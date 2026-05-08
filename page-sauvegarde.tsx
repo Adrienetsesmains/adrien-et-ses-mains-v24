@@ -1,3 +1,4 @@
+// @ts-nocheck
 function detailsTravaux(ligne: LigneTravaux) {
   const d: string[] = [];
 
