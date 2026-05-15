@@ -66,8 +66,12 @@ type LigneTravaux = {
   prixManuel?: boolean;
   heuresUnite?: number;
 
+  detailsPdfPersonnalises?: string[];
+  detailsPdfOuvert?: boolean;
+
   offert?: boolean;
 };
+
 type Depense = {
   id: number;
   date: string;
@@ -80,7 +84,7 @@ type Depense = {
 type Dossier = {
   
   montantEncaisse?: number;
-
+pourcentageAcompte?: number;
   factureSap?: boolean;
 numeroSap?: string;
 
@@ -263,6 +267,14 @@ function champsTravaux(type: string) {
   return ["Q1", "Q2", "R1", "R2", "Option"];
 }
 function detailsTravaux(ligne: LigneTravaux): string[] {
+  if (
+    ligne.detailsPdfPersonnalises &&
+    ligne.detailsPdfPersonnalises.length > 0 &&
+    ligne.detailsPdfPersonnalises.some((d) => d.trim() !== "")
+  ) {
+    return ligne.detailsPdfPersonnalises.filter((d) => d.trim() !== "");
+  }
+
   const tarifAssocie = TARIFS_PRESTATIONS.find(
     (t) => t.id === ligne.tarifId
   );
@@ -1196,6 +1208,7 @@ const numeroFactureFinal = numeroFacture;
     factureSap,
 numeroSap,
     montantEncaisse,
+    pourcentageAcompte,
     kmAller,
 achatFournitures,
 coefficientFournitures,
@@ -1321,6 +1334,7 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
   setFacturePayee(d.facturePayee);
 
   setMontantEncaisse(d.montantEncaisse ?? 0);
+  setPourcentageAcompte(d.pourcentageAcompte ?? 30);
 
   setFactureSap(d.factureSap || false);
 setNumeroSap(d.numeroSap || "");
@@ -3262,56 +3276,69 @@ doc.setTextColor(0, 0, 0);
     />
 
     <button
-      type="button"
-      onClick={() => {
-        const prestationTrouvee = TARIFS_PRESTATIONS.find(
-          (p) => p.id === prestationSelectionnee
-        );
+  type="button"
+  onClick={() => {
+    const prestationTrouvee = TARIFS_PRESTATIONS.find(
+      (p) => p.id === prestationSelectionnee
+    );
 
-        if (!prestationTrouvee) {
-          alert("Choisis une prestation avant d'ajouter une ligne.");
-          return;
-        }
+    if (!prestationTrouvee) {
+      alert("Choisis une prestation avant d'ajouter une ligne.");
+      return;
+    }
 
-        const prixClient =
-          modeClient === "jeremie"
-            ? prestationTrouvee.prix150
-            : prestationTrouvee.prix220;
+    const prixClient =
+      modeClient === "jeremie"
+        ? prestationTrouvee.prix150
+        : prestationTrouvee.prix220;
 
-        setLignesTravaux([
-          ...lignesTravaux,
-          {
-            id: Date.now(),
-            type: prestationTrouvee.typeTravaux || "prestation_tableau",
-            q1: prestationTrouvee.unite === "forfait" ? 1 : 1,
-            q2: 0,
-            r1: 0,
-            r2: 0,
-            option: 0,
+    const detailsBase =
+      prestationTrouvee.detailsPdf && prestationTrouvee.detailsPdf.length > 0
+        ? prestationTrouvee.detailsPdf
+        : DETAILS_PDF_PAR_CATEGORIE[prestationTrouvee.categorie] || [
+            "Réalisation de la prestation prévue au devis",
+            "Ajustements simples",
+            "Finitions standards",
+            "Nettoyage de fin d’intervention",
+          ];
 
-            tarifId: prestationTrouvee.id,
-            prestationNom: prestationTrouvee.prestation,
-            unite: prestationTrouvee.unite,
-            prixUnitaire: prixClient,
-prixUnitaireAuto: prixClient,
-prixManuel: false,
-heuresUnite: prestationTrouvee.heuresUnite,
-          },
-        ]);
+    setLignesTravaux([
+      ...lignesTravaux,
+      {
+        id: Date.now(),
+        type: prestationTrouvee.typeTravaux || "prestation_tableau",
+        q1: prestationTrouvee.unite === "forfait" ? 1 : 1,
+        q2: 0,
+        r1: 0,
+        r2: 0,
+        option: 0,
 
-        setPrestationSelectionnee("");
+        tarifId: prestationTrouvee.id,
+        prestationNom: prestationTrouvee.prestation,
+        unite: prestationTrouvee.unite,
+        prixUnitaire: prixClient,
+        prixUnitaireAuto: prixClient,
+        prixManuel: false,
+        heuresUnite: prestationTrouvee.heuresUnite,
 
-        setTimeout(() => {
-          derniereLigneRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }, 100);
-      }}
-      className="self-end rounded-xl bg-amber-600 px-5 py-3 font-semibold text-white"
-    >
-      Ajouter
-    </button>
+        detailsPdfPersonnalises: detailsBase,
+        detailsPdfOuvert: false,
+      },
+    ]);
+
+    setPrestationSelectionnee("");
+
+    setTimeout(() => {
+      derniereLigneRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+  }}
+  className="self-end rounded-xl bg-amber-600 px-5 py-3 font-semibold text-white"
+>
+  Ajouter
+</button>
   </div>
 
   <div className="space-y-5">
@@ -3389,7 +3416,93 @@ heuresUnite: prestationTrouvee.heuresUnite,
         )
       }
     />
+<Check
+  label="Personnaliser les détails affichés dans le devis"
+  checked={ligne.detailsPdfOuvert || false}
+  onChange={(checked) =>
+    setLignesTravaux(
+      lignesTravaux.map((l) =>
+        l.id === ligne.id
+          ? {
+              ...l,
+              detailsPdfOuvert: checked,
+              detailsPdfPersonnalises:
+                l.detailsPdfPersonnalises && l.detailsPdfPersonnalises.length > 0
+                  ? l.detailsPdfPersonnalises
+                  : detailsTravaux(l),
+            }
+          : l
+      )
+    )
+  }
+/>
 
+{ligne.detailsPdfOuvert && (
+  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+    <div>
+      <p className="text-sm font-bold text-amber-900">
+        Détails visibles dans le devis
+      </p>
+      <p className="text-xs text-amber-700">
+        Une ligne par détail. Ces textes apparaîtront sous la prestation dans le PDF.
+      </p>
+    </div>
+
+    <TextArea
+      label="Sous-catégories / détails personnalisés"
+      value={(ligne.detailsPdfPersonnalises || detailsTravaux(ligne)).join("\n")}
+      onChange={(valeur) =>
+        setLignesTravaux(
+          lignesTravaux.map((l) =>
+            l.id === ligne.id
+              ? {
+                  ...l,
+                  detailsPdfPersonnalises: valeur
+                    .split("\n")
+                    .map((texte) => texte.trim())
+                    .filter((texte) => texte !== ""),
+                }
+              : l
+          )
+        )
+      }
+    />
+
+    <div className="rounded-xl border bg-white p-3">
+      <p className="text-xs font-bold text-slate-600">
+        Aperçu PDF :
+      </p>
+
+      <ul className="mt-2 space-y-1 text-sm text-slate-700">
+        {(ligne.detailsPdfPersonnalises || detailsTravaux(ligne)).map(
+          (detail, detailIndex) => (
+            <li key={detailIndex}>• {detail}</li>
+          )
+        )}
+      </ul>
+    </div>
+
+    <button
+      type="button"
+      onClick={() =>
+        setLignesTravaux(
+          lignesTravaux.map((l) =>
+            l.id === ligne.id
+              ? {
+                  ...l,
+                  detailsPdfPersonnalises: undefined,
+                  detailsPdfOuvert: false,
+                }
+              : l
+          )
+        )
+      }
+      className="rounded-xl border bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+    >
+      Réinitialiser les détails automatiques
+    </button>
+  </div>
+)}
     {ligne.prixManuel && (
       <NumberInput
         label={`Prix unitaire manuel (€ / ${ligne.unite || "u"})`}
@@ -3662,16 +3775,17 @@ heuresUnite: prestationTrouvee.heuresUnite,
   <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
     <h3 className="text-sm font-bold text-slate-800">Acompte et encaissement</h3>
 
-    <Select
-      label="Acompte (%)"
-      value={String(pourcentageAcompte)}
-      onChange={(v) => setPourcentageAcompte(Number(v))}
-      options={[
-        ["30", "30 %"],
-        ["40", "40 %"],
-        ["50", "50 %"],
-      ]}
-    />
+   <Select
+  label="Acompte (%)"
+  value={String(pourcentageAcompte)}
+  onChange={(v) => setPourcentageAcompte(Number(v))}
+  options={[
+    ["0", "0 % — pas d’acompte"],
+    ["30", "30 %"],
+    ["40", "40 %"],
+    ["50", "50 %"],
+  ]}
+/>
 
     <div className="grid gap-2 md:grid-cols-3">
       <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
