@@ -654,6 +654,19 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         rentabilite: "🟢 Rentable agence",
       },
       {
+        nom: "Réglage porte coulissante",
+      unite: "u",
+      prixMo220: 60,
+      prixMoJeremie150: 40,
+      heuresUnite: 0.7,
+      rentabilite: "🟢",
+      typeTravaux: "bricolage",
+      notes: "Réglage rail et galets"+"Alignement porte"+
+        "Test fonctionnement",
+      conditions: "Système existant fonctionnel",
+      
+      },
+      {
         nom: "Petite assistance bricolage",
         unite: "h",
         prixMo220: 28,
@@ -676,6 +689,39 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
     ],
   },
 
+  {
+  categorie: "Extérieur / Métal / Divers",
+  prestations: [
+    {
+      nom: "Peinture portail / portillon / garde-corps",
+      unite: "m²",
+      prixMo220: 35,
+      prixMoJeremie150: 25,
+      heuresUnite: 0.6,
+      rentabilite: "🟢",
+      typeTravaux: "peinture",
+      notes:"Décapage / grattage si nécessaire"+
+        "Application primaire et peinture"+
+        "Finition soignée",
+      conditions: "Support sain, hors corrosion lourde",
+      
+      },
+     {
+      nom: "Reprise soudure métal",
+      unite: "u",
+      prixMo220: 45,
+      prixMoJeremie150: 30,
+      heuresUnite: 0.5,
+      rentabilite: "🟢",
+      typeTravaux: "bricolage",
+       notes:"Reprise des points de soudure"+
+        "Renforcement structure"+
+        "Nettoyage zone",
+      conditions: "Accès simple",
+     
+     },
+    ],
+  },
   {
     categorie: "Toiture",
     prestations: [
@@ -708,10 +754,39 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         prixJeremieTtc: 8.4,
         heuresUnite: 0.4,
         rentabilite: "🟠 À surveiller",
-      },
-    ],
+      },  
+     {
+  nom: "Dépose / repose toiture bac acier",
+  unite: "m²",
+  prixMo220: 55,
+  prixMoJeremie150: 40,
+  heuresUnite: 0.8,
+  rentabilite: "🟠 À surveiller",
+  typeTravaux: "toiture",
+  conditions: "Hors charpente / hors étanchéité lourde",
+  detailsPdf: [
+    "Dépose de l’ancienne couverture si prévue",
+    "Repose ou pose des plaques bac acier",
+    "Fixations et ajustements simples",
+  ],
+},
+     {
+  nom: "Pose rives et faîtage",
+  unite: "ml",
+  prixMo220: 18,
+  prixMoJeremie150: 12,
+  heuresUnite: 0.3,
+  rentabilite: "🟢 Rentable",
+  typeTravaux: "toiture",
+  conditions: "Accès toiture sécurisé",
+  detailsPdf: [
+    "Pose des éléments de finition",
+    "Fixation et alignement",
+    "Traitement simple des jonctions",
+  ],
+},
+     ],
   },
-
   {
     categorie: "Jardin",
     prestations: [
