@@ -80,11 +80,11 @@ type Depense = {
 type Dossier = {
   
   montantEncaisse?: number;
-<<<<<<< HEAD
+
   factureSap?: boolean;
 numeroSap?: string;
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
+
   kmAller?: number;
 achatFournitures?: number;
 coefficientFournitures?: number;
@@ -416,11 +416,10 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
   setCompteurFacture(d.compteurFacture ?? 1);
   setNumeroDevis(d.numeroDevis || "");
 setNumeroFacture(d.numeroFacture || "");
-<<<<<<< HEAD
+
 setFactureSap(d.factureSap || false);
 setNumeroSap(d.numeroSap || "");
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
 
   setMoisSelectionne(d.moisSelectionne ?? new Date().getMonth());
   setAnneeSelectionnee(d.anneeSelectionnee ?? new Date().getFullYear());
@@ -448,11 +447,10 @@ setDetailsFournitures(b.detailsFournitures || "");
     setLignesTravaux(b.lignesTravaux || []);
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
-<<<<<<< HEAD
+
     setFactureSap(b.factureSap || false);
 setNumeroSap(b.numeroSap || "");
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
     setDateChantier(b.dateChantier || "");
     setDatePaiement(b.datePaiement || "");
     setHeureChantier(b.heureChantier || "");
@@ -502,11 +500,10 @@ const [ajoutRdvOuvert, setAjoutRdvOuvert] = useState(false);
 const [clientsEnregistres, setClientsEnregistres] = useState<ClientEnregistre[]>(clientsBase);
   const [compteurDevis, setCompteurDevis] = useState(1);
   const [compteurFacture, setCompteurFacture] = useState(1);
-<<<<<<< HEAD
+
   const [factureSap, setFactureSap] = useState(false);
 const [numeroSap, setNumeroSap] = useState("");
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
 
 // ================= RIB ENTREPRISE =================
 const [ribTitulaire, setRibTitulaire] = useState("");
@@ -684,11 +681,10 @@ useEffect(() => {
   modeClient,
   lignesTravaux,
   montantEncaisse,
-<<<<<<< HEAD
+
   factureSap,
 numeroSap,
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
   dateChantier,
   datePaiement,
   priorite,
@@ -797,18 +793,12 @@ const construireSauvegardeComplete = () => {
     ribTitulaire,
     ribIban,
     ribBic,
-<<<<<<< HEAD
-   ribBanque,
-
-factureSap,
-numeroSap,
-
-brouillon: {
-=======
     ribBanque,
 
+    factureSap,
+    numeroSap,
+
     brouillon: {
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
       idDossierActuel,
 
       client,
@@ -835,11 +825,9 @@ brouillon: {
 
       montantEncaisse,
       pourcentageAcompte,
-<<<<<<< HEAD
+
       factureSap,
-numeroSap,
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+      numeroSap,
 
       statutDevis,
       statutChantier,
@@ -1120,12 +1108,11 @@ setNumeroFacture("");
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
 
-<<<<<<< HEAD
+
   setFactureSap(false);
 setNumeroSap("");
 
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
   setStatutDevis("en_cours");
   setStatutChantier("a_planifier");
   setFacturePayee(false);
@@ -1206,6 +1193,8 @@ const numeroFactureFinal = numeroFacture;
 
   const item: Dossier = {
     id: idFinal,
+    factureSap,
+numeroSap,
     montantEncaisse,
     kmAller,
 achatFournitures,
@@ -1332,11 +1321,10 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
   setFacturePayee(d.facturePayee);
 
   setMontantEncaisse(d.montantEncaisse ?? 0);
-<<<<<<< HEAD
+
   setFactureSap(d.factureSap || false);
 setNumeroSap(d.numeroSap || "");
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
   setKmAller(d.kmAller ?? 0);
 setAchatFournitures(d.achatFournitures ?? 0);
 setCoefficientFournitures(d.coefficientFournitures ?? 1.22);
@@ -2224,7 +2212,7 @@ if (type === "facture") {
 y += 38;
 
 
-<<<<<<< HEAD
+
 // ================= MENTION SAP FACTURE =================
 if (type === "facture" && factureSap) {
   if (y + 34 > 292) {
@@ -2258,14 +2246,12 @@ if (type === "facture" && factureSap) {
 
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
-=======
-// ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
 if (y + 82 > 292) {
   doc.addPage();
   page += 1;
   y = 35;
 }
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
 
 const yConditions = y;
 
@@ -2888,7 +2874,7 @@ doc.setTextColor(0, 0, 0);
 <div ref={actionsRef}>
   <Bloc titre="Actions principales">
 
-<<<<<<< HEAD
+
     <input
       ref={importRef}
       type="file"
@@ -2962,71 +2948,6 @@ doc.setTextColor(0, 0, 0);
   </Bloc>
 </div>
 
-=======
-  <input
-    ref={importRef}
-    type="file"
-    accept="application/json"
-    className="hidden"
-    onChange={importer}
-  />
-
-  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-
-    <button onClick={envoyerDevisMail} className="btn-green">
-      📧 Devis
-    </button>
-
-    <button onClick={envoyerFactureMail} className="btn-green">
-      📧 Facture
-    </button>
-
-    <button
-  onClick={() => {
-    setFicheOuverte(true);
-    setStatutDevis("estimation_rapide");
-    setNumeroDevis("");
-    setNumeroFacture("");
-  }}
-  className="btn-orange"
->
-  ⚡ Estimation rapide
-</button>
-
-    <button onClick={nouveauDossier} className="btn-dark">
-      Nouveau
-    </button>
-
-    <button onClick={enregistrer} className="btn-amber">
-      Enregistrer
-    </button>
-
-    <button onClick={() => genererPDF("devis")} className="btn-blue">
-      PDF devis
-    </button>
-
-    <button onClick={() => genererPDF("facture")} className="btn-emerald">
-      PDF facture
-    </button>
-
-    <button onClick={exporter} className="btn-purple">
-      Export
-    </button>
-
-    <button onClick={() => importRef.current?.click()} className="btn-outline">
-      Import
-    </button>
-<button
-  onClick={reinitialiserApplicationComplete}
-  className="rounded-xl border border-red-200 bg-red-50 p-3 font-bold text-red-700 hover:bg-red-100"
->
-  🧹 Réinitialiser application
-</button>
-  </div>
-</Bloc>
-
-</div>
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
   
         {ficheOuverte && (
 <section ref={ficheClientRef} className="grid gap-6 lg:grid-cols-2">
@@ -3164,7 +3085,7 @@ doc.setTextColor(0, 0, 0);
 />
             <Input label="Numéro devis" value={numeroDevis} onChange={setNumeroDevis} />
             <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
-<<<<<<< HEAD
+
             {factureSap && (
   <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
     <Input
@@ -3178,8 +3099,7 @@ doc.setTextColor(0, 0, 0);
     </p>
   </div>
 )}
-=======
->>>>>>> 1e655a901a3f81aeeebecd0f95c680645536481b
+
             <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
 {(modeClient === "agence" || modeClient === "jeremie") && (
   <div className="space-y-4 rounded-2xl border bg-slate-50 p-4">
@@ -4110,11 +4030,11 @@ heuresUnite: prestationTrouvee.heuresUnite,
       </h2>
 
       <p className="text-slate-500">
-        {dateSelectionnee.toLocaleDateString("fr-FR")}
+        {dateSelectionnee?.toLocaleDateString("fr-FR")}
       </p>
 
       {(() => {
-        const dateStr = dateSelectionnee.toLocaleDateString("fr-FR");
+        const dateStr = dateSelectionnee?.toLocaleDateString("fr-FR");
 
         const rdvs = historique.filter(
           (d) =>
