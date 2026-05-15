@@ -2290,7 +2290,7 @@ conditions.forEach((ligne) => {
   cy += coupe.length * 3.7 + 2;
 });
 
-if (type === "devis") {
+if (type === "devis" || type === "facture") {
   doc.setDrawColor(80);
   doc.line(140, yConditions + 17, 140, yConditions + 62);
 
@@ -2885,6 +2885,30 @@ doc.setTextColor(0, 0, 0);
 
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
 
+      <button
+        onClick={() => {
+          setFicheOuverte(true);
+          setStatutDevis("estimation_rapide");
+          setNumeroDevis("");
+          setNumeroFacture("");
+        }}
+        className="btn-orange"
+      >
+        ⚡ Estimation rapide
+      </button>
+
+      <button onClick={exporter} className="btn-purple">
+        Export
+      </button>
+
+      <button onClick={() => importRef.current?.click()} className="btn-outline">
+        Import
+      </button>
+
+      <button onClick={nouveauDossier} className="btn-dark">
+        Nouveau
+      </button>
+
       <button onClick={envoyerDevisMail} className="btn-green">
         📧 Devis
       </button>
@@ -2901,40 +2925,16 @@ doc.setTextColor(0, 0, 0);
         PDF facture
       </button>
 
+      <button onClick={enregistrer} className="btn-amber">
+        Enregistrer
+      </button>
+
       <button
         type="button"
         onClick={() => setFactureSap(!factureSap)}
         className={factureSap ? "btn-green" : "btn-outline"}
       >
         {factureSap ? "✅ Facture SAP activée" : "🧾 Facture SAP"}
-      </button>
-
-      <button
-        onClick={() => {
-          setFicheOuverte(true);
-          setStatutDevis("estimation_rapide");
-          setNumeroDevis("");
-          setNumeroFacture("");
-        }}
-        className="btn-orange"
-      >
-        ⚡ Estimation rapide
-      </button>
-
-      <button onClick={nouveauDossier} className="btn-dark">
-        Nouveau
-      </button>
-
-      <button onClick={enregistrer} className="btn-amber">
-        Enregistrer
-      </button>
-
-      <button onClick={exporter} className="btn-purple">
-        Export
-      </button>
-
-      <button onClick={() => importRef.current?.click()} className="btn-outline">
-        Import
       </button>
 
       <button
