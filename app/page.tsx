@@ -3427,9 +3427,9 @@ doc.setTextColor(0, 0, 0);
               ...l,
               detailsPdfOuvert: checked,
               detailsPdfPersonnalises:
-                l.detailsPdfPersonnalises && l.detailsPdfPersonnalises.length > 0
-                  ? l.detailsPdfPersonnalises
-                  : detailsTravaux(l),
+  l.detailsPdfPersonnalises && l.detailsPdfPersonnalises.length > 0
+    ? l.detailsPdfPersonnalises
+    : [...detailsTravaux(l)],
             }
           : l
       )
@@ -3450,22 +3450,21 @@ doc.setTextColor(0, 0, 0);
 
     <TextArea
       label="Sous-catégories / détails personnalisés"
-      value={(ligne.detailsPdfPersonnalises || detailsTravaux(ligne)).join("\n")}
-      onChange={(valeur) =>
-        setLignesTravaux(
-          lignesTravaux.map((l) =>
-            l.id === ligne.id
-              ? {
-                  ...l,
-                  detailsPdfPersonnalises: valeur
-                    .split("\n")
-                    .map((texte) => texte.trim())
-                    .filter((texte) => texte !== ""),
-                }
-              : l
-          )
-        )
-      }
+      value={(ligne.detailsPdfPersonnalises || []).join("\n")}
+      onChange={(valeur) => {
+  const lignes = valeur.split("\n");
+
+  setLignesTravaux(
+    lignesTravaux.map((l) =>
+      l.id === ligne.id
+        ? {
+            ...l,
+            detailsPdfPersonnalises: lignes,
+          }
+        : l
+    )
+  );
+}}
     />
 
     <div className="rounded-xl border bg-white p-3">
