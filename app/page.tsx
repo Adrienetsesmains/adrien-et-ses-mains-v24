@@ -2885,6 +2885,15 @@ doc.setTextColor(0, 0, 0);
 
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
 
+
+      <button onClick={exporter} className="btn-purple">
+        Export
+      </button>
+
+      <button onClick={() => importRef.current?.click()} className="btn-outline">
+        Import
+      </button>
+
       <button
         onClick={() => {
           setFicheOuverte(true);
@@ -2895,14 +2904,6 @@ doc.setTextColor(0, 0, 0);
         className="btn-orange"
       >
         ⚡ Estimation rapide
-      </button>
-
-      <button onClick={exporter} className="btn-purple">
-        Export
-      </button>
-
-      <button onClick={() => importRef.current?.click()} className="btn-outline">
-        Import
       </button>
 
       <button onClick={nouveauDossier} className="btn-dark">
