@@ -656,18 +656,20 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         rentabilite: "🟢 Rentable agence",
       },
       {
-        nom: "Réglage porte coulissante",
-      unite: "u",
-      prixMo220: 60,
-      prixMoJeremie150: 40,
-      heuresUnite: 0.7,
-      rentabilite: "🟢",
-      typeTravaux: "bricolage",
-      notes: "Réglage rail et galets"+"Alignement porte"+
-        "Test fonctionnement",
-      conditions: "Système existant fonctionnel",
-      
-      },
+  nom: "Réglage porte coulissante",
+  unite: "u",
+  prixMo220: 60,
+  prixMoJeremie150: 40,
+  heuresUnite: 0.7,
+  rentabilite: "🟢 Rentable",
+  typeTravaux: "bricolage",
+  conditions: "Système existant fonctionnel",
+  detailsPdf: [
+    "Réglage du rail et des galets",
+    "Alignement de la porte",
+    "Test de fonctionnement",
+  ],
+},
       {
         nom: "Petite assistance bricolage",
         unite: "h",
@@ -724,33 +726,35 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   categorie: "Extérieur / Métal / Divers",
   prestations: [
     {
-      nom: "Peinture portail / portillon / garde-corps",
-      unite: "m²",
-      prixMo220: 35,
-      prixMoJeremie150: 25,
-      heuresUnite: 0.6,
-      rentabilite: "🟢",
-      typeTravaux: "peinture",
-      notes:"Décapage / grattage si nécessaire"+
-        "Application primaire et peinture"+
-        "Finition soignée",
-      conditions: "Support sain, hors corrosion lourde",
-      
-      },
+  nom: "Peinture portail / portillon / garde-corps",
+  unite: "m²",
+  prixMo220: 35,
+  prixMoJeremie150: 25,
+  heuresUnite: 0.6,
+  rentabilite: "🟢 Rentable",
+  typeTravaux: "peinture",
+  conditions: "Support sain, hors corrosion lourde",
+  detailsPdf: [
+    "Décapage / grattage si nécessaire",
+    "Application primaire et peinture",
+    "Finition soignée",
+  ],
+},
      {
-      nom: "Reprise soudure métal",
-      unite: "u",
-      prixMo220: 45,
-      prixMoJeremie150: 30,
-      heuresUnite: 0.5,
-      rentabilite: "🟢",
-      typeTravaux: "bricolage",
-       notes:"Reprise des points de soudure"+
-        "Renforcement structure"+
-        "Nettoyage zone",
-      conditions: "Accès simple",
-     
-     },
+  nom: "Reprise soudure métal",
+  unite: "u",
+  prixMo220: 45,
+  prixMoJeremie150: 30,
+  heuresUnite: 0.5,
+  rentabilite: "🟢 Rentable",
+  typeTravaux: "bricolage",
+  conditions: "Accès simple",
+  detailsPdf: [
+    "Reprise des points de soudure",
+    "Renforcement simple si nécessaire",
+    "Nettoyage de la zone d’intervention",
+  ],
+},
     ],
   },
   {
