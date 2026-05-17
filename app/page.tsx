@@ -2424,6 +2424,7 @@ doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 
 y = yConditions + 62;
 
+y += 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
