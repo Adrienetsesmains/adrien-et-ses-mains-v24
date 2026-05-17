@@ -486,6 +486,7 @@ setTypeRdv(b.typeRdv || "visite");
 
   alert("✅ Sauvegarde restaurée");
 }; 
+  
   const importRef = useRef<HTMLInputElement | null>(null);
 const actionsRef = useRef<HTMLDivElement | null>(null);
 const inputClientRef = useRef<HTMLInputElement | null>(null);
@@ -557,6 +558,8 @@ const [numeroFacture, setNumeroFacture] = useState("");
 
 const [idDossierActuel, setIdDossierActuel] = useState<number | null>(null);
   const [kmAller, setKmAller] = useState(37);
+  const [fraisDeplacementManuelActif, setFraisDeplacementManuelActif] = useState(false);
+const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
   const [achatFournitures, setAchatFournitures] = useState(0);
   const [coefficientFournitures, setCoefficientFournitures] = useState(1.22);
   const [fournituresClient, setFournituresClient] = useState(true);
@@ -916,10 +919,15 @@ const construireSauvegardeComplete = () => {
     Math.max(0, nombreJoursChantier - 1) *
     (kmAR * (prestationJoursSuivants?.prix220 || 0));
 
-  const fraisLogistique =
-    dossierVide || kmAR <= 0
-      ? 0
-      : Math.round(prixPremierJour + prixJoursSuivants);
+const fraisLogistiqueAuto =
+  dossierVide || kmAR <= 0
+    ? 0
+    : Math.round(prixPremierJour + prixJoursSuivants);
+
+const fraisLogistique =
+  fraisDeplacementManuelActif
+    ? Math.round(fraisDeplacementManuel)
+    : fraisLogistiqueAuto;
 
   // ================= FOURNITURES =================
   const reventeFournitures = fournituresClient
@@ -940,10 +948,7 @@ const construireSauvegardeComplete = () => {
     total = minimumChantier;
   }
 
-  const acompte =
-    modeClient === "jeremie"
-      ? 0
-      : Math.round(total * (pourcentageAcompte / 100));
+  const acompte = Math.round(total * (pourcentageAcompte / 100));
 
   const reste = total - acompte;
   const resteReel = total - montantEncaisse;
@@ -1000,7 +1005,9 @@ const construireSauvegardeComplete = () => {
   achatFournitures,
   coefficientFournitures,
   montantEncaisse,
-  pourcentageAcompte,
+pourcentageAcompte,
+fraisDeplacementManuelActif,
+fraisDeplacementManuel,
 ]);
 const joursCalendrier = useMemo(() => {
   
@@ -1070,13 +1077,38 @@ const memeJourRdv =
     setLignesTravaux([]);
   };
 
-  const modifierLigne = (id: number, champ: keyof LigneTravaux, valeur: string | number) => {
-    setLignesTravaux(
-      lignesTravaux.map((l) =>
-        l.id === id ? { ...l, [champ]: champ === "type" ? valeur : Number(valeur) } : l
-      )
-    );
-  };
+ const modifierLigne = (id: number, champ: keyof LigneTravaux, valeur: string | number) => {
+  setLignesTravaux(
+    lignesTravaux.map((l) => {
+      if (l.id !== id) return l;
+
+      // Champs numériques uniquement
+      const champsNumeriques = ["q1", "q2", "r1", "r2", "option", "prixUnitaire", "heuresUnite"];
+
+      if (champsNumeriques.includes(champ)) {
+        return { ...l, [champ]: Number(valeur) };
+      }
+
+      // Tout le reste = TEXTE
+      return { ...l, [champ]: valeur };
+    })
+  );
+};
+const modifierDetailPdf = (id: number, index: number, valeur: string) => {
+  setLignesTravaux((ancien) =>
+    ancien.map((l) => {
+      if (l.id !== id) return l;
+
+      const nouveauxDetails = [...(l.detailsPdfPersonnalises || [])];
+      nouveauxDetails[index] = valeur;
+
+      return {
+        ...l,
+        detailsPdfPersonnalises: nouveauxDetails,
+      };
+    })
+  );
+};
 
   const supprimerLigne = (id: number) => {
   setLignesTravaux(lignesTravaux.filter((l) => l.id !== id));
@@ -2014,107 +2046,124 @@ doc.line(92, 60, 118, 60);
   doc.text(`N° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
 
-  doc.setDrawColor(60);
-  doc.roundedRect(15, 75, 85, 50, 2, 2);
+ // ================= CADRES CLIENT / CHANTIER COMPACTS =================
 
-if (modeClient === "agence") {
-  doc.roundedRect(110, 75, 85, 78, 2, 2);
-} else if (modeClient === "jeremie") {
-  doc.roundedRect(110, 75, 85, 78, 2, 2);
-} else {
-  doc.roundedRect(110, 75, 85, 50, 2, 2);
-}
+const hauteurCadreInfos =
+  modeClient === "agence" || modeClient === "jeremie" ? 62 : 48;
 
-  doc.setFillColor(52, 63, 79);
-  doc.circle(22, 84, 4, "F");
-  doc.circle(117, 84, 4, "F");
+doc.setDrawColor(70);
+doc.setLineWidth(0.25);
 
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(13);
-  doc.text("CLIENT", 30, 85);
-  doc.text("CHANTIER", 125, 85);
+// Cadres plus petits et plus élégants
+doc.roundedRect(22, 76, 73, hauteurCadreInfos, 2, 2);
+doc.roundedRect(115, 76, 73, hauteurCadreInfos, 2, 2);
 
-  doc.setFontSize(10);
-  doc.text(`Nom : ${client || "-"}`, 20, 94);
-  doc.text(`Telephone : ${telephone || "-"}`, 20, 101);
-  doc.text(`Email : ${email || "-"}`, 20, 108);
- const adresseClientCoupee = doc.splitTextToSize(
+// Petites pastilles au lieu des gros ronds
+doc.setFillColor(52, 63, 79);
+doc.circle(27, 84, 2.6, "F");
+doc.circle(120, 84, 2.6, "F");
+
+doc.setTextColor(0, 0, 0);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(9.5);
+
+doc.text("CLIENT", 33, 85);
+doc.text("CHANTIER", 126, 85);
+
+// -------- CLIENT --------
+doc.setFontSize(7.3);
+
+doc.setFont("helvetica", "bold");
+doc.text("Nom :", 26, 94);
+doc.text("Téléphone :", 26, 100);
+doc.text("Email :", 26, 106);
+doc.text(modeClient === "agence" ? "Agence :" : "Adresse :", 26, 112);
+
+doc.setFont("helvetica", "normal");
+
+doc.text(client || "-", 43, 94);
+doc.text(telephone || "-", 49, 100);
+
+const emailCoupe = doc.splitTextToSize(email || "-", 42);
+doc.text(emailCoupe, 43, 106);
+
+const adresseClientTexte =
   modeClient === "agence"
-    ? `Adresse agence : ${adresseAgence || "-"}`
-    : `Adresse : ${adresse || "-"}`,
-  75
+    ? adresseAgence || "-"
+    : adresse || "-";
+
+const adresseClientCoupee = doc.splitTextToSize(adresseClientTexte, 46);
+doc.text(adresseClientCoupee, 49, 112);
+
+// -------- CHANTIER --------
+doc.setFont("helvetica", "bold");
+doc.text(
+  modeClient === "jeremie" ? "Client final :" : "Adresse :",
+  119,
+  94
 );
 
-doc.text(adresseClientCoupee[0], 20, 115);
+doc.setFont("helvetica", "normal");
 
-if (adresseClientCoupee.length > 1) {
-  doc.text(
-    adresseClientCoupee.slice(1),
-    48,
-    120
+if (modeClient === "jeremie") {
+  const nomFinalCoupe = doc.splitTextToSize(clientFinalNom || "-", 42);
+  doc.text(nomFinalCoupe, 142, 94);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Tel final :", 119, 102);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(clientFinalTelephone || "-", 142, 102);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Adresse :", 119, 110);
+
+  doc.setFont("helvetica", "normal");
+  const adresseChantierCoupee = doc.splitTextToSize(
+    clientFinalAdresse || adresse || "-",
+    50
   );
-}
- 
-if (modeClient === "agence") {
-  doc.setFontSize(10);
+  doc.text(adresseChantierCoupee, 142, 110);
+} else if (modeClient === "agence") {
+  doc.setFont("helvetica", "bold");
+  doc.text("Réf :", 119, 94);
+  doc.text("Locataire :", 119, 100);
+  doc.text("Tel loc. :", 119, 106);
+  doc.text("Adresse :", 119, 112);
 
-  doc.text(`Ref : ${referenceChantier || "-"}`, 115, 94);
-doc.text(`Locataire : ${locataire || "-"}`, 115, 101);
-doc.text(`Tel locataire : ${telephoneLocataire || "-"}`, 115, 108);
+  doc.setFont("helvetica", "normal");
+  doc.text(referenceChantier || "-", 136, 94);
+  doc.text(locataire || "-", 143, 100);
+  doc.text(telephoneLocataire || "-", 142, 106);
 
-doc.text(`Proprietaire : ${proprietaire || "-"}`, 115, 115);
-doc.text(`Tel proprietaire : ${telephoneProprietaire || "-"}`, 115, 122);
-
-const adresseChantierCoupee = doc.splitTextToSize(
-  `Adresse chantier : ${adresse || "-"}`,
-  75
-);
-
-doc.text(adresseChantierCoupee[0], 115, 129);
-
-if (adresseChantierCoupee.length > 1) {
-  doc.text(
-  adresseChantierCoupee.slice(1),
-  144,
-  134
-);
-}
-
-let yAdresseSuite =
-  129 + adresseChantierCoupee.length * 5 + 1;
-
-if (complementAdresse) {
-  const complementCoupe = doc.splitTextToSize(
-    `Complement : ${complementAdresse}`,
-    75
+  const adresseChantierCoupee = doc.splitTextToSize(
+    `${adresse || "-"} ${complementAdresse || ""}`,
+    48
   );
-
-  doc.text(complementCoupe, 115, yAdresseSuite);
-}
-
-} else if (modeClient === "jeremie") {
-  doc.text(`Client final : ${clientFinalNom || "-"}`, 115, 94);
-  doc.text(`Tel client final : ${clientFinalTelephone || "-"}`, 115, 101);
-
-  const adresseFinaleCoupee = doc.splitTextToSize(
-    `Adresse intervention : ${clientFinalAdresse || adresse || "-"}`,
-    75
-  );
-
-  doc.text(adresseFinaleCoupee[0], 115, 108);
-
-  if (adresseFinaleCoupee.length > 1) {
-    doc.text(adresseFinaleCoupee.slice(1), 150, 113);
-  }
-
-  doc.text(`Statut devis : ${statutDevis}`, 115, 121);
-  doc.text(`Statut chantier : ${statutChantier}`, 115, 129);
-  doc.text("Validite devis : 30 jours", 115, 137);
+  doc.text(adresseChantierCoupee, 142, 112);
 } else {
-  doc.text(`Statut devis : ${statutDevis}`, 115, 104);
-  doc.text(`Statut chantier : ${statutChantier}`, 115, 112);
-  doc.text("Validite devis : 30 jours", 115, 120);
+  const adresseChantierCoupee = doc.splitTextToSize(
+    `${adresse || "-"} ${complementAdresse || ""}`,
+    50
+  );
+  doc.text(adresseChantierCoupee, 142, 94);
 }
+
+if (modeClient === "agence" || modeClient === "jeremie") {
+  doc.setFont("helvetica", "bold");
+  doc.text("Statut devis :", 119, 128);
+  doc.text("Statut chantier :", 119, 134);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(statutDevis || "-", 145, 128);
+  doc.text(statutChantier || "-", 149, 134);
+}
+
+doc.setFont("helvetica", "normal");
+doc.setTextColor(0, 0, 0);
+
+// On remonte le tableau après réduction des cadres
+y = modeClient === "agence" || modeClient === "jeremie" ? 146 : 134;
 
   enteteTableau();
 // ================= TABLEAU COMPACT =================
@@ -2123,21 +2172,14 @@ const lignesDevisPDF = lignesPDF();
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const ligneSource = lignesTravaux[index];
 
-  const designation =
-    ligneSource?.prestationNom
-      ? ligneSource.unite === "m²" || ligneSource.unite === "ml"
-  ? ligneSource.prestationNom
-  : `${ligneSource.prestationNom} — ${ligneSource.q1} ${ligneSource.unite || ""}`
-      : designationBrute;
+  const designation = designationBrute;
 
   const detailsLimites =
-    ligneSource
-      ? detailsTravaux(ligneSource).slice(0, 2)
-      : designationBrute.includes("déplacement")
-      ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`]
-      : designationBrute.includes("Fournitures")
-      ? [detailsFournitures || "Fournitures et approvisionnement prévus au devis"]
-      : [];
+  ligneSource
+    ? detailsTravaux(ligneSource)
+    : designationBrute.includes("déplacement")
+    ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`]
+    : [];
 
   const detail = detailsLimites.map((t) => `• ${t}`).join("\n");
 
@@ -2154,25 +2196,27 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   }
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(0);
-  doc.text(designationCoupe, 15, y);
+doc.setFontSize(10);
+doc.setTextColor(0);
+doc.text(designationCoupe, 15, y);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(`${Math.round(montant)} €`, 182, y, { align: "right" });
+// 👉 PRIX UNIQUE propre
+doc.setFont("helvetica", "normal");
+doc.setFontSize(9.5);
+doc.text(`${Math.round(montant)} €`, 190, y, { align: "right" });
 
-  y += designationCoupe.length * 4;
+ y += designationCoupe.length * 3.5;
 
   if (detailCoupe.length > 0) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.8);
-    doc.setTextColor(90);
-    doc.text(detailCoupe, 20, y);
-    y += detailCoupe.length * 3;
+doc.setFontSize(8);
+doc.setTextColor(120);
+doc.text(detailCoupe, 20, y);
+
+y += detailCoupe.length * 3.5;
   }
 
-  doc.setDrawColor(220);
+  doc.setDrawColor(230);
   doc.line(15, y - 2, 195, y - 2);
 
   y += 2;
@@ -2306,26 +2350,26 @@ conditions.forEach((ligne) => {
 
 if (type === "devis" || type === "facture") {
   doc.setDrawColor(80);
-  doc.line(140, yConditions + 17, 140, yConditions + 62);
+  doc.line(140, yConditions + 15, 140, yConditions + 52);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  doc.text("Bon pour accord", 167, yConditions + 22, { align: "center" });
-  doc.text("Date :        /        / 2026", 150, yConditions + 30);
+ doc.text("Bon pour accord", 167, yConditions + 20, { align: "center" });
+doc.text("Date :        /        / 2026", 150, yConditions + 27);
 
-  doc.rect(147, yConditions + 35, 42, 15);
+doc.rect(148, yConditions + 31, 40, 13);
 
-  doc.setFontSize(8.5);
-  doc.text("Signature client", 167, yConditions + 57, { align: "center" });
+doc.setFontSize(8);
+doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 }
 
-y = yConditions + 82;
+y = yConditions + 62;
 
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
-  if (y + 46 > 292) {
+    if (y + 36 > 292) {
     doc.addPage();
     page += 1;
     y = 35;
@@ -2333,32 +2377,28 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
 
   doc.setDrawColor(190, 145, 55);
   doc.setFillColor(248, 244, 236);
-  doc.roundedRect(15, y, 180, 42, 3, 3, "FD");
-
+  doc.roundedRect(15, y, 180, 32, 3, 3, "FD");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(9.5);
   doc.setTextColor(52, 63, 79);
-  doc.text("MODALITES DE PAIEMENT", 25, y + 10);
+   doc.text("MODALITES DE PAIEMENT", 25, y + 8);
 
   doc.setDrawColor(190, 145, 55);
-  doc.line(25, y + 13, 78, y + 13);
+  doc.line(25, y + 11, 72, y + 11);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(60, 60, 60);
 
-  doc.text("Règlement par virement bancaire :", 25, y + 22);
+    doc.text("Règlement par virement bancaire :", 25, y + 19);
 
   if (type === "devis") {
-    doc.text("Un acompte pourra être demandé à la validation du devis.", 25, y + 28);
-  } else {
-    doc.text("Merci d’indiquer le numéro de facture en libellé de virement.", 25, y + 28);
-  }
+  doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
 
   doc.setDrawColor(220);
-  doc.line(102, y + 7, 102, y + 35);
+  doc.line(102, y + 6, 102, y + 27);
 
-  let ribY = y + 10;
+  let ribY = y + 8;
 
   doc.setFontSize(8.5);
   doc.setTextColor(0, 0, 0);
@@ -2399,7 +2439,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "normal");
 
-  y += 48;
+  y += 36;
 }
  
   const totalPages = doc.getNumberOfPages();
@@ -3448,24 +3488,24 @@ doc.setTextColor(0, 0, 0);
       </p>
     </div>
 
-    <TextArea
-      label="Sous-catégories / détails personnalisés"
-      value={(ligne.detailsPdfPersonnalises || []).join("\n")}
-      onChange={(valeur) => {
-  const lignes = valeur.split("\n");
+ <TextArea
+  label="Sous-catégories / détails personnalisés"
+  value={(ligne.detailsPdfPersonnalises || []).join("\n")}
+  onChange={(valeur) => {
+    const lignes = valeur.split("\n");
 
-  setLignesTravaux(
-    lignesTravaux.map((l) =>
-      l.id === ligne.id
-        ? {
-            ...l,
-            detailsPdfPersonnalises: lignes,
-          }
-        : l
-    )
-  );
-}}
-    />
+    setLignesTravaux((ancien) =>
+      ancien.map((l) =>
+        l.id === ligne.id
+          ? {
+              ...l,
+              detailsPdfPersonnalises: lignes,
+            }
+          : l
+      )
+    );
+  }}
+/>
 
     <div className="rounded-xl border bg-white p-3">
       <p className="text-xs font-bold text-slate-600">
@@ -3588,22 +3628,44 @@ doc.setTextColor(0, 0, 0);
     Estimation et analyse en temps réel.
   </p>
 <div className="grid gap-3 md:grid-cols-2">
-  {/* Déplacement */}
-  <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
-    <h3 className="text-sm font-bold text-slate-800">
-      🚚 Déplacement
-    </h3>
+ {/* Déplacement */}
+<div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
+  <h3 className="text-sm font-bold text-slate-800">
+    🚚 Déplacement
+  </h3>
 
-    <NumberInput
-      label="KM aller"
-      value={kmAller}
-      onChange={setKmAller}
+  <NumberInput
+    label="KM aller"
+    value={kmAller}
+    onChange={setKmAller}
+  />
+
+  <label className="flex items-center gap-2 text-sm font-semibold">
+    <input
+      type="checkbox"
+      checked={fraisDeplacementManuelActif}
+      onChange={(e) => {
+        setFraisDeplacementManuelActif(e.target.checked);
+        if (e.target.checked) {
+          setFraisDeplacementManuel(calcul.fraisLogistique);
+        }
+      }}
     />
+    Modifier le prix du déplacement
+  </label>
 
-    <p className="text-xs text-slate-500">
-      {calcul.kmAR} km A/R → {calcul.fraisLogistique} €
-    </p>
-  </div>
+  {fraisDeplacementManuelActif && (
+    <NumberInput
+      label="Prix déplacement manuel"
+      value={fraisDeplacementManuel}
+      onChange={setFraisDeplacementManuel}
+    />
+  )}
+
+  <p className="text-xs text-slate-500">
+    {calcul.kmAR} km A/R → {calcul.fraisLogistique} €
+  </p>
+</div>
 
  {/* Fournitures */}
 <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
@@ -4589,10 +4651,10 @@ function GraphiqueCourbe({
               >
                 {p.label}
               </text>
-            </g>
-          ))}
-        </svg>
-      </div>
-    </div>
-  );
-}
+           </g>
+))}
+</svg>
+</div>
+</div>
+);
+}}
