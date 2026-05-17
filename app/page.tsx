@@ -29,7 +29,9 @@ const formatDateFrVersInput = (dateFr: string) => {
 
 const trouverPrestationDepuisTableau = (nomPrestation: string) => {
   return TARIFS_PRESTATIONS.find(
-    (item) => item.prestation === nomPrestation
+    (item) =>
+      item.prestation === nomPrestation ||
+           item.id === nomPrestation
   );
 };
 
@@ -1073,9 +1075,29 @@ const memeJourRdv =
   setModeClient(fiche.modeClient || "normal");
   setAgence(fiche.agence || "");
 };
-  const ajouterLigne = () => {
-    setLignesTravaux([]);
+const ajouterLigne = () => {
+  const nouvelleLigne: LigneTravaux = {
+    id: Date.now(),
+    type: "plafond",
+    q1: 0,
+    q2: 0,
+    r1: 0,
+    r2: 0,
+    option: 0,
+    tarifId: "",
+    prestationNom: "",
+    unite: "",
+    prixUnitaire: 0,
+    prixUnitaireAuto: 0,
+    prixManuel: false,
+    heuresUnite: 0,
+    detailsPdfPersonnalises: [],
+    detailsPdfOuvert: false,
+    offert: false,
   };
+
+  setLignesTravaux((ancien) => [...ancien, nouvelleLigne]);
+};
 
  const modifierLigne = (id: number, champ: keyof LigneTravaux, valeur: string | number) => {
   setLignesTravaux(
@@ -2501,7 +2523,9 @@ doc.setTextColor(0, 0, 0);
 
   return (
     <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
-
+<div style={{ padding: 30, fontSize: 30, color: "red", background: "yellow" }}>
+  TEST AFFICHAGE
+</div>
      <style jsx>{`
   .btn-green {
     background:#dcfce7;
