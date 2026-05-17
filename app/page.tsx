@@ -2068,126 +2068,141 @@ doc.line(92, 60, 118, 60);
   doc.text(`N° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
 
- // ================= CADRES CLIENT / CHANTIER COMPACTS =================
+  // ================= CADRES CLIENT / CHANTIER PREMIUM COMPACTS =================
 
-const hauteurCadreInfos =
-  modeClient === "agence" || modeClient === "jeremie" ? 62 : 48;
+const estClientPro = modeClient === "agence" || modeClient === "jeremie";
+const hauteurCadreInfos = estClientPro ? 54 : 42;
 
-doc.setDrawColor(70);
-doc.setLineWidth(0.25);
+doc.setLineWidth(0.22);
+doc.setDrawColor(120, 120, 120);
+doc.setFillColor(255, 255, 255);
 
-// Cadres plus petits et plus élégants
-doc.roundedRect(22, 76, 73, hauteurCadreInfos, 2, 2);
-doc.roundedRect(115, 76, 73, hauteurCadreInfos, 2, 2);
+// Cadres plus fins, moins hauts, plus premium
+doc.roundedRect(18, 76, 78, hauteurCadreInfos, 2, 2, "S");
+doc.roundedRect(114, 76, 78, hauteurCadreInfos, 2, 2, "S");
 
-// Petites pastilles au lieu des gros ronds
+// Petites pastilles discrètes
 doc.setFillColor(52, 63, 79);
-doc.circle(27, 84, 2.6, "F");
-doc.circle(120, 84, 2.6, "F");
+doc.circle(23, 83, 1.8, "F");
+doc.circle(119, 83, 1.8, "F");
 
-doc.setTextColor(0, 0, 0);
+// Titres
 doc.setFont("helvetica", "bold");
-doc.setFontSize(9.5);
+doc.setFontSize(8.8);
+doc.setTextColor(35, 35, 35);
 
-doc.text("CLIENT", 33, 85);
-doc.text("CHANTIER", 126, 85);
+doc.text("CLIENT", 28, 84);
+doc.text("CHANTIER", 124, 84);
 
 // -------- CLIENT --------
-doc.setFontSize(7.3);
+doc.setFontSize(6.8);
 
 doc.setFont("helvetica", "bold");
-doc.text("Nom :", 26, 94);
-doc.text("Téléphone :", 26, 100);
-doc.text("Email :", 26, 106);
-doc.text(modeClient === "agence" ? "Agence :" : "Adresse :", 26, 112);
+doc.text("Nom :", 22, 92);
+doc.text("Tél. :", 22, 97.5);
+doc.text("Email :", 22, 103);
+doc.text(modeClient === "agence" ? "Agence :" : "Adresse :", 22, 108.5);
 
 doc.setFont("helvetica", "normal");
+doc.setTextColor(45, 45, 45);
 
-doc.text(client || "-", 43, 94);
-doc.text(telephone || "-", 49, 100);
+const clientCoupe = doc.splitTextToSize(client || "-", 48);
+doc.text(clientCoupe, 39, 92);
 
-const emailCoupe = doc.splitTextToSize(email || "-", 42);
-doc.text(emailCoupe, 43, 106);
+doc.text(telephone || "-", 39, 97.5);
+
+const emailCoupe = doc.splitTextToSize(email || "-", 48);
+doc.text(emailCoupe, 39, 103);
 
 const adresseClientTexte =
   modeClient === "agence"
     ? adresseAgence || "-"
     : adresse || "-";
 
-const adresseClientCoupee = doc.splitTextToSize(adresseClientTexte, 46);
-doc.text(adresseClientCoupee, 49, 112);
+const adresseClientCoupee = doc.splitTextToSize(adresseClientTexte, 48);
+doc.text(adresseClientCoupee, 39, 108.5);
 
 // -------- CHANTIER --------
+doc.setTextColor(35, 35, 35);
 doc.setFont("helvetica", "bold");
-doc.text(
-  modeClient === "jeremie" ? "Client final :" : "Adresse :",
-  119,
-  94
-);
-
-doc.setFont("helvetica", "normal");
+doc.setFontSize(6.8);
 
 if (modeClient === "jeremie") {
-  const nomFinalCoupe = doc.splitTextToSize(clientFinalNom || "-", 42);
-  doc.text(nomFinalCoupe, 142, 94);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Tel final :", 119, 102);
+  doc.text("Client :", 118, 92);
+  doc.text("Tél. :", 118, 97.5);
+  doc.text("Adresse :", 118, 103);
 
   doc.setFont("helvetica", "normal");
-  doc.text(clientFinalTelephone || "-", 142, 102);
+  doc.setTextColor(45, 45, 45);
 
-  doc.setFont("helvetica", "bold");
-  doc.text("Adresse :", 119, 110);
+  const nomFinalCoupe = doc.splitTextToSize(clientFinalNom || "-", 48);
+  doc.text(nomFinalCoupe, 139, 92);
 
-  doc.setFont("helvetica", "normal");
+  doc.text(clientFinalTelephone || "-", 139, 97.5);
+
   const adresseChantierCoupee = doc.splitTextToSize(
     clientFinalAdresse || adresse || "-",
-    50
+    48
   );
-  doc.text(adresseChantierCoupee, 142, 110);
+  doc.text(adresseChantierCoupee, 139, 103);
 } else if (modeClient === "agence") {
-  doc.setFont("helvetica", "bold");
-  doc.text("Réf :", 119, 94);
-  doc.text("Locataire :", 119, 100);
-  doc.text("Tel loc. :", 119, 106);
-  doc.text("Adresse :", 119, 112);
+  doc.text("Réf. :", 118, 92);
+  doc.text("Locataire :", 118, 97.5);
+  doc.text("Tél. :", 118, 103);
+  doc.text("Adresse :", 118, 108.5);
 
   doc.setFont("helvetica", "normal");
-  doc.text(referenceChantier || "-", 136, 94);
-  doc.text(locataire || "-", 143, 100);
-  doc.text(telephoneLocataire || "-", 142, 106);
+  doc.setTextColor(45, 45, 45);
+
+  doc.text(referenceChantier || "-", 139, 92);
+
+  const locataireCoupe = doc.splitTextToSize(locataire || "-", 45);
+  doc.text(locataireCoupe, 139, 97.5);
+
+  doc.text(telephoneLocataire || "-", 139, 103);
 
   const adresseChantierCoupee = doc.splitTextToSize(
     `${adresse || "-"} ${complementAdresse || ""}`,
     48
   );
-  doc.text(adresseChantierCoupee, 142, 112);
+  doc.text(adresseChantierCoupee, 139, 108.5);
 } else {
-  const adresseChantierCoupee = doc.splitTextToSize(
-    `${adresse || "-"} ${complementAdresse || ""}`,
-    50
-  );
-  doc.text(adresseChantierCoupee, 142, 94);
-}
-
-if (modeClient === "agence" || modeClient === "jeremie") {
-  doc.setFont("helvetica", "bold");
-  doc.text("Statut devis :", 119, 128);
-  doc.text("Statut chantier :", 119, 134);
+  doc.text("Adresse :", 118, 92);
 
   doc.setFont("helvetica", "normal");
-  doc.text(statutDevis || "-", 145, 128);
-  doc.text(statutChantier || "-", 149, 134);
+  doc.setTextColor(45, 45, 45);
+
+  const adresseChantierCoupee = doc.splitTextToSize(
+    `${adresse || "-"} ${complementAdresse || ""}`,
+    52
+  );
+  doc.text(adresseChantierCoupee, 139, 92);
+}
+
+// Statuts plus discrets pour agence / Jérémie
+if (estClientPro) {
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.6);
+  doc.setTextColor(35, 35, 35);
+
+  doc.text("Devis :", 118, 121);
+  doc.text("Chantier :", 118, 126);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(70, 70, 70);
+
+  doc.text(statutDevis || "-", 139, 121);
+  doc.text(statutChantier || "-", 139, 126);
 }
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
-// On remonte le tableau après réduction des cadres
-y = modeClient === "agence" || modeClient === "jeremie" ? 146 : 134;
+// Tableau remonté après cadres plus compacts
+y = estClientPro ? 136 : 126;
 
-  enteteTableau();
+enteteTableau();
+
 // ================= TABLEAU COMPACT =================
 const lignesDevisPDF = lignesPDF();
 
