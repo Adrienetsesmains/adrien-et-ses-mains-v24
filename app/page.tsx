@@ -2105,8 +2105,8 @@ const yCadres = 76;
 const largeurClient = 70;
 const largeurChantier = 91;
 
-const hauteurClient = estClientPro ? 35 : 28;
-const hauteurChantier = estClientPro ? 48 : 32;
+const hauteurClient = estClientPro ? 35 : 32;
+const hauteurChantier = estClientPro ? 48 : 36;
 
 const interligne = 4.6;
 
@@ -2220,7 +2220,7 @@ doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
 // Tableau remonté proprement
-y = estClientPro ? 140 : 122;
+y = estClientPro ? 140 : 126;
 
 enteteTableau();
 
