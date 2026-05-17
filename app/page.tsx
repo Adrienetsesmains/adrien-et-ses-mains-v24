@@ -2463,8 +2463,11 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
 
   y += 36;
 }
- 
-  const totalPages = doc.getNumberOfPages();
+
+// ✅ fermeture du bloc RIB
+}
+
+const totalPages = doc.getNumberOfPages();
 
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -2518,15 +2521,14 @@ doc.setTextColor(0, 0, 0);
   });
 
   doc.save(`${numero}-${client || "client"}.pdf`);
-}; 
+};
 
+// 🔥 FERMETURE PROPRE DE LA FONCTION genererPDF
 
-  return (
-    <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
-<div style={{ padding: 30, fontSize: 30, color: "red", background: "yellow" }}>
-  TEST AFFICHAGE
-</div>
-     <style jsx>{`
+return (
+  <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
+    <style jsx>{`
+
   .btn-green {
     background:#dcfce7;
     color:#166534;
@@ -4681,4 +4683,4 @@ function GraphiqueCourbe({
 </div>
 </div>
 );
-}}
+}
