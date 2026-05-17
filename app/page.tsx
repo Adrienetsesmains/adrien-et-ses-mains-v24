@@ -1075,6 +1075,32 @@ const memeJourRdv =
   setModeClient(fiche.modeClient || "normal");
   setAgence(fiche.agence || "");
 };
+const supprimerClientEnregistre = (nomClient: string) => {
+  if (!nomClient.trim()) return;
+
+  const clientExiste = clientsEnregistres.some(
+    (c) => normaliserTexte(c.nom) === normaliserTexte(nomClient)
+  );
+
+  if (!clientExiste) {
+    alert("Ce client n'est pas enregistré.");
+    return;
+  }
+
+  const confirmation = window.confirm(
+    `Supprimer le client enregistré "${nomClient}" ?`
+  );
+
+  if (!confirmation) return;
+
+  setClientsEnregistres((anciens) =>
+    anciens.filter(
+      (c) => normaliserTexte(c.nom) !== normaliserTexte(nomClient)
+    )
+  );
+
+  alert("Client supprimé des clients enregistrés.");
+};
 const ajouterLigne = () => {
   const nouvelleLigne: LigneTravaux = {
     id: Date.now(),
@@ -2079,8 +2105,8 @@ const yCadres = 76;
 const largeurClient = 70;
 const largeurChantier = 91;
 
-const hauteurClient = estClientPro ? 35 : 20;
-const hauteurChantier = estClientPro ? 48 : 24;
+const hauteurClient = estClientPro ? 35 : 28;
+const hauteurChantier = estClientPro ? 48 : 32;
 
 const interligne = 4.6;
 
@@ -3066,12 +3092,26 @@ return (
   ]}
 />
             <div>
-  <label className="text-sm font-medium">Client</label>
+  <div className="flex items-center justify-between gap-3">
+    <label className="text-sm font-medium">Client</label>
+
+    {clientsEnregistres.some(
+      (c) => normaliserTexte(c.nom) === normaliserTexte(client)
+    ) && (
+      <button
+        type="button"
+        onClick={() => supprimerClientEnregistre(client)}
+        className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
+      >
+        Supprimer ce client
+      </button>
+    )}
+  </div>
 
   <input
-  ref={inputClientRef}
-  className="mt-2 w-full rounded-xl border p-3"
-  value={client}
+    ref={inputClientRef}
+    className="mt-2 w-full rounded-xl border p-3"
+    value={client}
     list="liste-clients-enregistres"
     placeholder="Tape le nom du client..."
     onChange={(e) => {
