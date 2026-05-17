@@ -2079,8 +2079,8 @@ const yCadres = 76;
 const largeurClient = 70;
 const largeurChantier = 91;
 
-const hauteurClient = estClientPro ? 36 : 32;
-const hauteurChantier = estClientPro ? 50 : 36;
+const hauteurClient = estClientPro ? 30 : 24;
+const hauteurChantier = estClientPro ? 44 : 30;
 
 const interligne = 4.6;
 
@@ -2103,7 +2103,7 @@ doc.text("CLIENT", xClient + 12, yCadres + 9);
 doc.text("CHANTIER", xChantier + 12, yCadres + 9);
 
 // ================= CLIENT =================
-let yClient = yCadres + 10;
+let yClient = yCadres + 16;
 
 doc.setFontSize(7.2);
 doc.setFont("helvetica", "bold");
@@ -2133,7 +2133,7 @@ const adresseClientCoupee = doc
 doc.text(adresseClientCoupee, xClient + 25, yClient + interligne * 3);
 
 // ================= CHANTIER =================
-let yChantier = yCadres + 10;
+let yChantier = yCadres + 16;
 
 doc.setFont("helvetica", "bold");
 doc.setFontSize(7.2);
