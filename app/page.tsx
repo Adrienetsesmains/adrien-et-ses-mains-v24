@@ -2079,8 +2079,8 @@ const yCadres = 76;
 const largeurClient = 70;
 const largeurChantier = 91;
 
-const hauteurClient = estClientPro ? 30 : 24;
-const hauteurChantier = estClientPro ? 44 : 30;
+const hauteurClient = estClientPro ? 28 : 28;
+const hauteurChantier = estClientPro ? 42 : 32;
 
 const interligne = 4.6;
 
