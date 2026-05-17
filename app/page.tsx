@@ -2103,7 +2103,7 @@ doc.text("CLIENT", xClient + 12, yCadres + 9);
 doc.text("CHANTIER", xChantier + 12, yCadres + 9);
 
 // ================= CLIENT =================
-let yClient = yCadres + 14;
+let yClient = yCadres + 10;
 
 doc.setFontSize(7.2);
 doc.setFont("helvetica", "bold");
@@ -2133,7 +2133,7 @@ const adresseClientCoupee = doc
 doc.text(adresseClientCoupee, xClient + 25, yClient + interligne * 3);
 
 // ================= CHANTIER =================
-let yChantier = yCadres + 14;
+let yChantier = yCadres + 10;
 
 doc.setFont("helvetica", "bold");
 doc.setFontSize(7.2);
