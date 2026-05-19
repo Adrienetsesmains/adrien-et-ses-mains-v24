@@ -9,6 +9,8 @@ import {
   DETAILS_PDF_PAR_CATEGORIE,
 } from "../data/TARIFS_PRESTATIONS";
 
+import { supabase } from "./lib/supabaseClient";
+
 const formatDateInputVersFr = (dateIso: string) => {
   if (!dateIso) return "";
 
@@ -501,6 +503,49 @@ setTypeRdv(b.typeRdv || "visite");
   alert("✅ Sauvegarde restaurée");
 }; 
   
+const envoyerCloud = async () => {
+  const data = {
+    historique,
+    clientsEnregistres,
+  };
+
+  const { error } = await supabase
+    .from("dashboard_data")
+    .upsert([
+      {
+        id: "global",
+        data,
+      },
+    ]);
+
+  if (error) {
+    console.error("Erreur cloud :", error);
+    alert("Erreur envoi cloud");
+  } else {
+    alert("✅ Données envoyées au cloud");
+  }
+};
+
+const recupererCloud = async () => {
+  const { data, error } = await supabase
+    .from("dashboard_data")
+    .select("*")
+    .eq("id", "global")
+    .single();
+
+  if (error) {
+    console.error("Erreur récupération :", error);
+    alert("Erreur récupération cloud");
+    return;
+  }
+
+  if (data?.data) {
+    setHistorique(data.data.historique || []);
+    setClientsEnregistres(data.data.clientsEnregistres || []);
+    alert("✅ Données récupérées depuis le cloud");
+  }
+};
+
   const importRef = useRef<HTMLInputElement | null>(null);
 const actionsRef = useRef<HTMLDivElement | null>(null);
 const inputClientRef = useRef<HTMLInputElement | null>(null);
@@ -3158,7 +3203,19 @@ return (
 <div ref={actionsRef}>
   <Bloc titre="Actions principales">
 
+<button
+  onClick={envoyerCloud}
+  className="btn-blue"
+>
+  ☁️ Sauvegarder Cloud
+</button>
 
+<button
+  onClick={recupererCloud}
+  className="btn-emerald"
+>
+  📥 Charger Cloud
+</button>
     <input
       ref={importRef}
       type="file"
