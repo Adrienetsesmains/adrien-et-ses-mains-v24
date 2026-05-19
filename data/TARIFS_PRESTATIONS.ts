@@ -568,7 +568,53 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         heuresUnite: 0.08,
         rentabilite: "🟢 Rentable agence",
       },
-      {
+ {
+      nom: "Préparation plafond bois (poutres / lames)",
+      unite: "m²",
+      prixMo220: 18,
+      prixMoJeremie150: 12,
+      heuresUnite: 0.6,
+      rentabilite: "🟠",
+      detailsPdf: [
+        "Protection complète du chantier",
+        "Nettoyage du support",
+        "Égrenage du bois peint",
+        "Préparation avant mise en peinture"
+      ],
+      typeTravaux: "peinture"
+    },
+
+    {
+      nom: "Application primaire isolant anti-taches bois",
+      unite: "m²",
+      prixMo220: 14,
+      prixMoJeremie150: 9,
+      heuresUnite: 0.45,
+      rentabilite: "🟠",
+      detailsPdf: [
+        "Application primaire isolant",
+        "Blocage remontées tanniques",
+        "Traitement des traces d’humidité"
+      ],
+      typeTravaux: "peinture"
+    },
+
+    {
+      nom: "Peinture plafond bois salle de bain (2 couches)",
+      unite: "m²",
+      prixMo220: 22,
+      prixMoJeremie150: 15,
+      heuresUnite: 0.7,
+      rentabilite: "🟢",
+      detailsPdf: [
+        "Application de 2 couches",
+        "Peinture spéciale pièce humide",
+        "Finition blanche uniforme"
+      ],
+      typeTravaux: "peinture"
+    },
+
+     {
         nom: "Enduit / ratissage complet + ponçage",
         unite: "m²",
         prixMo220: 9.33,
@@ -578,9 +624,10 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         heuresUnite: 0.33,
         rentabilite: "🟢 Rentable agence",
       },
-    ],
-  },
-  {
+ 
+         ],
+             },
+                  {
     categorie: "Déco",
     prestations: [
       {

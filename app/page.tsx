@@ -1494,18 +1494,15 @@ const marquerPayee = (id: number) => {
   );
 };
 
-const envoyerDevisMail = () => {
-  genererPDF("devis");
+const envoyerDevisMail = async () => {
+  const pdfBase64 = await genererPDF("devis");
 
-  // 🔥 passage automatique en "envoyé"
   setStatutDevis("envoye");
 
   if (idDossierActuel !== null) {
     setHistorique((ancien) =>
       ancien.map((d) =>
-        d.id === idDossierActuel
-          ? { ...d, statutDevis: "envoye" }
-          : d
+        d.id === idDossierActuel ? { ...d, statutDevis: "envoye" } : d
       )
     );
   }
@@ -1528,14 +1525,30 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const mailto = `mailto:${email}?subject=${encodeURIComponent(
-    sujet
-  )}&body=${encodeURIComponent(corps)}`;
+  const reponse = await fetch("/api/envoyer-mail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to: email,
+      subject: sujet,
+      text: corps,
+      pdfBase64,
+      filename: `${numeroDevis || "devis"}-${client || "client"}.pdf`,
+    }),
+  });
 
-  window.location.href = mailto;
+  if (!reponse.ok) {
+    alert("❌ Erreur lors de l’envoi du devis par mail.");
+    return;
+  }
+
+  alert("✅ Devis envoyé par mail avec la pièce jointe.");
 };
-const envoyerFactureMail = () => {
-  genererPDF("facture");
+
+const envoyerFactureMail = async () => {
+  const pdfBase64 = await genererPDF("facture");
 
   const sujet = `Facture ${numeroFacture} - Adrien et ses mains`;
 
@@ -1555,13 +1568,31 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const mailto = `mailto:${email}?subject=${encodeURIComponent(
-    sujet
-  )}&body=${encodeURIComponent(corps)}`;
+  const reponse = await fetch("/api/envoyer-mail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to: email,
+      subject: sujet,
+      text: corps,
+      pdfBase64,
+      filename: `${numeroFacture || "facture"}-${client || "client"}.pdf`,
+    }),
+  });
 
-  window.location.href = mailto;
+  if (!reponse.ok) {
+    alert("❌ Erreur lors de l’envoi de la facture par mail.");
+    return;
+  }
+
+  alert("✅ Facture envoyée par mail avec la pièce jointe.");
 };
-const preparerRelance = (d: Dossier) => {
+
+const preparerRelance = async (d: Dossier) => {
+  const pdfBase64 = await genererPDF("facture");
+
   const sujet = `Relance facture ${d.numeroFacture}`;
 
   const corps = `Bonjour ${d.client},
@@ -1582,11 +1613,27 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const mailto = `mailto:${d.email}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+  const reponse = await fetch("/api/envoyer-mail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to: d.email,
+      subject: sujet,
+      text: corps,
+      pdfBase64,
+      filename: `${d.numeroFacture || "facture"}-${d.client || "client"}.pdf`,
+    }),
+  });
 
-  window.location.href = mailto;
+  if (!reponse.ok) {
+    alert("❌ Erreur lors de l’envoi de la relance.");
+    return;
+  }
+
+  alert("✅ Relance envoyée avec la facture en pièce jointe.");
 };
-
 
 const moisActuel = moisSelectionne;
 const anneeActuelle = anneeSelectionnee;
@@ -2060,7 +2107,7 @@ const ecart = totalAttendu - totalApres;
   return lignesAvecFrais.map((l) => [l.designation, l.montant]);
 };
 
-const genererPDF = (type: "devis" | "facture") => {
+const genererPDF = async (type: "devis" | "facture") => {
   const doc = new jsPDF();
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
@@ -2649,7 +2696,35 @@ doc.setTextColor(0, 0, 0);
     align: "center",
   });
 
-  doc.save(`${numero}-${client || "client"}.pdf`);
+  const nomFichier = `${numero}-${client || "client"}.pdf`;
+
+// ✅ garde le téléchargement PDF normal
+doc.save(nomFichier);
+
+// ✅ crée aussi le PDF pour la pièce jointe mail
+const pdfBlob = doc.output("blob");
+
+return new Promise<string>((resolve) => {
+  const reader = new FileReader();
+
+  reader.onloadend = () => {
+    const base64 = (reader.result as string).split(",")[1];
+    resolve(base64);
+  };
+
+  reader.readAsDataURL(pdfBlob);
+});
+
+return new Promise<string>((resolve) => {
+  const reader = new FileReader();
+
+  reader.onloadend = () => {
+    const base64 = (reader.result as string).split(",")[1];
+    resolve(base64);
+  };
+
+  reader.readAsDataURL(pdfBlob);
+});
 };
 
 // 🔥 FERMETURE PROPRE DE LA FONCTION genererPDF

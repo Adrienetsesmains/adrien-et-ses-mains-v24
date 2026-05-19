@@ -28,11 +28,22 @@ const formatDateFrVersInput = (dateFr: string) => {
 };
 
 const trouverPrestationDepuisTableau = (nomPrestation: string) => {
-  return TARIFS_PRESTATIONS.find(
-    (item) =>
-      item.prestation === nomPrestation ||
-           item.id === nomPrestation
-  );
+  return TARIFS_PRESTATIONS.find((item: any) => {
+    const libelle = item.prestation || item.nom || "";
+    return libelle === nomPrestation || item.id === nomPrestation;
+  });
+};
+
+const getNomPrestation = (prestation: any) => {
+  return prestation.prestation || prestation.nom || "";
+};
+
+const getPrixPrestation = (prestation: any, modeClient: string) => {
+  if (modeClient === "jeremie") {
+    return prestation.prix150 ?? prestation.prixMoJeremie150 ?? prestation.prixMo150 ?? 0;
+  }
+
+  return prestation.prix220 ?? prestation.prixMo220 ?? 0;
 };
 
 const parseDateFr = (date: string) => {
@@ -178,16 +189,17 @@ const typesTravaux = [
 
 const clientsBase = [
   {
-    nom: "Jérémie Meurisse",
-    telephone: "06 50 95 10 89",
-    email: "",
-    adresse: "Revel",
-    adresseAgence: "",
-    complementAdresse: "",
-    notes: "Sous-traitance Jérémie — base 150 €/jour — hors fournitures.",
-    modeClient: "jeremie",
-    agence: "",
-  },
+  nom: "SAS Meurisse Couverture",
+  telephone: "06 50 95 10 89",
+  email: "meurissecouverture@gmail.com",
+  adresse: "7 route de la Jasse 31250 Revel",
+  adresseAgence: "",
+  complementAdresse: "",
+  notes:
+    "Sous-traitance Jérémie — base 150 €/jour — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
+  modeClient: "jeremie",
+  agence: "",
+},
   {
     nom: "Tony Ferreira",
     telephone: "06 66 40 71 32",
@@ -1131,9 +1143,17 @@ const ajouterLigne = () => {
       if (l.id !== id) return l;
 
       // Champs numériques uniquement
-      const champsNumeriques = ["q1", "q2", "r1", "r2", "option", "prixUnitaire", "heuresUnite"];
+      const champsNumeriques: (keyof LigneTravaux)[] = [
+  "q1",
+  "q2",
+  "r1",
+  "r2",
+  "option",
+  "prixUnitaire",
+  "heuresUnite",
+];
 
-      if (champsNumeriques.includes(champ)) {
+      if (champsNumeriques.includes(champ as keyof LigneTravaux)) {
         return { ...l, [champ]: Number(valeur) };
       }
 
@@ -1972,13 +1992,73 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
   const lignesPDF = (): [string, number][] => {
-    const lignes: [string, number][] = lignesTravaux.map((l) => [l.prestationNom || nomTravaux(l.type), montantLigne(l, modeClient)]);
-    lignes.push(["Frais de déplacement et logistique", calcul.fraisLogistique]);
-    if (!fournituresClient && calcul.reventeFournitures > 0) {
-      lignes.push(["Fournitures et approvisionnement", calcul.reventeFournitures]);
-    }
-    return lignes;
+  // 1. lignes de base
+  const lignesTravauxPDF = lignesTravaux.map((l) => ({
+    designation: l.prestationNom || nomTravaux(l.type),
+    montant: montantLigne(l, modeClient),
+  }));
+
+  const totalTravaux = lignesTravauxPDF.reduce(
+    (s, l) => s + l.montant,
+    0
+  );
+
+  const frais = calcul.fraisLogistique || 0;
+
+  // 2. Si pas de travaux → on affiche rien de spécial
+  if (totalTravaux === 0) {
+    return lignesTravauxPDF.map((l) => [l.designation, l.montant]);
+  }
+
+// 1. Séparer lignes travaux / fournitures
+const lignesTravauxSeules = lignesTravauxPDF.filter(
+  (l) => !l.designation.toLowerCase().includes("fourniture")
+);
+
+const totalTravauxSansFourniture = lignesTravauxSeules.reduce(
+  (s, l) => s + l.montant,
+  0
+);
+
+// 2. Répartition uniquement sur travaux
+const lignesAvecFrais = lignesTravauxPDF.map((l) => {
+  const estFourniture = l.designation.toLowerCase().includes("fourniture");
+
+  if (estFourniture || totalTravauxSansFourniture === 0) {
+    return l; // pas de répartition
+  }
+
+  const ratio = l.montant / totalTravauxSansFourniture;
+  const partFrais = Math.round(frais * ratio);
+
+  return {
+    designation: l.designation,
+    montant: l.montant + partFrais,
   };
+});
+
+  // 4. Ajustement pour éviter perte à cause des arrondis
+  const totalApres = lignesAvecFrais.reduce((s, l) => s + l.montant, 0);
+
+const totalAttendu =
+  totalTravaux + calcul.fraisLogistique;
+
+const ecart = totalAttendu - totalApres;
+
+  if (Math.abs(ecart) > 0 && lignesAvecFrais.length > 0) {
+    lignesAvecFrais[0].montant += ecart;
+  }
+
+  // 5. Fournitures (inchangé)
+  if (!fournituresClient && calcul.reventeFournitures > 0) {
+    lignesAvecFrais.push({
+      designation: "Fournitures et approvisionnement",
+      montant: calcul.reventeFournitures,
+    });
+  }
+
+  return lignesAvecFrais.map((l) => [l.designation, l.montant]);
+};
 
 const genererPDF = (type: "devis" | "facture") => {
   const doc = new jsPDF();
@@ -2093,10 +2173,7 @@ doc.line(92, 60, 118, 60);
   doc.setFontSize(11);
   doc.text(`N° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
-
-  // ================= CADRES CLIENT / CHANTIER PREMIUM COMPACTS =================
-
-const estClientPro = modeClient === "agence" || modeClient === "jeremie";
+// ================= CADRES CLIENT / CHANTIER PREMIUM COMPACTS AUTO =================
 
 const xClient = 18;
 const xChantier = 101;
@@ -2105,122 +2182,137 @@ const yCadres = 76;
 const largeurClient = 70;
 const largeurChantier = 91;
 
-const hauteurClient = estClientPro ? 35 : 32;
-const hauteurChantier = estClientPro ? 48 : 36;
+const interligne = 4.1;
 
-const interligne = 4.6;
+type LigneBloc = {
+  label: string;
+  valeur: string;
+};
 
-doc.setLineWidth(0.25);
-doc.setDrawColor(120, 120, 120);
+const dessinerCadreInfos = (
+  titre: string,
+  x: number,
+  yDepart: number,
+  largeur: number,
+  lignes: LigneBloc[],
+  largeurLabel: number,
+  largeurTexte: number
+) => {
+  const lignesFiltrees = lignes.filter(
+    (ligne) => ligne.valeur && ligne.valeur.trim() !== ""
+  );
 
-doc.roundedRect(xClient, yCadres, largeurClient, hauteurClient, 2, 2);
-doc.roundedRect(xChantier, yCadres, largeurChantier, hauteurChantier, 2, 2);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.2);
 
-// Pastilles
-doc.setFillColor(52, 63, 79);
-doc.circle(xClient + 5, yCadres + 8, 1.9, "F");
-doc.circle(xChantier + 5, yCadres + 8, 1.9, "F");
+  let hauteurTexte = 0;
 
-// Titres
-doc.setFont("helvetica", "bold");
-doc.setFontSize(9.2);
-doc.setTextColor(35, 35, 35);
-doc.text("CLIENT", xClient + 12, yCadres + 9);
-doc.text("CHANTIER", xChantier + 12, yCadres + 9);
+  lignesFiltrees.forEach((ligne) => {
+    const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne;
+  });
 
-// ================= CLIENT =================
-let yClient = yCadres + 16;
+  const yDebutTexte = yDepart + 18;
+  const margeBas = 4;
+  const hauteurBloc = Math.max(26, 18 + hauteurTexte + margeBas);
 
-doc.setFontSize(7.2);
-doc.setFont("helvetica", "bold");
-doc.setTextColor(35, 35, 35);
+  doc.setLineWidth(0.25);
+  doc.setDrawColor(120, 120, 120);
+  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2, 2);
 
-doc.text("Nom :", xClient + 4, yClient);
-doc.text("Tél. :", xClient + 4, yClient + interligne);
-doc.text("Email :", xClient + 4, yClient + interligne * 2);
-doc.text(modeClient === "agence" ? "Agence :" : "Adresse :", xClient + 4, yClient + interligne * 3);
+  doc.setFillColor(52, 63, 79);
+  doc.circle(x + 5, yDepart + 8, 1.9, "F");
 
-doc.setFont("helvetica", "normal");
-doc.setTextColor(45, 45, 45);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.2);
+  doc.setTextColor(35, 35, 35);
+  doc.text(titre, x + 12, yDepart + 9);
 
-doc.text(doc.splitTextToSize(client || "-", 42), xClient + 25, yClient);
-doc.text(telephone || "-", xClient + 25, yClient + interligne);
-doc.text(doc.splitTextToSize(email || "-", 42), xClient + 25, yClient + interligne * 2);
+  let yTexte = yDebutTexte;
 
-const adresseClientTexte =
-  modeClient === "agence"
-    ? adresseAgence || "-"
-    : adresse || "-";
+  lignesFiltrees.forEach((ligne) => {
+    const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
+    const nbLignes = Math.max(1, texteCoupe.length);
 
-const adresseClientCoupee = doc
-  .splitTextToSize(adresseClientTexte, 42)
-  .slice(0, 2);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.2);
+    doc.setTextColor(35, 35, 35);
+    doc.text(`${ligne.label} :`, x + 4, yTexte);
 
-doc.text(adresseClientCoupee, xClient + 25, yClient + interligne * 3);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.2);
+    doc.setTextColor(45, 45, 45);
+    doc.text(texteCoupe, x + largeurLabel, yTexte);
 
-// ================= CHANTIER =================
-let yChantier = yCadres + 16;
+    yTexte += nbLignes * interligne;
+  });
 
-doc.setFont("helvetica", "bold");
-doc.setFontSize(7.2);
-doc.setTextColor(35, 35, 35);
+  return hauteurBloc;
+};
+
+const lignesClient: LigneBloc[] = [
+  { label: "Nom", valeur: client || "" },
+  { label: "Tél.", valeur: telephone || "" },
+  { label: "Email", valeur: email || "" },
+  {
+    label: modeClient === "agence" ? "Agence" : "Adresse",
+    valeur: modeClient === "agence" ? adresseAgence || "" : adresse || "",
+  },
+];
+
+let lignesChantier: LigneBloc[] = [];
 
 if (modeClient === "jeremie") {
-  doc.text("Client :", xChantier + 4, yChantier);
-  doc.text("Tél. :", xChantier + 4, yChantier + interligne);
-  doc.text("Adresse :", xChantier + 4, yChantier + interligne * 2);
-
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(45, 45, 45);
-
-  doc.text(doc.splitTextToSize(clientFinalNom || "-", 48), xChantier + 32, yChantier);
-  doc.text(clientFinalTelephone || "-", xChantier + 32, yChantier + interligne);
-
-  const adresseChantierCoupee = doc
-    .splitTextToSize(clientFinalAdresse || adresse || "-", 50)
-    .slice(0, 2);
-
-  doc.text(adresseChantierCoupee, xChantier + 32, yChantier + interligne * 2);
+  lignesChantier = [
+    { label: "Client", valeur: clientFinalNom || client || "" },
+    { label: "Tél.", valeur: clientFinalTelephone || telephone || "" },
+    { label: "Adresse", valeur: clientFinalAdresse || adresse || "" },
+  ];
 } else if (modeClient === "agence") {
-  doc.text("Réf. :", xChantier + 4, yChantier);
-  doc.text("Locataire :", xChantier + 4, yChantier + interligne);
-  doc.text("Tél. loc. :", xChantier + 4, yChantier + interligne * 2);
-  doc.text("Proprio. :", xChantier + 4, yChantier + interligne * 3);
-  doc.text("Tél. prop. :", xChantier + 4, yChantier + interligne * 4);
-  doc.text("Adresse :", xChantier + 4, yChantier + interligne * 5);
-
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(45, 45, 45);
-
-  doc.text(referenceChantier || "-", xChantier + 34, yChantier);
-  doc.text(locataire || "-", xChantier + 34, yChantier + interligne);
-  doc.text(telephoneLocataire || "-", xChantier + 34, yChantier + interligne * 2);
-  doc.text(proprietaire || "-", xChantier + 34, yChantier + interligne * 3);
-  doc.text(telephoneProprietaire || "-", xChantier + 34, yChantier + interligne * 4);
-
-  const adresseChantierCoupee = doc
-    .splitTextToSize(`${adresse || "-"} ${complementAdresse || ""}`, 50)
-    .slice(0, 2);
-
-  doc.text(adresseChantierCoupee, xChantier + 34, yChantier + interligne * 5);
+  lignesChantier = [
+    { label: "Réf.", valeur: referenceChantier || "" },
+    { label: "Locataire", valeur: locataire || "" },
+    { label: "Tél. loc.", valeur: telephoneLocataire || "" },
+    { label: "Proprio.", valeur: proprietaire || "" },
+    { label: "Tél. prop.", valeur: telephoneProprietaire || "" },
+    {
+      label: "Adresse",
+      valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+    },
+  ];
 } else {
-  doc.text("Adresse :", xChantier + 4, yChantier);
-
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(45, 45, 45);
-
-  const adresseChantierCoupee = doc
-    .splitTextToSize(`${adresse || "-"} ${complementAdresse || ""}`, 52)
-    .slice(0, 2);
-
-  doc.text(adresseChantierCoupee, xChantier + 32, yChantier);
+  lignesChantier = [
+    {
+      label: "Adresse",
+      valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+    },
+  ];
 }
+
+const hauteurClientAuto = dessinerCadreInfos(
+  "CLIENT",
+  xClient,
+  yCadres,
+  largeurClient,
+  lignesClient,
+  25,
+  42
+);
+
+const hauteurChantierAuto = dessinerCadreInfos(
+  "CHANTIER",
+  xChantier,
+  yCadres,
+  largeurChantier,
+  lignesChantier,
+  modeClient === "agence" ? 34 : 32,
+  modeClient === "agence" ? 50 : 52
+);
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
-// Tableau remonté proprement
-y = estClientPro ? 140 : 126;
+y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 8;
 
 enteteTableau();
 
@@ -3284,7 +3376,7 @@ return (
   options={[
     ["estimation_rapide", "Estimation rapide (client)"],
     ["en_cours", "Devis en cours"],
-    ["envoye", "Devis envoyé"],
+    ["envoye", "Devis yé"],
     ["accepte", "Devis accepté"],
     ["refuse", "Devis refusé"]
   ]}
@@ -3379,24 +3471,24 @@ return (
       ]}
     />
 
-    <Select
-      label="Prestation"
-      value={prestationSelectionnee}
-      onChange={setPrestationSelectionnee}
-      options={[
-        ["", "Choisir une prestation"],
-        ...getPrestationsByCategorie(categorieSelectionnee).map((p) => [
-          p.id,
-          `${p.prestation} — ${p.prix220} €/${p.unite}`,
-        ]),
-      ]}
-    />
+  <Select
+  label="Prestation"
+  value={prestationSelectionnee}
+  onChange={setPrestationSelectionnee}
+  options={[
+  ["", "Choisir une prestation"],
+  ...getPrestationsByCategorie(categorieSelectionnee).map((p: any) => [
+    p.id,
+    `${getNomPrestation(p)} — ${getPrixPrestation(p, modeClient)} €/${p.unite}`,
+  ]),
+]}
+/>
 
-    <button
+<button
   type="button"
   onClick={() => {
-    const prestationTrouvee = TARIFS_PRESTATIONS.find(
-      (p) => p.id === prestationSelectionnee
+    const prestationTrouvee: any = TARIFS_PRESTATIONS.find(
+      (p: any) => p.id === prestationSelectionnee
     );
 
     if (!prestationTrouvee) {
@@ -3404,10 +3496,7 @@ return (
       return;
     }
 
-    const prixClient =
-      modeClient === "jeremie"
-        ? prestationTrouvee.prix150
-        : prestationTrouvee.prix220;
+    const prixClient = getPrixPrestation(prestationTrouvee, modeClient);
 
     const detailsBase =
       prestationTrouvee.detailsPdf && prestationTrouvee.detailsPdf.length > 0
@@ -3424,19 +3513,19 @@ return (
       {
         id: Date.now(),
         type: prestationTrouvee.typeTravaux || "prestation_tableau",
-        q1: prestationTrouvee.unite === "forfait" ? 1 : 1,
+        q1: 1,
         q2: 0,
         r1: 0,
         r2: 0,
         option: 0,
 
         tarifId: prestationTrouvee.id,
-        prestationNom: prestationTrouvee.prestation,
+        prestationNom: getNomPrestation(prestationTrouvee),
         unite: prestationTrouvee.unite,
         prixUnitaire: prixClient,
         prixUnitaireAuto: prixClient,
         prixManuel: false,
-        heuresUnite: prestationTrouvee.heuresUnite,
+        heuresUnite: prestationTrouvee.heuresUnite || 0,
 
         detailsPdfPersonnalises: detailsBase,
         detailsPdfOuvert: false,
@@ -3452,9 +3541,9 @@ return (
       });
     }, 100);
   }}
-  className="self-end rounded-xl bg-amber-600 px-5 py-3 font-semibold text-white"
+  className="btn-green mt-6 rounded-xl px-4 py-2 text-sm font-semibold"
 >
-  Ajouter
+  + Ajouter
 </button>
   </div>
 
@@ -3565,11 +3654,14 @@ return (
       </p>
     </div>
 
- <TextArea
-  label="Sous-catégories / détails personnalisés"
+ <textarea
+  className="min-h-[120px] w-full rounded-xl border border-slate-300 bg-white p-3 text-sm outline-none focus:border-amber-500"
   value={(ligne.detailsPdfPersonnalises || []).join("\n")}
-  onChange={(valeur) => {
-    const lignes = valeur.split("\n");
+  onKeyDown={(event) => {
+    event.stopPropagation();
+  }}
+  onChange={(event) => {
+    const lignes = event.target.value.split("\n");
 
     setLignesTravaux((ancien) =>
       ancien.map((l) =>
@@ -4203,7 +4295,7 @@ return (
         d.id === item.id
           ? {
               ...d,
-              statutChantier: "facture_envoyee",
+              statutChantier: "facture_yee",
             }
           : d
       )
@@ -4211,7 +4303,7 @@ return (
   }
   className="rounded-xl bg-cyan-700 px-4 py-2 font-semibold text-white"
 >
-  Facture envoyée
+  Facture yée
 </button>
             <button
  onClick={() => {
