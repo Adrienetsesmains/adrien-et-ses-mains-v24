@@ -3654,11 +3654,14 @@ return (
       </p>
     </div>
 
- <TextArea
-  label="Sous-catégories / détails personnalisés"
+ <textarea
+  className="min-h-[120px] w-full rounded-xl border border-slate-300 bg-white p-3 text-sm outline-none focus:border-amber-500"
   value={(ligne.detailsPdfPersonnalises || []).join("\n")}
-  onChange={(valeur) => {
-    const lignes = valeur.split("\n");
+  onKeyDown={(event) => {
+    event.stopPropagation();
+  }}
+  onChange={(event) => {
+    const lignes = event.target.value.split("\n");
 
     setLignesTravaux((ancien) =>
       ancien.map((l) =>
