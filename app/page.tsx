@@ -2174,82 +2174,145 @@ doc.line(92, 60, 118, 60);
   doc.text(`N° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
 
- // ================= BLOCS CLIENT / CHANTIER AUTO =================
+ // ================= CADRES CLIENT / CHANTIER PREMIUM COMPACTS AUTO =================
 
-const dessinerBlocInfosAuto = (
+const estClientPro = modeClient === "agence" || modeClient === "jeremie";
+
+const xClient = 18;
+const xChantier = 101;
+const yCadres = 76;
+
+const largeurClient = 70;
+const largeurChantier = 91;
+
+const interligne = 4.4;
+
+type LigneBloc = {
+  label: string;
+  valeur: string;
+};
+
+const dessinerCadreInfos = (
   titre: string,
   x: number,
-  y: number,
+  yDepart: number,
   largeur: number,
-  lignes: [string, string][]
+  lignes: LigneBloc[],
+  largeurLabel: number,
+  largeurTexte: number
 ) => {
-  const paddingHaut = 12;
-  const paddingBas = 10;
-  const hauteurTitre = 10;
-  const interligne = 6;
+  const lignesFiltrees = lignes.filter((ligne) => ligne.valeur && ligne.valeur.trim() !== "");
 
-  const lignesFiltrees = lignes.filter(([_, valeur]) => valeur && valeur.trim() !== "");
+  const paddingHaut = 16;
+  const paddingBas = 8;
 
-  let hauteurContenu = 0;
+  let hauteurTexte = 0;
 
-  lignesFiltrees.forEach(([label, valeur]) => {
-    const valeurCoupee = doc.splitTextToSize(valeur, largeur - 42);
-    hauteurContenu += Math.max(1, valeurCoupee.length) * interligne;
+  lignesFiltrees.forEach((ligne) => {
+    const texteCoupe = doc.splitTextToSize(ligne.valeur || "-", largeurTexte);
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne;
   });
 
-  const hauteurBloc = Math.max(
-    42,
-    paddingHaut + hauteurTitre + hauteurContenu + paddingBas
-  );
+  const hauteurBloc = Math.max(30, paddingHaut + hauteurTexte + paddingBas);
 
-  doc.setDrawColor(150, 150, 150);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(x, y, largeur, hauteurBloc, 2, 2);
+  doc.setLineWidth(0.25);
+  doc.setDrawColor(120, 120, 120);
+  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2, 2);
 
-  doc.setFillColor(45, 55, 72);
-  doc.circle(x + 8, y + 13, 2.4, "F");
+  doc.setFillColor(52, 63, 79);
+  doc.circle(x + 5, yDepart + 8, 1.9, "F");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(40, 40, 40);
-  doc.text(titre, x + 16, y + 15);
+  doc.setFontSize(9.2);
+  doc.setTextColor(35, 35, 35);
+  doc.text(titre, x + 12, yDepart + 9);
 
-  let cy = y + 28;
+  let yTexte = yDepart + 16;
 
-  lignesFiltrees.forEach(([label, valeur]) => {
-    const valeurCoupee = doc.splitTextToSize(valeur, largeur - 42);
+  lignesFiltrees.forEach((ligne) => {
+    const texteCoupe = doc.splitTextToSize(ligne.valeur || "-", largeurTexte);
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.setTextColor(45, 45, 45);
-    doc.text(`${label} :`, x + 10, cy);
+    doc.setFontSize(7.2);
+    doc.setTextColor(35, 35, 35);
+    doc.text(`${ligne.label} :`, x + 4, yTexte);
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(65, 65, 65);
-    doc.text(valeurCoupee, x + 38, cy);
+    doc.setFontSize(7.2);
+    doc.setTextColor(45, 45, 45);
+    doc.text(texteCoupe, x + largeurLabel, yTexte);
 
-    cy += Math.max(1, valeurCoupee.length) * interligne;
+    yTexte += Math.max(1, texteCoupe.length) * interligne;
   });
 
   return hauteurBloc;
 };
 
-const hauteurClient = dessinerBlocInfosAuto("CLIENT", 18, 76, 70, [
-  ["Nom", client],
-]);
+const adresseClientTexte =
+  modeClient === "agence"
+    ? adresseAgence || "-"
+    : adresse || "-";
 
-const hauteurChantier = dessinerBlocInfosAuto("CHANTIER", 101, 76, 91, [
-  ["Client", clientFinalNom],
-  ["Tél.", telephone],
-  ["Adresse", adresse],
-  ["Réf.", referenceChantier],
-  ["Locataire", locataire],
-  ["Propriétaire", proprietaire],
-  ["Complément", complementAdresse],
-]);
+const lignesClient: LigneBloc[] = [
+  { label: "Nom", valeur: client || "-" },
+  { label: "Tél.", valeur: telephone || "-" },
+  { label: "Email", valeur: email !== undefined ? email : "-" },
+  {
+    label: modeClient === "agence" ? "Agence" : "Adresse",
+    valeur: (modeClient === "agence" ? adresseAgence : adresse) || "-",
+  },
+];
 
-y = 76 + Math.max(hauteurClient, hauteurChantier) + 18;
+let lignesChantier: LigneBloc[] = [];
+
+if (modeClient === "jeremie") {
+  lignesChantier = [
+    { label: "Client", valeur: clientFinalNom || client || "-" },
+    { label: "Tél.", valeur: clientFinalTelephone || "-" },
+    { label: "Adresse", valeur: clientFinalAdresse || adresse || "-" },
+  ];
+} else if (modeClient === "agence") {
+  lignesChantier = [
+    { label: "Réf.", valeur: referenceChantier || "-" },
+    { label: "Locataire", valeur: locataire || "-" },
+    { label: "Tél. loc.", valeur: telephoneLocataire || "-" },
+    { label: "Proprio.", valeur: proprietaire || "-" },
+    { label: "Tél. prop.", valeur: telephoneProprietaire || "-" },
+    { label: "Adresse", valeur: `${adresse || "-"} ${complementAdresse || ""}`.trim() },
+  ];
+} else {
+  lignesChantier = [
+    { label: "Adresse", valeur: `${adresse || "-"} ${complementAdresse || ""}`.trim() },
+  ];
+}
+
+const hauteurClientAuto = dessinerCadreInfos(
+  "CLIENT",
+  xClient,
+  yCadres,
+  largeurClient,
+  lignesClient,
+  25,
+  42
+);
+
+const hauteurChantierAuto = dessinerCadreInfos(
+  "CHANTIER",
+  xChantier,
+  yCadres,
+  largeurChantier,
+  lignesChantier,
+  modeClient === "agence" ? 34 : 32,
+  modeClient === "agence" ? 50 : 52
+);
+
+doc.setFont("helvetica", "normal");
+doc.setTextColor(0, 0, 0);
+
+// Tableau placé automatiquement juste sous le plus grand cadre
+y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 16;
+
+enteteTableau();
 
 // ================= TABLEAU COMPACT =================
 const lignesDevisPDF = lignesPDF();
