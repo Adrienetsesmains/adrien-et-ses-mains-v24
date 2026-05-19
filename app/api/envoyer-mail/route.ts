@@ -1,29 +1,14 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const { to, subject, text, pdfBase64, filename } = await req.json();
 
-    const {
-      to,
-      subject,
-      text,
-      pdfBase64,
-      filename,
-    } = body;
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-});
-
-    await transporter.sendMail({
-      from: process.env.MAIL_USER,
+    await resend.emails.send({
+      from: "Adrien et ses mains <onboarding@resend.dev>",
       to,
       subject,
       text,
@@ -31,8 +16,6 @@ const transporter = nodemailer.createTransport({
         {
           filename,
           content: pdfBase64,
-          encoding: "base64",
-          contentType: "application/pdf",
         },
       ],
     });
