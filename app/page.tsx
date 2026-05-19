@@ -2039,7 +2039,11 @@ const lignesAvecFrais = lignesTravauxPDF.map((l) => {
 
   // 4. Ajustement pour éviter perte à cause des arrondis
   const totalApres = lignesAvecFrais.reduce((s, l) => s + l.montant, 0);
-  const ecart = calcul.total - totalApres;
+
+const totalAttendu =
+  totalTravaux + calcul.fraisLogistique;
+
+const ecart = totalAttendu - totalApres;
 
   if (Math.abs(ecart) > 0 && lignesAvecFrais.length > 0) {
     lignesAvecFrais[0].montant += ecart;
