@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       attachments: [
         {
           filename,
-          content: pdfBase64,
+          content: pdfBase64.split(",")[1],
         },
       ],
     });
