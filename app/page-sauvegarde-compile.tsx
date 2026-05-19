@@ -28,22 +28,11 @@ const formatDateFrVersInput = (dateFr: string) => {
 };
 
 const trouverPrestationDepuisTableau = (nomPrestation: string) => {
-  return TARIFS_PRESTATIONS.find((item: any) => {
-    const libelle = item.prestation || item.nom || "";
-    return libelle === nomPrestation || item.id === nomPrestation;
-  });
-};
-
-const getNomPrestation = (prestation: any) => {
-  return prestation.prestation || prestation.nom || "";
-};
-
-const getPrixPrestation = (prestation: any, modeClient: string) => {
-  if (modeClient === "jeremie") {
-    return prestation.prix150 ?? prestation.prixMoJeremie150 ?? prestation.prixMo150 ?? 0;
-  }
-
-  return prestation.prix220 ?? prestation.prixMo220 ?? 0;
+  return TARIFS_PRESTATIONS.find(
+    (item) =>
+      item.prestation === nomPrestation ||
+           item.id === nomPrestation
+  );
 };
 
 const parseDateFr = (date: string) => {
@@ -189,17 +178,16 @@ const typesTravaux = [
 
 const clientsBase = [
   {
-  nom: "SAS Meurisse Couverture",
-  telephone: "06 50 95 10 89",
-  email: "meurissecouverture@gmail.com",
-  adresse: "7 route de la Jasse 31250 Revel",
-  adresseAgence: "",
-  complementAdresse: "",
-  notes:
-    "Sous-traitance Jérémie — base 150 €/jour — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
-  modeClient: "jeremie",
-  agence: "",
-},
+    nom: "Jérémie Meurisse",
+    telephone: "06 50 95 10 89",
+    email: "",
+    adresse: "Revel",
+    adresseAgence: "",
+    complementAdresse: "",
+    notes: "Sous-traitance Jérémie — base 150 €/jour — hors fournitures.",
+    modeClient: "jeremie",
+    agence: "",
+  },
   {
     nom: "Tony Ferreira",
     telephone: "06 66 40 71 32",
@@ -1143,17 +1131,9 @@ const ajouterLigne = () => {
       if (l.id !== id) return l;
 
       // Champs numériques uniquement
-      const champsNumeriques: (keyof LigneTravaux)[] = [
-  "q1",
-  "q2",
-  "r1",
-  "r2",
-  "option",
-  "prixUnitaire",
-  "heuresUnite",
-];
+      const champsNumeriques = ["q1", "q2", "r1", "r2", "option", "prixUnitaire", "heuresUnite"];
 
-      if (champsNumeriques.includes(champ as keyof LigneTravaux)) {
+      if (champsNumeriques.includes(champ)) {
         return { ...l, [champ]: Number(valeur) };
       }
 
@@ -1992,69 +1972,13 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
   const lignesPDF = (): [string, number][] => {
-  // 1. lignes de base
-  const lignesTravauxPDF = lignesTravaux.map((l) => ({
-    designation: l.prestationNom || nomTravaux(l.type),
-    montant: montantLigne(l, modeClient),
-  }));
-
-  const totalTravaux = lignesTravauxPDF.reduce(
-    (s, l) => s + l.montant,
-    0
-  );
-
-  const frais = calcul.fraisLogistique || 0;
-
-  // 2. Si pas de travaux → on affiche rien de spécial
-  if (totalTravaux === 0) {
-    return lignesTravauxPDF.map((l) => [l.designation, l.montant]);
-  }
-
-// 1. Séparer lignes travaux / fournitures
-const lignesTravauxSeules = lignesTravauxPDF.filter(
-  (l) => !l.designation.toLowerCase().includes("fourniture")
-);
-
-const totalTravauxSansFourniture = lignesTravauxSeules.reduce(
-  (s, l) => s + l.montant,
-  0
-);
-
-// 2. Répartition uniquement sur travaux
-const lignesAvecFrais = lignesTravauxPDF.map((l) => {
-  const estFourniture = l.designation.toLowerCase().includes("fourniture");
-
-  if (estFourniture || totalTravauxSansFourniture === 0) {
-    return l; // pas de répartition
-  }
-
-  const ratio = l.montant / totalTravauxSansFourniture;
-  const partFrais = Math.round(frais * ratio);
-
-  return {
-    designation: l.designation,
-    montant: l.montant + partFrais,
+    const lignes: [string, number][] = lignesTravaux.map((l) => [l.prestationNom || nomTravaux(l.type), montantLigne(l, modeClient)]);
+    lignes.push(["Frais de déplacement et logistique", calcul.fraisLogistique]);
+    if (!fournituresClient && calcul.reventeFournitures > 0) {
+      lignes.push(["Fournitures et approvisionnement", calcul.reventeFournitures]);
+    }
+    return lignes;
   };
-});
-
-  // 4. Ajustement pour éviter perte à cause des arrondis
-  const totalApres = lignesAvecFrais.reduce((s, l) => s + l.montant, 0);
-  const ecart = calcul.total - totalApres;
-
-  if (Math.abs(ecart) > 0 && lignesAvecFrais.length > 0) {
-    lignesAvecFrais[0].montant += ecart;
-  }
-
-  // 5. Fournitures (inchangé)
-  if (!fournituresClient && calcul.reventeFournitures > 0) {
-    lignesAvecFrais.push({
-      designation: "Fournitures et approvisionnement",
-      montant: calcul.reventeFournitures,
-    });
-  }
-
-  return lignesAvecFrais.map((l) => [l.designation, l.montant]);
-};
 
 const genererPDF = (type: "devis" | "facture") => {
   const doc = new jsPDF();
@@ -3455,24 +3379,24 @@ return (
       ]}
     />
 
-  <Select
-  label="Prestation"
-  value={prestationSelectionnee}
-  onChange={setPrestationSelectionnee}
-  options={[
-  ["", "Choisir une prestation"],
-  ...getPrestationsByCategorie(categorieSelectionnee).map((p: any) => [
-    p.id,
-    `${getNomPrestation(p)} — ${getPrixPrestation(p, modeClient)} €/${p.unite}`,
-  ]),
-]}
-/>
+    <Select
+      label="Prestation"
+      value={prestationSelectionnee}
+      onChange={setPrestationSelectionnee}
+      options={[
+        ["", "Choisir une prestation"],
+        ...getPrestationsByCategorie(categorieSelectionnee).map((p) => [
+          p.id,
+          `${p.prestation} — ${p.prix220} €/${p.unite}`,
+        ]),
+      ]}
+    />
 
-<button
+    <button
   type="button"
   onClick={() => {
-    const prestationTrouvee: any = TARIFS_PRESTATIONS.find(
-      (p: any) => p.id === prestationSelectionnee
+    const prestationTrouvee = TARIFS_PRESTATIONS.find(
+      (p) => p.id === prestationSelectionnee
     );
 
     if (!prestationTrouvee) {
@@ -3480,7 +3404,10 @@ return (
       return;
     }
 
-    const prixClient = getPrixPrestation(prestationTrouvee, modeClient);
+    const prixClient =
+      modeClient === "jeremie"
+        ? prestationTrouvee.prix150
+        : prestationTrouvee.prix220;
 
     const detailsBase =
       prestationTrouvee.detailsPdf && prestationTrouvee.detailsPdf.length > 0
@@ -3497,19 +3424,19 @@ return (
       {
         id: Date.now(),
         type: prestationTrouvee.typeTravaux || "prestation_tableau",
-        q1: 1,
+        q1: prestationTrouvee.unite === "forfait" ? 1 : 1,
         q2: 0,
         r1: 0,
         r2: 0,
         option: 0,
 
         tarifId: prestationTrouvee.id,
-        prestationNom: getNomPrestation(prestationTrouvee),
+        prestationNom: prestationTrouvee.prestation,
         unite: prestationTrouvee.unite,
         prixUnitaire: prixClient,
         prixUnitaireAuto: prixClient,
         prixManuel: false,
-        heuresUnite: prestationTrouvee.heuresUnite || 0,
+        heuresUnite: prestationTrouvee.heuresUnite,
 
         detailsPdfPersonnalises: detailsBase,
         detailsPdfOuvert: false,
@@ -3525,9 +3452,9 @@ return (
       });
     }, 100);
   }}
-  className="btn-green mt-6 rounded-xl px-4 py-2 text-sm font-semibold"
+  className="self-end rounded-xl bg-amber-600 px-5 py-3 font-semibold text-white"
 >
-  + Ajouter
+  Ajouter
 </button>
   </div>
 
