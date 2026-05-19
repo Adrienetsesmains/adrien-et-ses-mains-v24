@@ -2203,17 +2203,17 @@ const dessinerCadreInfos = (
 ) => {
   const lignesFiltrees = lignes.filter((ligne) => ligne.valeur && ligne.valeur.trim() !== "");
 
-  const paddingHaut = 16;
-  const paddingBas = 8;
+ const paddingHaut = 15;
+const paddingBas = 5;
 
-  let hauteurTexte = 0;
+let hauteurTexte = 0;
 
-  lignesFiltrees.forEach((ligne) => {
-    const texteCoupe = doc.splitTextToSize(ligne.valeur || "-", largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne;
-  });
+lignesFiltrees.forEach((ligne) => {
+  const texteCoupe = doc.splitTextToSize(ligne.valeur || "-", largeurTexte);
+  hauteurTexte += Math.max(1, texteCoupe.length) * interligne;
+});
 
-  const hauteurBloc = Math.max(30, paddingHaut + hauteurTexte + paddingBas);
+const hauteurBloc = paddingHaut + hauteurTexte + paddingBas;
 
   doc.setLineWidth(0.25);
   doc.setDrawColor(120, 120, 120);
@@ -2310,7 +2310,7 @@ doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
 // Tableau placé automatiquement juste sous le plus grand cadre
-y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 16;
+y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 10;
 
 enteteTableau();
 
