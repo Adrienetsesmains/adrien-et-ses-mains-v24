@@ -2270,7 +2270,7 @@ const dessinerCadreInfos = (
   doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2, 2);
 
   doc.setFillColor(52, 63, 79);
-  doc.circle(x + 5, yDepart + 8, 1.9, "F");
+  doc.circle(x + 5, yDepart + 8, 1.4, "F");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11.5);
