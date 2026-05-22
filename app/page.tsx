@@ -2232,12 +2232,13 @@ const yCadres = 76;
 const largeurClient = 85;
 const largeurChantier = 90;
 
-const hauteurEnteteCadre = 15;
-const interligne = 4.9;
+const hauteurEnteteCadre = 17;
+const interligne = 5.6;
 
 type LigneBloc = {
   label: string;
   valeur: string;
+  icone?: string;
 };
 
 const dessinerCadreInfos = (
@@ -2246,7 +2247,6 @@ const dessinerCadreInfos = (
   yDepart: number,
   largeur: number,
   lignes: LigneBloc[],
-  largeurLabel: number,
   largeurTexte: number
 ) => {
   const lignesFiltrees = lignes.filter(
@@ -2254,81 +2254,86 @@ const dessinerCadreInfos = (
   );
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.2);
+  doc.setFontSize(8.4);
 
   let hauteurTexte = 0;
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.5;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 2.2;
   });
 
-  const hauteurBloc = Math.max(45, hauteurEnteteCadre + hauteurTexte + 8);
+  const hauteurBloc = Math.max(48, hauteurEnteteCadre + hauteurTexte + 10);
 
   // Ombre légère
-  doc.setFillColor(235, 235, 235);
-  doc.roundedRect(x + 1.1, yDepart + 1.1, largeur, hauteurBloc, 2.5, 2.5, "F");
+  doc.setFillColor(230, 230, 230);
+  doc.roundedRect(x + 1.2, yDepart + 1.2, largeur, hauteurBloc, 3, 3, "F");
 
-  // Cadre fond blanc + contour doré
+  // Fond blanc + contour doré
   doc.setFillColor(255, 255, 255);
   doc.setDrawColor(190, 145, 55);
   doc.setLineWidth(0.35);
-  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2.5, 2.5, "FD");
+  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 3, 3, "FD");
 
-  // Bandeau haut bleu foncé
+  // Bandeau bleu foncé
   doc.setFillColor(52, 63, 79);
-  doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 2.5, 2.5, "F");
+  doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 3, 3, "F");
 
-  // Liseré doré sous bandeau
+  // Liseré doré
   doc.setDrawColor(190, 145, 55);
-  doc.setLineWidth(0.5);
+  doc.setLineWidth(0.55);
   doc.line(x, yDepart + hauteurEnteteCadre, x + largeur, yDepart + hauteurEnteteCadre);
 
-  // Pastille dorée
+  // Pastille titre
   doc.setFillColor(190, 145, 55);
-  doc.circle(x + 7, yDepart + 7.5, 3.2, "F");
+  doc.circle(x + 7.5, yDepart + 8.5, 4, "F");
 
-  // Titre
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11.2);
+  doc.setFontSize(11.5);
   doc.setTextColor(255, 255, 255);
-  doc.text(titre, x + 14, yDepart + 9.5);
+  doc.text(titre, x + 16, yDepart + 10.5);
 
-  let yTexte = yDepart + hauteurEnteteCadre + 9;
+  let yTexte = yDepart + hauteurEnteteCadre + 10;
 
-  lignesFiltrees.forEach((ligne, index) => {
+  lignesFiltrees.forEach((ligne) => {
+    // Petite pastille ligne
+    doc.setFillColor(52, 63, 79);
+    doc.circle(x + 7.5, yTexte - 2.4, 2.7, "F");
+
+    doc.setTextColor(190, 145, 55);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.text(ligne.icone || "•", x + 7.5, yTexte - 0.6, { align: "center" });
+
+    // Label
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.6);
+    doc.setTextColor(25, 35, 48);
+    doc.text(`${ligne.label} :`, x + 14, yTexte);
+
+    // Valeur rapprochée
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
     const nbLignes = Math.max(1, texteCoupe.length);
 
-    if (index > 0) {
-      doc.setDrawColor(225, 210, 175);
-      doc.setLineWidth(0.2);
-      doc.line(x + 5, yTexte - 4.2, x + largeur - 5, yTexte - 4.2);
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.4);
-    doc.setTextColor(35, 35, 35);
-    doc.text(`${ligne.label} :`, x + 5, yTexte);
-
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.4);
-    doc.setTextColor(45, 45, 45);
-    doc.text(texteCoupe, x + largeurLabel, yTexte);
+    doc.setFontSize(8.6);
+    doc.setTextColor(35, 35, 35);
+    doc.text(texteCoupe, x + 31, yTexte);
 
-    yTexte += nbLignes * interligne + 2.4;
+    yTexte += nbLignes * interligne + 2.2;
   });
 
   return hauteurBloc;
 };
 
 const lignesClient: LigneBloc[] = [
-  { label: "Nom", valeur: client || "" },
-  { label: "Tél.", valeur: telephone || "" },
-  { label: "Email", valeur: email || "" },
+  { label: "Nom", valeur: client || "", icone: "N" },
+  { label: "Tél.", valeur: telephone || "", icone: "T" },
+  { label: "Email", valeur: email || "", icone: "@" },
   {
     label: modeClient === "agence" ? "Agence" : "Adresse",
     valeur: modeClient === "agence" ? adresseAgence || "" : adresse || "",
+    icone: "A",
   },
 ];
 
@@ -2336,20 +2341,21 @@ let lignesChantier: LigneBloc[] = [];
 
 if (modeClient === "jeremie") {
   lignesChantier = [
-    { label: "Client", valeur: clientFinalNom || client || "" },
-    { label: "Tél.", valeur: clientFinalTelephone || telephone || "" },
-    { label: "Adresse", valeur: clientFinalAdresse || adresse || "" },
+    { label: "Client", valeur: clientFinalNom || client || "", icone: "C" },
+    { label: "Tél.", valeur: clientFinalTelephone || telephone || "", icone: "T" },
+    { label: "Adresse", valeur: clientFinalAdresse || adresse || "", icone: "A" },
   ];
 } else if (modeClient === "agence") {
   lignesChantier = [
-    { label: "Réf.", valeur: referenceChantier || "" },
-    { label: "Locataire", valeur: locataire || "" },
-    { label: "Tél. loc.", valeur: telephoneLocataire || "" },
-    { label: "Proprio.", valeur: proprietaire || "" },
-    { label: "Tél. prop.", valeur: telephoneProprietaire || "" },
+    { label: "Réf.", valeur: referenceChantier || "", icone: "R" },
+    { label: "Locataire", valeur: locataire || "", icone: "L" },
+    { label: "Tél. loc.", valeur: telephoneLocataire || "", icone: "T" },
+    { label: "Proprio.", valeur: proprietaire || "", icone: "P" },
+    { label: "Tél. prop.", valeur: telephoneProprietaire || "", icone: "T" },
     {
       label: "Adresse",
       valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+      icone: "A",
     },
   ];
 } else {
@@ -2357,6 +2363,7 @@ if (modeClient === "jeremie") {
     {
       label: "Adresse",
       valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+      icone: "A",
     },
   ];
 }
@@ -2367,8 +2374,7 @@ const hauteurClientAuto = dessinerCadreInfos(
   yCadres,
   largeurClient,
   lignesClient,
-  27,
-  52
+  50
 );
 
 const hauteurChantierAuto = dessinerCadreInfos(
@@ -2377,8 +2383,7 @@ const hauteurChantierAuto = dessinerCadreInfos(
   yCadres,
   largeurChantier,
   lignesChantier,
-  modeClient === "agence" ? 31 : 29,
-  modeClient === "agence" ? 53 : 55
+  modeClient === "agence" ? 52 : 55
 );
 
 doc.setFont("helvetica", "normal");
