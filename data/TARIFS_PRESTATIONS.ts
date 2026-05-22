@@ -797,6 +797,55 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         heuresUnite: 8,
         rentabilite: "🔴 À majorer",
       },
+{
+  nom: "Démolition baignoire existante",
+  unite: "forfait",
+  prixMo220: 180,
+  prixMoJeremie150: 122,
+  heuresUnite: 6,
+  rentabilite: "🟠",
+  detailsPdf: [
+    "Protection de la zone",
+    "Déconnexion des arrivées d’eau",
+    "Dépose de la baignoire",
+    "Évacuation interne",
+    "Nettoyage sommaire"
+  ],
+  typeTravaux: "plomberie"
+},
+
+{
+  nom: "Pose receveur de douche",
+  unite: "forfait",
+  prixMo220: 220,
+  prixMoJeremie150: 150,
+  heuresUnite: 7,
+  rentabilite: "🟠",
+  detailsPdf: [
+    "Préparation du support",
+    "Mise à niveau",
+    "Pose du receveur",
+    "Raccordement évacuation",
+    "Contrôle étanchéité"
+  ],
+  typeTravaux: "plomberie"
+},
+
+{
+  nom: "Pose paroi de douche",
+  unite: "u",
+  prixMo220: 95,
+  prixMoJeremie150: 65,
+  heuresUnite: 3,
+  rentabilite: "🟢",
+  detailsPdf: [
+    "Mise en place de la paroi",
+    "Fixations murales",
+    "Réglages",
+    "Joint silicone"
+  ],
+  typeTravaux: "plomberie"
+},
       {
         nom: "Recherche fuite + réparation simple",
         unite: "forfait",
@@ -1131,6 +1180,59 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
 },
     ],
   },
+
+  {
+  categorie: "Structure / Bois",
+  prestations: [
+    {
+      nom: "Structure mezzanine poutres",
+      unite: "u",
+      prixMo220: 60,
+      prixMoJeremie150: 40.9,
+      heuresUnite: 2,
+      rentabilite: "🟠",
+      detailsPdf: [
+        "Préparation des réservations dans mur",
+        "Découpe et ajustement poutre",
+        "Mise en place et scellement",
+        "Contrôle niveau et alignement"
+      ],
+      typeTravaux: "menuiserie"
+    },
+
+    {
+      nom: "Réalisation garde corps bois",
+      unite: "ml",
+      prixMo220: 85,
+      prixMoJeremie150: 58,
+      heuresUnite: 3,
+      rentabilite: "🟠",
+      detailsPdf: [
+        "Prise de mesures",
+        "Fabrication sur place",
+        "Fixation structure",
+        "Finitions"
+      ],
+      typeTravaux: "menuiserie"
+    },
+
+    {
+      nom: "Fabrication et pose portillon bois",
+      unite: "u",
+      prixMo220: 180,
+      prixMoJeremie150: 122,
+      heuresUnite: 6,
+      rentabilite: "🟢",
+      detailsPdf: [
+        "Fabrication portillon",
+        "Pose des gonds",
+        "Réglages ouverture",
+        "Finitions"
+      ],
+      typeTravaux: "menuiserie"
+    }
+  ]
+},
   {
     categorie: "Toiture",
     prestations: [

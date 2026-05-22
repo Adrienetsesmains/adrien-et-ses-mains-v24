@@ -80,7 +80,7 @@ type LigneTravaux = {
   prixUnitaireAuto?: number;
   prixManuel?: boolean;
   heuresUnite?: number;
-
+heuresUniteManuel?: boolean;
   detailsPdfPersonnalises?: string[];
   detailsPdfOuvert?: boolean;
 
@@ -1173,6 +1173,7 @@ const ajouterLigne = () => {
     prixUnitaire: 0,
     prixUnitaireAuto: 0,
     prixManuel: false,
+    heuresUniteManuel: false,
     heuresUnite: 0,
     detailsPdfPersonnalises: [],
     detailsPdfOuvert: false,
@@ -1539,19 +1540,7 @@ const marquerPayee = (id: number) => {
   );
 };
 
-const envoyerDevisMail = async () => {
-  const pdfBase64 = await genererPDF("devis");
-
-  setStatutDevis("envoye");
-
-  if (idDossierActuel !== null) {
-    setHistorique((ancien) =>
-      ancien.map((d) =>
-        d.id === idDossierActuel ? { ...d, statutDevis: "envoye" } : d
-      )
-    );
-  }
-
+const envoyerDevisMail = () => {
   const sujet = `Devis ${numeroDevis} - Adrien et ses mains`;
 
   const corps = `Bonjour ${client},
@@ -1570,31 +1559,14 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const reponse = await fetch("/api/envoyer-mail", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      to: email,
-      subject: sujet,
-      text: corps,
-      pdfBase64,
-      filename: `${numeroDevis || "devis"}-${client || "client"}.pdf`,
-    }),
-  });
+  const mailto = `mailto:${email}?subject=${encodeURIComponent(
+    sujet
+  )}&body=${encodeURIComponent(corps)}`;
 
-  if (!reponse.ok) {
-    alert("❌ Erreur lors de l’envoi du devis par mail.");
-    return;
-  }
-
-  alert("✅ Devis envoyé par mail avec la pièce jointe.");
+  window.location.href = mailto;
 };
 
-const envoyerFactureMail = async () => {
-  const pdfBase64 = await genererPDF("facture");
-
+const envoyerFactureMail = () => {
   const sujet = `Facture ${numeroFacture} - Adrien et ses mains`;
 
   const corps = `Bonjour ${client},
@@ -1613,26 +1585,11 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const reponse = await fetch("/api/envoyer-mail", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      to: email,
-      subject: sujet,
-      text: corps,
-      pdfBase64,
-      filename: `${numeroFacture || "facture"}-${client || "client"}.pdf`,
-    }),
-  });
+  const mailto = `mailto:${email}?subject=${encodeURIComponent(
+    sujet
+  )}&body=${encodeURIComponent(corps)}`;
 
-  if (!reponse.ok) {
-    alert("❌ Erreur lors de l’envoi de la facture par mail.");
-    return;
-  }
-
-  alert("✅ Facture envoyée par mail avec la pièce jointe.");
+  window.location.href = mailto;
 };
 
 const preparerRelance = async (d: Dossier) => {
@@ -2295,7 +2252,7 @@ const dessinerCadreInfos = (
   );
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
+  doc.setFontSize(8.6);
 
   let hauteurTexte = 0;
 
@@ -2316,7 +2273,7 @@ const dessinerCadreInfos = (
   doc.circle(x + 5, yDepart + 8, 1.9, "F");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.2);
+  doc.setFontSize(11.5);
   doc.setTextColor(35, 35, 35);
   doc.text(titre, x + 12, yDepart + 9);
 
@@ -2327,12 +2284,12 @@ const dessinerCadreInfos = (
     const nbLignes = Math.max(1, texteCoupe.length);
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.2);
+    doc.setFontSize(8.6);
     doc.setTextColor(35, 35, 35);
     doc.text(`${ligne.label} :`, x + 4, yTexte);
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.2);
+    doc.setFontSize(8.6);
     doc.setTextColor(45, 45, 45);
     doc.text(texteCoupe, x + largeurLabel, yTexte);
 
@@ -2409,7 +2366,18 @@ y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 8;
 enteteTableau();
 
 // ================= TABLEAU COMPACT =================
-const lignesDevisPDF = lignesPDF();
+
+let lignesDevisPDF = lignesPDF();
+
+// 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
+if (modeClient === "jeremie" && type === "facture") {
+  lignesDevisPDF = [
+    [
+      "Prestation de service Main d'œuvre uniquement\nForfait main d'œuvre global",
+      calcul.total,
+    ],
+  ];
+}
 
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const ligneSource = lignesTravaux[index];
@@ -3896,12 +3864,21 @@ return (
                   valeur={`${tarifAssocie.rentabilite} ${tarifAssocie.action}`}
                 />
 
-                <Card
-                  titre="Temps estimé"
-                  valeur={`${(
-                    (ligne.q1 || 1) * (tarifAssocie.heuresUnite || 0)
-                  ).toFixed(1)} h`}
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+  <Card
+    titre="Temps estimé"
+    valeur={`${((ligne.q1 || 1) * (ligne.heuresUnite || tarifAssocie.heuresUnite || 0)).toFixed(1)} h`}
+  />
+
+  <input
+    type="number"
+    value={ligne.heuresUnite || tarifAssocie.heuresUnite || 0}
+    onChange={(e) =>
+      modifierLigne(ligne.id, "heuresUnite", Number(e.target.value))
+    }
+    style={{ width: 60 }}
+  />
+</div>
 
                 {tarifAssocie.conditions && (
                   <p className="text-sm text-slate-500">
