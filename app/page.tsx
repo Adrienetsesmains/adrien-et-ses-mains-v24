@@ -2228,7 +2228,7 @@ const xClient = 18;
 const xChantier = 101;
 const yCadres = 76;
 
-const largeurClient = 70;
+const largeurClient = 82;
 const largeurChantier = 91;
 
 const interligne = 4.1;
@@ -2286,12 +2286,12 @@ const dessinerCadreInfos = (
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.6);
     doc.setTextColor(35, 35, 35);
-    doc.text(`${ligne.label} :`, x + 4, yTexte);
+    doc.text(`${ligne.label} :`, x + 3, yTexte);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.6);
     doc.setTextColor(45, 45, 45);
-    doc.text(texteCoupe, x + largeurLabel, yTexte);
+    doc.text(texteCoupe, x + largeurLabel -2, yTexte);
 
     yTexte += nbLignes * interligne;
   });
@@ -2344,8 +2344,8 @@ const hauteurClientAuto = dessinerCadreInfos(
   yCadres,
   largeurClient,
   lignesClient,
-  25,
-  42
+  18, // 🔥 réduit espace label
+  50  // 🔥 agrandit zone texte
 );
 
 const hauteurChantierAuto = dessinerCadreInfos(
