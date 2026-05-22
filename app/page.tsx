@@ -2222,16 +2222,18 @@ doc.line(92, 60, 118, 60);
   doc.setFontSize(11);
   doc.text(`N° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
-// ================= CADRES CLIENT / CHANTIER PREMIUM COMPACTS AUTO =================
 
-const xClient = 18;
-const xChantier = 101;
+  // ================= CADRES CLIENT / CHANTIER PREMIUM PRESTIGE =================
+
+const xClient = 15;
+const xChantier = 105;
 const yCadres = 76;
 
-const largeurClient = 82;
-const largeurChantier = 91;
+const largeurClient = 85;
+const largeurChantier = 90;
 
-const interligne = 4.1;
+const hauteurEnteteCadre = 15;
+const interligne = 4.9;
 
 type LigneBloc = {
   label: string;
@@ -2252,48 +2254,69 @@ const dessinerCadreInfos = (
   );
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.6);
+  doc.setFontSize(8.2);
 
   let hauteurTexte = 0;
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.5;
   });
 
-  const yDebutTexte = yDepart + 18;
-  const margeBas = 4;
-  const hauteurBloc = Math.max(26, 18 + hauteurTexte + margeBas);
+  const hauteurBloc = Math.max(45, hauteurEnteteCadre + hauteurTexte + 8);
 
-  doc.setLineWidth(0.25);
-  doc.setDrawColor(120, 120, 120);
-  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2, 2);
+  // Ombre légère
+  doc.setFillColor(235, 235, 235);
+  doc.roundedRect(x + 1.1, yDepart + 1.1, largeur, hauteurBloc, 2.5, 2.5, "F");
 
+  // Cadre fond blanc + contour doré
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(190, 145, 55);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2.5, 2.5, "FD");
+
+  // Bandeau haut bleu foncé
   doc.setFillColor(52, 63, 79);
-  doc.circle(x + 5, yDepart + 8, 1.4, "F");
+  doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 2.5, 2.5, "F");
 
+  // Liseré doré sous bandeau
+  doc.setDrawColor(190, 145, 55);
+  doc.setLineWidth(0.5);
+  doc.line(x, yDepart + hauteurEnteteCadre, x + largeur, yDepart + hauteurEnteteCadre);
+
+  // Pastille dorée
+  doc.setFillColor(190, 145, 55);
+  doc.circle(x + 7, yDepart + 7.5, 3.2, "F");
+
+  // Titre
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11.5);
-  doc.setTextColor(35, 35, 35);
-  doc.text(titre, x + 12, yDepart + 9);
+  doc.setFontSize(11.2);
+  doc.setTextColor(255, 255, 255);
+  doc.text(titre, x + 14, yDepart + 9.5);
 
-  let yTexte = yDebutTexte;
+  let yTexte = yDepart + hauteurEnteteCadre + 9;
 
-  lignesFiltrees.forEach((ligne) => {
+  lignesFiltrees.forEach((ligne, index) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
     const nbLignes = Math.max(1, texteCoupe.length);
 
+    if (index > 0) {
+      doc.setDrawColor(225, 210, 175);
+      doc.setLineWidth(0.2);
+      doc.line(x + 5, yTexte - 4.2, x + largeur - 5, yTexte - 4.2);
+    }
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.6);
+    doc.setFontSize(8.4);
     doc.setTextColor(35, 35, 35);
-    doc.text(`${ligne.label} :`, x + 3, yTexte);
+    doc.text(`${ligne.label} :`, x + 5, yTexte);
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.6);
+    doc.setFontSize(8.4);
     doc.setTextColor(45, 45, 45);
-    doc.text(texteCoupe, x + largeurLabel -2, yTexte);
+    doc.text(texteCoupe, x + largeurLabel, yTexte);
 
-    yTexte += nbLignes * interligne;
+    yTexte += nbLignes * interligne + 2.4;
   });
 
   return hauteurBloc;
@@ -2344,8 +2367,8 @@ const hauteurClientAuto = dessinerCadreInfos(
   yCadres,
   largeurClient,
   lignesClient,
-  18, // 🔥 réduit espace label
-  50  // 🔥 agrandit zone texte
+  27,
+  52
 );
 
 const hauteurChantierAuto = dessinerCadreInfos(
@@ -2354,14 +2377,14 @@ const hauteurChantierAuto = dessinerCadreInfos(
   yCadres,
   largeurChantier,
   lignesChantier,
-  modeClient === "agence" ? 34 : 32,
-  modeClient === "agence" ? 50 : 52
+  modeClient === "agence" ? 31 : 29,
+  modeClient === "agence" ? 53 : 55
 );
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
-y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 8;
+y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 10;
 
 enteteTableau();
 
