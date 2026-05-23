@@ -2298,7 +2298,7 @@ const dessinerCadreInfos = (
   lignesFiltrees.forEach((ligne) => {
     // Petite pastille ligne
     doc.setFillColor(52, 63, 79);
-    doc.circle(x + 7.5, yTexte - 1.4, 2.7, "F");
+    doc.circle(x + 7.5, yTexte - 1.4, 1.7, "F");
 
     doc.setTextColor(190, 145, 55);
     doc.setFont("helvetica", "bold");
