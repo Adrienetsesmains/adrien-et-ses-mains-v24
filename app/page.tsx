@@ -2279,11 +2279,7 @@ const dessinerCadreInfos = (
   doc.setFillColor(52, 63, 79);
   doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 3, 3, "F");
 
-  // Liseré doré
-  doc.setDrawColor(190, 145, 55);
-  doc.setLineWidth(0.55);
-  doc.line(x, yDepart + hauteurEnteteCadre, x + largeur, yDepart + hauteurEnteteCadre);
-
+ 
   // Pastille titre
   doc.setFillColor(190, 145, 55);
   doc.circle(x + 7.5, yDepart + 6, 2.5, "F");
