@@ -2227,12 +2227,12 @@ doc.line(92, 60, 118, 60);
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = 70;
+const yCadres = 65;
 
 const largeurClient = 85;
 const largeurChantier = 90;
 
-const hauteurEnteteCadre = 15;
+const hauteurEnteteCadre = 12;
 const interligne = 5;
 
 type LigneBloc = {
