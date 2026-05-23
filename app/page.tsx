@@ -2227,7 +2227,7 @@ doc.line(92, 60, 118, 60);
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = 76;
+const yCadres = 70;
 
 const largeurClient = 85;
 const largeurChantier = 90;
