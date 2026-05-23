@@ -2260,7 +2260,8 @@ const dessinerCadreInfos = (
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 2.2;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.8
+  ;
   });
 
   const hauteurBloc = Math.max(48, hauteurEnteteCadre + hauteurTexte + 10);
