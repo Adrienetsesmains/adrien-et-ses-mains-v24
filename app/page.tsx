@@ -2227,7 +2227,7 @@ doc.line(92, 60, 118, 60);
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = 65;
+const yCadres = 70;
 
 const largeurClient = 85;
 const largeurChantier = 90;
@@ -2291,7 +2291,7 @@ const dessinerCadreInfos = (
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11.5);
   doc.setTextColor(255, 255, 255);
-  doc.text(titre, x + 16, yDepart + 10.5);
+  doc.text(titre, x + 16, yDepart + 9.5);
 
   let yTexte = yDepart + hauteurEnteteCadre + 10;
 
