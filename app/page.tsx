@@ -2286,7 +2286,7 @@ const dessinerCadreInfos = (
 
   // Pastille titre
   doc.setFillColor(190, 145, 55);
-  doc.circle(x + 7.5, yDepart + 8.5, 4, "F");
+  doc.circle(x + 7.5, yDepart + 6.5, 4, "F");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11.5);
