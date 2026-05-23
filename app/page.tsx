@@ -2291,7 +2291,7 @@ const dessinerCadreInfos = (
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11.5);
   doc.setTextColor(255, 255, 255);
-  doc.text(titre, x + 16, yDepart + 8.5);
+  doc.text(titre, x + 16, yDepart + 7.5);
 
   let yTexte = yDepart + hauteurEnteteCadre + 10;
 
