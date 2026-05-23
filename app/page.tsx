@@ -2260,7 +2260,7 @@ const dessinerCadreInfos = (
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.8
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1
   ;
   });
 
