@@ -2316,7 +2316,7 @@ const dessinerCadreInfos = (
     doc.setTextColor(35, 35, 35);
     doc.text(texteCoupe, x + 31, yTexte);
 
-    yTexte += nbLignes * interligne + 2.2;
+    yTexte += nbLignes * interligne + 1.8;
   });
 
   return hauteurBloc;
