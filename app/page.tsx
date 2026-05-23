@@ -2232,8 +2232,8 @@ const yCadres = 76;
 const largeurClient = 85;
 const largeurChantier = 90;
 
-const hauteurEnteteCadre = 17;
-const interligne = 5.6;
+const hauteurEnteteCadre = 10;
+const interligne = 5;
 
 type LigneBloc = {
   label: string;
