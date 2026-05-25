@@ -2314,7 +2314,7 @@ const dessinerCadreInfos = (
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.6);
     doc.setTextColor(35, 35, 35);
-    doc.text(texteCoupe, x + 27, yTexte);
+    doc.text(texteCoupe, x + 29, yTexte);
 
     yTexte += nbLignes * interligne + 1.8;
   });
