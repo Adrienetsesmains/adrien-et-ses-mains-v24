@@ -2260,8 +2260,7 @@ const dessinerCadreInfos = (
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1
-  ;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1;
   });
 
   const hauteurBloc = Math.max(48, hauteurEnteteCadre + hauteurTexte + 10);
@@ -2315,7 +2314,7 @@ const dessinerCadreInfos = (
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.6);
     doc.setTextColor(35, 35, 35);
-    doc.text(texteCoupe, x + 31, yTexte);
+    doc.text(texteCoupe, x + 27, yTexte);
 
     yTexte += nbLignes * interligne + 1.8;
   });
