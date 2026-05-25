@@ -1039,23 +1039,39 @@ const fraisLogistique =
   const estimationHaute = Math.round(total * margeHaute);
   const prixConseille = Math.ceil(estimationHaute / 10) * 10;
 
-  return {
-    resteReel,
-    totalTravaux,
-    kmAR,
-    totalHeuresChantier,
-    nombreJoursChantier,
-    fraisLogistique,
-    reventeFournitures,
-    margeFournitures,
-    total,
-    acompte,
-    reste,
-    rentabilite,
-    estimationBasse,
-    estimationHaute,
-    prixConseille,
-  };
+  const montantEligibleSap = factureSap
+  ? totalTravaux
+  : 0;
+
+const montantNonEligibleSap = factureSap
+  ? reventeFournitures
+  : 0;
+
+const creditImpotEstime = factureSap
+  ? Math.round(montantEligibleSap * 0.5)
+  : 0;
+
+return {
+  resteReel,
+  totalTravaux,
+  kmAR,
+  totalHeuresChantier,
+  nombreJoursChantier,
+  fraisLogistique,
+  reventeFournitures,
+  margeFournitures,
+  total,
+  acompte,
+  reste,
+  rentabilite,
+  estimationBasse,
+  estimationHaute,
+  prixConseille,
+
+  montantEligibleSap,
+  montantNonEligibleSap,
+  creditImpotEstime,
+};
 }, [
   lignesTravaux,
   modeClient,
@@ -1067,6 +1083,7 @@ const fraisLogistique =
 pourcentageAcompte,
 fraisDeplacementManuelActif,
 fraisDeplacementManuel,
+factureSap,
 ]);
 const joursCalendrier = useMemo(() => {
   
@@ -2505,37 +2522,97 @@ y += 38;
 
 
 
-// ================= MENTION SAP FACTURE =================
-if (type === "facture" && factureSap) {
-  if (y + 34 > 292) {
+// ================= MENTION SAP DEVIS / FACTURE =================
+if (factureSap) {
+  if (y + 42 > 265) {
     doc.addPage();
     page += 1;
     y = 35;
   }
 
+  const montantEligibleSapPDF = Math.round(calcul.montantEligibleSap || 0);
+  const montantNonEligibleSapPDF = Math.round(calcul.montantNonEligibleSap || 0);
+  const creditImpotEstimePDF = Math.round(calcul.creditImpotEstime || 0);
+
   doc.setFillColor(236, 253, 245);
   doc.setDrawColor(16, 185, 129);
-  doc.roundedRect(15, y, 180, 28, 2, 2, "FD");
+  doc.setLineWidth(0.35);
+  doc.roundedRect(15, y, 180, 36, 2, 2, "FD");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(6, 95, 70);
-  doc.text("MENTION SERVICES A LA PERSONNE", 20, y + 8);
+
+  const titreSap =
+    type === "facture"
+      ? "SERVICES A LA PERSONNE"
+      : "INFORMATION SERVICES A LA PERSONNE";
+
+  doc.text(titreSap, 20, y + 8);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.4);
+  doc.setFontSize(7.2);
   doc.setTextColor(30, 64, 54);
 
-  const texteSap = numeroSap
-    ? `Prestation relevant des services à la personne - Numéro de déclaration SAP : ${numeroSap}. Sous réserve des conditions prévues par l'article 199 sexdecies du CGI, cette prestation peut ouvrir droit à un crédit d'impôt de 50 % des sommes effectivement supportées par le client.`
-    : `Prestation relevant des services à la personne. Sous réserve des conditions prévues par l'article 199 sexdecies du CGI, cette prestation peut ouvrir droit à un crédit d'impôt de 50 % des sommes effectivement supportées par le client.`;
+  const texteSap = `Organisme de services à la personne déclaré sous le numéro : ${
+    numeroSap && numeroSap.trim() !== "" ? numeroSap : "XXXXXXXXXXXX"
+  }. 
+
+Montant de main d’œuvre éligible au crédit d’impôt : ${montantEligibleSapPDF} €. 
+Fournitures et éléments non éligibles : ${montantNonEligibleSapPDF} €. 
+Crédit d’impôt estimatif pour le client : ${creditImpotEstimePDF} €, selon les conditions de l’article 199 sexdecies du CGI.`;
 
   const lignesSap = doc.splitTextToSize(texteSap, 168);
   doc.text(lignesSap, 20, y + 15);
 
-  y += 34;
+  y += 42;
 }
 
+// ================= BLOC SAP OFFICIEL =================
+if (factureSap) {
+  if (y + 50 > 265) {
+    doc.addPage();
+    page += 1;
+    y = 35;
+  }
+
+  const montantEligible = Math.round(calcul.montantEligibleSap || 0);
+  const montantNonEligible = Math.round(calcul.montantNonEligibleSap || 0);
+  const creditImpot = Math.round(calcul.creditImpotEstime || 0);
+
+  // Cadre vert SAP
+  doc.setFillColor(236, 253, 245);
+  doc.setDrawColor(16, 185, 129);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(15, y, 180, 40, 3, 3, "FD");
+
+  // Titre
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(6, 95, 70);
+  doc.text("SERVICES A LA PERSONNE", 20, y + 8);
+
+  // Texte
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(30, 41, 59);
+
+  const texte = `Organisme de services à la personne déclaré sous le numéro : ${
+    numeroSap && numeroSap.trim() !== "" ? numeroSap : "XXXXXXXXXXXX"
+  }.
+
+Montant de main d’œuvre éligible au crédit d’impôt : ${montantEligible} €.
+Fournitures et éléments non éligibles : ${montantNonEligible} €.
+
+Crédit d’impôt estimatif pour le client : ${creditImpot} €.
+
+Prestations de services à la personne ouvrant droit au crédit d’impôt selon l’article 199 sexdecies du Code Général des Impôts.`;
+
+  const lignes = doc.splitTextToSize(texte, 170);
+  doc.text(lignes, 20, y + 16);
+
+  y += 45;
+}
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
 if (y + 82 > 292) {
@@ -4150,15 +4227,44 @@ return (
   ]}
 />
 
-    <div className="grid gap-2 md:grid-cols-3">
-      <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
-      <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
-      <MiniResult
-        titre="Reste"
-        valeur={`${Math.max(0, calcul.total - montantEncaisse)} €`}
-        couleur="text-blue-700"
-      />
+ <div className="grid gap-2 md:grid-cols-3">
+  <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
+  <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
+  <MiniResult
+    titre="Reste"
+    valeur={`${Math.max(0, calcul.total - montantEncaisse)} €`}
+    couleur="text-blue-700"
+  />
+</div>
+
+{factureSap && (
+  <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+    <div className="font-semibold">Mode SAP activé</div>
+
+    <div className="mt-2 space-y-1">
+      <p>
+        Montant éligible au crédit d’impôt :{" "}
+        <strong>{calcul.montantEligibleSap} €</strong>
+      </p>
+
+      <p>
+        Fournitures non éligibles :{" "}
+        <strong>{calcul.montantNonEligibleSap} €</strong>
+      </p>
+
+      <p>
+        Crédit d’impôt estimatif client :{" "}
+        <strong>{calcul.creditImpotEstime} €</strong>
+      </p>
     </div>
+
+    {!numeroSap && (
+      <p className="mt-2 text-xs text-amber-700">
+        Démarche SAP en cours — numéro non renseigné
+      </p>
+    )}
+  </div>
+)}
 
     <div className="flex flex-wrap gap-2">
       <button
