@@ -1619,22 +1619,9 @@ Ce devis reste valable 30 jours.
 
 Je reste disponible pour toute question ou ajustement si nécessaire.
 
-Belle journée
+Belle journée,
 
-Merci pour la confiance accordée
-
-Mr Tournier Adrien 
-__________________________
-   
-    Adrien et ses mains
-__________________________
-
-
-Une Personne de Confiance pour votre maison
-
-
-06 71 17 11 76
-adrienetsesmains@gmail.com`;
+Merci pour la confiance accordée`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent(
     sujet
@@ -1655,21 +1642,9 @@ Le reste à payer est de ${Math.max(0, calcul.total - montantEncaisse)} €.
 
 Je reste disponible si besoin.
 
-Belle journée
+Belle journée,
 
-Merci pour la confiance accordée
-
-Mr Tournier Adrien 
-__________________________
-   
-    Adrien et ses mains
-__________________________
-
-Une Personne de Confiance pour votre maison
-
-
-06 71 17 11 76
-adrienetsesmains@gmail.com`;
+Merci pour la confiance accordée`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent(
     sujet
@@ -1677,6 +1652,7 @@ adrienetsesmains@gmail.com`;
 
   window.location.href = mailto;
 };
+
 
 const preparerRelance = async (d: Dossier) => {
   const pdfBase64 = await genererPDF("facture");
@@ -1693,13 +1669,9 @@ Sauf erreur de ma part, pouvez-vous me confirmer la date de règlement prévue ?
 
 Je reste bien entendu disponible si besoin.
 
-Belle journée
+Belle journée,
 
-Merci pour la confiance accordée
-
-Adrien et ses mains
-06 71 17 11 76
-adrienetsesmains@gmail.com`;
+Merci pour la confiance accordée`;
 
   const reponse = await fetch("/api/envoyer-mail", {
     method: "POST",
