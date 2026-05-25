@@ -1623,7 +1623,16 @@ Belle journée
 
 Merci pour la confiance accordée
 
-Adrien et ses mains
+Mr Tournier Adrien 
+__________________________
+   
+    Adrien et ses mains
+__________________________
+
+
+Une Personne de Confiance pour votre maison
+
+
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
@@ -1650,7 +1659,15 @@ Belle journée
 
 Merci pour la confiance accordée
 
-Adrien et ses mains
+Mr Tournier Adrien 
+__________________________
+   
+    Adrien et ses mains
+__________________________
+
+Une Personne de Confiance pour votre maison
+
+
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
