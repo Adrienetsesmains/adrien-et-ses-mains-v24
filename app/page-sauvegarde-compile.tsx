@@ -1591,8 +1591,25 @@ const marquerPayee = (id: number) => {
   );
 };
 
+const construireObjetMail = (type: "devis" | "facture") => {
+  const numero = type === "facture" ? numeroFacture : numeroDevis;
+  const libelle = type === "facture" ? "Facture" : "Devis";
+
+const nomPrincipal =
+  modeClient === "normal"
+    ? client || "Client"
+    : complementAdresse || adresse || clientFinalNom || client || "Chantier";
+
+  const referenceAgence =
+    modeClient === "agence" && referenceChantier.trim()
+      ? ` - Réf. ${referenceChantier.trim()}`
+      : "";
+
+  return `${libelle} ${numero} - ${nomPrincipal}${referenceAgence}`;
+};
+
 const envoyerDevisMail = () => {
-  const sujet = `Devis ${numeroDevis} - Adrien et ses mains`;
+  const sujet = construireObjetMail("devis");
 
   const corps = `Bonjour ${client},
 
@@ -1602,13 +1619,9 @@ Ce devis reste valable 30 jours.
 
 Je reste disponible pour toute question ou ajustement si nécessaire.
 
-Belle journée
+Belle journée,
 
-Merci pour la confiance accordée
-
-Adrien et ses mains
-06 71 17 11 76
-adrienetsesmains@gmail.com`;
+Merci pour la confiance accordée`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent(
     sujet
@@ -1617,8 +1630,9 @@ adrienetsesmains@gmail.com`;
   window.location.href = mailto;
 };
 
+
 const envoyerFactureMail = () => {
-  const sujet = `Facture ${numeroFacture} - Adrien et ses mains`;
+  const sujet = construireObjetMail("facture");
 
   const corps = `Bonjour ${client},
 
@@ -1628,13 +1642,9 @@ Le reste à payer est de ${Math.max(0, calcul.total - montantEncaisse)} €.
 
 Je reste disponible si besoin.
 
-Belle journée
+Belle journée,
 
-Merci pour la confiance accordée
-
-Adrien et ses mains
-06 71 17 11 76
-adrienetsesmains@gmail.com`;
+Merci pour la confiance accordée`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent(
     sujet
@@ -1642,6 +1652,7 @@ adrienetsesmains@gmail.com`;
 
   window.location.href = mailto;
 };
+
 
 const preparerRelance = async (d: Dossier) => {
   const pdfBase64 = await genererPDF("facture");
@@ -1658,13 +1669,9 @@ Sauf erreur de ma part, pouvez-vous me confirmer la date de règlement prévue ?
 
 Je reste bien entendu disponible si besoin.
 
-Belle journée
+Belle journée,
 
-Merci pour la confiance accordée
-
-Adrien et ses mains
-06 71 17 11 76
-adrienetsesmains@gmail.com`;
+Merci pour la confiance accordée`;
 
   const reponse = await fetch("/api/envoyer-mail", {
     method: "POST",
@@ -2554,57 +2561,9 @@ if (type === "facture") {
 
 y += 38;
 
-
-
-// ================= MENTION SAP DEVIS / FACTURE =================
+// ================= BLOC SAP UNIQUE PRO =================
 if (factureSap) {
-  if (y + 42 > 265) {
-    doc.addPage();
-    page += 1;
-    y = 35;
-  }
-
-  const montantEligibleSapPDF = Math.round(calcul.montantEligibleSap || 0);
-  const montantNonEligibleSapPDF = Math.round(calcul.montantNonEligibleSap || 0);
-  const creditImpotEstimePDF = Math.round(calcul.creditImpotEstime || 0);
-
-  doc.setFillColor(236, 253, 245);
-  doc.setDrawColor(16, 185, 129);
-  doc.setLineWidth(0.35);
-  doc.roundedRect(15, y, 180, 36, 2, 2, "FD");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(6, 95, 70);
-
-  const titreSap =
-    type === "facture"
-      ? "SERVICES A LA PERSONNE"
-      : "INFORMATION SERVICES A LA PERSONNE";
-
-  doc.text(titreSap, 20, y + 8);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
-  doc.setTextColor(30, 64, 54);
-
-  const texteSap = `Organisme de services à la personne déclaré sous le numéro : ${
-    numeroSap && numeroSap.trim() !== "" ? numeroSap : "XXXXXXXXXXXX"
-  }. 
-
-Montant de main d’œuvre éligible au crédit d’impôt : ${montantEligibleSapPDF} €. 
-Fournitures et éléments non éligibles : ${montantNonEligibleSapPDF} €. 
-Crédit d’impôt estimatif pour le client : ${creditImpotEstimePDF} €, selon les conditions de l’article 199 sexdecies du CGI.`;
-
-  const lignesSap = doc.splitTextToSize(texteSap, 168);
-  doc.text(lignesSap, 20, y + 15);
-
-  y += 42;
-}
-
-// ================= BLOC SAP OFFICIEL =================
-if (factureSap) {
-  if (y + 50 > 265) {
+  if (y + 45 > 275) {
     doc.addPage();
     page += 1;
     y = 35;
@@ -2614,7 +2573,7 @@ if (factureSap) {
   const montantNonEligible = Math.round(calcul.montantNonEligibleSap || 0);
   const creditImpot = Math.round(calcul.creditImpotEstime || 0);
 
-  // Cadre vert SAP
+  // Cadre vert clair
   doc.setFillColor(236, 253, 245);
   doc.setDrawColor(16, 185, 129);
   doc.setLineWidth(0.4);
@@ -2624,28 +2583,38 @@ if (factureSap) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(6, 95, 70);
-  doc.text("SERVICES A LA PERSONNE", 20, y + 8);
+  doc.text("INFORMATIONS FISCALES – SERVICES A LA PERSONNE", 20, y + 8);
 
-  // Texte
+  // Contenu
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(30, 30, 30);
+
+  let cy = y + 15;
+
+  doc.text(`Organisme déclaré sous le numéro : ${numeroSap || "XXXXXXX"}`, 20, cy);
+  cy += 6;
+
+  doc.text(`Montant total éligible : ${montantEligible} €`, 20, cy);
+  cy += 5;
+
+  if (montantNonEligible > 0) {
+    doc.text(`Fournitures non éligibles : ${montantNonEligible} €`, 20, cy);
+    cy += 5;
+  }
+
+  doc.text(`Crédit d’impôt estimé : ${creditImpot} €`, 20, cy);
+  cy += 6;
+
   doc.setFontSize(8);
-  doc.setTextColor(30, 41, 59);
+  doc.setTextColor(80, 80, 80);
+  doc.text(
+    "Prestations éligibles au crédit d’impôt selon l’article 199 sexdecies du CGI.",
+    20,
+    cy
+  );
 
-  const texte = `Organisme de services à la personne déclaré sous le numéro : ${
-    numeroSap && numeroSap.trim() !== "" ? numeroSap : "XXXXXXXXXXXX"
-  }.
-
-Montant de main d’œuvre éligible au crédit d’impôt : ${montantEligible} €.
-Fournitures et éléments non éligibles : ${montantNonEligible} €.
-
-Crédit d’impôt estimatif pour le client : ${creditImpot} €.
-
-Prestations de services à la personne ouvrant droit au crédit d’impôt selon l’article 199 sexdecies du Code Général des Impôts.`;
-
-  const lignes = doc.splitTextToSize(texte, 170);
-  doc.text(lignes, 20, y + 16);
-
-  y += 45;
+  y += 50;
 }
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================

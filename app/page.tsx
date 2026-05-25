@@ -96,60 +96,84 @@ type Depense = {
   modePaiement: string;
 };
 
+type TypeEvenement = "devis" | "rdv" | "chantier" | "rappel";
+
 type Dossier = {
-  
-  montantEncaisse?: number;
-pourcentageAcompte?: number;
-  factureSap?: boolean;
-numeroSap?: string;
-
-
-  kmAller?: number;
-achatFournitures?: number;
-coefficientFournitures?: number;
-fournituresClient?: boolean;
-detailsFournitures?: string;
-reventeFournitures?: number;
-margeFournitures?: number;
   id: number;
+
+  // ================= TYPE DE DOSSIER / EVENEMENT =================
+  typeEvenement?: TypeEvenement;
+
+  // ================= CLIENT =================
   client: string;
   telephone: string;
   email: string;
   adresse: string;
   adresseAgence: string;
+  complementAdresse: string;
   notes: string;
   modeClient: string;
+
   clientFinalNom?: string;
-clientFinalTelephone?: string;
-clientFinalAdresse?: string;
+  clientFinalTelephone?: string;
+  clientFinalAdresse?: string;
+
+  locataire: string;
+  telephoneLocataire: string;
+  proprietaire: string;
+  telephoneProprietaire: string;
+  agence: string;
+  referenceChantier: string;
+
+  // ================= DEVIS / FACTURE =================
   lignesTravaux: LigneTravaux[];
   numeroDevis: string;
   numeroFacture: string;
   total: number;
   acompte: number;
   reste: number;
+  montantEncaisse?: number;
+  pourcentageAcompte?: number;
+  facturePayee: boolean;
+
   statutDevis: string;
   statutChantier: string;
-  facturePayee: boolean;
-  priorite?: string;
+
+  factureSap?: boolean;
+  numeroSap?: string;
+
+  // ================= DATES =================
   date: string;
   dateChantier?: string;
   heureChantier?: string;
-  dateRdv?: string;
-heureRdv?: string;
-motifRdv?: string;
-typeRdv?: string;
-  datePaiement?: string;
-  locataire: string;
- telephoneLocataire: string;
 
- proprietaire: string;
- telephoneProprietaire: string;
- agence: string;
- referenceChantier: string;
- complementAdresse: string;
- 
- 
+  // Planning chantier multi-jours libres :
+  // exemple : lundi mardi Eiffes, mercredi Blanc, jeudi vendredi Eiffes
+  planningChantier?: string[];
+
+  dateRdv?: string;
+  heureRdv?: string;
+  motifRdv?: string;
+  typeRdv?: string;
+  observationRdv?: string;
+
+  datePaiement?: string;
+
+  // ================= RAPPELS =================
+  dateRappel?: string;
+  heureRappel?: string;
+  texteRappel?: string;
+
+  // ================= FOURNITURES / DEPLACEMENT =================
+  kmAller?: number;
+  achatFournitures?: number;
+  coefficientFournitures?: number;
+  fournituresClient?: boolean;
+  detailsFournitures?: string;
+  reventeFournitures?: number;
+  margeFournitures?: number;
+
+  priorite?: string;
 };
 
 const prestations = TARIFS_PRESTATIONS;
@@ -1119,14 +1143,23 @@ fraisDeplacementManuelActif,
 fraisDeplacementManuel,
 factureSap,
 ]);
+
 const joursCalendrier = useMemo(() => {
-  
   const premierJour = new Date(anneeSelectionnee, moisSelectionne, 1);
   const dernierJour = new Date(anneeSelectionnee, moisSelectionne + 1, 0);
 
-  
   const decalage = (premierJour.getDay() + 6) % 7;
   const totalCases = Math.ceil((decalage + dernierJour.getDate()) / 7) * 7;
+
+  const memeDate = (dateA: Date | null, dateB: Date) => {
+    if (!dateA) return false;
+
+    return (
+      dateA.getDate() === dateB.getDate() &&
+      dateA.getMonth() === dateB.getMonth() &&
+      dateA.getFullYear() === dateB.getFullYear()
+    );
+  };
 
   return Array.from({ length: totalCases }, (_, index) => {
     const numeroJour = index - decalage + 1;
@@ -1138,27 +1171,28 @@ const joursCalendrier = useMemo(() => {
     const dateCase = new Date(anneeSelectionnee, moisSelectionne, numeroJour);
 
     const dossiersJour = historique.filter((d) => {
+      const dateRdvObj = parseDateFr(d.dateRdv || "");
       const dateChantierObj = parseDateFr(d.dateChantier || "");
       const datePaiementObj = parseDateFr(d.datePaiement || "");
-const dateRdvObj = parseDateFr(d.dateRdv || "");
-const memeJourRdv =
-  dateRdvObj &&
-  dateRdvObj.getDate() === dateCase.getDate() &&
-  dateRdvObj.getMonth() === dateCase.getMonth() &&
-  dateRdvObj.getFullYear() === dateCase.getFullYear();
-      const memeJourChantier =
-        dateChantierObj &&
-        dateChantierObj.getDate() === dateCase.getDate() &&
-        dateChantierObj.getMonth() === dateCase.getMonth() &&
-        dateChantierObj.getFullYear() === dateCase.getFullYear();
+      const dateRappelObj = parseDateFr(d.dateRappel || "");
 
-      const memeJourPaiement =
-        datePaiementObj &&
-        datePaiementObj.getDate() === dateCase.getDate() &&
-        datePaiementObj.getMonth() === dateCase.getMonth() &&
-        datePaiementObj.getFullYear() === dateCase.getFullYear();
+      const memeJourRdv = memeDate(dateRdvObj, dateCase);
+      const memeJourChantier = memeDate(dateChantierObj, dateCase);
+      const memeJourPaiement = memeDate(datePaiementObj, dateCase);
+      const memeJourRappel = memeDate(dateRappelObj, dateCase);
 
-      return memeJourRdv || memeJourChantier || memeJourPaiement;
+      const memeJourPlanningChantier =
+        d.planningChantier?.some((datePlanning) =>
+          memeDate(parseDateFr(datePlanning), dateCase)
+        ) || false;
+
+      return (
+        memeJourRdv ||
+        memeJourChantier ||
+        memeJourPaiement ||
+        memeJourRappel ||
+        memeJourPlanningChantier
+      );
     });
 
     return {
@@ -1342,24 +1376,34 @@ setNumeroSap("");
 
 const creerRDVDepuisCalendrier = (date: Date) => {
   const dateFormatee = date.toLocaleDateString("fr-FR");
-setFicheOuverte(true);
+
+  setFicheOuverte(true);
   setIdDossierActuel(null);
 
-  setClient("RDV client à compléter");
+  // ================= RDV CLIENT =================
+  setClient("");
   setTelephone("");
   setEmail("");
   setAdresse("");
   setAdresseAgence("");
   setComplementAdresse("");
-
-  setNotes("RDV créé depuis le calendrier — à compléter");
+  setNotes("Observation RDV : ");
 
   setModeClient("normal");
 
+  setLocataire("");
+  setTelephoneLocataire("");
+  setProprietaire("");
+  setTelephoneProprietaire("");
+  setAgence("");
+  setReferenceChantier("");
+
+  // ================= IMPORTANT : PAS DE DEVIS =================
   setNumeroDevis("");
   setNumeroFacture("");
-
   setLignesTravaux([]);
+  setMontantEncaisse(0);
+  setPourcentageAcompte(0);
 
   setKmAller(0);
   setAchatFournitures(0);
@@ -1367,11 +1411,13 @@ setFicheOuverte(true);
   setCoefficientFournitures(1.22);
   setDetailsFournitures("");
 
-  setMontantEncaisse(0);
-  setPourcentageAcompte(30);
+  setFactureSap(false);
+  setNumeroSap("");
 
-  setStatutDevis("estimation_rapide");
+  // Le RDV est un événement, pas un devis
+  setStatutDevis("rdv");
   setStatutChantier("rdv_client");
+  setFacturePayee(false);
 
   setDateRdv(dateFormatee);
   setHeureRdv("");
@@ -1382,102 +1428,146 @@ setFicheOuverte(true);
   setHeureChantier("");
   setDatePaiement("");
 
-  setTimeout(() => {
-  inputClientRef.current?.scrollIntoView({
-    behavior: "smooth",
-    block: "center",
-  });
+  setPriorite("normale");
 
-  inputClientRef.current?.focus();
-}, 150);
-  };
+  setTimeout(() => {
+    inputClientRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    inputClientRef.current?.focus();
+  }, 150);
+};
 
 const enregistrer = () => {
-  const nouveau = idDossierActuel === null;
-
   const numeroDevisFinal = numeroDevis;
-const numeroFactureFinal = numeroFacture;
-
+  const numeroFactureFinal = numeroFacture;
   const idFinal = idDossierActuel ?? Date.now();
+
+  const estRdv =
+    statutDevis === "rdv" ||
+    statutChantier === "rdv_client";
+
+  const estRappel =
+    statutDevis === "rappel" ||
+    statutChantier === "rappel";
+
+  const estEvenementSimple = estRdv || estRappel;
+
+  const typeEvenementFinal: TypeEvenement = estRdv
+    ? "rdv"
+    : estRappel
+    ? "rappel"
+    : "devis";
 
   const item: Dossier = {
     id: idFinal,
-    factureSap,
-numeroSap,
-    montantEncaisse,
-    pourcentageAcompte,
-    kmAller,
-achatFournitures,
-coefficientFournitures,
-fournituresClient,
-detailsFournitures,
-reventeFournitures: calcul.reventeFournitures,
-margeFournitures: calcul.margeFournitures,
-    dateChantier,
-    heureChantier,
-    datePaiement,
+
+    typeEvenement: typeEvenementFinal,
+
+    factureSap: estEvenementSimple ? false : factureSap,
+    numeroSap: estEvenementSimple ? "" : numeroSap,
+
+    montantEncaisse: estEvenementSimple ? 0 : montantEncaisse,
+    pourcentageAcompte: estEvenementSimple ? 0 : pourcentageAcompte,
+
+    kmAller: estEvenementSimple ? 0 : kmAller,
+    achatFournitures: estEvenementSimple ? 0 : achatFournitures,
+    coefficientFournitures,
+    fournituresClient,
+    detailsFournitures: estEvenementSimple ? "" : detailsFournitures,
+    reventeFournitures: estEvenementSimple ? 0 : calcul.reventeFournitures,
+    margeFournitures: estEvenementSimple ? 0 : calcul.margeFournitures,
+
+    dateChantier: estEvenementSimple ? "" : dateChantier,
+    heureChantier: estEvenementSimple ? "" : heureChantier,
+
+    planningChantier: [],
+
+    datePaiement: estEvenementSimple ? "" : datePaiement,
+
     dateRdv,
-heureRdv,
-motifRdv,
-typeRdv,
+    heureRdv,
+    motifRdv,
+    typeRdv,
+    observationRdv: notes,
+
+    dateRappel: estRappel ? dateRdv : "",
+    heureRappel: estRappel ? heureRdv : "",
+    texteRappel: estRappel ? notes : "",
+
     priorite,
+
     client,
     telephone,
     email,
     adresse,
     adresseAgence,
+    complementAdresse,
     notes,
     modeClient,
+
     clientFinalNom,
-clientFinalTelephone,
-clientFinalAdresse,
-    lignesTravaux,
-    numeroDevis: numeroDevisFinal,
-    numeroFacture: numeroFactureFinal,
-    total: calcul.total,
-    acompte: calcul.acompte,
-    reste: Math.max(0, calcul.total - montantEncaisse),
-    statutDevis,
-    statutChantier,
-    facturePayee,
+    clientFinalTelephone,
+    clientFinalAdresse,
+
+    lignesTravaux: estEvenementSimple ? [] : lignesTravaux,
+
+    numeroDevis: estEvenementSimple ? "" : numeroDevisFinal,
+    numeroFacture: estEvenementSimple ? "" : numeroFactureFinal,
+
+    total: estEvenementSimple ? 0 : calcul.total,
+    acompte: estEvenementSimple ? 0 : calcul.acompte,
+    reste: estEvenementSimple ? 0 : Math.max(0, calcul.total - montantEncaisse),
+
+    statutDevis: estRdv ? "rdv" : estRappel ? "rappel" : statutDevis,
+    statutChantier: estRdv ? "rdv_client" : estRappel ? "rappel" : statutChantier,
+
+    facturePayee: estEvenementSimple ? false : facturePayee,
+
     date: new Date().toLocaleDateString("fr-FR"),
+
     locataire,
     telephoneLocataire,
     proprietaire,
     telephoneProprietaire,
     agence,
     referenceChantier,
-    complementAdresse,
-  };
-if (client.trim()) {
-  const ficheClient: ClientEnregistre = {
-    nom: client.trim(),
-    telephone,
-    email,
-    adresse,
-    adresseAgence,
-    complementAdresse,
-    notes,
-    modeClient,
-    agence,
   };
 
-  setClientsEnregistres((anciens) => {
-    const existe = anciens.some(
-      (c) => c.nom.toLowerCase() === ficheClient.nom.toLowerCase()
-    );
+  // ================= MEMOIRE CLIENT =================
+  // Même un RDV enregistre la fiche client pour pouvoir faire le devis plus tard.
+  if (client.trim()) {
+    const ficheClient: ClientEnregistre = {
+      nom: client.trim(),
+      telephone,
+      email,
+      adresse,
+      adresseAgence,
+      complementAdresse,
+      notes,
+      modeClient,
+      agence,
+    };
 
-    if (existe) {
-      return anciens.map((c) =>
-        c.nom.toLowerCase() === ficheClient.nom.toLowerCase()
-          ? ficheClient
-          : c
+    setClientsEnregistres((anciens) => {
+      const existe = anciens.some(
+        (c) => c.nom.toLowerCase() === ficheClient.nom.toLowerCase()
       );
-    }
 
-    return [ficheClient, ...anciens];
-  });
-}
+      if (existe) {
+        return anciens.map((c) =>
+          c.nom.toLowerCase() === ficheClient.nom.toLowerCase()
+            ? ficheClient
+            : c
+        );
+      }
+
+      return [ficheClient, ...anciens];
+    });
+  }
+
   setHistorique((ancien) => {
     const existeDeja = ancien.some((d) => d.id === idFinal);
 
@@ -1488,10 +1578,9 @@ if (client.trim()) {
     return [item, ...ancien];
   });
 
-  
   setIdDossierActuel(idFinal);
 
-  alert("Dossier enregistré");
+  alert(estRdv ? "RDV enregistré" : estRappel ? "Rappel enregistré" : "Dossier enregistré");
 };
 
 const rechargerDossier = (d: Dossier) => {
@@ -1548,6 +1637,10 @@ setDetailsFournitures(d.detailsFournitures || "");
 setHeureRdv(d.heureRdv || "");
 setMotifRdv(d.motifRdv || "");
 setTypeRdv(d.typeRdv || "visite");
+if (d.typeEvenement === "rdv") {
+  setStatutDevis("rdv");
+  setStatutChantier("rdv_client");
+}
   setPriorite(d.priorite || "normale");
 
   setLocataire(d.locataire || "");
@@ -1559,6 +1652,186 @@ setTypeRdv(d.typeRdv || "visite");
   setComplementAdresse(d.complementAdresse || "");
 
   actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+const transformerRdvEnDevis = (d: Dossier) => {
+  rechargerDossier(d);
+
+  setStatutDevis("en_cours");
+  setStatutChantier("a_planifier");
+  setNumeroDevis("");
+  setNumeroFacture("");
+  setLignesTravaux([]);
+
+  setDateRdv(d.dateRdv || "");
+  setHeureRdv(d.heureRdv || "");
+  setMotifRdv(d.motifRdv || "");
+  setTypeRdv(d.typeRdv || "visite");
+
+  setTimeout(() => {
+    lignesTravauxRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 150);
+};
+
+const deplacerEvenementCalendrier = (
+  dossier: Dossier,
+  type: "rdv" | "chantier" | "paiement" | "rappel"
+) => {
+  const nouvelleDate = window.prompt(
+    "Nouvelle date au format JJ/MM/AAAA :"
+  );
+
+  if (!nouvelleDate) return;
+
+  setHistorique((ancien) =>
+    ancien.map((d) => {
+      if (d.id !== dossier.id) return d;
+
+      if (type === "rdv") {
+        return { ...d, dateRdv: nouvelleDate };
+      }
+
+      if (type === "chantier") {
+        return { ...d, dateChantier: nouvelleDate };
+      }
+
+      if (type === "paiement") {
+        return { ...d, datePaiement: nouvelleDate };
+      }
+
+      if (type === "rappel") {
+        return { ...d, dateRappel: nouvelleDate };
+      }
+
+      return d;
+    })
+  );
+};
+
+const ajouterJourChantier = (dossier: Dossier) => {
+  const nouvelleDate = window.prompt(
+    "Date à ajouter au planning chantier au format JJ/MM/AAAA :"
+  );
+
+  if (!nouvelleDate) return;
+
+  setHistorique((ancien) =>
+    ancien.map((d) => {
+      if (d.id !== dossier.id) return d;
+
+      const planningActuel = d.planningChantier || [];
+
+      if (planningActuel.includes(nouvelleDate)) {
+        alert("Cette date est déjà prévue pour ce chantier.");
+        return d;
+      }
+
+      return {
+        ...d,
+        typeEvenement: "chantier",
+        planningChantier: [...planningActuel, nouvelleDate],
+      };
+    })
+  );
+};
+
+const supprimerJourChantier = (dossier: Dossier, dateASupprimer: string) => {
+  setHistorique((ancien) =>
+    ancien.map((d) => {
+      if (d.id !== dossier.id) return d;
+
+      return {
+        ...d,
+        planningChantier: (d.planningChantier || []).filter(
+          (date) => date !== dateASupprimer
+        ),
+      };
+    })
+  );
+};
+
+const creerRappelDepuisCalendrier = (date: Date) => {
+  const dateFormatee = date.toLocaleDateString("fr-FR");
+
+  const texte = window.prompt(
+    "Note / rappel à enregistrer :\nExemple : acheter peinture, rappeler client, commander fournitures..."
+  );
+
+  if (!texte) return;
+
+  const nouveauRappel: Dossier = {
+    id: Date.now(),
+
+    typeEvenement: "rappel",
+
+    client: "Rappel",
+    telephone: "",
+    email: "",
+    adresse: "",
+    adresseAgence: "",
+    complementAdresse: "",
+    notes: texte,
+    modeClient: "normal",
+
+    clientFinalNom: "",
+    clientFinalTelephone: "",
+    clientFinalAdresse: "",
+
+    locataire: "",
+    telephoneLocataire: "",
+    proprietaire: "",
+    telephoneProprietaire: "",
+    agence: "",
+    referenceChantier: "",
+
+    lignesTravaux: [],
+    numeroDevis: "",
+    numeroFacture: "",
+    total: 0,
+    acompte: 0,
+    reste: 0,
+    montantEncaisse: 0,
+    pourcentageAcompte: 0,
+    facturePayee: false,
+
+    statutDevis: "rappel",
+    statutChantier: "rappel",
+
+    factureSap: false,
+    numeroSap: "",
+
+    date: new Date().toLocaleDateString("fr-FR"),
+
+    dateRappel: dateFormatee,
+    heureRappel: "",
+    texteRappel: texte,
+
+    dateRdv: "",
+    heureRdv: "",
+    motifRdv: "",
+    typeRdv: "",
+
+    dateChantier: "",
+    heureChantier: "",
+    planningChantier: [],
+
+    datePaiement: "",
+
+    kmAller: 0,
+    achatFournitures: 0,
+    coefficientFournitures: 1.22,
+    fournituresClient: true,
+    detailsFournitures: "",
+    reventeFournitures: 0,
+    margeFournitures: 0,
+
+    priorite: "normale",
+  };
+
+  setHistorique((ancien) => [nouveauRappel, ...ancien]);
 };
 
 const supprimerDossier = (id: number) => {
@@ -4628,148 +4901,300 @@ return (
     <Input label="BIC" value={ribBic} onChange={setRibBic} />
   </div>
 </BlocRepliable>
+
 {showPopupCalendrier && dateSelectionnee && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 space-y-4">
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
 
       <h2 className="text-xl font-bold text-slate-800">
         Planning du jour
       </h2>
 
       <p className="text-slate-500">
-        {dateSelectionnee?.toLocaleDateString("fr-FR")}
+        {dateSelectionnee.toLocaleDateString("fr-FR")}
       </p>
 
       {(() => {
-        const dateStr = dateSelectionnee?.toLocaleDateString("fr-FR");
+        const dateStr = dateSelectionnee.toLocaleDateString("fr-FR");
 
-        const rdvs = historique.filter(
-          (d) =>
+        const evenementsJour = historique.filter((d) => {
+          const dansPlanningChantier =
+            d.planningChantier?.includes(dateStr) || false;
+
+          return (
             d.dateRdv === dateStr ||
             d.dateChantier === dateStr ||
-            d.datePaiement === dateStr
-        );
+            d.datePaiement === dateStr ||
+            d.dateRappel === dateStr ||
+            dansPlanningChantier
+          );
+        });
 
-        if (rdvs.length === 0) {
+        if (evenementsJour.length === 0) {
           return (
             <div className="bg-slate-100 rounded-xl p-4 text-slate-500 text-sm">
-              Aucun RDV client pour cette journée.
+              Aucun événement prévu pour cette journée.
             </div>
           );
         }
 
         return (
           <div className="space-y-3">
-            {rdvs.map((d) => (
-              <div
-                key={d.id}
-                className="rounded-xl border p-4 bg-white space-y-2"
-              >
-                <p className="font-bold text-slate-800">
-                  {d.client || "Client non renseigné"}
-                </p>
+            {evenementsJour.map((d) => {
+              const estRdv = d.dateRdv === dateStr || d.typeEvenement === "rdv";
+              const estRappel = d.dateRappel === dateStr || d.typeEvenement === "rappel";
+              const estPaiement = d.datePaiement === dateStr && !d.facturePayee;
+              const estChantier =
+                d.dateChantier === dateStr ||
+                (d.planningChantier || []).includes(dateStr);
 
-                <p className="text-sm text-slate-600">
-                  📞 {d.telephone || "Non renseigné"}
-                </p>
+              const badge = estRappel
+                ? "📝 Rappel"
+                : estRdv
+                ? "📅 RDV client"
+                : estPaiement
+                ? "💳 Paiement / relance"
+                : estChantier
+                ? "🛠️ Chantier"
+                : "📌 Événement";
 
-                <p className="text-sm text-slate-600">
-                  📍 {d.adresse || "Adresse non renseignée"}
-                </p>
+              const couleurCarte = estRappel
+                ? "border-amber-200 bg-amber-50"
+                : estRdv
+                ? "border-blue-200 bg-blue-50"
+                : estPaiement
+                ? "border-red-200 bg-red-50"
+                : estChantier
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-slate-200 bg-white";
 
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span>
-                    ⏱️{" "}
-                    {d.dateChantier === dateStr
-                      ? d.heureChantier || "-"
-                      : d.heureRdv || "-"}
-                  </span>
+              return (
+                <div
+                  key={d.id}
+                  className={`rounded-xl border p-4 space-y-2 ${couleurCarte}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-bold text-slate-800">
+                      {estRappel
+                        ? d.texteRappel || d.notes || "Rappel"
+                        : d.client || "Client non renseigné"}
+                    </p>
 
-                  <span>
-                    📄 {d.numeroDevis || "-"}
-                  </span>
+                    <span className="text-xs rounded-full border bg-white px-2 py-1 text-slate-700">
+                      {badge}
+                    </span>
+                  </div>
 
-                  <span>
-                    🧾 {d.numeroFacture || "-"}
-                  </span>
+                  {!estRappel && (
+                    <>
+                      <p className="text-sm text-slate-600">
+                        📞 {d.telephone || "Non renseigné"}
+                      </p>
 
-                  <span>
-                    💳 {d.datePaiement ? "Paiement prévu" : "-"}
-                  </span>
+                      <p className="text-sm text-slate-600">
+                        📍 {d.adresse || "Adresse non renseignée"}
+                      </p>
+
+                      {d.email && (
+                        <p className="text-sm text-slate-600">
+                          ✉️ {d.email}
+                        </p>
+                      )}
+                    </>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-700">
+                    <span>
+                      ⏱️{" "}
+                      {estRdv
+                        ? d.heureRdv || "-"
+                        : estChantier
+                        ? d.heureChantier || "-"
+                        : estRappel
+                        ? d.heureRappel || "-"
+                        : "-"}
+                    </span>
+
+                    <span>
+                      📄 {d.numeroDevis || "Pas de devis"}
+                    </span>
+
+                    <span>
+                      🧾 {d.numeroFacture || "-"}
+                    </span>
+
+                    <span>
+                      💶 {estPaiement ? `${d.reste || 0} € à suivre` : "-"}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-slate-600">
+                    {estRappel
+                      ? d.texteRappel || d.notes
+                      : estRdv
+                      ? d.motifRdv || d.notes || "RDV client"
+                      : estChantier
+                      ? d.lignesTravaux?.[0]?.prestationNom ||
+                        nomTravaux(d.lignesTravaux?.[0]?.type || "") ||
+                        "Chantier planifié"
+                      : estPaiement
+                      ? "Paiement prévu / retard à surveiller"
+                      : d.notes}
+                  </p>
+
+                  {estChantier && d.planningChantier && d.planningChantier.length > 0 && (
+                    <div className="text-xs text-slate-600 bg-white/70 rounded-lg p-2">
+                      <p className="font-semibold mb-1">Jours chantier prévus :</p>
+
+                      <div className="flex flex-wrap gap-1">
+                        {d.planningChantier.map((jour) => (
+                          <button
+                            key={jour}
+                            onClick={() => supprimerJourChantier(d, jour)}
+                            className="rounded-full border px-2 py-1 bg-white hover:bg-red-50"
+                            title="Cliquer pour supprimer ce jour"
+                          >
+                            {jour} ✕
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {!estRappel && (
+                      <button
+                        onClick={() => {
+                          rechargerDossier(d);
+                          setShowPopupCalendrier(false);
+                        }}
+                        className="btn-dark"
+                      >
+                        Ouvrir
+                      </button>
+                    )}
+
+                    {estRdv && (
+                      <button
+                        onClick={() => {
+                          transformerRdvEnDevis(d);
+                          setShowPopupCalendrier(false);
+                        }}
+                        className="btn-green"
+                      >
+                        Transformer en devis
+                      </button>
+                    )}
+
+                    {estChantier && (
+                      <button
+                        onClick={() => ajouterJourChantier(d)}
+                        className="btn-emerald"
+                      >
+                        Ajouter jour chantier
+                      </button>
+                    )}
+
+                    {estRdv && (
+                      <button
+                        onClick={() => deplacerEvenementCalendrier(d, "rdv")}
+                        className="btn-blue"
+                      >
+                        Déplacer RDV
+                      </button>
+                    )}
+
+                    {estChantier && (
+                      <button
+                        onClick={() => deplacerEvenementCalendrier(d, "chantier")}
+                        className="btn-blue"
+                      >
+                        Déplacer chantier
+                      </button>
+                    )}
+
+                    {estPaiement && (
+                      <button
+                        onClick={() => deplacerEvenementCalendrier(d, "paiement")}
+                        className="btn-orange"
+                      >
+                        Déplacer paiement
+                      </button>
+                    )}
+
+                    {estRappel && (
+                      <button
+                        onClick={() => deplacerEvenementCalendrier(d, "rappel")}
+                        className="btn-blue"
+                      >
+                        Déplacer rappel
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        if (confirm("Supprimer cet événement du calendrier ?")) {
+                          setHistorique((prev) =>
+                            prev.map((item) =>
+                              item.id === d.id
+                                ? {
+                                    ...item,
+                                    dateRdv: estRdv ? "" : item.dateRdv,
+                                    heureRdv: estRdv ? "" : item.heureRdv,
+                                    motifRdv: estRdv ? "" : item.motifRdv,
+
+                                    dateChantier: estChantier ? "" : item.dateChantier,
+                                    heureChantier: estChantier ? "" : item.heureChantier,
+                                    planningChantier: estChantier ? [] : item.planningChantier,
+
+                                    datePaiement: estPaiement ? "" : item.datePaiement,
+
+                                    dateRappel: estRappel ? "" : item.dateRappel,
+                                    heureRappel: estRappel ? "" : item.heureRappel,
+                                    texteRappel: estRappel ? "" : item.texteRappel,
+                                  }
+                                : item
+                            )
+                          );
+                        }
+                      }}
+                      className="btn-orange"
+                    >
+                      Supprimer du calendrier
+                    </button>
+                  </div>
                 </div>
-
-                <p className="text-sm text-slate-500">
-                  {d.lignesTravaux?.[0]?.prestationNom ||
-                    nomTravaux(d.lignesTravaux?.[0]?.type || "") ||
-                    "Travaux"}
-                </p>
-
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <button
-                    onClick={() => {
-                      rechargerDossier(d);
-                      setShowPopupCalendrier(false);
-                    }}
-                    className="btn-dark"
-                  >
-                    Ouvrir dossier
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      rechargerDossier(d);
-                      setShowPopupCalendrier(false);
-                      // ici tu pourras brancher ton mode édition
-                    }}
-                    className="btn-blue"
-                  >
-                    Modifier
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      if (confirm("Supprimer ce RDV ?")) {
-                        setHistorique((prev) =>
-                          prev.map((item) =>
-                            item.id === d.id
-                              ? {
-                                  ...item,
-                                  dateRdv: "",
-                                  heureRdv: "",
-                                  dateChantier: "",
-                                  heureChantier: "",
-                                  datePaiement: "",
-                                }
-                              : item
-                          )
-                        );
-                      }
-                    }}
-                    className="btn-orange"
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         );
       })()}
 
-<button
-  onClick={() => {
-    creerRDVDepuisCalendrier(dateSelectionnee);
-    setShowPopupCalendrier(false);
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
+        <button
+          onClick={() => {
+            creerRDVDepuisCalendrier(dateSelectionnee);
+            setShowPopupCalendrier(false);
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }}
-  className="w-full btn-green"
->
-  ➕ Créer un RDV ce jour
-</button>
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+          className="btn-green"
+        >
+          ➕ Créer RDV client
+        </button>
+
+        <button
+          onClick={() => {
+            creerRappelDepuisCalendrier(dateSelectionnee);
+          }}
+          className="btn-amber"
+        >
+          📝 Créer rappel / note
+        </button>
+      </div>
 
       <button
         onClick={() => setShowPopupCalendrier(false)}
