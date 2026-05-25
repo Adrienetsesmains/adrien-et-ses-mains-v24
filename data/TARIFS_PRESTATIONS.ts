@@ -502,6 +502,23 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         heuresUnite: 0.26,
         rentabilite: "🟠 À surveiller",
       },
+      {
+  nom: "Application étanchéité sous faïence (SPEC)",
+  unite: "m²",
+  prixMo220: 12,
+  prixMoJeremie150: 8.2,
+  heuresUnite: 0.35,
+  rentabilite: "🟠 À surveiller",
+  typeTravaux: "carrelage",
+  conditions: "Support sain et préparé / hors reprises lourdes",
+  detailsPdf: [
+    "Préparation du support (propre, sec et sain)",
+    "Application primaire d’accrochage si nécessaire",
+    "Application produit d’étanchéité type SPEC",
+    "Traitement des angles et points sensibles",
+    "Séchage avant pose faïence",
+  ],
+},
     ],
   },
 {
