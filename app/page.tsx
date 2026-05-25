@@ -5172,19 +5172,121 @@ return (
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
         <button
-          onClick={() => {
-            creerRDVDepuisCalendrier(dateSelectionnee);
-            setShowPopupCalendrier(false);
+  onClick={() => {
+    const nom = window.prompt("Nom du client :");
+    if (!nom) return;
 
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
-          }}
-          className="btn-green"
-        >
-          ➕ Créer RDV client
-        </button>
+    const tel = window.prompt("Téléphone :") || "";
+    const adresseRdv = window.prompt("Adresse du RDV :") || "";
+    const mail = window.prompt("Email :") || "";
+    const observation = window.prompt("Observation / note du RDV :") || "";
+
+    const dateFormatee = dateSelectionnee.toLocaleDateString("fr-FR");
+
+    const nouveauRdv: Dossier = {
+      id: Date.now(),
+      typeEvenement: "rdv",
+
+      client: nom,
+      telephone: tel,
+      email: mail,
+      adresse: adresseRdv,
+      adresseAgence: "",
+      complementAdresse: "",
+      notes: observation,
+      modeClient: "normal",
+
+      clientFinalNom: "",
+      clientFinalTelephone: "",
+      clientFinalAdresse: "",
+
+      locataire: "",
+      telephoneLocataire: "",
+      proprietaire: "",
+      telephoneProprietaire: "",
+      agence: "",
+      referenceChantier: "",
+
+      lignesTravaux: [],
+      numeroDevis: "",
+      numeroFacture: "",
+      total: 0,
+      acompte: 0,
+      reste: 0,
+      montantEncaisse: 0,
+      pourcentageAcompte: 0,
+      facturePayee: false,
+
+      statutDevis: "rdv",
+      statutChantier: "rdv_client",
+
+      factureSap: false,
+      numeroSap: "",
+
+      date: new Date().toLocaleDateString("fr-FR"),
+
+      dateRdv: dateFormatee,
+      heureRdv: "",
+      motifRdv: "RDV client",
+      typeRdv: "visite",
+      observationRdv: observation,
+
+      dateChantier: "",
+      heureChantier: "",
+      planningChantier: [],
+
+      datePaiement: "",
+
+      dateRappel: "",
+      heureRappel: "",
+      texteRappel: "",
+
+      kmAller: 0,
+      achatFournitures: 0,
+      coefficientFournitures: 1.22,
+      fournituresClient: true,
+      detailsFournitures: "",
+      reventeFournitures: 0,
+      margeFournitures: 0,
+
+      priorite: "normale",
+    };
+
+    setHistorique((ancien) => [nouveauRdv, ...ancien]);
+
+    setClientsEnregistres((anciens) => {
+      const ficheClient: ClientEnregistre = {
+        nom,
+        telephone: tel,
+        email: mail,
+        adresse: adresseRdv,
+        adresseAgence: "",
+        complementAdresse: "",
+        notes: observation,
+        modeClient: "normal",
+        agence: "",
+      };
+
+      const existe = anciens.some(
+        (c) => c.nom.toLowerCase() === nom.toLowerCase()
+      );
+
+      if (existe) {
+        return anciens.map((c) =>
+          c.nom.toLowerCase() === nom.toLowerCase() ? ficheClient : c
+        );
+      }
+
+      return [ficheClient, ...anciens];
+    });
+
+    setShowPopupCalendrier(false);
+    alert("RDV client enregistré");
+  }}
+  className="btn-green"
+>
+  ➕ Créer RDV client
+</button>
 
         <button
           onClick={() => {
