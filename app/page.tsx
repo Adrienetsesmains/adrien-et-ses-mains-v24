@@ -427,6 +427,40 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
   return prixLigne(ligne, modeClient);
 }
 
+const getSapInfoLigne = (ligne: LigneTravaux) => {
+  const tarifAssocie: any = TARIFS_PRESTATIONS.find(
+    (t: any) => t.id === ligne.tarifId
+  );
+
+  const sapCategorie = tarifAssocie?.sapCategorie || "attention";
+
+  if (sapCategorie === "ok") {
+    return {
+      badge: "🟢 SAP OK",
+      message: "Prestation compatible avec le cadre SAP déclaré.",
+      classeCarte: "border-emerald-200 bg-emerald-50",
+      classeBadge: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    };
+  }
+
+  if (sapCategorie === "non") {
+    return {
+      badge: "🔴 Hors SAP",
+      message:
+        "Attention : cette prestation semble hors cadre SAP. À éviter sur une facture SAP sauf cas très particulier justifié.",
+      classeCarte: "border-red-200 bg-red-50",
+      classeBadge: "bg-red-100 text-red-800 border-red-200",
+    };
+  }
+
+  return {
+    badge: "🟡 À vérifier",
+    message:
+      "Possible uniquement si c’est une petite intervention de bricolage, sans transformation du logement.",
+    classeCarte: "border-amber-200 bg-amber-50",
+    classeBadge: "bg-amber-100 text-amber-800 border-amber-200",
+  };
+};
 
   export default function Home() {
    const restaurerBackup = (index: number) => {
@@ -3750,23 +3784,43 @@ return (
 
   <div className="space-y-5">
     {lignesTravaux.map((ligne, index) => {
-      const labels = champsTravaux(ligne.type);
-      const tarifAssocie = TARIFS_PRESTATIONS.find(
-        (t) => t.id === ligne.tarifId
-      );
+  const labels = champsTravaux(ligne.type);
+  const tarifAssocie = TARIFS_PRESTATIONS.find(
+    (t) => t.id === ligne.tarifId
+  );
 
-      return (
-        <div
-          key={ligne.id}
-          ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
-          className="rounded-2xl border bg-slate-50 p-5 space-y-4"
-        >
+  const sapInfo = getSapInfoLigne(ligne);
+
+  return (
+    <div
+      key={ligne.id}
+      ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
+      className={`rounded-2xl border p-5 space-y-4 ${
+        factureSap ? sapInfo.classeCarte : "bg-slate-50"
+      }`}
+    >
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-semibold text-slate-800">
-              {ligne.prestationNom
-                ? `${index + 1} — ${ligne.prestationNom}`
-                : `${index + 1} — Prestation personnalisée`}
-            </h3>
+          <div>
+  <h3 className="font-semibold text-slate-800">
+    {ligne.prestationNom
+      ? `${index + 1} — ${ligne.prestationNom}`
+      : `${index + 1} — Prestation personnalisée`}
+  </h3>
+
+  {factureSap && (
+    <div className="mt-2 flex flex-col gap-1">
+      <span
+        className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${sapInfo.classeBadge}`}
+      >
+        {sapInfo.badge}
+      </span>
+
+      <p className="text-xs font-medium text-slate-700">
+        {sapInfo.message}
+      </p>
+    </div>
+  )}
+</div>
 
            <div className="flex gap-2">
   <button
