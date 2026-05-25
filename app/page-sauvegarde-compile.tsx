@@ -80,7 +80,7 @@ type LigneTravaux = {
   prixUnitaireAuto?: number;
   prixManuel?: boolean;
   heuresUnite?: number;
-
+heuresUniteManuel?: boolean;
   detailsPdfPersonnalises?: string[];
   detailsPdfOuvert?: boolean;
 
@@ -427,6 +427,40 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
   return prixLigne(ligne, modeClient);
 }
 
+const getSapInfoLigne = (ligne: LigneTravaux) => {
+  const tarifAssocie: any = TARIFS_PRESTATIONS.find(
+    (t: any) => t.id === ligne.tarifId
+  );
+
+  const sapCategorie = tarifAssocie?.sapCategorie || "attention";
+
+  if (sapCategorie === "ok") {
+    return {
+      badge: "🟢 SAP OK",
+      message: "Prestation compatible avec le cadre SAP déclaré.",
+      classeCarte: "border-emerald-200 bg-emerald-50",
+      classeBadge: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    };
+  }
+
+  if (sapCategorie === "non") {
+    return {
+      badge: "🔴 Hors SAP",
+      message:
+        "Attention : cette prestation semble hors cadre SAP. À éviter sur une facture SAP sauf cas très particulier justifié.",
+      classeCarte: "border-red-200 bg-red-50",
+      classeBadge: "bg-red-100 text-red-800 border-red-200",
+    };
+  }
+
+  return {
+    badge: "🟡 À vérifier",
+    message:
+      "Possible uniquement si c’est une petite intervention de bricolage, sans transformation du logement.",
+    classeCarte: "border-amber-200 bg-amber-50",
+    classeBadge: "bg-amber-100 text-amber-800 border-amber-200",
+  };
+};
 
   export default function Home() {
    const restaurerBackup = (index: number) => {
@@ -1039,23 +1073,39 @@ const fraisLogistique =
   const estimationHaute = Math.round(total * margeHaute);
   const prixConseille = Math.ceil(estimationHaute / 10) * 10;
 
-  return {
-    resteReel,
-    totalTravaux,
-    kmAR,
-    totalHeuresChantier,
-    nombreJoursChantier,
-    fraisLogistique,
-    reventeFournitures,
-    margeFournitures,
-    total,
-    acompte,
-    reste,
-    rentabilite,
-    estimationBasse,
-    estimationHaute,
-    prixConseille,
-  };
+  const montantEligibleSap = factureSap
+  ? totalTravaux
+  : 0;
+
+const montantNonEligibleSap = factureSap
+  ? reventeFournitures
+  : 0;
+
+const creditImpotEstime = factureSap
+  ? Math.round(montantEligibleSap * 0.5)
+  : 0;
+
+return {
+  resteReel,
+  totalTravaux,
+  kmAR,
+  totalHeuresChantier,
+  nombreJoursChantier,
+  fraisLogistique,
+  reventeFournitures,
+  margeFournitures,
+  total,
+  acompte,
+  reste,
+  rentabilite,
+  estimationBasse,
+  estimationHaute,
+  prixConseille,
+
+  montantEligibleSap,
+  montantNonEligibleSap,
+  creditImpotEstime,
+};
 }, [
   lignesTravaux,
   modeClient,
@@ -1067,6 +1117,7 @@ const fraisLogistique =
 pourcentageAcompte,
 fraisDeplacementManuelActif,
 fraisDeplacementManuel,
+factureSap,
 ]);
 const joursCalendrier = useMemo(() => {
   
@@ -1173,6 +1224,7 @@ const ajouterLigne = () => {
     prixUnitaire: 0,
     prixUnitaireAuto: 0,
     prixManuel: false,
+    heuresUniteManuel: false,
     heuresUnite: 0,
     detailsPdfPersonnalises: [],
     detailsPdfOuvert: false,
@@ -1539,19 +1591,7 @@ const marquerPayee = (id: number) => {
   );
 };
 
-const envoyerDevisMail = async () => {
-  const pdfBase64 = await genererPDF("devis");
-
-  setStatutDevis("envoye");
-
-  if (idDossierActuel !== null) {
-    setHistorique((ancien) =>
-      ancien.map((d) =>
-        d.id === idDossierActuel ? { ...d, statutDevis: "envoye" } : d
-      )
-    );
-  }
-
+const envoyerDevisMail = () => {
   const sujet = `Devis ${numeroDevis} - Adrien et ses mains`;
 
   const corps = `Bonjour ${client},
@@ -1570,31 +1610,14 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const reponse = await fetch("/api/envoyer-mail", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      to: email,
-      subject: sujet,
-      text: corps,
-      pdfBase64,
-      filename: `${numeroDevis || "devis"}-${client || "client"}.pdf`,
-    }),
-  });
+  const mailto = `mailto:${email}?subject=${encodeURIComponent(
+    sujet
+  )}&body=${encodeURIComponent(corps)}`;
 
-  if (!reponse.ok) {
-    alert("❌ Erreur lors de l’envoi du devis par mail.");
-    return;
-  }
-
-  alert("✅ Devis envoyé par mail avec la pièce jointe.");
+  window.location.href = mailto;
 };
 
-const envoyerFactureMail = async () => {
-  const pdfBase64 = await genererPDF("facture");
-
+const envoyerFactureMail = () => {
   const sujet = `Facture ${numeroFacture} - Adrien et ses mains`;
 
   const corps = `Bonjour ${client},
@@ -1613,26 +1636,11 @@ Adrien et ses mains
 06 71 17 11 76
 adrienetsesmains@gmail.com`;
 
-  const reponse = await fetch("/api/envoyer-mail", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      to: email,
-      subject: sujet,
-      text: corps,
-      pdfBase64,
-      filename: `${numeroFacture || "facture"}-${client || "client"}.pdf`,
-    }),
-  });
+  const mailto = `mailto:${email}?subject=${encodeURIComponent(
+    sujet
+  )}&body=${encodeURIComponent(corps)}`;
 
-  if (!reponse.ok) {
-    alert("❌ Erreur lors de l’envoi de la facture par mail.");
-    return;
-  }
-
-  alert("✅ Facture envoyée par mail avec la pièce jointe.");
+  window.location.href = mailto;
 };
 
 const preparerRelance = async (d: Dossier) => {
@@ -2265,20 +2273,23 @@ doc.line(92, 60, 118, 60);
   doc.setFontSize(11);
   doc.text(`N° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
-// ================= CADRES CLIENT / CHANTIER PREMIUM COMPACTS AUTO =================
 
-const xClient = 18;
-const xChantier = 101;
-const yCadres = 76;
+  // ================= CADRES CLIENT / CHANTIER PREMIUM PRESTIGE =================
 
-const largeurClient = 70;
-const largeurChantier = 91;
+const xClient = 15;
+const xChantier = 105;
+const yCadres = 70;
 
-const interligne = 4.1;
+const largeurClient = 85;
+const largeurChantier = 90;
+
+const hauteurEnteteCadre = 12;
+const interligne = 5;
 
 type LigneBloc = {
   label: string;
   valeur: string;
+  icone?: string;
 };
 
 const dessinerCadreInfos = (
@@ -2287,7 +2298,6 @@ const dessinerCadreInfos = (
   yDepart: number,
   largeur: number,
   lignes: LigneBloc[],
-  largeurLabel: number,
   largeurTexte: number
 ) => {
   const lignesFiltrees = lignes.filter(
@@ -2295,60 +2305,82 @@ const dessinerCadreInfos = (
   );
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
+  doc.setFontSize(8.4);
 
   let hauteurTexte = 0;
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1;
   });
 
-  const yDebutTexte = yDepart + 18;
-  const margeBas = 4;
-  const hauteurBloc = Math.max(26, 18 + hauteurTexte + margeBas);
+  const hauteurBloc = Math.max(48, hauteurEnteteCadre + hauteurTexte + 10);
 
-  doc.setLineWidth(0.25);
-  doc.setDrawColor(120, 120, 120);
-  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 2, 2);
+  // Ombre légère
+  doc.setFillColor(230, 230, 230);
+  doc.roundedRect(x + 1.2, yDepart + 1.2, largeur, hauteurBloc, 3, 3, "F");
 
+  // Fond blanc + contour doré
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(190, 145, 55);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(x, yDepart, largeur, hauteurBloc, 3, 3, "FD");
+
+  // Bandeau bleu foncé
   doc.setFillColor(52, 63, 79);
-  doc.circle(x + 5, yDepart + 8, 1.9, "F");
+  doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 3, 3, "F");
+
+ 
+  // Pastille titre
+  doc.setFillColor(190, 145, 55);
+  doc.circle(x + 7.5, yDepart + 6, 2.5, "F");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.2);
-  doc.setTextColor(35, 35, 35);
-  doc.text(titre, x + 12, yDepart + 9);
+  doc.setFontSize(11.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text(titre, x + 16, yDepart + 7.5);
 
-  let yTexte = yDebutTexte;
+  let yTexte = yDepart + hauteurEnteteCadre + 10;
 
   lignesFiltrees.forEach((ligne) => {
+    // Petite pastille ligne
+    doc.setFillColor(52, 63, 79);
+    doc.circle(x + 7.5, yTexte - 1.4, 1.7, "F");
+
+    doc.setTextColor(190, 145, 55);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.5);
+    doc.text(ligne.icone || "•", x + 7.5, yTexte - 0.6, { align: "center" });
+
+    // Label
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.6);
+    doc.setTextColor(25, 35, 48);
+    doc.text(`${ligne.label} :`, x + 14, yTexte);
+
+    // Valeur rapprochée
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
     const nbLignes = Math.max(1, texteCoupe.length);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.2);
-    doc.setTextColor(35, 35, 35);
-    doc.text(`${ligne.label} :`, x + 4, yTexte);
-
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.2);
-    doc.setTextColor(45, 45, 45);
-    doc.text(texteCoupe, x + largeurLabel, yTexte);
+    doc.setFontSize(8.6);
+    doc.setTextColor(35, 35, 35);
+    doc.text(texteCoupe, x + 29, yTexte);
 
-    yTexte += nbLignes * interligne;
+    yTexte += nbLignes * interligne + 1.8;
   });
 
   return hauteurBloc;
 };
 
 const lignesClient: LigneBloc[] = [
-  { label: "Nom", valeur: client || "" },
-  { label: "Tél.", valeur: telephone || "" },
-  { label: "Email", valeur: email || "" },
+  { label: "Nom", valeur: client || "", icone: "N" },
+  { label: "Tél.", valeur: telephone || "", icone: "T" },
+  { label: "Email", valeur: email || "", icone: "@" },
   {
     label: modeClient === "agence" ? "Agence" : "Adresse",
     valeur: modeClient === "agence" ? adresseAgence || "" : adresse || "",
+    icone: "A",
   },
 ];
 
@@ -2356,20 +2388,21 @@ let lignesChantier: LigneBloc[] = [];
 
 if (modeClient === "jeremie") {
   lignesChantier = [
-    { label: "Client", valeur: clientFinalNom || client || "" },
-    { label: "Tél.", valeur: clientFinalTelephone || telephone || "" },
-    { label: "Adresse", valeur: clientFinalAdresse || adresse || "" },
+    { label: "Client", valeur: clientFinalNom || client || "", icone: "C" },
+    { label: "Tél.", valeur: clientFinalTelephone || telephone || "", icone: "T" },
+    { label: "Adresse", valeur: clientFinalAdresse || adresse || "", icone: "A" },
   ];
 } else if (modeClient === "agence") {
   lignesChantier = [
-    { label: "Réf.", valeur: referenceChantier || "" },
-    { label: "Locataire", valeur: locataire || "" },
-    { label: "Tél. loc.", valeur: telephoneLocataire || "" },
-    { label: "Proprio.", valeur: proprietaire || "" },
-    { label: "Tél. prop.", valeur: telephoneProprietaire || "" },
+    { label: "Réf.", valeur: referenceChantier || "", icone: "R" },
+    { label: "Locataire", valeur: locataire || "", icone: "L" },
+    { label: "Tél. loc.", valeur: telephoneLocataire || "", icone: "T" },
+    { label: "Proprio.", valeur: proprietaire || "", icone: "P" },
+    { label: "Tél. prop.", valeur: telephoneProprietaire || "", icone: "T" },
     {
       label: "Adresse",
       valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+      icone: "A",
     },
   ];
 } else {
@@ -2377,6 +2410,7 @@ if (modeClient === "jeremie") {
     {
       label: "Adresse",
       valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+      icone: "A",
     },
   ];
 }
@@ -2387,8 +2421,7 @@ const hauteurClientAuto = dessinerCadreInfos(
   yCadres,
   largeurClient,
   lignesClient,
-  25,
-  42
+  50
 );
 
 const hauteurChantierAuto = dessinerCadreInfos(
@@ -2397,19 +2430,29 @@ const hauteurChantierAuto = dessinerCadreInfos(
   yCadres,
   largeurChantier,
   lignesChantier,
-  modeClient === "agence" ? 34 : 32,
-  modeClient === "agence" ? 50 : 52
+  modeClient === "agence" ? 52 : 55
 );
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
-y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 8;
+y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 10;
 
 enteteTableau();
 
 // ================= TABLEAU COMPACT =================
-const lignesDevisPDF = lignesPDF();
+
+let lignesDevisPDF = lignesPDF();
+
+// 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
+if (modeClient === "jeremie" && type === "facture") {
+  lignesDevisPDF = [
+    [
+      "Prestation de service Main d'œuvre uniquement\nForfait main d'œuvre global",
+      calcul.total,
+    ],
+  ];
+}
 
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const ligneSource = lignesTravaux[index];
@@ -2513,37 +2556,97 @@ y += 38;
 
 
 
-// ================= MENTION SAP FACTURE =================
-if (type === "facture" && factureSap) {
-  if (y + 34 > 292) {
+// ================= MENTION SAP DEVIS / FACTURE =================
+if (factureSap) {
+  if (y + 42 > 265) {
     doc.addPage();
     page += 1;
     y = 35;
   }
 
+  const montantEligibleSapPDF = Math.round(calcul.montantEligibleSap || 0);
+  const montantNonEligibleSapPDF = Math.round(calcul.montantNonEligibleSap || 0);
+  const creditImpotEstimePDF = Math.round(calcul.creditImpotEstime || 0);
+
   doc.setFillColor(236, 253, 245);
   doc.setDrawColor(16, 185, 129);
-  doc.roundedRect(15, y, 180, 28, 2, 2, "FD");
+  doc.setLineWidth(0.35);
+  doc.roundedRect(15, y, 180, 36, 2, 2, "FD");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(6, 95, 70);
-  doc.text("MENTION SERVICES A LA PERSONNE", 20, y + 8);
+
+  const titreSap =
+    type === "facture"
+      ? "SERVICES A LA PERSONNE"
+      : "INFORMATION SERVICES A LA PERSONNE";
+
+  doc.text(titreSap, 20, y + 8);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.4);
+  doc.setFontSize(7.2);
   doc.setTextColor(30, 64, 54);
 
-  const texteSap = numeroSap
-    ? `Prestation relevant des services à la personne - Numéro de déclaration SAP : ${numeroSap}. Sous réserve des conditions prévues par l'article 199 sexdecies du CGI, cette prestation peut ouvrir droit à un crédit d'impôt de 50 % des sommes effectivement supportées par le client.`
-    : `Prestation relevant des services à la personne. Sous réserve des conditions prévues par l'article 199 sexdecies du CGI, cette prestation peut ouvrir droit à un crédit d'impôt de 50 % des sommes effectivement supportées par le client.`;
+  const texteSap = `Organisme de services à la personne déclaré sous le numéro : ${
+    numeroSap && numeroSap.trim() !== "" ? numeroSap : "XXXXXXXXXXXX"
+  }. 
+
+Montant de main d’œuvre éligible au crédit d’impôt : ${montantEligibleSapPDF} €. 
+Fournitures et éléments non éligibles : ${montantNonEligibleSapPDF} €. 
+Crédit d’impôt estimatif pour le client : ${creditImpotEstimePDF} €, selon les conditions de l’article 199 sexdecies du CGI.`;
 
   const lignesSap = doc.splitTextToSize(texteSap, 168);
   doc.text(lignesSap, 20, y + 15);
 
-  y += 34;
+  y += 42;
 }
 
+// ================= BLOC SAP OFFICIEL =================
+if (factureSap) {
+  if (y + 50 > 265) {
+    doc.addPage();
+    page += 1;
+    y = 35;
+  }
+
+  const montantEligible = Math.round(calcul.montantEligibleSap || 0);
+  const montantNonEligible = Math.round(calcul.montantNonEligibleSap || 0);
+  const creditImpot = Math.round(calcul.creditImpotEstime || 0);
+
+  // Cadre vert SAP
+  doc.setFillColor(236, 253, 245);
+  doc.setDrawColor(16, 185, 129);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(15, y, 180, 40, 3, 3, "FD");
+
+  // Titre
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(6, 95, 70);
+  doc.text("SERVICES A LA PERSONNE", 20, y + 8);
+
+  // Texte
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(30, 41, 59);
+
+  const texte = `Organisme de services à la personne déclaré sous le numéro : ${
+    numeroSap && numeroSap.trim() !== "" ? numeroSap : "XXXXXXXXXXXX"
+  }.
+
+Montant de main d’œuvre éligible au crédit d’impôt : ${montantEligible} €.
+Fournitures et éléments non éligibles : ${montantNonEligible} €.
+
+Crédit d’impôt estimatif pour le client : ${creditImpot} €.
+
+Prestations de services à la personne ouvrant droit au crédit d’impôt selon l’article 199 sexdecies du Code Général des Impôts.`;
+
+  const lignes = doc.splitTextToSize(texte, 170);
+  doc.text(lignes, 20, y + 16);
+
+  y += 45;
+}
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
 if (y + 82 > 292) {
@@ -3681,23 +3784,43 @@ return (
 
   <div className="space-y-5">
     {lignesTravaux.map((ligne, index) => {
-      const labels = champsTravaux(ligne.type);
-      const tarifAssocie = TARIFS_PRESTATIONS.find(
-        (t) => t.id === ligne.tarifId
-      );
+  const labels = champsTravaux(ligne.type);
+  const tarifAssocie = TARIFS_PRESTATIONS.find(
+    (t) => t.id === ligne.tarifId
+  );
 
-      return (
-        <div
-          key={ligne.id}
-          ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
-          className="rounded-2xl border bg-slate-50 p-5 space-y-4"
-        >
+  const sapInfo = getSapInfoLigne(ligne);
+
+  return (
+    <div
+      key={ligne.id}
+      ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
+      className={`rounded-2xl border p-5 space-y-4 ${
+        factureSap ? sapInfo.classeCarte : "bg-slate-50"
+      }`}
+    >
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-semibold text-slate-800">
-              {ligne.prestationNom
-                ? `${index + 1} — ${ligne.prestationNom}`
-                : `${index + 1} — Prestation personnalisée`}
-            </h3>
+          <div>
+  <h3 className="font-semibold text-slate-800">
+    {ligne.prestationNom
+      ? `${index + 1} — ${ligne.prestationNom}`
+      : `${index + 1} — Prestation personnalisée`}
+  </h3>
+
+  {factureSap && (
+    <div className="mt-2 flex flex-col gap-1">
+      <span
+        className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${sapInfo.classeBadge}`}
+      >
+        {sapInfo.badge}
+      </span>
+
+      <p className="text-xs font-medium text-slate-700">
+        {sapInfo.message}
+      </p>
+    </div>
+  )}
+</div>
 
            <div className="flex gap-2">
   <button
@@ -3896,12 +4019,21 @@ return (
                   valeur={`${tarifAssocie.rentabilite} ${tarifAssocie.action}`}
                 />
 
-                <Card
-                  titre="Temps estimé"
-                  valeur={`${(
-                    (ligne.q1 || 1) * (tarifAssocie.heuresUnite || 0)
-                  ).toFixed(1)} h`}
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+  <Card
+    titre="Temps estimé"
+    valeur={`${((ligne.q1 || 1) * (ligne.heuresUnite || tarifAssocie.heuresUnite || 0)).toFixed(1)} h`}
+  />
+
+  <input
+    type="number"
+    value={ligne.heuresUnite || tarifAssocie.heuresUnite || 0}
+    onChange={(e) =>
+      modifierLigne(ligne.id, "heuresUnite", Number(e.target.value))
+    }
+    style={{ width: 60 }}
+  />
+</div>
 
                 {tarifAssocie.conditions && (
                   <p className="text-sm text-slate-500">
@@ -4149,15 +4281,44 @@ return (
   ]}
 />
 
-    <div className="grid gap-2 md:grid-cols-3">
-      <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
-      <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
-      <MiniResult
-        titre="Reste"
-        valeur={`${Math.max(0, calcul.total - montantEncaisse)} €`}
-        couleur="text-blue-700"
-      />
+ <div className="grid gap-2 md:grid-cols-3">
+  <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
+  <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
+  <MiniResult
+    titre="Reste"
+    valeur={`${Math.max(0, calcul.total - montantEncaisse)} €`}
+    couleur="text-blue-700"
+  />
+</div>
+
+{factureSap && (
+  <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+    <div className="font-semibold">Mode SAP activé</div>
+
+    <div className="mt-2 space-y-1">
+      <p>
+        Montant éligible au crédit d’impôt :{" "}
+        <strong>{calcul.montantEligibleSap} €</strong>
+      </p>
+
+      <p>
+        Fournitures non éligibles :{" "}
+        <strong>{calcul.montantNonEligibleSap} €</strong>
+      </p>
+
+      <p>
+        Crédit d’impôt estimatif client :{" "}
+        <strong>{calcul.creditImpotEstime} €</strong>
+      </p>
     </div>
+
+    {!numeroSap && (
+      <p className="mt-2 text-xs text-amber-700">
+        Démarche SAP en cours — numéro non renseigné
+      </p>
+    )}
+  </div>
+)}
 
     <div className="flex flex-wrap gap-2">
       <button

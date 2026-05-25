@@ -1591,8 +1591,25 @@ const marquerPayee = (id: number) => {
   );
 };
 
+const construireObjetMail = (type: "devis" | "facture") => {
+  const numero = type === "facture" ? numeroFacture : numeroDevis;
+  const libelle = type === "facture" ? "Facture" : "Devis";
+
+const nomPrincipal =
+  modeClient === "normal"
+    ? client || "Client"
+    : complementAdresse || adresse || clientFinalNom || client || "Chantier";
+
+  const referenceAgence =
+    modeClient === "agence" && referenceChantier.trim()
+      ? ` - Réf. ${referenceChantier.trim()}`
+      : "";
+
+  return `${libelle} ${numero} - ${nomPrincipal}${referenceAgence}`;
+};
+
 const envoyerDevisMail = () => {
-  const sujet = `Devis ${numeroDevis} - Adrien et ses mains`;
+  const sujet = construireObjetMail("devis");
 
   const corps = `Bonjour ${client},
 
@@ -1617,8 +1634,9 @@ adrienetsesmains@gmail.com`;
   window.location.href = mailto;
 };
 
+
 const envoyerFactureMail = () => {
-  const sujet = `Facture ${numeroFacture} - Adrien et ses mains`;
+  const sujet = construireObjetMail("facture");
 
   const corps = `Bonjour ${client},
 
