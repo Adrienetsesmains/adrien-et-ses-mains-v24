@@ -4689,7 +4689,9 @@ return (
     <p>Aucun dossier.</p>
   ) : (
     <div className="space-y-4">
-      {historiqueFiltre.map((item) => (
+      {historiqueFiltre
+  .filter((d) => d.typeEvenement !== "rdv" && d.typeEvenement !== "rappel")
+  .map((item) => (
         <div
   key={item.id}
   className={`rounded-2xl border p-5 space-y-3 ${
