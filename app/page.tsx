@@ -1881,6 +1881,47 @@ const nomPrincipal =
   return `${libelle} ${numero} - ${nomPrincipal}${referenceAgence}`;
 };
 
+const ouvrirGoogleCalendar = ({
+  titre,
+  description,
+  lieu,
+  date,
+}: {
+  titre: string;
+  description: string;
+  lieu: string;
+  date: string;
+}) => {
+  if (!date) {
+    alert("Date manquante pour créer l'événement Google");
+    return;
+  }
+
+  const dateObj = parseDateFr(date);
+  if (!dateObj) return;
+
+  const formatGoogleDate = (d: Date) => {
+    return d
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .split(".")[0] + "Z";
+  };
+
+  const debut = new Date(dateObj);
+  debut.setHours(9, 0);
+
+  const fin = new Date(dateObj);
+  fin.setHours(10, 0);
+
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE
+&text=${encodeURIComponent(titre)}
+&details=${encodeURIComponent(description)}
+&location=${encodeURIComponent(lieu)}
+&dates=${formatGoogleDate(debut)}/${formatGoogleDate(fin)}`;
+
+  window.open(url, "_blank");
+};
+
 const envoyerDevisMail = () => {
   const sujet = construireObjetMail("devis");
 
@@ -5130,7 +5171,39 @@ return (
                         Déplacer rappel
                       </button>
                     )}
+<button
+  onClick={() => {
+    ouvrirGoogleCalendar({
+      titre: estRappel
+        ? `Rappel - ${d.texteRappel || "Note"}`
+        : estRdv
+        ? `RDV client - ${d.client}`
+        : estChantier
+        ? `Chantier - ${d.client} - ${d.numeroDevis || ""}`
+        : `Événement - ${d.client}`,
 
+      lieu: d.adresse || "",
+
+      date:
+        d.dateRappel ||
+        d.dateRdv ||
+        d.dateChantier ||
+        d.planningChantier?.[0] ||
+        "",
+
+      description: estRappel
+        ? d.texteRappel || ""
+        : `Client : ${d.client}
+Téléphone : ${d.telephone}
+Email : ${d.email}
+
+${d.notes || ""}`,
+    });
+  }}
+  className="btn-purple"
+>
+  📅 Google
+</button>
                     <button
                       onClick={() => {
                         if (confirm("Supprimer cet événement du calendrier ?")) {
@@ -5296,6 +5369,8 @@ return (
         >
           📝 Créer rappel / note
         </button>
+
+        
       </div>
 
       <button
