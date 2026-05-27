@@ -4724,7 +4724,6 @@ return (
           <Input label="Recherche client / devis / facture" value={rechercheHistorique} onChange={setRechercheHistorique} />
         </Bloc>
 
-
 <BlocRepliable titre="Historique" ouvertParDefaut={false}>
   {historiqueFiltre.filter(
     (item) =>
@@ -4736,7 +4735,7 @@ return (
       Aucun devis ou facture enregistré.
     </p>
   ) : (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {historiqueFiltre
         .filter(
           (item) =>
@@ -4751,14 +4750,6 @@ return (
             parseDateFr(item.datePaiement) &&
             parseDateFr(item.datePaiement)! < new Date();
 
-          const statutPastel = item.facturePayee
-            ? "bg-emerald-50 border-emerald-200"
-            : factureEnRetard
-            ? "bg-red-50 border-red-200"
-            : item.numeroFacture
-            ? "bg-blue-50 border-blue-200"
-            : "bg-slate-50 border-slate-200";
-
           const badgePastel = item.facturePayee
             ? "bg-emerald-100 text-emerald-800 border-emerald-200"
             : factureEnRetard
@@ -4768,17 +4759,23 @@ return (
             : "bg-amber-100 text-amber-800 border-amber-200";
 
           const libelleStatut = item.facturePayee
-            ? "Facture payée"
+            ? "Payée"
             : factureEnRetard
-            ? "Paiement en retard"
+            ? "Retard"
             : item.numeroFacture
             ? "Facture"
             : "Devis";
 
+          const nomChantier =
+            item.complementAdresse ||
+            item.referenceChantier ||
+            item.adresse ||
+            "Chantier non renseigné";
+
           return (
             <div
               key={item.id}
-              className={`rounded-2xl border p-5 space-y-3 shadow-sm ${statutPastel}`}
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -4787,15 +4784,8 @@ return (
                   </p>
 
                   <p className="text-sm text-slate-500">
-                    {item.numeroDevis || "Aucun devis"} /{" "}
-                    {item.numeroFacture || "Aucune facture"}
+                    {nomChantier}
                   </p>
-
-                  {item.referenceChantier && (
-                    <p className="text-sm font-medium text-blue-700">
-                      Réf chantier : {item.referenceChantier}
-                    </p>
-                  )}
                 </div>
 
                 <span
@@ -4805,13 +4795,7 @@ return (
                 </span>
               </div>
 
-              {item.priorite && item.priorite !== "normale" && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-                  PRIORITÉ : {item.priorite}
-                </p>
-              )}
-
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
                 <MiniResult
                   titre="Total"
                   valeur={`${item.total || 0} €`}
@@ -4832,25 +4816,20 @@ return (
 
                 <MiniResult
                   titre="Reste"
-                  valeur={`${Math.max(0, (item.total || 0) - (item.montantEncaisse || 0))} €`}
+                  valeur={`${Math.max(
+                    0,
+                    (item.total || 0) - (item.montantEncaisse || 0)
+                  )} €`}
                   couleur={factureEnRetard ? "text-red-700" : "text-slate-900"}
                 />
               </div>
 
-              <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-2">
-                <p>📍 {item.adresse || "Adresse non renseignée"}</p>
-                <p>📞 {item.telephone || "Téléphone non renseigné"}</p>
+              <div className="mt-3 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
                 <p>📅 Chantier : {item.dateChantier || "Non planifié"}</p>
                 <p>💳 Paiement : {item.datePaiement || "Non renseigné"}</p>
               </div>
 
-              {item.notes && (
-                <p className="rounded-xl border border-slate-200 bg-white/70 p-3 text-sm text-slate-600">
-                  {item.notes}
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => rechargerDossier(item)}
                   className="btn-blue"
@@ -4864,24 +4843,6 @@ return (
                 >
                   Supprimer
                 </button>
-
-                {item.numeroFacture && !item.facturePayee && (
-                  <button
-                    onClick={() => marquerPayee(item.id)}
-                    className="btn-green"
-                  >
-                    Marquer payée
-                  </button>
-                )}
-
-                {item.numeroFacture && !item.facturePayee && (
-                  <button
-                    onClick={() => preparerRelance(item)}
-                    className="btn-amber"
-                  >
-                    Relancer
-                  </button>
-                )}
               </div>
             </div>
           );
