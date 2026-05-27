@@ -4783,9 +4783,14 @@ return (
                     {item.client || "Client non renseigné"}
                   </p>
 
-                  <p className="text-sm text-slate-500">
-                    {nomChantier}
-                  </p>
+                 <div className="text-sm text-slate-500 space-y-1">
+  
+  <p>
+    {item.numeroDevis || "Aucun devis"} /{" "}
+    {item.numeroFacture || "Aucune facture"}
+  </p>
+  <p>{nomChantier}</p>
+</div> 
                 </div>
 
                 <span
