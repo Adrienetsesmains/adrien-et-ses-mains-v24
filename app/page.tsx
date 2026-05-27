@@ -166,6 +166,8 @@ type Dossier = {
 
   // ================= FOURNITURES / DEPLACEMENT =================
   kmAller?: number;
+  fraisDeplacementManuelActif?: boolean;
+fraisDeplacementManuel?: number;
   achatFournitures?: number;
   coefficientFournitures?: number;
   fournituresClient?: boolean;
@@ -837,6 +839,10 @@ heureRdv,
 motifRdv,
 typeRdv,
 kmAller,
+
+fraisDeplacementManuelActif,
+fraisDeplacementManuel,
+
 achatFournitures,
 coefficientFournitures,
 fournituresClient,
@@ -949,8 +955,10 @@ const construireSauvegardeComplete = () => {
 
       lignesTravaux,
 
-      kmAller,
-      achatFournitures,
+     kmAller,
+fraisDeplacementManuelActif,
+fraisDeplacementManuel,
+achatFournitures,
       coefficientFournitures,
       fournituresClient,
       detailsFournitures,
@@ -1268,31 +1276,45 @@ const ajouterLigne = () => {
   setLignesTravaux((ancien) => [...ancien, nouvelleLigne]);
 };
 
- const modifierLigne = (id: number, champ: keyof LigneTravaux, valeur: string | number) => {
-  setLignesTravaux(
-    lignesTravaux.map((l) => {
+const modifierLigne = (
+  id: number,
+  champ: keyof LigneTravaux,
+  valeur: string | number
+) => {
+  setLignesTravaux((anciennesLignes) =>
+    anciennesLignes.map((l) => {
       if (l.id !== id) return l;
 
-      // Champs numériques uniquement
       const champsNumeriques: (keyof LigneTravaux)[] = [
-  "q1",
-  "q2",
-  "r1",
-  "r2",
-  "option",
-  "prixUnitaire",
-  "heuresUnite",
-];
+        "q1",
+        "q2",
+        "r1",
+        "r2",
+        "option",
+        "prixUnitaire",
+        "heuresUnite",
+      ];
 
-      if (champsNumeriques.includes(champ as keyof LigneTravaux)) {
-        return { ...l, [champ]: Number(valeur) };
+      if (champsNumeriques.includes(champ)) {
+        const valeurNumerique =
+          valeur === "" || valeur === null || Number.isNaN(Number(valeur))
+            ? 0
+            : Number(valeur);
+
+        return {
+          ...l,
+          [champ]: valeurNumerique,
+        };
       }
 
-      // Tout le reste = TEXTE
-      return { ...l, [champ]: valeur };
+      return {
+        ...l,
+        [champ]: valeur,
+      };
     })
   );
 };
+
 const modifierDetailPdf = (id: number, index: number, valeur: string) => {
   setLignesTravaux((ancien) =>
     ancien.map((l) => {
@@ -1307,7 +1329,7 @@ const modifierDetailPdf = (id: number, index: number, valeur: string) => {
       };
     })
   );
-};
+}; 
 
   const supprimerLigne = (id: number) => {
   setLignesTravaux(lignesTravaux.filter((l) => l.id !== id));
@@ -1343,6 +1365,8 @@ setNumeroFacture("");
   setLignesTravaux([]);
 
   setKmAller(0);
+  setFraisDeplacementManuelActif(false);
+setFraisDeplacementManuel(0);
   setAchatFournitures(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
@@ -1473,6 +1497,15 @@ const enregistrer = () => {
     pourcentageAcompte: estEvenementSimple ? 0 : pourcentageAcompte,
 
     kmAller: estEvenementSimple ? 0 : kmAller,
+    fraisDeplacementManuelActif:
+  estEvenementSimple
+    ? false
+    : fraisDeplacementManuelActif,
+
+fraisDeplacementManuel:
+  estEvenementSimple
+    ? 0
+    : fraisDeplacementManuel,
     achatFournitures: estEvenementSimple ? 0 : achatFournitures,
     coefficientFournitures,
     fournituresClient,
@@ -1626,6 +1659,13 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
 setNumeroSap(d.numeroSap || "");
 
   setKmAller(d.kmAller ?? 0);
+  setFraisDeplacementManuelActif(
+  d.fraisDeplacementManuelActif ?? false
+);
+
+setFraisDeplacementManuel(
+  d.fraisDeplacementManuel ?? 0
+);
 setAchatFournitures(d.achatFournitures ?? 0);
 setCoefficientFournitures(d.coefficientFournitures ?? 1.22);
 setFournituresClient(d.fournituresClient ?? true);
@@ -4684,258 +4724,172 @@ return (
           <Input label="Recherche client / devis / facture" value={rechercheHistorique} onChange={setRechercheHistorique} />
         </Bloc>
 
-        <BlocRepliable titre="Historique" ouvertParDefaut={false}>
-  {historiqueFiltre.length === 0 ? (
-    <p>Aucun dossier.</p>
+
+<BlocRepliable titre="Historique" ouvertParDefaut={false}>
+  {historiqueFiltre.filter(
+    (item) =>
+      item.typeEvenement !== "rdv" &&
+      item.typeEvenement !== "rappel" &&
+      (item.numeroDevis || item.numeroFacture)
+  ).length === 0 ? (
+    <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+      Aucun devis ou facture enregistré.
+    </p>
   ) : (
     <div className="space-y-4">
       {historiqueFiltre
-  .filter((d) => d.typeEvenement !== "rdv" && d.typeEvenement !== "rappel")
-  .map((item) => (
-        <div
-  key={item.id}
-  className={`rounded-2xl border p-5 space-y-3 ${
-    item.datePaiement &&
-    !item.facturePayee &&
-    parseDateFr(item.datePaiement) &&
-    parseDateFr(item.datePaiement)! < new Date()
-      ? "bg-red-50 border-red-300"
-      : "bg-white"
-  }`}
->
-          <div>
-            <p className="text-lg font-bold text-slate-800">{item.client}</p>
+        .filter(
+          (item) =>
+            item.typeEvenement !== "rdv" &&
+            item.typeEvenement !== "rappel" &&
+            (item.numeroDevis || item.numeroFacture)
+        )
+        .map((item) => {
+          const factureEnRetard =
+            item.datePaiement &&
+            !item.facturePayee &&
+            parseDateFr(item.datePaiement) &&
+            parseDateFr(item.datePaiement)! < new Date();
 
-            {item.priorite && item.priorite !== "normale" && (
-              <p className="font-semibold text-red-600">
-                PRIORITÉ : {item.priorite}
-              </p>
-            )}
+          const statutPastel = item.facturePayee
+            ? "bg-emerald-50 border-emerald-200"
+            : factureEnRetard
+            ? "bg-red-50 border-red-200"
+            : item.numeroFacture
+            ? "bg-blue-50 border-blue-200"
+            : "bg-slate-50 border-slate-200";
 
-            <p className="text-sm text-slate-500">
-              {item.numeroDevis} / {item.numeroFacture}
-            </p>
+          const badgePastel = item.facturePayee
+            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+            : factureEnRetard
+            ? "bg-red-100 text-red-800 border-red-200"
+            : item.numeroFacture
+            ? "bg-blue-100 text-blue-800 border-blue-200"
+            : "bg-amber-100 text-amber-800 border-amber-200";
 
-            {item.referenceChantier && (
-              <p className="text-sm font-medium text-blue-700">
-                Réf chantier : {item.referenceChantier}
-              </p>
-            )}
-          </div>
+          const libelleStatut = item.facturePayee
+            ? "Facture payée"
+            : factureEnRetard
+            ? "Paiement en retard"
+            : item.numeroFacture
+            ? "Facture"
+            : "Devis";
 
-          <div className="rounded-xl bg-slate-50 p-4 space-y-2">
-            <p>
-              <strong>Total :</strong> {item.total} € — <strong>Reste :</strong> {Math.max(0, item.total - (item.montantEncaisse || 0))} €
-            </p>
-{item.total < 450 && (
-  <div className="rounded-xl border border-red-300 bg-red-50 p-3">
-    <p className="font-semibold text-red-700">
-      ⚠ Chantier peu rentable
-    </p>
-  </div>
-)}
-            <p className="text-sm text-slate-500">
-              {item.lignesTravaux?.[0]?.prestationNom || "Travaux divers"}
-            </p>
-
-            <p>
-              <strong>Devis :</strong> {item.statutDevis}
-            </p>
-
-            <p>
-              <strong>Chantier :</strong> {item.statutChantier}
-            </p>
-
-            {item.dateChantier && (
-              <p>
-                <strong>Date chantier prévue :</strong> {item.dateChantier}
-              </p>
-            )}
-
-            {item.datePaiement && (
-              <p>
-                <strong>Paiement prévu :</strong> {item.datePaiement}
-              </p>
-            )}
-
-            <p>
-              <strong>Facture payée :</strong> {item.facturePayee ? "Oui" : "Non"}
-            </p>
-           {item.datePaiement &&
-  !item.facturePayee &&
-  parseDateFr(item.datePaiement) &&
-  parseDateFr(item.datePaiement)! < new Date() && (
-    <div className="rounded-xl border border-red-300 bg-red-50 p-3">
-      <p className="font-semibold text-red-700">
-        ⚠ Relance client à faire : paiement prévu dépassé.
-      </p>
-    </div>
-  )} 
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => rechargerDossier(item)}
-              className="rounded-xl bg-slate-800 px-4 py-2 font-semibold text-white"
+          return (
+            <div
+              key={item.id}
+              className={`rounded-2xl border p-5 space-y-3 shadow-sm ${statutPastel}`}
             >
-              Recharger
-            </button>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-lg font-bold text-slate-800">
+                    {item.client || "Client non renseigné"}
+                  </p>
 
-<button
-  onClick={() => {
-    rechargerDossier(item);
+                  <p className="text-sm text-slate-500">
+                    {item.numeroDevis || "Aucun devis"} /{" "}
+                    {item.numeroFacture || "Aucune facture"}
+                  </p>
 
-    setStatutDevis("en_cours");
-    setStatutChantier("a_planifier");
+                  {item.referenceChantier && (
+                    <p className="text-sm font-medium text-blue-700">
+                      Réf chantier : {item.referenceChantier}
+                    </p>
+                  )}
+                </div>
 
-    setNumeroDevis(item.numeroDevis || "");
-    setNumeroFacture("");
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgePastel}`}
+                >
+                  {libelleStatut}
+                </span>
+              </div>
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }}
-  className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white"
->
-  Transformer en devis en cours
-</button>
-            <button
-              onClick={() => {
-                setClient(item.client);
-                setTelephone(item.telephone);
-                setEmail(item.email);
-                setAdresse(item.adresse);
-                setAdresseAgence(item.adresseAgence || "");
-                setNotes(item.notes);
-                setModeClient(item.modeClient);
-                setLignesTravaux(
-                  item.lignesTravaux.map((l) => ({
-                    ...l,
-                    id: Date.now() + Math.random(),
-                  }))
-                );
+              {item.priorite && item.priorite !== "normale" && (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                  PRIORITÉ : {item.priorite}
+                </p>
+              )}
 
-                setNumeroDevis("");
-                setNumeroFacture(item.numeroFacture || "");
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                <MiniResult
+                  titre="Total"
+                  valeur={`${item.total || 0} €`}
+                  couleur="text-slate-900"
+                />
 
-                setStatutDevis("en_cours");
-                setStatutChantier("a_planifier");
-                setFacturePayee(false);
+                <MiniResult
+                  titre="Acompte"
+                  valeur={`${item.acompte || 0} €`}
+                  couleur="text-amber-700"
+                />
 
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="rounded-xl bg-purple-700 px-4 py-2 font-semibold text-white"
-            >
-              Dupliquer
-            </button>
+                <MiniResult
+                  titre="Encaissé"
+                  valeur={`${item.montantEncaisse || 0} €`}
+                  couleur="text-emerald-700"
+                />
 
-            <button
-              onClick={() =>
-                setHistorique(
-                  historique.map((d) =>
-                    d.id === item.id
-                      ? {
-                          ...d,
-                          statutDevis: "accepte",
-                          statutChantier: "a_planifier",
-                        }
-                      : d
-                  )
-                )
-              }
-              className="rounded-xl bg-blue-700 px-4 py-2 font-semibold text-white"
-            >
-              Devis accepté
-            </button>
+                <MiniResult
+                  titre="Reste"
+                  valeur={`${Math.max(0, (item.total || 0) - (item.montantEncaisse || 0))} €`}
+                  couleur={factureEnRetard ? "text-red-700" : "text-slate-900"}
+                />
+              </div>
 
-            <button
-              onClick={() =>
-                setHistorique(
-                  historique.map((d) =>
-                    d.id === item.id
-                      ? {
-                          ...d,
-                          statutChantier: "termine",
-                        }
-                      : d
-                  )
-                )
-              }
-              className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white"
-            >
-              Chantier terminé
-            </button>
-<button
-  onClick={() =>
-    setHistorique(
-      historique.map((d) =>
-        d.id === item.id
-          ? {
-              ...d,
-              statutChantier: "facture_envoyee",
-            }
-          : d
-      )
-    )
-  }
-  className="rounded-xl bg-cyan-700 px-4 py-2 font-semibold text-white"
->
-  Facture envoyée
-</button>
-            <button
- onClick={() => {
-  rechargerDossier(item);
+              <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-2">
+                <p>📍 {item.adresse || "Adresse non renseignée"}</p>
+                <p>📞 {item.telephone || "Téléphone non renseigné"}</p>
+                <p>📅 Chantier : {item.dateChantier || "Non planifié"}</p>
+                <p>💳 Paiement : {item.datePaiement || "Non renseigné"}</p>
+              </div>
 
-  setStatutDevis("accepte");
-  setStatutChantier("facture_envoyee");
-  setFacturePayee(false);
-  setIdDossierActuel(item.id);
+              {item.notes && (
+                <p className="rounded-xl border border-slate-200 bg-white/70 p-3 text-sm text-slate-600">
+                  {item.notes}
+                </p>
+              )}
 
-  setNumeroFacture(item.numeroFacture || "");
-  setMontantEncaisse(item.montantEncaisse ?? item.acompte ?? 0);
+              <div className="flex flex-wrap gap-2 pt-2">
+                <button
+                  onClick={() => rechargerDossier(item)}
+                  className="btn-blue"
+                >
+                  Ouvrir
+                </button>
 
-  // 🔥 IMPORTANT (ajout)
-  setDateChantier(item.dateChantier || "");
-  setDatePaiement(item.datePaiement || "");
+                <button
+                  onClick={() => supprimerDossier(item.id)}
+                  className="btn-orange"
+                >
+                  Supprimer
+                </button>
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}}
-  className="rounded-xl bg-indigo-700 px-4 py-2 font-semibold text-white"
->
-  Transformer en facture
-</button>
+                {item.numeroFacture && !item.facturePayee && (
+                  <button
+                    onClick={() => marquerPayee(item.id)}
+                    className="btn-green"
+                  >
+                    Marquer payée
+                  </button>
+                )}
 
-<button
-  onClick={() => marquerPayee(item.id)}
-  className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white"
->
-  Payée
-  
-</button>
-
-<button
-  onClick={() => preparerRelance(item)}
-  className="rounded-xl bg-orange-600 px-4 py-2 font-semibold text-white"
->
-  Préparer relance
-</button>
-
-            <button
-              onClick={() => supprimerDossier(item.id)}
-              className="rounded-xl border px-4 py-2 font-semibold"
-            >
-              Supprimer
-            </button>
-          </div>
-        </div>
-      ))}
+                {item.numeroFacture && !item.facturePayee && (
+                  <button
+                    onClick={() => preparerRelance(item)}
+                    className="btn-amber"
+                  >
+                    Relancer
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
     </div>
   )}
 </BlocRepliable>
+
 <BlocRepliable titre="Paramètres entreprise / RIB" ouvertParDefaut={false}>
   <div className="grid gap-3 md:grid-cols-2">
     <Input label="Titulaire" value={ribTitulaire} onChange={setRibTitulaire} />
