@@ -16,6 +16,7 @@ export type PrestationTarif = {
   conditions?: string;
   detailsPdf?: string[];
   typeTravaux?: string;
+    sapCategorie?: "ok" | "attention" | "non";
 };
 
 export type CategorieTarifs = {
@@ -685,6 +686,40 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       ],
       typeTravaux: "peinture",
     },
+{
+  nom: "Reprise / lissage encadrement fenêtre",
+  unite: "u",
+  prixMo220: 65,
+  prixMoJeremie150: 44,
+  heuresUnite: 2,
+  rentabilite: "🟠 À surveiller",
+  typeTravaux: "peinture",
+  sapCategorie: "non",
+  conditions: "Encadrement accessible / hors reprise structurelle / hors échafaudage",
+  detailsPdf: [
+    "Grattage et préparation des parties maçonnées irrégulières",
+    "Reprise localisée de l’enduit pour améliorer la planéité",
+    "Ponçage et lissage de l’encadrement avant finition",
+    "Nettoyage du support avant mise en peinture",
+  ],
+},
+{
+  nom: "Peinture encadrement fenêtre",
+  unite: "u",
+  prixMo220: 50,
+  prixMoJeremie150: 34,
+  heuresUnite: 1.5,
+  rentabilite: "🟢 Rentable",
+  typeTravaux: "peinture",
+  sapCategorie: "non",
+  conditions: "Support préparé / hors décapage lourd / hors échafaudage",
+  detailsPdf: [
+    "Protection des abords de la fenêtre",
+    "Application d’une impression ou sous-couche si nécessaire",
+    "Mise en peinture de l’encadrement extérieur",
+    "Finition propre des angles et reprises périphériques",
+  ],
+},
   ],
 },
                   {
@@ -1502,8 +1537,8 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
     {
       nom: "Déplacement jours suivants",
       unite: "km",
-      prixMo220: 0.30,
-      prixMoJeremie150: 0.30,
+      prixMo220: 0.70,
+      prixMoJeremie150: 0.70,
       heuresUnite: 0,
       rentabilite: "🟢",
       action: "Base déplacement jours suivants",
@@ -1548,6 +1583,7 @@ export type TarifPrestationPlat = {
   conditions: string;
   detailsPdf: string[];
   typeTravaux?: string;
+    sapCategorie: "ok" | "attention" | "non";
 };
 
 const creerIdPrestation = (nom: string) =>
@@ -1557,6 +1593,51 @@ const creerIdPrestation = (nom: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
+
+const determinerCategorieSap = (
+  categorie: string,
+  nom: string
+): "ok" | "attention" | "non" => {
+  const c = categorie.toLowerCase();
+  const n = nom.toLowerCase();
+
+  // 🟢 SAP OK : petit bricolage / jardinage / entretien simple
+  if (c.includes("bricolage")) return "ok";
+  if (c.includes("jardin")) return "ok";
+  if (c.includes("nettoyage")) return "ok";
+
+  // 🟡 SAP possible selon contexte : petite intervention uniquement
+  if (c.includes("peinture")) return "attention";
+  if (c.includes("plomberie")) return "attention";
+  if (c.includes("électricité") || c.includes("electricite")) return "attention";
+  if (c.includes("équipement") || c.includes("equipement")) return "attention";
+  if (c.includes("chauffage")) return "attention";
+  if (c.includes("ventilation")) return "attention";
+  if (c.includes("débarras") || c.includes("debarras")) return "attention";
+
+  // 🔴 Hors SAP : travaux bâtiment / transformation logement
+  if (c.includes("sols")) return "non";
+  if (c.includes("carrelage")) return "non";
+  if (c.includes("placo")) return "non";
+  if (c.includes("toiture")) return "non";
+  if (c.includes("métal") || c.includes("metal")) return "non";
+  if (c.includes("structure")) return "non";
+  if (c.includes("bois")) return "non";
+  if (c.includes("déplacement") || c.includes("deplacement")) return "non";
+
+  // Cas particuliers par nom
+  if (n.includes("carrelage")) return "non";
+  if (n.includes("faïence") || n.includes("faience")) return "non";
+  if (n.includes("ragréage") || n.includes("ragreage")) return "non";
+  if (n.includes("parquet")) return "non";
+  if (n.includes("sol pvc")) return "non";
+  if (n.includes("toiture")) return "non";
+  if (n.includes("gouttière") || n.includes("gouttiere")) return "non";
+  if (n.includes("placo")) return "non";
+  if (n.includes("soudure")) return "non";
+
+  return "attention";
+};
 
 export const TARIFS_PRESTATIONS: TarifPrestationPlat[] =
   TARIFS_PRESTATIONS_PAR_CATEGORIE.flatMap((categorie) =>
@@ -1588,5 +1669,9 @@ export const TARIFS_PRESTATIONS: TarifPrestationPlat[] =
           : DETAILS_PDF_PAR_CATEGORIE[categorie.categorie] ?? []),
 
       typeTravaux: prestation.typeTravaux ?? "main_oeuvre",
+
+      sapCategorie:
+        prestation.sapCategorie ??
+        determinerCategorieSap(categorie.categorie, prestation.nom),
     }))
   );
