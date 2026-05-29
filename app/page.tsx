@@ -3034,7 +3034,7 @@ doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 
 // Le cadre conditions mesure 72 mm de haut.
 // On repart donc après le cadre + marge, sinon le RIB chevauche les conditions.
-y = yConditions + 65 + 8;
+y = yConditions + 58 + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
