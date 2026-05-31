@@ -3385,40 +3385,64 @@ return new Promise<string>((resolve) => {
 
 return (
   <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
-    <div className="sticky top-0 z-40 mb-3 rounded-2xl border border-blue-200 bg-white/95 backdrop-blur p-3 shadow-sm">
-  <div className="grid gap-2 md:grid-cols-6">
-    <MiniResult
-      titre="Client"
-      valeur={resumeExpress.clientEnCours || "-"}
-    />
+<div className="sticky top-0 z-40 mb-3 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
+  {/* VERSION ORDINATEUR */}
+  <div className="hidden items-center gap-2 md:flex">
+    <div className="grid flex-1 grid-cols-6 gap-1">
+      <MiniResult titre="Client" valeur={resumeExpress.clientEnCours || "-"} />
+      <MiniResult titre="Total" valeur={`${resumeExpress.totalDevis} €`} couleur="text-blue-700" />
+      <MiniResult titre="Encaissé" valeur={`${resumeExpress.dejaEncaisse} €`} couleur="text-green-700" />
+      <MiniResult titre="Reste" valeur={`${resumeExpress.resteReel} €`} couleur="text-orange-700" />
+      <MiniResult titre="Paiement" valeur={resumeExpress.paiementPrevu || "-"} />
+      <MiniResult titre="Priorité" valeur={resumeExpress.prioriteActuelle} />
+    </div>
 
-    <MiniResult
-      titre="Total"
-      valeur={`${resumeExpress.totalDevis} €`}
-      couleur="text-blue-700"
-    />
+    <div className="flex gap-2">
+      <button onClick={nouveauDossier} className="btn-dark px-3 py-2 text-xs">
+        Nouveau
+      </button>
 
-    <MiniResult
-      titre="Encaissé"
-      valeur={`${resumeExpress.dejaEncaisse} €`}
-      couleur="text-green-700"
-    />
+      <button onClick={enregistrer} className="btn-amber px-3 py-2 text-xs">
+        Enregistrer
+      </button>
 
-    <MiniResult
-      titre="Reste"
-      valeur={`${resumeExpress.resteReel} €`}
-      couleur="text-orange-700"
-    />
+      <button onClick={() => genererPDF("devis")} className="btn-blue px-3 py-2 text-xs">
+        PDF devis
+      </button>
 
-    <MiniResult
-      titre="Paiement"
-      valeur={resumeExpress.paiementPrevu || "-"}
-    />
+      <button onClick={() => genererPDF("facture")} className="btn-emerald px-3 py-2 text-xs">
+        PDF facture
+      </button>
+    </div>
+  </div>
 
-    <MiniResult
-      titre="Priorité"
-      valeur={resumeExpress.prioriteActuelle}
-    />
+  {/* VERSION TÉLÉPHONE */}
+  <div className="flex items-center gap-2 md:hidden">
+    <button
+      onClick={() => {
+        setFicheOuverte(true);
+        setStatutDevis("estimation_rapide");
+        setNumeroDevis("");
+        setNumeroFacture("");
+      }}
+      className="flex-1 rounded-lg border border-orange-200 bg-orange-50 px-2 py-2 text-xs font-bold text-orange-800"
+    >
+      Estimation
+    </button>
+
+    <button
+      onClick={nouveauDossier}
+      className="flex-1 rounded-lg border border-slate-300 bg-slate-100 px-2 py-2 text-xs font-bold text-slate-800"
+    >
+      Nouveau
+    </button>
+
+    <button
+      onClick={enregistrer}
+      className="flex-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-2 text-xs font-bold text-amber-800"
+    >
+      Enregistrer
+    </button>
   </div>
 </div>
     <style jsx>{`
@@ -3979,28 +4003,12 @@ return (
         ⚡ Estimation rapide
       </button>
 
-      <button onClick={nouveauDossier} className="btn-dark">
-        Nouveau
-      </button>
-
-      <button onClick={envoyerDevisMail} className="btn-green">
+          <button onClick={envoyerDevisMail} className="btn-green">
         📧 Devis
       </button>
 
       <button onClick={envoyerFactureMail} className="btn-green">
         📧 Facture
-      </button>
-
-      <button onClick={() => genererPDF("devis")} className="btn-blue">
-        PDF devis
-      </button>
-
-      <button onClick={() => genererPDF("facture")} className="btn-emerald">
-        PDF facture
-      </button>
-
-      <button onClick={enregistrer} className="btn-amber">
-        Enregistrer
       </button>
 
       <button
