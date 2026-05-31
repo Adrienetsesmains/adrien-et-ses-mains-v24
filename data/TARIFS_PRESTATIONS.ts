@@ -1,4 +1,6 @@
+
 export type PrestationTarif = {
+  id?: string;
   nom: string;
   unite: string;
   prixMo220: number;
@@ -675,6 +677,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   prixMo220: 8,
   prixMoJeremie150: 5.45,
   heuresUnite: 0.25,
+  rentabilite: "🟢 Rentable agence",
   typeTravaux: "peinture",
   sapCategorie: "ok",
   detailsPdf: [
@@ -691,6 +694,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   prixMo220: 15,
   prixMoJeremie150: 10.2,
   heuresUnite: 0.50,
+  rentabilite: "🟢 Rentable agence",
   typeTravaux: "peinture",
   sapCategorie: "ok",
   detailsPdf: [
@@ -708,6 +712,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   prixMo220: 18,
   prixMoJeremie150: 12.25,
   heuresUnite: 0.60,
+  rentabilite: "🟢 Rentable agence",
   typeTravaux: "peinture",
   sapCategorie: "ok",
   detailsPdf: [
@@ -725,6 +730,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   prixMo220: 25,
   prixMoJeremie150: 17,
   heuresUnite: 0.80,
+  rentabilite: "🟢 Rentable agence",
   typeTravaux: "peinture",
   sapCategorie: "ok",
   detailsPdf: [
@@ -741,6 +747,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   prixMo220: 35,
   prixMoJeremie150: 23.8,
   heuresUnite: 1.20,
+  rentabilite: "🟢 Rentable agence",
   typeTravaux: "peinture",
   sapCategorie: "ok",
   detailsPdf: [
