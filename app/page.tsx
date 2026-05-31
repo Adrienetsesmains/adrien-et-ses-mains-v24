@@ -3522,19 +3522,18 @@ return (
         Nouveau
       </button>
 
+<button
+        onClick={enregistrer}
+        className="rounded-md border border-amber-200 bg-amber-50 px-1 py-1 text-[10px] font-bold text-amber-800"
+      >
+        Enreg.
+      </button>
+      
       <button
         onClick={envoyerCloud}
         className="rounded-md border border-blue-200 bg-blue-50 px-1 py-1 text-[10px] font-bold text-blue-800"
       >   
         Sauv.
-      </button>
-
-
-       <button
-        onClick={enregistrer}
-        className="rounded-md border border-amber-200 bg-amber-50 px-1 py-1 text-[10px] font-bold text-amber-800"
-      >
-        Enreg.
       </button>
 
       <button
