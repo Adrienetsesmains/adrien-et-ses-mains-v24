@@ -3414,87 +3414,50 @@ return (
 `}</style>
       <div className="mx-auto max-w-7xl space-y-3">
         <section className="rounded-xl bg-slate-800 px-4 py-3 text-white shadow-sm">
-<Bloc titre="Résumé express chantier">
-  <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
 
-    <MiniResult
-      titre="Client"
-      valeur={resumeExpress.clientEnCours}
-    />
+<div className="rounded-lg border bg-slate-50 p-3">
+  <button
+    type="button"
+    onClick={() => {
+      const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
+      setListeBackups(backups);
+      setSauvegardesOuvertes(!sauvegardesOuvertes);
+    }}
+    className="flex w-full items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800"
+  >
+    🔁 Sauvegardes de sécurité
+    <span>{sauvegardesOuvertes ? "▲" : "▼"}</span>
+  </button>
 
-    <MiniResult
-      titre="Total"
-      valeur={`${resumeExpress.totalDevis} €`}
-      couleur="text-blue-700"
-    />
+  {sauvegardesOuvertes && (
+    <div className="mt-2 space-y-2">
+      {listeBackups
+        .slice()
+        .reverse()
+        .map((b: any, i: number) => (
+          <button
+            key={i}
+            onClick={() => {
+              const confirmation = window.confirm(
+                `Restaurer la sauvegarde du ${b.date} ?`
+              );
+              if (!confirmation) return;
 
-    <MiniResult
-      titre="Encaissé"
-      valeur={`${resumeExpress.dejaEncaisse} €`}
-      couleur="text-green-700"
-    />
+              const backups = JSON.parse(
+                localStorage.getItem("backupHistoriqueV24") || "[]"
+              );
 
-    <MiniResult
-      titre="Reste"
-      valeur={`${resumeExpress.resteReel} €`}
-      couleur="text-orange-600"
-    />
+              restaurerBackup(backups.length - 1 - i);
+            }}
+            className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-semibold text-slate-800 hover:bg-amber-50"
+          >
+            {b.date}
+          </button>
+        ))}
+    </div>
+  )}
+</div>
 
-    <MiniResult
-      titre="Priorité"
-      valeur={resumeExpress.prioriteActuelle}
-    />
-
-    <MiniResult
-      titre="Paiement"
-      valeur={resumeExpress.paiementPrevu}
-    />
-
-  </div>
-
-  <div className="mt-3 rounded-lg border bg-slate-50 p-3">
-    <button
-      type="button"
-      onClick={() => {
-  const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
-  setListeBackups(backups);
-  setSauvegardesOuvertes(!sauvegardesOuvertes);
-}}
-      className="flex w-full items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800"
-    >
-      🔁 Sauvegardes de sécurité
-      <span>{sauvegardesOuvertes ? "▲" : "▼"}</span>
-    </button>
-
-    {sauvegardesOuvertes && (
-      <div className="mt-2 space-y-2">
-        {listeBackups
-  .slice()
-  .reverse()
-  .map((b: any, i: number) => (
-            <button
-              key={i}
-              onClick={() => {
-                const confirmation = window.confirm(
-                  `Restaurer la sauvegarde du ${b.date} ?`
-                );
-                if (!confirmation) return;
-
-                const backups = JSON.parse(
-                  localStorage.getItem("backupHistoriqueV24") || "[]"
-                );
-
-                restaurerBackup(backups.length - 1 - i);
-              }}
-              className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-semibold text-slate-800 hover:bg-amber-50"
-            >
-              {b.date}
-            </button>
-          ))}
-      </div>
-    )}
-  </div>
-</Bloc>
           <p className="text-sm text-amber-300">Adrien et ses mains</p>
           <h1 className="mt-1 text-2xl font-bold">Tableau de bord entreprise V24</h1>
           <p className="mt-1 text-sm text-slate-200">
@@ -3505,7 +3468,7 @@ return (
   </div>
 )}
         </section>
-<Bloc titre="Tableau de bord mensuel">
+<BlocRepliable titre="Tableau de bord mensuel" ouvertParDefaut={false}>
 
   <div className="flex items-center justify-between">
     <button
@@ -3564,7 +3527,7 @@ return (
     <GraphiqueCourbe donnees={donneesGraphique} />
   </BlocRepliable>
 
-</Bloc>
+</BlocRepliable>
 
 <Bloc titre="Dépenses entreprise">
   <div className="grid gap-2 md:grid-cols-3">
@@ -3741,7 +3704,7 @@ return (
   </BlocRepliable>
 </Bloc>
 
-<Bloc titre="Calendrier chantier">
+<BlocRepliable titre="Calendrier chantier" ouvertParDefaut={false}>
   <div className="rounded-xl border bg-slate-50 p-3 space-y-3">
     <Input
       label="Recherche planning / client / devis / facture"
@@ -3873,7 +3836,7 @@ return (
       </div>
     ))}
   </div>
-</Bloc>
+</BlocRepliable>
 
 <div ref={actionsRef}>
   <Bloc titre="Actions principales">
