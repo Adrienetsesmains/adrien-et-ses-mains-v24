@@ -3385,80 +3385,164 @@ return new Promise<string>((resolve) => {
 
 return (
   <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
-<div className="sticky top-0 z-40 mb-3 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
+<div className="sticky top-0 z-40 mb-2 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
+  <input
+    ref={importRef}
+    type="file"
+    accept="application/json"
+    className="hidden"
+    onChange={importer}
+  />
+
   {/* VERSION ORDINATEUR */}
-<div className="hidden md:block">
+  <div className="hidden space-y-2 md:block">
+    <div className="grid grid-cols-6 gap-1">
+      {[
+        ["Client", resumeExpress.clientEnCours || "-"],
+        ["Total", `${resumeExpress.totalDevis} €`],
+        ["Encaissé", `${resumeExpress.dejaEncaisse} €`],
+        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Paiement", resumeExpress.paiementPrevu || "-"],
+        ["Priorité", resumeExpress.prioriteActuelle || "-"],
+      ].map(([titre, valeur]) => (
+        <div key={titre} className="rounded-lg border bg-white px-2 py-1">
+          <p className="text-[10px] font-semibold text-slate-500">{titre}</p>
+          <p className="truncate text-sm font-bold text-slate-900">{valeur}</p>
+        </div>
+      ))}
+    </div>
 
-  <div className="grid grid-cols-6 gap-1">
-    <MiniResult titre="Client" valeur={resumeExpress.clientEnCours || "-"} />
-    <MiniResult titre="Total" valeur={`${resumeExpress.totalDevis} €`} couleur="text-blue-700" />
-    <MiniResult titre="Encaissé" valeur={`${resumeExpress.dejaEncaisse} €`} couleur="text-green-700" />
-    <MiniResult titre="Reste" valeur={`${resumeExpress.resteReel} €`} couleur="text-orange-700" />
-    <MiniResult titre="Paiement" valeur={resumeExpress.paiementPrevu || "-"} />
-    <MiniResult titre="Priorité" valeur={resumeExpress.prioriteActuelle} />
+    <div className="grid grid-cols-13 gap-1">
+      <button onClick={envoyerCloud} className="btn-blue px-2 py-1 text-[11px]">
+        ☁️ Sauv. cloud
+      </button>
+
+      <button onClick={recupererCloud} className="btn-emerald px-2 py-1 text-[11px]">
+        📥 Charger
+      </button>
+
+      <button
+        onClick={() => {
+          setFicheOuverte(true);
+          setStatutDevis("estimation_rapide");
+          setNumeroDevis("");
+          setNumeroFacture("");
+        }}
+        className="btn-orange px-2 py-1 text-[11px]"
+      >
+        ⚡ Esti.
+      </button>
+
+      <button onClick={nouveauDossier} className="btn-dark px-2 py-1 text-[11px]">
+        Nouveau
+      </button>
+
+      <button onClick={enregistrer} className="btn-amber px-2 py-1 text-[11px]">
+        Enregistrer
+      </button>
+
+      <button onClick={() => genererPDF("devis")} className="btn-blue px-2 py-1 text-[11px]">
+        PDF devis
+      </button>
+
+      <button onClick={() => genererPDF("facture")} className="btn-emerald px-2 py-1 text-[11px]">
+        PDF facture
+      </button>
+
+      <button onClick={envoyerDevisMail} className="btn-green px-2 py-1 text-[11px]">
+        Mail devis
+      </button>
+
+      <button onClick={envoyerFactureMail} className="btn-green px-2 py-1 text-[11px]">
+        Mail facture
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setFactureSap(!factureSap)}
+        className={`${factureSap ? "btn-green" : "btn-outline"} px-2 py-1 text-[11px]`}
+      >
+        SAP
+      </button>
+
+      <button onClick={exporter} className="btn-purple px-2 py-1 text-[11px]">
+        Export
+      </button>
+
+      <button onClick={() => importRef.current?.click()} className="btn-outline px-2 py-1 text-[11px]">
+        Import
+      </button>
+
+      <button
+        onClick={reinitialiserApplicationComplete}
+        className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-bold text-red-700"
+      >
+        RAZ appli
+      </button>
+    </div>
   </div>
-
-  <div className="mt-2 flex justify-center gap-2">
-
-    <button
-      onClick={nouveauDossier}
-      className="btn-dark px-4 py-2 text-sm"
-    >
-      Nouveau
-    </button>
-
-    <button
-      onClick={enregistrer}
-      className="btn-amber px-4 py-2 text-sm"
-    >
-      Enregistrer
-    </button>
-
-    <button
-      onClick={() => genererPDF("devis")}
-      className="btn-blue px-4 py-2 text-sm"
-    >
-      PDF devis
-    </button>
-
-    <button
-      onClick={() => genererPDF("facture")}
-      className="btn-emerald px-4 py-2 text-sm"
-    >
-      PDF facture
-    </button>
-
-  </div>
-
-</div>
 
   {/* VERSION TÉLÉPHONE */}
-  <div className="flex items-center gap-2 md:hidden">
-    <button
-      onClick={() => {
-        setFicheOuverte(true);
-        setStatutDevis("estimation_rapide");
-        setNumeroDevis("");
-        setNumeroFacture("");
-      }}
-      className="flex-1 rounded-lg border border-orange-200 bg-orange-50 px-2 py-2 text-xs font-bold text-orange-800"
-    >
-      Estimation
-    </button>
+  <div className="space-y-1 md:hidden">
+    <div className="grid grid-cols-6 gap-1">
+      {[
+        ["Client", resumeExpress.clientEnCours || "-"],
+        ["Total", `${resumeExpress.totalDevis} €`],
+        ["Enc.", `${resumeExpress.dejaEncaisse} €`],
+        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Pay.", resumeExpress.paiementPrevu || "-"],
+        ["Prio", resumeExpress.prioriteActuelle || "-"],
+      ].map(([titre, valeur]) => (
+        <div key={titre} className="rounded-md border bg-white px-1 py-1">
+          <p className="text-[8px] leading-none text-slate-500">{titre}</p>
+          <p className="truncate text-[10px] font-bold leading-tight text-slate-900">
+            {valeur}
+          </p>
+        </div>
+      ))}
+    </div>
 
-    <button
-      onClick={nouveauDossier}
-      className="flex-1 rounded-lg border border-slate-300 bg-slate-100 px-2 py-2 text-xs font-bold text-slate-800"
-    >
-      Nouveau
-    </button>
+    <div className="grid grid-cols-5 gap-1">
+      <button
+        onClick={() => {
+          setFicheOuverte(true);
+          setStatutDevis("estimation_rapide");
+          setNumeroDevis("");
+          setNumeroFacture("");
+        }}
+        className="rounded-md border border-orange-200 bg-orange-50 px-1 py-1 text-[10px] font-bold text-orange-800"
+      >
+        Estim.
+      </button>
 
-    <button
-      onClick={enregistrer}
-      className="flex-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-2 text-xs font-bold text-amber-800"
-    >
-      Enregistrer
-    </button>
+      <button
+        onClick={nouveauDossier}
+        className="rounded-md border border-slate-300 bg-slate-100 px-1 py-1 text-[10px] font-bold text-slate-800"
+      >
+        Nouveau
+      </button>
+
+      <button
+        onClick={envoyerCloud}
+        className="rounded-md border border-blue-200 bg-blue-50 px-1 py-1 text-[10px] font-bold text-blue-800"
+      >
+        Sauv.
+      </button>
+
+      <button
+        onClick={recupererCloud}
+        className="rounded-md border border-emerald-200 bg-emerald-50 px-1 py-1 text-[10px] font-bold text-emerald-800"
+      >
+        Charger
+      </button>
+
+      <button
+        onClick={enregistrer}
+        className="rounded-md border border-amber-200 bg-amber-50 px-1 py-1 text-[10px] font-bold text-amber-800"
+      >
+        Enreg.
+      </button>
+    </div>
   </div>
 </div>
     <style jsx>{`
@@ -3972,79 +4056,6 @@ return (
   </div>
 </BlocRepliable>
 
-<div ref={actionsRef}>
-  <Bloc titre="Actions principales">
-
-<button
-  onClick={envoyerCloud}
-  className="btn-blue"
->
-  ☁️ Sauvegarder Cloud
-</button>
-
-<button
-  onClick={recupererCloud}
-  className="btn-emerald"
->
-  📥 Charger Cloud
-</button>
-    <input
-      ref={importRef}
-      type="file"
-      accept="application/json"
-      className="hidden"
-      onChange={importer}
-    />
-
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-
-
-      <button onClick={exporter} className="btn-purple">
-        Export
-      </button>
-
-      <button onClick={() => importRef.current?.click()} className="btn-outline">
-        Import
-      </button>
-
-      <button
-        onClick={() => {
-          setFicheOuverte(true);
-          setStatutDevis("estimation_rapide");
-          setNumeroDevis("");
-          setNumeroFacture("");
-        }}
-        className="btn-orange"
-      >
-        ⚡ Estimation rapide
-      </button>
-
-          <button onClick={envoyerDevisMail} className="btn-green">
-        📧 Devis
-      </button>
-
-      <button onClick={envoyerFactureMail} className="btn-green">
-        📧 Facture
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setFactureSap(!factureSap)}
-        className={factureSap ? "btn-green" : "btn-outline"}
-      >
-        {factureSap ? "✅ Facture SAP activée" : "🧾 Facture SAP"}
-      </button>
-
-      <button
-        onClick={reinitialiserApplicationComplete}
-        className="rounded-xl border border-red-200 bg-red-50 p-3 font-bold text-red-700 hover:bg-red-100"
-      >
-        🧹 Réinitialiser application
-      </button>
-
-    </div>
-  </Bloc>
-</div>
 
   
         {ficheOuverte && (
