@@ -3291,6 +3291,42 @@ return new Promise<string>((resolve) => {
 
 return (
   <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
+    <div className="sticky top-0 z-40 mb-3 rounded-2xl border border-blue-200 bg-white/95 backdrop-blur p-3 shadow-sm">
+  <div className="grid gap-2 md:grid-cols-6">
+    <MiniResult
+      titre="Client"
+      valeur={resumeExpress.clientEnCours || "-"}
+    />
+
+    <MiniResult
+      titre="Total"
+      valeur={`${resumeExpress.totalDevis} €`}
+      couleur="text-blue-700"
+    />
+
+    <MiniResult
+      titre="Encaissé"
+      valeur={`${resumeExpress.dejaEncaisse} €`}
+      couleur="text-green-700"
+    />
+
+    <MiniResult
+      titre="Reste"
+      valeur={`${resumeExpress.resteReel} €`}
+      couleur="text-orange-700"
+    />
+
+    <MiniResult
+      titre="Paiement"
+      valeur={resumeExpress.paiementPrevu || "-"}
+    />
+
+    <MiniResult
+      titre="Priorité"
+      valeur={resumeExpress.prioriteActuelle}
+    />
+  </div>
+</div>
     <style jsx>{`
 
   .btn-green {
