@@ -669,6 +669,89 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       typeTravaux: "peinture",
     },
     {
+  id: "traitement_fissure_fine",
+  nom: "Traitement fissure fine mur ou plafond",
+  unite: "ml",
+  prixMo220: 8,
+  prixMoJeremie150: 5.45,
+  heuresUnite: 0.25,
+  typeTravaux: "peinture",
+  sapCategorie: "ok",
+  detailsPdf: [
+    "Ouverture légère de la fissure",
+    "Dépoussiérage du support",
+    "Application enduit fibré",
+    "Ponçage et préparation avant finition"
+  ]
+},
+{
+  id: "traitement_fissure_bande",
+  nom: "Traitement fissure avec bande de renfort",
+  unite: "ml",
+  prixMo220: 15,
+  prixMoJeremie150: 10.2,
+  heuresUnite: 0.50,
+  typeTravaux: "peinture",
+  sapCategorie: "ok",
+  detailsPdf: [
+    "Ouverture de la fissure",
+    "Pose bande papier ou fibre",
+    "Application enduit de rebouchage",
+    "Application enduit de finition",
+    "Ponçage et préparation avant peinture"
+  ]
+},
+{
+  id: "reprise_enduit_localisee",
+  nom: "Reprise enduit localisée mur ou plafond",
+  unite: "m²",
+  prixMo220: 18,
+  prixMoJeremie150: 12.25,
+  heuresUnite: 0.60,
+  typeTravaux: "peinture",
+  sapCategorie: "ok",
+  detailsPdf: [
+    "Purge des parties non adhérentes",
+    "Reprise des défauts du support",
+    "Application enduit de rebouchage",
+    "Application enduit de finition",
+    "Ponçage prêt à peindre"
+  ]
+},
+{
+  id: "purge_platre_decolle",
+  nom: "Purge plâtre ou enduit décollé",
+  unite: "m²",
+  prixMo220: 25,
+  prixMoJeremie150: 17,
+  heuresUnite: 0.80,
+  typeTravaux: "peinture",
+  sapCategorie: "ok",
+  detailsPdf: [
+    "Dépose des parties décollées",
+    "Nettoyage du support",
+    "Préparation avant reprise d'enduit",
+    "Mise en sécurité de la zone"
+  ]
+},
+{
+  id: "reprise_angle_ouverture",
+  nom: "Reprise fissure angle de porte ou fenêtre",
+  unite: "u",
+  prixMo220: 35,
+  prixMoJeremie150: 23.8,
+  heuresUnite: 1.20,
+  typeTravaux: "peinture",
+  sapCategorie: "ok",
+  detailsPdf: [
+    "Ouverture des fissures",
+    "Renforcement des angles sensibles",
+    "Pose bande de renfort",
+    "Reprise complète des enduits",
+    "Ponçage prêt à peindre"
+  ]
+},
+    {
       nom: "Enduit / ratissage complet + ponçage",
       unite: "m²",
       prixMo220: 9.33,
