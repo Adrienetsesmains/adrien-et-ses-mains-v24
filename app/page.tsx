@@ -3557,7 +3557,14 @@ return (
   {depenses.length > 0 && (
   <BlocRepliable titre="Historique dépenses" ouvertParDefaut={false}>
     <div className="space-y-2">
-      {depenses.slice(0, 20).map((depense) => (
+      {[...depenses]
+  .sort((a, b) => {
+    const da = parseDateFr(a.date)?.getTime() || 0;
+    const db = parseDateFr(b.date)?.getTime() || 0;
+    return db - da;
+  })
+
+  .map((depense) => (
         <div
           key={depense.id}
           className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 p-3 text-sm"
