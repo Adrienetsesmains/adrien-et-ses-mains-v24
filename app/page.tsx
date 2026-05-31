@@ -2024,24 +2024,26 @@ const marquerPayee = (id: number) => {
 };
 
 const construireObjetMail = (type: "devis" | "facture") => {
-  const villeChantier =
-    adresse
-      ?.split(",")
-      ?.pop()
-      ?.trim() || "";
+  const numero = type === "facture" ? numeroFacture : numeroDevis;
+  const libelle = type === "facture" ? "Facture" : "Devis";
 
   const nomAffiche =
     modeClient === "jeremie"
-      ? clientFinalNom || client
+      ? clientFinalNom || "Client final"
       : modeClient === "agence"
-      ? locataire || proprietaire || client
-      : client;
+      ? locataire || proprietaire || client || "Client"
+      : client || "Client";
 
-  if (type === "devis") {
-    return `Devis ${numeroDevis} - ${nomAffiche}${villeChantier ? `, ${villeChantier}` : ""}`;
-  }
+  const adresseAffichee =
+    modeClient === "jeremie"
+      ? clientFinalAdresse || ""
+      : modeClient === "agence"
+      ? `${adresse || ""} ${complementAdresse || ""}`.trim()
+      : `${adresse || ""} ${complementAdresse || ""}`.trim();
 
-  return `Facture ${numeroFacture} - ${nomAffiche}${villeChantier ? `, ${villeChantier}` : ""}`;
+  return `${libelle} ${numero} - ${nomAffiche}${
+    adresseAffichee ? `, ${adresseAffichee}` : ""
+  }`;
 };
 
 const ouvrirGoogleCalendar = ({
