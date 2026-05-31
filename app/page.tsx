@@ -3387,34 +3387,50 @@ return (
   <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
 <div className="sticky top-0 z-40 mb-3 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
   {/* VERSION ORDINATEUR */}
-  <div className="hidden items-center gap-2 md:flex">
-    <div className="grid flex-1 grid-cols-6 gap-1">
-      <MiniResult titre="Client" valeur={resumeExpress.clientEnCours || "-"} />
-      <MiniResult titre="Total" valeur={`${resumeExpress.totalDevis} €`} couleur="text-blue-700" />
-      <MiniResult titre="Encaissé" valeur={`${resumeExpress.dejaEncaisse} €`} couleur="text-green-700" />
-      <MiniResult titre="Reste" valeur={`${resumeExpress.resteReel} €`} couleur="text-orange-700" />
-      <MiniResult titre="Paiement" valeur={resumeExpress.paiementPrevu || "-"} />
-      <MiniResult titre="Priorité" valeur={resumeExpress.prioriteActuelle} />
-    </div>
+<div className="hidden md:block">
 
-    <div className="flex gap-2">
-      <button onClick={nouveauDossier} className="btn-dark px-3 py-2 text-xs">
-        Nouveau
-      </button>
-
-      <button onClick={enregistrer} className="btn-amber px-3 py-2 text-xs">
-        Enregistrer
-      </button>
-
-      <button onClick={() => genererPDF("devis")} className="btn-blue px-3 py-2 text-xs">
-        PDF devis
-      </button>
-
-      <button onClick={() => genererPDF("facture")} className="btn-emerald px-3 py-2 text-xs">
-        PDF facture
-      </button>
-    </div>
+  <div className="grid grid-cols-6 gap-1">
+    <MiniResult titre="Client" valeur={resumeExpress.clientEnCours || "-"} />
+    <MiniResult titre="Total" valeur={`${resumeExpress.totalDevis} €`} couleur="text-blue-700" />
+    <MiniResult titre="Encaissé" valeur={`${resumeExpress.dejaEncaisse} €`} couleur="text-green-700" />
+    <MiniResult titre="Reste" valeur={`${resumeExpress.resteReel} €`} couleur="text-orange-700" />
+    <MiniResult titre="Paiement" valeur={resumeExpress.paiementPrevu || "-"} />
+    <MiniResult titre="Priorité" valeur={resumeExpress.prioriteActuelle} />
   </div>
+
+  <div className="mt-2 flex justify-center gap-2">
+
+    <button
+      onClick={nouveauDossier}
+      className="btn-dark px-4 py-2 text-sm"
+    >
+      Nouveau
+    </button>
+
+    <button
+      onClick={enregistrer}
+      className="btn-amber px-4 py-2 text-sm"
+    >
+      Enregistrer
+    </button>
+
+    <button
+      onClick={() => genererPDF("devis")}
+      className="btn-blue px-4 py-2 text-sm"
+    >
+      PDF devis
+    </button>
+
+    <button
+      onClick={() => genererPDF("facture")}
+      className="btn-emerald px-4 py-2 text-sm"
+    >
+      PDF facture
+    </button>
+
+  </div>
+
+</div>
 
   {/* VERSION TÉLÉPHONE */}
   <div className="flex items-center gap-2 md:hidden">
