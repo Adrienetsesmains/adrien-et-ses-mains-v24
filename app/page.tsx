@@ -528,6 +528,9 @@ setClientFinalTelephone(b.clientFinalTelephone || "");
 setClientFinalAdresse(b.clientFinalAdresse || "");
 
 setKmAller(b.kmAller ?? 0);
+setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
+setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
+
 setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
@@ -847,6 +850,9 @@ setClientFinalTelephone(b.clientFinalTelephone || "");
 setClientFinalAdresse(b.clientFinalAdresse || "");
 
 setKmAller(b.kmAller ?? 0);
+setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
+setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
+
 setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
@@ -926,6 +932,8 @@ numeroSap,
   agence,
   referenceChantier,
   complementAdresse,
+  fraisDeplacementManuelActif,
+fraisDeplacementManuel,
   clientsEnregistres,
 heureChantier,
 dateRdv,
