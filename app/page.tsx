@@ -2176,8 +2176,14 @@ const resumeDepenses = useMemo(() => {
   });
 
   return {
-    totalMois: depensesDuMois.reduce((somme, d) => somme + (d.montant || 0), 0),
-    totalAnnee: depensesAnnee.reduce((somme, d) => somme + (d.montant || 0), 0),
+    totalMois: depensesDuMois.reduce(
+      (somme, d) => somme + (d.montant || 0),
+      0
+    ),
+    totalAnnee: depensesAnnee.reduce(
+      (somme, d) => somme + (d.montant || 0),
+      0
+    ),
     nombreTotal: depenses.length,
   };
 }, [depenses, moisSelectionne, anneeSelectionnee]);
@@ -3546,11 +3552,7 @@ return (
   </div>
 
   <div className="grid gap-3 md:grid-cols-5">
-    <DateInput
-      label="Date dépense"
-      value={depenseDate}
-      onChange={setDepenseDate}
-    />
+    <DateInput label="Date dépense" value={depenseDate} onChange={setDepenseDate} />
 
     <Select
       label="Catégorie"
@@ -3567,17 +3569,8 @@ return (
       ]}
     />
 
-    <Input
-      label="Description"
-      value={depenseDescription}
-      onChange={setDepenseDescription}
-    />
-
-    <NumberInput
-      label="Montant TTC"
-      value={depenseMontant}
-      onChange={setDepenseMontant}
-    />
+    <Input label="Description" value={depenseDescription} onChange={setDepenseDescription} />
+    <NumberInput label="Montant TTC" value={depenseMontant} onChange={setDepenseMontant} />
 
     <Select
       label="Paiement"
@@ -3621,10 +3614,7 @@ return (
     Ajouter dépense
   </button>
 
-  <BlocRepliable
-    titre={`Historique dépenses (${depenses.length})`}
-    ouvertParDefaut={false}
-  >
+  <BlocRepliable titre={`Historique dépenses (${depenses.length})`} ouvertParDefaut={false}>
     {depensesTriees.length === 0 ? (
       <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
         Aucune dépense enregistrée.
@@ -3632,10 +3622,7 @@ return (
     ) : (
       <div className="space-y-2">
         {depensesTriees.map((depense) => (
-          <div
-            key={depense.id}
-            className="rounded-xl border bg-slate-50 p-3 text-sm"
-          >
+          <div key={depense.id} className="rounded-xl border bg-slate-50 p-3 text-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-bold text-slate-800">
@@ -3643,8 +3630,7 @@ return (
                 </p>
 
                 <p className="text-slate-600">
-                  {depense.description || "Sans description"} ·{" "}
-                  {depense.modePaiement}
+                  {depense.description || "Sans description"} · {depense.modePaiement}
                 </p>
               </div>
 
@@ -3657,43 +3643,26 @@ return (
               <button
                 type="button"
                 onClick={() => {
-                  const nouvelleDate = window.prompt(
-                    "Date de la dépense :",
-                    depense.date
-                  );
+                  const nouvelleDate = window.prompt("Date de la dépense :", depense.date);
                   if (nouvelleDate === null) return;
 
-                  const nouvelleCategorie = window.prompt(
-                    "Catégorie :",
-                    depense.categorie
-                  );
+                  const nouvelleCategorie = window.prompt("Catégorie :", depense.categorie);
                   if (nouvelleCategorie === null) return;
 
-                  const nouvelleDescription = window.prompt(
-                    "Description :",
-                    depense.description
-                  );
+                  const nouvelleDescription = window.prompt("Description :", depense.description);
                   if (nouvelleDescription === null) return;
 
-                  const nouveauMontantTexte = window.prompt(
-                    "Montant TTC :",
-                    String(depense.montant)
-                  );
+                  const nouveauMontantTexte = window.prompt("Montant TTC :", String(depense.montant));
                   if (nouveauMontantTexte === null) return;
 
-                  const nouveauMontant = Number(
-                    nouveauMontantTexte.replace(",", ".")
-                  );
+                  const nouveauMontant = Number(nouveauMontantTexte.replace(",", "."));
 
                   if (Number.isNaN(nouveauMontant) || nouveauMontant < 0) {
                     alert("Montant invalide.");
                     return;
                   }
 
-                  const nouveauModePaiement = window.prompt(
-                    "Mode de paiement :",
-                    depense.modePaiement
-                  );
+                  const nouveauModePaiement = window.prompt("Mode de paiement :", depense.modePaiement);
                   if (nouveauModePaiement === null) return;
 
                   setDepenses((anciennes) =>
@@ -3719,14 +3688,10 @@ return (
               <button
                 type="button"
                 onClick={() => {
-                  const confirmation = window.confirm(
-                    "Supprimer cette dépense ?"
-                  );
+                  const confirmation = window.confirm("Supprimer cette dépense ?");
                   if (!confirmation) return;
 
-                  setDepenses((anciennes) =>
-                    anciennes.filter((d) => d.id !== depense.id)
-                  );
+                  setDepenses((anciennes) => anciennes.filter((d) => d.id !== depense.id));
                 }}
                 className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
               >
