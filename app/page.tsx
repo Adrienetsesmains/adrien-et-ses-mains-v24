@@ -5536,6 +5536,8 @@ ${d.notes || ""}`,
   );
 
 }
+let blocsRepliablesOuvertsGlobal: string[] = [];
+
 function BlocRepliable({
   titre,
   children,
@@ -5545,13 +5547,61 @@ function BlocRepliable({
   children: ReactNode;
   ouvertParDefaut?: boolean;
 }) {
+  const idBloc = titre;
   const [ouvert, setOuvert] = useState(ouvertParDefaut);
+
+  useEffect(() => {
+    const fermerBloc = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+
+      if (detail?.idBloc === idBloc) {
+        setOuvert(false);
+      }
+    };
+
+    window.addEventListener("fermer-bloc-repliable", fermerBloc);
+
+    return () => {
+      window.removeEventListener("fermer-bloc-repliable", fermerBloc);
+    };
+  }, [idBloc]);
+
+  const basculerBloc = () => {
+    if (ouvert) {
+      blocsRepliablesOuvertsGlobal = blocsRepliablesOuvertsGlobal.filter(
+        (id) => id !== idBloc
+      );
+
+      setOuvert(false);
+      return;
+    }
+
+    blocsRepliablesOuvertsGlobal = blocsRepliablesOuvertsGlobal.filter(
+      (id) => id !== idBloc
+    );
+
+    blocsRepliablesOuvertsGlobal.push(idBloc);
+
+    if (blocsRepliablesOuvertsGlobal.length > 2) {
+      const blocAFermer = blocsRepliablesOuvertsGlobal.shift();
+
+      if (blocAFermer) {
+        window.dispatchEvent(
+          new CustomEvent("fermer-bloc-repliable", {
+            detail: { idBloc: blocAFermer },
+          })
+        );
+      }
+    }
+
+    setOuvert(true);
+  };
 
   return (
     <section className="rounded-xl border bg-white px-4 py-3 shadow-sm">
       <button
         type="button"
-        onClick={() => setOuvert(!ouvert)}
+        onClick={basculerBloc}
         className="flex w-full items-center justify-between gap-3 text-left"
       >
         <h2 className="text-base font-bold text-slate-900">{titre}</h2>
