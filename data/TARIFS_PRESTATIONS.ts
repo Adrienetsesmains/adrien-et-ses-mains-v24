@@ -765,7 +765,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       prixMoJeremie150: 6.36,
       tva: 10,
       prixJeremieTtc: 7,
-      heuresUnite: 0.33,
+      heuresUnite: 0.45,
       rentabilite: "🟢 Rentable agence",
       detailsPdf: [
         "Préparation du support",
@@ -847,7 +847,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         prixJeremieTtc: 3.65,
         marcheHtMin: 14,
         marcheHtMax: 22,
-        heuresUnite: 0.17,
+        heuresUnite: 0.37,
         rentabilite: "🟢 Rentable agence",
         action: "Acceptable au tarif bas",
         notes:

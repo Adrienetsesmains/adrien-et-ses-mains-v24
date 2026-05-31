@@ -2024,20 +2024,24 @@ const marquerPayee = (id: number) => {
 };
 
 const construireObjetMail = (type: "devis" | "facture") => {
-  const numero = type === "facture" ? numeroFacture : numeroDevis;
-  const libelle = type === "facture" ? "Facture" : "Devis";
+  const villeChantier =
+    adresse
+      ?.split(",")
+      ?.pop()
+      ?.trim() || "";
 
-const nomPrincipal =
-  modeClient === "normal"
-    ? client || "Client"
-    : complementAdresse || adresse || clientFinalNom || client || "Chantier";
+  const nomAffiche =
+    modeClient === "jeremie"
+      ? clientFinalNom || client
+      : modeClient === "agence"
+      ? locataire || proprietaire || client
+      : client;
 
-  const referenceAgence =
-    modeClient === "agence" && referenceChantier.trim()
-      ? ` - Réf. ${referenceChantier.trim()}`
-      : "";
+  if (type === "devis") {
+    return `Devis ${numeroDevis} - ${nomAffiche}${villeChantier ? `, ${villeChantier}` : ""}`;
+  }
 
-  return `${libelle} ${numero} - ${nomPrincipal}${referenceAgence}`;
+  return `Facture ${numeroFacture} - ${nomAffiche}${villeChantier ? `, ${villeChantier}` : ""}`;
 };
 
 const ouvrirGoogleCalendar = ({
@@ -3528,7 +3532,7 @@ return (
       >
         Enreg.
       </button>
-      
+
       <button
         onClick={envoyerCloud}
         className="rounded-md border border-blue-200 bg-blue-50 px-1 py-1 text-[10px] font-bold text-blue-800"
