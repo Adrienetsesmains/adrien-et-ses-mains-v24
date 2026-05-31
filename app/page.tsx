@@ -4873,10 +4873,17 @@ return (
             : "Devis";
 
           const nomChantier =
-            item.complementAdresse ||
-            item.referenceChantier ||
-            item.adresse ||
-            "Chantier non renseigné";
+  item.modeClient === "jeremie"
+    ? item.clientFinalAdresse ||
+      item.adresse ||
+      "Chantier non renseigné"
+    : item.modeClient === "agence"
+    ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
+      item.referenceChantier ||
+      "Chantier non renseigné"
+    : item.complementAdresse ||
+      item.adresse ||
+      "Chantier non renseigné";
 
           return (
             <div
@@ -4886,8 +4893,15 @@ return (
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold text-slate-800">
-                    {item.client || "Client non renseigné"}
-                  </p>
+  {item.modeClient === "jeremie"
+    ? item.clientFinalNom || item.client || "Client non renseigné"
+    : item.modeClient === "agence"
+    ? item.locataire ||
+      item.proprietaire ||
+      item.client ||
+      "Client non renseigné"
+    : item.client || "Client non renseigné"}
+</p>
 
                  <div className="text-sm text-slate-500 space-y-1">
   
