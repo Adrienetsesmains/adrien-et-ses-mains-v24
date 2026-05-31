@@ -1301,10 +1301,35 @@ const modifierLigne = (
             ? 0
             : Number(valeur);
 
-        return {
-          ...l,
-          [champ]: valeurNumerique,
-        };
+  const ligneModifiee: LigneTravaux = {
+  ...l,
+  [champ]: valeurNumerique,
+};
+
+if (
+  champ === "heuresUnite" &&
+  !l.prixManuel &&
+  l.heuresUnite &&
+  l.heuresUnite > 0
+) {
+  const ancienPrix =
+    l.prixUnitaire ||
+    l.prixUnitaireAuto ||
+    montantLigne(l, modeClient);
+
+  const tauxHoraireLigne = ancienPrix / l.heuresUnite;
+
+  ligneModifiee.prixUnitaire =
+    Math.round(tauxHoraireLigne * valeurNumerique * 100) / 100;
+
+  ligneModifiee.prixUnitaireAuto =
+    Math.round(tauxHoraireLigne * valeurNumerique * 100) / 100;
+
+  ligneModifiee.heuresUniteManuel = true;
+}
+
+return ligneModifiee;
+
       }
 
       return {
@@ -2222,36 +2247,52 @@ const resumeExpress = useMemo(() => {
   };
 }, [client, calcul.total, montantEncaisse, priorite, datePaiement, dossierActuel]);
 const historiqueFiltre = useMemo(() => {
-  const q = rechercheHistorique.toLowerCase().trim();
+  const q = normaliserTexte(rechercheHistorique);
 
   if (!q) return historique;
 
   return historique.filter((d) =>
-    `${d.client} ${d.telephone} ${d.numeroDevis} ${d.numeroFacture}`
-      .toLowerCase()
-      .includes(q)
+    normaliserTexte(`
+      ${d.client || ""}
+      ${d.telephone || ""}
+      ${d.email || ""}
+      ${d.numeroDevis || ""}
+      ${d.numeroFacture || ""}
+      ${d.clientFinalNom || ""}
+      ${d.clientFinalTelephone || ""}
+      ${d.clientFinalAdresse || ""}
+      ${d.locataire || ""}
+      ${d.telephoneLocataire || ""}
+      ${d.proprietaire || ""}
+      ${d.telephoneProprietaire || ""}
+      ${d.referenceChantier || ""}
+      ${d.adresse || ""}
+      ${d.complementAdresse || ""}
+      ${d.agence || ""}
+    `).includes(q)
   );
 }, [historique, rechercheHistorique]);
 
 const resultatsCalendrier = useMemo(() => {
-  const q = rechercheCalendrier.toLowerCase().trim();
+  const q = normaliserTexte(rechercheCalendrier);
 
   if (!q) return [];
 
   return historique.filter((d) =>
-    `
-    ${d.client}
-    ${d.telephone}
-    ${d.email}
-    ${d.adresse}
-    ${d.numeroDevis}
-    ${d.numeroFacture}
-    ${d.referenceChantier}
-    ${d.locataire}
-    ${d.proprietaire}
-    `
-      .toLowerCase()
-      .includes(q)
+    normaliserTexte(`
+      ${d.client || ""}
+      ${d.telephone || ""}
+      ${d.email || ""}
+      ${d.adresse || ""}
+      ${d.complementAdresse || ""}
+      ${d.numeroDevis || ""}
+      ${d.numeroFacture || ""}
+      ${d.referenceChantier || ""}
+      ${d.locataire || ""}
+      ${d.proprietaire || ""}
+      ${d.clientFinalNom || ""}
+      ${d.clientFinalAdresse || ""}
+    `).includes(q)
   );
 }, [historique, rechercheCalendrier]);
   
@@ -2304,6 +2345,8 @@ const reinitialiserApplicationComplete = () => {
   setLignesTravaux([]);
 
   setKmAller(0);
+  setFraisDeplacementManuelActif(false);
+setFraisDeplacementManuel(0);
   setAchatFournitures(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
@@ -2406,6 +2449,13 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLignesTravaux(b.lignesTravaux || []);
 
         setKmAller(b.kmAller ?? 0);
+        setFraisDeplacementManuelActif(
+  b.fraisDeplacementManuelActif ?? false
+);
+
+setFraisDeplacementManuel(
+  b.fraisDeplacementManuel ?? 0
+);
         setAchatFournitures(b.achatFournitures ?? 0);
         setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
         setFournituresClient(b.fournituresClient ?? true);
@@ -3504,6 +3554,48 @@ return (
   >
     Ajouter dépense
   </button>
+  {depenses.length > 0 && (
+  <BlocRepliable titre="Historique dépenses" ouvertParDefaut={false}>
+    <div className="space-y-2">
+      {depenses.slice(0, 20).map((depense) => (
+        <div
+          key={depense.id}
+          className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 p-3 text-sm"
+        >
+          <div>
+            <p className="font-bold text-slate-800">
+              {depense.date} — {depense.categorie}
+            </p>
+            <p className="text-slate-600">
+              {depense.description || "Sans description"} · {depense.modePaiement}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <p className="font-bold text-red-700">
+              {depense.montant.toFixed(2)} €
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                const confirmation = window.confirm("Supprimer cette dépense ?");
+                if (!confirmation) return;
+
+                setDepenses((ancien) =>
+                  ancien.filter((d) => d.id !== depense.id)
+                );
+              }}
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </BlocRepliable>
+)}
 </Bloc>
 
 <Bloc titre="Calendrier chantier">
@@ -3521,9 +3613,23 @@ return (
         ) : (
           resultatsCalendrier.map((d) => (
             <div key={d.id} className="rounded-xl border bg-white p-3 space-y-2">
-              <p className="font-bold text-slate-800">{d.client || "Client non renseigné"}</p>
+              <p className="font-bold text-slate-800">
+  {d.modeClient === "jeremie"
+    ? d.clientFinalNom || d.client || "Client non renseigné"
+    : d.modeClient === "agence"
+    ? d.locataire || d.proprietaire || d.client || "Client non renseigné"
+    : d.client || "Client non renseigné"}
+</p>
               <p className="text-sm text-slate-600">📞 {d.telephone || "Téléphone non renseigné"}</p>
-              <p className="text-sm text-slate-600">📍 {d.adresse || "Adresse non renseignée"}</p>
+              <p className="text-sm text-slate-600">
+  📍{" "}
+  {d.modeClient === "jeremie"
+    ? d.clientFinalAdresse || d.adresse || "Adresse non renseignée"
+    : d.modeClient === "agence"
+    ? `${d.adresse || ""} ${d.complementAdresse || ""}`.trim() ||
+      "Adresse chantier non renseignée"
+    : d.adresse || "Adresse non renseignée"}
+</p>
 
               <button
                 onClick={() => {
@@ -5454,14 +5560,58 @@ function NumberInput({
   value: number;
   onChange: (v: number) => void;
 }) {
+  const [valeurTexte, setValeurTexte] = useState(
+    value === 0 ? "0" : String(value)
+  );
+
+  useEffect(() => {
+    setValeurTexte(value === 0 ? "0" : String(value));
+  }, [value]);
+
   return (
     <div>
       <label className="text-xs font-semibold text-slate-700">{label}</label>
       <input
-        type="number"
+        type="text"
+        inputMode="decimal"
         className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        value={valeurTexte}
+        onFocus={() => {
+          if (valeurTexte === "0") {
+            setValeurTexte("");
+          }
+        }}
+        onChange={(e) => {
+          const brut = e.target.value.replace(",", ".");
+
+          if (brut === "") {
+            setValeurTexte("");
+            onChange(0);
+            return;
+          }
+
+          if (!/^\d*\.?\d{0,2}$/.test(brut)) return;
+
+          setValeurTexte(brut);
+
+          const nombre = Number(brut);
+          if (!Number.isNaN(nombre)) {
+            onChange(nombre);
+          }
+        }}
+        onBlur={() => {
+          const nombre = Number(valeurTexte);
+
+          if (!valeurTexte || Number.isNaN(nombre)) {
+            setValeurTexte("0");
+            onChange(0);
+            return;
+          }
+
+          const arrondi = Math.round(nombre * 100) / 100;
+          setValeurTexte(String(arrondi));
+          onChange(arrondi);
+        }}
       />
     </div>
   );
