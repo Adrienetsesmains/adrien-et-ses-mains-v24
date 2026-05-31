@@ -563,11 +563,93 @@ setTypeRdv(b.typeRdv || "visite");
   alert("✅ Sauvegarde restaurée");
 }; 
   
+const appliquerSauvegardeComplete = (data: any) => {
+  if (!data) return;
+
+  setHistorique(data.historique || []);
+  setDepenses(data.depenses || []);
+  setClientsEnregistres(data.clientsEnregistres || clientsBase);
+
+  setCompteurDevis(data.compteurDevis ?? 1);
+  setCompteurFacture(data.compteurFacture ?? 1);
+
+  setNumeroDevis(data.numeroDevis || "");
+  setNumeroFacture(data.numeroFacture || "");
+
+  setMoisSelectionne(data.moisSelectionne ?? new Date().getMonth());
+  setAnneeSelectionnee(data.anneeSelectionnee ?? new Date().getFullYear());
+
+  setRibTitulaire(data.ribTitulaire || "");
+  setRibIban(data.ribIban || "");
+  setRibBic(data.ribBic || "");
+  setRibBanque(data.ribBanque || "");
+
+  setFactureSap(data.factureSap || false);
+  setNumeroSap(data.numeroSap || "");
+
+  if (data.brouillon) {
+    const b = data.brouillon;
+
+    setIdDossierActuel(b.idDossierActuel ?? null);
+
+    setClient(b.client || "");
+    setTelephone(b.telephone || "");
+    setEmail(b.email || "");
+    setAdresse(b.adresse || "");
+    setAdresseAgence(b.adresseAgence || "");
+    setComplementAdresse(b.complementAdresse || "");
+    setNotes(b.notes || "");
+
+    setModeClient(b.modeClient || "normal");
+
+    setClientFinalNom(b.clientFinalNom || "");
+    setClientFinalTelephone(b.clientFinalTelephone || "");
+    setClientFinalAdresse(b.clientFinalAdresse || "");
+
+    setLignesTravaux(b.lignesTravaux || []);
+
+    setKmAller(b.kmAller ?? 0);
+    setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
+    setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
+
+    setAchatFournitures(b.achatFournitures ?? 0);
+    setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
+    setFournituresClient(b.fournituresClient ?? true);
+    setDetailsFournitures(b.detailsFournitures || "");
+
+    setMontantEncaisse(b.montantEncaisse ?? 0);
+    setPourcentageAcompte(b.pourcentageAcompte ?? 30);
+
+    setFactureSap(b.factureSap || false);
+    setNumeroSap(b.numeroSap || "");
+
+    setStatutDevis(b.statutDevis || "en_cours");
+    setStatutChantier(b.statutChantier || "a_planifier");
+    setFacturePayee(b.facturePayee || false);
+
+    setDateChantier(b.dateChantier || "");
+    setHeureChantier(b.heureChantier || "");
+    setDatePaiement(b.datePaiement || "");
+
+    setDateRdv(b.dateRdv || "");
+    setHeureRdv(b.heureRdv || "");
+    setMotifRdv(b.motifRdv || "");
+    setTypeRdv(b.typeRdv || "visite");
+
+    setPriorite(b.priorite || "normale");
+
+    setLocataire(b.locataire || "");
+    setTelephoneLocataire(b.telephoneLocataire || "");
+    setProprietaire(b.proprietaire || "");
+    setTelephoneProprietaire(b.telephoneProprietaire || "");
+
+    setAgence(b.agence || "");
+    setReferenceChantier(b.referenceChantier || "");
+  }
+};
+
 const envoyerCloud = async () => {
-  const data = {
-    historique,
-    clientsEnregistres,
-  };
+  const data = construireSauvegardeComplete();
 
   const { error } = await supabase
     .from("dashboard_data")
@@ -575,15 +657,19 @@ const envoyerCloud = async () => {
       {
         id: "global",
         data,
+        updated_at: new Date().toISOString(),
       },
     ]);
 
   if (error) {
     console.error("Erreur cloud :", error);
-    alert("Erreur envoi cloud");
-  } else {
-    alert("✅ Données envoyées au cloud");
+    alert("❌ Erreur envoi cloud");
+    return;
   }
+
+  localStorage.setItem("tableauDeBordEntrepriseV24", JSON.stringify(data));
+
+  alert("✅ Données complètes envoyées au cloud");
 };
 
 const recupererCloud = async () => {
@@ -595,15 +681,23 @@ const recupererCloud = async () => {
 
   if (error) {
     console.error("Erreur récupération :", error);
-    alert("Erreur récupération cloud");
+    alert("❌ Erreur récupération cloud");
     return;
   }
 
-  if (data?.data) {
-    setHistorique(data.data.historique || []);
-    setClientsEnregistres(data.data.clientsEnregistres || []);
-    alert("✅ Données récupérées depuis le cloud");
+  if (!data?.data) {
+    alert("Aucune donnée cloud trouvée");
+    return;
   }
+
+  appliquerSauvegardeComplete(data.data);
+
+  localStorage.setItem(
+    "tableauDeBordEntrepriseV24",
+    JSON.stringify(data.data)
+  );
+
+  alert("✅ Données complètes récupérées depuis le cloud");
 };
 
   const importRef = useRef<HTMLInputElement | null>(null);
