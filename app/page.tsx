@@ -2149,6 +2149,39 @@ const tableauMensuel = useMemo(() => {
   };
 }, [historique, depenses, moisSelectionne, anneeSelectionnee]);
 
+const depensesTriees = useMemo(() => {
+  return [...depenses].sort((a, b) => {
+    const dateA = parseDateFr(a.date)?.getTime() || 0;
+    const dateB = parseDateFr(b.date)?.getTime() || 0;
+    return dateB - dateA;
+  });
+}, [depenses]);
+
+const resumeDepenses = useMemo(() => {
+  const depensesDuMois = depenses.filter((depense) => {
+    const dateDepense = parseDateFr(depense.date);
+    if (!dateDepense) return false;
+
+    return (
+      dateDepense.getMonth() === moisSelectionne &&
+      dateDepense.getFullYear() === anneeSelectionnee
+    );
+  });
+
+  const depensesAnnee = depenses.filter((depense) => {
+    const dateDepense = parseDateFr(depense.date);
+    if (!dateDepense) return false;
+
+    return dateDepense.getFullYear() === anneeSelectionnee;
+  });
+
+  return {
+    totalMois: depensesDuMois.reduce((somme, d) => somme + (d.montant || 0), 0),
+    totalAnnee: depensesAnnee.reduce((somme, d) => somme + (d.montant || 0), 0),
+    nombreTotal: depenses.length,
+  };
+}, [depenses, moisSelectionne, anneeSelectionnee]);
+
 const alertesIntelligentes = useMemo(() => {
   const aujourdHui = new Date();
 
@@ -3492,8 +3525,32 @@ return (
 </Bloc>
 
 <Bloc titre="Dépenses entreprise">
+  <div className="grid gap-2 md:grid-cols-3">
+    <MiniResult
+      titre="Dépenses du mois"
+      valeur={`${resumeDepenses.totalMois.toFixed(2)} €`}
+      couleur="text-red-700"
+    />
+
+    <MiniResult
+      titre="Dépenses année"
+      valeur={`${resumeDepenses.totalAnnee.toFixed(2)} €`}
+      couleur="text-orange-700"
+    />
+
+    <MiniResult
+      titre="Nombre dépenses"
+      valeur={`${resumeDepenses.nombreTotal}`}
+      couleur="text-slate-900"
+    />
+  </div>
+
   <div className="grid gap-3 md:grid-cols-5">
-    <DateInput label="Date dépense" value={depenseDate} onChange={setDepenseDate} />
+    <DateInput
+      label="Date dépense"
+      value={depenseDate}
+      onChange={setDepenseDate}
+    />
 
     <Select
       label="Catégorie"
@@ -3510,8 +3567,17 @@ return (
       ]}
     />
 
-    <Input label="Description" value={depenseDescription} onChange={setDepenseDescription} />
-    <NumberInput label="Montant TTC" value={depenseMontant} onChange={setDepenseMontant} />
+    <Input
+      label="Description"
+      value={depenseDescription}
+      onChange={setDepenseDescription}
+    />
+
+    <NumberInput
+      label="Montant TTC"
+      value={depenseMontant}
+      onChange={setDepenseMontant}
+    />
 
     <Select
       label="Paiement"
@@ -3554,55 +3620,124 @@ return (
   >
     Ajouter dépense
   </button>
-  {depenses.length > 0 && (
-  <BlocRepliable titre="Historique dépenses" ouvertParDefaut={false}>
-    <div className="space-y-2">
-      {[...depenses]
-  .sort((a, b) => {
-    const da = parseDateFr(a.date)?.getTime() || 0;
-    const db = parseDateFr(b.date)?.getTime() || 0;
-    return db - da;
-  })
 
-  .map((depense) => (
-        <div
-          key={depense.id}
-          className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 p-3 text-sm"
-        >
-          <div>
-            <p className="font-bold text-slate-800">
-              {depense.date} — {depense.categorie}
-            </p>
-            <p className="text-slate-600">
-              {depense.description || "Sans description"} · {depense.modePaiement}
-            </p>
+  <BlocRepliable
+    titre={`Historique dépenses (${depenses.length})`}
+    ouvertParDefaut={false}
+  >
+    {depensesTriees.length === 0 ? (
+      <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+        Aucune dépense enregistrée.
+      </p>
+    ) : (
+      <div className="space-y-2">
+        {depensesTriees.map((depense) => (
+          <div
+            key={depense.id}
+            className="rounded-xl border bg-slate-50 p-3 text-sm"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-bold text-slate-800">
+                  {depense.date} — {depense.categorie}
+                </p>
+
+                <p className="text-slate-600">
+                  {depense.description || "Sans description"} ·{" "}
+                  {depense.modePaiement}
+                </p>
+              </div>
+
+              <p className="font-bold text-red-700">
+                {(depense.montant || 0).toFixed(2)} €
+              </p>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const nouvelleDate = window.prompt(
+                    "Date de la dépense :",
+                    depense.date
+                  );
+                  if (nouvelleDate === null) return;
+
+                  const nouvelleCategorie = window.prompt(
+                    "Catégorie :",
+                    depense.categorie
+                  );
+                  if (nouvelleCategorie === null) return;
+
+                  const nouvelleDescription = window.prompt(
+                    "Description :",
+                    depense.description
+                  );
+                  if (nouvelleDescription === null) return;
+
+                  const nouveauMontantTexte = window.prompt(
+                    "Montant TTC :",
+                    String(depense.montant)
+                  );
+                  if (nouveauMontantTexte === null) return;
+
+                  const nouveauMontant = Number(
+                    nouveauMontantTexte.replace(",", ".")
+                  );
+
+                  if (Number.isNaN(nouveauMontant) || nouveauMontant < 0) {
+                    alert("Montant invalide.");
+                    return;
+                  }
+
+                  const nouveauModePaiement = window.prompt(
+                    "Mode de paiement :",
+                    depense.modePaiement
+                  );
+                  if (nouveauModePaiement === null) return;
+
+                  setDepenses((anciennes) =>
+                    anciennes.map((d) =>
+                      d.id === depense.id
+                        ? {
+                            ...d,
+                            date: nouvelleDate,
+                            categorie: nouvelleCategorie,
+                            description: nouvelleDescription,
+                            montant: Math.round(nouveauMontant * 100) / 100,
+                            modePaiement: nouveauModePaiement,
+                          }
+                        : d
+                    )
+                  );
+                }}
+                className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const confirmation = window.confirm(
+                    "Supprimer cette dépense ?"
+                  );
+                  if (!confirmation) return;
+
+                  setDepenses((anciennes) =>
+                    anciennes.filter((d) => d.id !== depense.id)
+                  );
+                }}
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
+              >
+                Supprimer
+              </button>
+            </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <p className="font-bold text-red-700">
-              {depense.montant.toFixed(2)} €
-            </p>
-
-            <button
-              type="button"
-              onClick={() => {
-                const confirmation = window.confirm("Supprimer cette dépense ?");
-                if (!confirmation) return;
-
-                setDepenses((ancien) =>
-                  ancien.filter((d) => d.id !== depense.id)
-                );
-              }}
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
-            >
-              Supprimer
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    )}
   </BlocRepliable>
-)}
 </Bloc>
 
 <Bloc titre="Calendrier chantier">

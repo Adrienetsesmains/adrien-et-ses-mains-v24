@@ -166,6 +166,8 @@ type Dossier = {
 
   // ================= FOURNITURES / DEPLACEMENT =================
   kmAller?: number;
+  fraisDeplacementManuelActif?: boolean;
+fraisDeplacementManuel?: number;
   achatFournitures?: number;
   coefficientFournitures?: number;
   fournituresClient?: boolean;
@@ -837,6 +839,10 @@ heureRdv,
 motifRdv,
 typeRdv,
 kmAller,
+
+fraisDeplacementManuelActif,
+fraisDeplacementManuel,
+
 achatFournitures,
 coefficientFournitures,
 fournituresClient,
@@ -949,8 +955,10 @@ const construireSauvegardeComplete = () => {
 
       lignesTravaux,
 
-      kmAller,
-      achatFournitures,
+     kmAller,
+fraisDeplacementManuelActif,
+fraisDeplacementManuel,
+achatFournitures,
       coefficientFournitures,
       fournituresClient,
       detailsFournitures,
@@ -1268,31 +1276,70 @@ const ajouterLigne = () => {
   setLignesTravaux((ancien) => [...ancien, nouvelleLigne]);
 };
 
- const modifierLigne = (id: number, champ: keyof LigneTravaux, valeur: string | number) => {
-  setLignesTravaux(
-    lignesTravaux.map((l) => {
+const modifierLigne = (
+  id: number,
+  champ: keyof LigneTravaux,
+  valeur: string | number
+) => {
+  setLignesTravaux((anciennesLignes) =>
+    anciennesLignes.map((l) => {
       if (l.id !== id) return l;
 
-      // Champs numériques uniquement
       const champsNumeriques: (keyof LigneTravaux)[] = [
-  "q1",
-  "q2",
-  "r1",
-  "r2",
-  "option",
-  "prixUnitaire",
-  "heuresUnite",
-];
+        "q1",
+        "q2",
+        "r1",
+        "r2",
+        "option",
+        "prixUnitaire",
+        "heuresUnite",
+      ];
 
-      if (champsNumeriques.includes(champ as keyof LigneTravaux)) {
-        return { ...l, [champ]: Number(valeur) };
+      if (champsNumeriques.includes(champ)) {
+        const valeurNumerique =
+          valeur === "" || valeur === null || Number.isNaN(Number(valeur))
+            ? 0
+            : Number(valeur);
+
+  const ligneModifiee: LigneTravaux = {
+  ...l,
+  [champ]: valeurNumerique,
+};
+
+if (
+  champ === "heuresUnite" &&
+  !l.prixManuel &&
+  l.heuresUnite &&
+  l.heuresUnite > 0
+) {
+  const ancienPrix =
+    l.prixUnitaire ||
+    l.prixUnitaireAuto ||
+    montantLigne(l, modeClient);
+
+  const tauxHoraireLigne = ancienPrix / l.heuresUnite;
+
+  ligneModifiee.prixUnitaire =
+    Math.round(tauxHoraireLigne * valeurNumerique * 100) / 100;
+
+  ligneModifiee.prixUnitaireAuto =
+    Math.round(tauxHoraireLigne * valeurNumerique * 100) / 100;
+
+  ligneModifiee.heuresUniteManuel = true;
+}
+
+return ligneModifiee;
+
       }
 
-      // Tout le reste = TEXTE
-      return { ...l, [champ]: valeur };
+      return {
+        ...l,
+        [champ]: valeur,
+      };
     })
   );
 };
+
 const modifierDetailPdf = (id: number, index: number, valeur: string) => {
   setLignesTravaux((ancien) =>
     ancien.map((l) => {
@@ -1307,7 +1354,7 @@ const modifierDetailPdf = (id: number, index: number, valeur: string) => {
       };
     })
   );
-};
+}; 
 
   const supprimerLigne = (id: number) => {
   setLignesTravaux(lignesTravaux.filter((l) => l.id !== id));
@@ -1343,6 +1390,8 @@ setNumeroFacture("");
   setLignesTravaux([]);
 
   setKmAller(0);
+  setFraisDeplacementManuelActif(false);
+setFraisDeplacementManuel(0);
   setAchatFournitures(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
@@ -1473,6 +1522,15 @@ const enregistrer = () => {
     pourcentageAcompte: estEvenementSimple ? 0 : pourcentageAcompte,
 
     kmAller: estEvenementSimple ? 0 : kmAller,
+    fraisDeplacementManuelActif:
+  estEvenementSimple
+    ? false
+    : fraisDeplacementManuelActif,
+
+fraisDeplacementManuel:
+  estEvenementSimple
+    ? 0
+    : fraisDeplacementManuel,
     achatFournitures: estEvenementSimple ? 0 : achatFournitures,
     coefficientFournitures,
     fournituresClient,
@@ -1626,6 +1684,13 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
 setNumeroSap(d.numeroSap || "");
 
   setKmAller(d.kmAller ?? 0);
+  setFraisDeplacementManuelActif(
+  d.fraisDeplacementManuelActif ?? false
+);
+
+setFraisDeplacementManuel(
+  d.fraisDeplacementManuel ?? 0
+);
 setAchatFournitures(d.achatFournitures ?? 0);
 setCoefficientFournitures(d.coefficientFournitures ?? 1.22);
 setFournituresClient(d.fournituresClient ?? true);
@@ -1879,6 +1944,47 @@ const nomPrincipal =
       : "";
 
   return `${libelle} ${numero} - ${nomPrincipal}${referenceAgence}`;
+};
+
+const ouvrirGoogleCalendar = ({
+  titre,
+  description,
+  lieu,
+  date,
+}: {
+  titre: string;
+  description: string;
+  lieu: string;
+  date: string;
+}) => {
+  if (!date) {
+    alert("Date manquante pour créer l'événement Google");
+    return;
+  }
+
+  const dateObj = parseDateFr(date);
+  if (!dateObj) return;
+
+  const formatGoogleDate = (d: Date) => {
+    return d
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .split(".")[0] + "Z";
+  };
+
+  const debut = new Date(dateObj);
+  debut.setHours(9, 0);
+
+  const fin = new Date(dateObj);
+  fin.setHours(10, 0);
+
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE
+&text=${encodeURIComponent(titre)}
+&details=${encodeURIComponent(description)}
+&location=${encodeURIComponent(lieu)}
+&dates=${formatGoogleDate(debut)}/${formatGoogleDate(fin)}`;
+
+  window.open(url, "_blank");
 };
 
 const envoyerDevisMail = () => {
@@ -2141,36 +2247,52 @@ const resumeExpress = useMemo(() => {
   };
 }, [client, calcul.total, montantEncaisse, priorite, datePaiement, dossierActuel]);
 const historiqueFiltre = useMemo(() => {
-  const q = rechercheHistorique.toLowerCase().trim();
+  const q = normaliserTexte(rechercheHistorique);
 
   if (!q) return historique;
 
   return historique.filter((d) =>
-    `${d.client} ${d.telephone} ${d.numeroDevis} ${d.numeroFacture}`
-      .toLowerCase()
-      .includes(q)
+    normaliserTexte(`
+      ${d.client || ""}
+      ${d.telephone || ""}
+      ${d.email || ""}
+      ${d.numeroDevis || ""}
+      ${d.numeroFacture || ""}
+      ${d.clientFinalNom || ""}
+      ${d.clientFinalTelephone || ""}
+      ${d.clientFinalAdresse || ""}
+      ${d.locataire || ""}
+      ${d.telephoneLocataire || ""}
+      ${d.proprietaire || ""}
+      ${d.telephoneProprietaire || ""}
+      ${d.referenceChantier || ""}
+      ${d.adresse || ""}
+      ${d.complementAdresse || ""}
+      ${d.agence || ""}
+    `).includes(q)
   );
 }, [historique, rechercheHistorique]);
 
 const resultatsCalendrier = useMemo(() => {
-  const q = rechercheCalendrier.toLowerCase().trim();
+  const q = normaliserTexte(rechercheCalendrier);
 
   if (!q) return [];
 
   return historique.filter((d) =>
-    `
-    ${d.client}
-    ${d.telephone}
-    ${d.email}
-    ${d.adresse}
-    ${d.numeroDevis}
-    ${d.numeroFacture}
-    ${d.referenceChantier}
-    ${d.locataire}
-    ${d.proprietaire}
-    `
-      .toLowerCase()
-      .includes(q)
+    normaliserTexte(`
+      ${d.client || ""}
+      ${d.telephone || ""}
+      ${d.email || ""}
+      ${d.adresse || ""}
+      ${d.complementAdresse || ""}
+      ${d.numeroDevis || ""}
+      ${d.numeroFacture || ""}
+      ${d.referenceChantier || ""}
+      ${d.locataire || ""}
+      ${d.proprietaire || ""}
+      ${d.clientFinalNom || ""}
+      ${d.clientFinalAdresse || ""}
+    `).includes(q)
   );
 }, [historique, rechercheCalendrier]);
   
@@ -2223,6 +2345,8 @@ const reinitialiserApplicationComplete = () => {
   setLignesTravaux([]);
 
   setKmAller(0);
+  setFraisDeplacementManuelActif(false);
+setFraisDeplacementManuel(0);
   setAchatFournitures(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
@@ -2325,6 +2449,13 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLignesTravaux(b.lignesTravaux || []);
 
         setKmAller(b.kmAller ?? 0);
+        setFraisDeplacementManuelActif(
+  b.fraisDeplacementManuelActif ?? false
+);
+
+setFraisDeplacementManuel(
+  b.fraisDeplacementManuel ?? 0
+);
         setAchatFournitures(b.achatFournitures ?? 0);
         setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
         setFournituresClient(b.fournituresClient ?? true);
@@ -2951,9 +3082,9 @@ doc.setFontSize(8);
 doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 }
 
-y = yConditions + 62;
-
-y += 8;
+// Le cadre conditions mesure 72 mm de haut.
+// On repart donc après le cadre + marge, sinon le RIB chevauche les conditions.
+y = yConditions + 58 + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
@@ -3423,6 +3554,55 @@ return (
   >
     Ajouter dépense
   </button>
+  {depenses.length > 0 && (
+  <BlocRepliable titre="Historique dépenses" ouvertParDefaut={false}>
+    <div className="space-y-2">
+      {[...depenses]
+  .sort((a, b) => {
+    const da = parseDateFr(a.date)?.getTime() || 0;
+    const db = parseDateFr(b.date)?.getTime() || 0;
+    return db - da;
+  })
+
+  .map((depense) => (
+        <div
+          key={depense.id}
+          className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 p-3 text-sm"
+        >
+          <div>
+            <p className="font-bold text-slate-800">
+              {depense.date} — {depense.categorie}
+            </p>
+            <p className="text-slate-600">
+              {depense.description || "Sans description"} · {depense.modePaiement}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <p className="font-bold text-red-700">
+              {depense.montant.toFixed(2)} €
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                const confirmation = window.confirm("Supprimer cette dépense ?");
+                if (!confirmation) return;
+
+                setDepenses((ancien) =>
+                  ancien.filter((d) => d.id !== depense.id)
+                );
+              }}
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </BlocRepliable>
+)}
 </Bloc>
 
 <Bloc titre="Calendrier chantier">
@@ -3440,9 +3620,23 @@ return (
         ) : (
           resultatsCalendrier.map((d) => (
             <div key={d.id} className="rounded-xl border bg-white p-3 space-y-2">
-              <p className="font-bold text-slate-800">{d.client || "Client non renseigné"}</p>
+              <p className="font-bold text-slate-800">
+  {d.modeClient === "jeremie"
+    ? d.clientFinalNom || d.client || "Client non renseigné"
+    : d.modeClient === "agence"
+    ? d.locataire || d.proprietaire || d.client || "Client non renseigné"
+    : d.client || "Client non renseigné"}
+</p>
               <p className="text-sm text-slate-600">📞 {d.telephone || "Téléphone non renseigné"}</p>
-              <p className="text-sm text-slate-600">📍 {d.adresse || "Adresse non renseignée"}</p>
+              <p className="text-sm text-slate-600">
+  📍{" "}
+  {d.modeClient === "jeremie"
+    ? d.clientFinalAdresse || d.adresse || "Adresse non renseignée"
+    : d.modeClient === "agence"
+    ? `${d.adresse || ""} ${d.complementAdresse || ""}`.trim() ||
+      "Adresse chantier non renseignée"
+    : d.adresse || "Adresse non renseignée"}
+</p>
 
               <button
                 onClick={() => {
@@ -4643,256 +4837,152 @@ return (
           <Input label="Recherche client / devis / facture" value={rechercheHistorique} onChange={setRechercheHistorique} />
         </Bloc>
 
-        <BlocRepliable titre="Historique" ouvertParDefaut={false}>
-  {historiqueFiltre.length === 0 ? (
-    <p>Aucun dossier.</p>
-  ) : (
-    <div className="space-y-4">
-      {historiqueFiltre.map((item) => (
-        <div
-  key={item.id}
-  className={`rounded-2xl border p-5 space-y-3 ${
-    item.datePaiement &&
-    !item.facturePayee &&
-    parseDateFr(item.datePaiement) &&
-    parseDateFr(item.datePaiement)! < new Date()
-      ? "bg-red-50 border-red-300"
-      : "bg-white"
-  }`}
->
-          <div>
-            <p className="text-lg font-bold text-slate-800">{item.client}</p>
-
-            {item.priorite && item.priorite !== "normale" && (
-              <p className="font-semibold text-red-600">
-                PRIORITÉ : {item.priorite}
-              </p>
-            )}
-
-            <p className="text-sm text-slate-500">
-              {item.numeroDevis} / {item.numeroFacture}
-            </p>
-
-            {item.referenceChantier && (
-              <p className="text-sm font-medium text-blue-700">
-                Réf chantier : {item.referenceChantier}
-              </p>
-            )}
-          </div>
-
-          <div className="rounded-xl bg-slate-50 p-4 space-y-2">
-            <p>
-              <strong>Total :</strong> {item.total} € — <strong>Reste :</strong> {Math.max(0, item.total - (item.montantEncaisse || 0))} €
-            </p>
-{item.total < 450 && (
-  <div className="rounded-xl border border-red-300 bg-red-50 p-3">
-    <p className="font-semibold text-red-700">
-      ⚠ Chantier peu rentable
+<BlocRepliable titre="Historique" ouvertParDefaut={false}>
+  {historiqueFiltre.filter(
+    (item) =>
+      item.typeEvenement !== "rdv" &&
+      item.typeEvenement !== "rappel" &&
+      (item.numeroDevis || item.numeroFacture)
+  ).length === 0 ? (
+    <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+      Aucun devis ou facture enregistré.
     </p>
-  </div>
-)}
-            <p className="text-sm text-slate-500">
-              {item.lignesTravaux?.[0]?.prestationNom || "Travaux divers"}
-            </p>
+  ) : (
+    <div className="space-y-3">
+      {historiqueFiltre
+        .filter(
+          (item) =>
+            item.typeEvenement !== "rdv" &&
+            item.typeEvenement !== "rappel" &&
+            (item.numeroDevis || item.numeroFacture)
+        )
+        .map((item) => {
+          const factureEnRetard =
+            item.datePaiement &&
+            !item.facturePayee &&
+            parseDateFr(item.datePaiement) &&
+            parseDateFr(item.datePaiement)! < new Date();
 
-            <p>
-              <strong>Devis :</strong> {item.statutDevis}
-            </p>
+          const badgePastel = item.facturePayee
+            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+            : factureEnRetard
+            ? "bg-red-100 text-red-800 border-red-200"
+            : item.numeroFacture
+            ? "bg-blue-100 text-blue-800 border-blue-200"
+            : "bg-amber-100 text-amber-800 border-amber-200";
 
-            <p>
-              <strong>Chantier :</strong> {item.statutChantier}
-            </p>
+          const libelleStatut = item.facturePayee
+            ? "Payée"
+            : factureEnRetard
+            ? "Retard"
+            : item.numeroFacture
+            ? "Facture"
+            : "Devis";
 
-            {item.dateChantier && (
-              <p>
-                <strong>Date chantier prévue :</strong> {item.dateChantier}
-              </p>
-            )}
+          const nomChantier =
+  item.modeClient === "jeremie"
+    ? item.clientFinalAdresse ||
+      item.adresse ||
+      "Chantier non renseigné"
+    : item.modeClient === "agence"
+    ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
+      item.referenceChantier ||
+      "Chantier non renseigné"
+    : item.complementAdresse ||
+      item.adresse ||
+      "Chantier non renseigné";
 
-            {item.datePaiement && (
-              <p>
-                <strong>Paiement prévu :</strong> {item.datePaiement}
-              </p>
-            )}
-
-            <p>
-              <strong>Facture payée :</strong> {item.facturePayee ? "Oui" : "Non"}
-            </p>
-           {item.datePaiement &&
-  !item.facturePayee &&
-  parseDateFr(item.datePaiement) &&
-  parseDateFr(item.datePaiement)! < new Date() && (
-    <div className="rounded-xl border border-red-300 bg-red-50 p-3">
-      <p className="font-semibold text-red-700">
-        ⚠ Relance client à faire : paiement prévu dépassé.
-      </p>
-    </div>
-  )} 
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => rechargerDossier(item)}
-              className="rounded-xl bg-slate-800 px-4 py-2 font-semibold text-white"
+          return (
+            <div
+              key={item.id}
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
             >
-              Recharger
-            </button>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-lg font-bold text-slate-800">
+  {item.modeClient === "jeremie"
+    ? item.clientFinalNom || item.client || "Client non renseigné"
+    : item.modeClient === "agence"
+    ? item.locataire ||
+      item.proprietaire ||
+      item.client ||
+      "Client non renseigné"
+    : item.client || "Client non renseigné"}
+</p>
 
-<button
-  onClick={() => {
-    rechargerDossier(item);
-
-    setStatutDevis("en_cours");
-    setStatutChantier("a_planifier");
-
-    setNumeroDevis(item.numeroDevis || "");
-    setNumeroFacture("");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }}
-  className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white"
->
-  Transformer en devis en cours
-</button>
-            <button
-              onClick={() => {
-                setClient(item.client);
-                setTelephone(item.telephone);
-                setEmail(item.email);
-                setAdresse(item.adresse);
-                setAdresseAgence(item.adresseAgence || "");
-                setNotes(item.notes);
-                setModeClient(item.modeClient);
-                setLignesTravaux(
-                  item.lignesTravaux.map((l) => ({
-                    ...l,
-                    id: Date.now() + Math.random(),
-                  }))
-                );
-
-                setNumeroDevis("");
-                setNumeroFacture(item.numeroFacture || "");
-
-                setStatutDevis("en_cours");
-                setStatutChantier("a_planifier");
-                setFacturePayee(false);
-
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="rounded-xl bg-purple-700 px-4 py-2 font-semibold text-white"
-            >
-              Dupliquer
-            </button>
-
-            <button
-              onClick={() =>
-                setHistorique(
-                  historique.map((d) =>
-                    d.id === item.id
-                      ? {
-                          ...d,
-                          statutDevis: "accepte",
-                          statutChantier: "a_planifier",
-                        }
-                      : d
-                  )
-                )
-              }
-              className="rounded-xl bg-blue-700 px-4 py-2 font-semibold text-white"
-            >
-              Devis accepté
-            </button>
-
-            <button
-              onClick={() =>
-                setHistorique(
-                  historique.map((d) =>
-                    d.id === item.id
-                      ? {
-                          ...d,
-                          statutChantier: "termine",
-                        }
-                      : d
-                  )
-                )
-              }
-              className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white"
-            >
-              Chantier terminé
-            </button>
-<button
-  onClick={() =>
-    setHistorique(
-      historique.map((d) =>
-        d.id === item.id
-          ? {
-              ...d,
-              statutChantier: "facture_envoyee",
-            }
-          : d
-      )
-    )
-  }
-  className="rounded-xl bg-cyan-700 px-4 py-2 font-semibold text-white"
->
-  Facture envoyée
-</button>
-            <button
- onClick={() => {
-  rechargerDossier(item);
-
-  setStatutDevis("accepte");
-  setStatutChantier("facture_envoyee");
-  setFacturePayee(false);
-  setIdDossierActuel(item.id);
-
-  setNumeroFacture(item.numeroFacture || "");
-  setMontantEncaisse(item.montantEncaisse ?? item.acompte ?? 0);
-
-  // 🔥 IMPORTANT (ajout)
-  setDateChantier(item.dateChantier || "");
-  setDatePaiement(item.datePaiement || "");
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}}
-  className="rounded-xl bg-indigo-700 px-4 py-2 font-semibold text-white"
->
-  Transformer en facture
-</button>
-
-<button
-  onClick={() => marquerPayee(item.id)}
-  className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white"
->
-  Payée
+                 <div className="text-sm text-slate-500 space-y-1">
   
-</button>
+  <p>
+    {item.numeroDevis || "Aucun devis"} /{" "}
+    {item.numeroFacture || "Aucune facture"}
+  </p>
+  <p>{nomChantier}</p>
+</div> 
+                </div>
 
-<button
-  onClick={() => preparerRelance(item)}
-  className="rounded-xl bg-orange-600 px-4 py-2 font-semibold text-white"
->
-  Préparer relance
-</button>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgePastel}`}
+                >
+                  {libelleStatut}
+                </span>
+              </div>
 
-            <button
-              onClick={() => supprimerDossier(item.id)}
-              className="rounded-xl border px-4 py-2 font-semibold"
-            >
-              Supprimer
-            </button>
-          </div>
-        </div>
-      ))}
+              <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+                <MiniResult
+                  titre="Total"
+                  valeur={`${item.total || 0} €`}
+                  couleur="text-slate-900"
+                />
+
+                <MiniResult
+                  titre="Acompte"
+                  valeur={`${item.acompte || 0} €`}
+                  couleur="text-amber-700"
+                />
+
+                <MiniResult
+                  titre="Encaissé"
+                  valeur={`${item.montantEncaisse || 0} €`}
+                  couleur="text-emerald-700"
+                />
+
+                <MiniResult
+                  titre="Reste"
+                  valeur={`${Math.max(
+                    0,
+                    (item.total || 0) - (item.montantEncaisse || 0)
+                  )} €`}
+                  couleur={factureEnRetard ? "text-red-700" : "text-slate-900"}
+                />
+              </div>
+
+              <div className="mt-3 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
+                <p>📅 Chantier : {item.dateChantier || "Non planifié"}</p>
+                <p>💳 Paiement : {item.datePaiement || "Non renseigné"}</p>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  onClick={() => rechargerDossier(item)}
+                  className="btn-blue"
+                >
+                  Ouvrir
+                </button>
+
+                <button
+                  onClick={() => supprimerDossier(item.id)}
+                  className="btn-orange"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          );
+        })}
     </div>
   )}
 </BlocRepliable>
+
 <BlocRepliable titre="Paramètres entreprise / RIB" ouvertParDefaut={false}>
   <div className="grid gap-3 md:grid-cols-2">
     <Input label="Titulaire" value={ribTitulaire} onChange={setRibTitulaire} />
@@ -5130,7 +5220,39 @@ return (
                         Déplacer rappel
                       </button>
                     )}
+<button
+  onClick={() => {
+    ouvrirGoogleCalendar({
+      titre: estRappel
+        ? `Rappel - ${d.texteRappel || "Note"}`
+        : estRdv
+        ? `RDV client - ${d.client}`
+        : estChantier
+        ? `Chantier - ${d.client} - ${d.numeroDevis || ""}`
+        : `Événement - ${d.client}`,
 
+      lieu: d.adresse || "",
+
+      date:
+        d.dateRappel ||
+        d.dateRdv ||
+        d.dateChantier ||
+        d.planningChantier?.[0] ||
+        "",
+
+      description: estRappel
+        ? d.texteRappel || ""
+        : `Client : ${d.client}
+Téléphone : ${d.telephone}
+Email : ${d.email}
+
+${d.notes || ""}`,
+    });
+  }}
+  className="btn-purple"
+>
+  📅 Google
+</button>
                     <button
                       onClick={() => {
                         if (confirm("Supprimer cet événement du calendrier ?")) {
@@ -5172,19 +5294,121 @@ return (
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
         <button
-          onClick={() => {
-            creerRDVDepuisCalendrier(dateSelectionnee);
-            setShowPopupCalendrier(false);
+  onClick={() => {
+    const nom = window.prompt("Nom du client :");
+    if (!nom) return;
 
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
-          }}
-          className="btn-green"
-        >
-          ➕ Créer RDV client
-        </button>
+    const tel = window.prompt("Téléphone :") || "";
+    const adresseRdv = window.prompt("Adresse du RDV :") || "";
+    const mail = window.prompt("Email :") || "";
+    const observation = window.prompt("Observation / note du RDV :") || "";
+
+    const dateFormatee = dateSelectionnee.toLocaleDateString("fr-FR");
+
+    const nouveauRdv: Dossier = {
+      id: Date.now(),
+      typeEvenement: "rdv",
+
+      client: nom,
+      telephone: tel,
+      email: mail,
+      adresse: adresseRdv,
+      adresseAgence: "",
+      complementAdresse: "",
+      notes: observation,
+      modeClient: "normal",
+
+      clientFinalNom: "",
+      clientFinalTelephone: "",
+      clientFinalAdresse: "",
+
+      locataire: "",
+      telephoneLocataire: "",
+      proprietaire: "",
+      telephoneProprietaire: "",
+      agence: "",
+      referenceChantier: "",
+
+      lignesTravaux: [],
+      numeroDevis: "",
+      numeroFacture: "",
+      total: 0,
+      acompte: 0,
+      reste: 0,
+      montantEncaisse: 0,
+      pourcentageAcompte: 0,
+      facturePayee: false,
+
+      statutDevis: "rdv",
+      statutChantier: "rdv_client",
+
+      factureSap: false,
+      numeroSap: "",
+
+      date: new Date().toLocaleDateString("fr-FR"),
+
+      dateRdv: dateFormatee,
+      heureRdv: "",
+      motifRdv: "RDV client",
+      typeRdv: "visite",
+      observationRdv: observation,
+
+      dateChantier: "",
+      heureChantier: "",
+      planningChantier: [],
+
+      datePaiement: "",
+
+      dateRappel: "",
+      heureRappel: "",
+      texteRappel: "",
+
+      kmAller: 0,
+      achatFournitures: 0,
+      coefficientFournitures: 1.22,
+      fournituresClient: true,
+      detailsFournitures: "",
+      reventeFournitures: 0,
+      margeFournitures: 0,
+
+      priorite: "normale",
+    };
+
+    setHistorique((ancien) => [nouveauRdv, ...ancien]);
+
+    setClientsEnregistres((anciens) => {
+      const ficheClient: ClientEnregistre = {
+        nom,
+        telephone: tel,
+        email: mail,
+        adresse: adresseRdv,
+        adresseAgence: "",
+        complementAdresse: "",
+        notes: observation,
+        modeClient: "normal",
+        agence: "",
+      };
+
+      const existe = anciens.some(
+        (c) => c.nom.toLowerCase() === nom.toLowerCase()
+      );
+
+      if (existe) {
+        return anciens.map((c) =>
+          c.nom.toLowerCase() === nom.toLowerCase() ? ficheClient : c
+        );
+      }
+
+      return [ficheClient, ...anciens];
+    });
+
+    setShowPopupCalendrier(false);
+    alert("RDV client enregistré");
+  }}
+  className="btn-green"
+>
+  ➕ Créer RDV client
+</button>
 
         <button
           onClick={() => {
@@ -5194,6 +5418,8 @@ return (
         >
           📝 Créer rappel / note
         </button>
+
+        
       </div>
 
       <button
@@ -5355,14 +5581,58 @@ function NumberInput({
   value: number;
   onChange: (v: number) => void;
 }) {
+  const [valeurTexte, setValeurTexte] = useState(
+    value === 0 ? "0" : String(value)
+  );
+
+  useEffect(() => {
+    setValeurTexte(value === 0 ? "0" : String(value));
+  }, [value]);
+
   return (
     <div>
       <label className="text-xs font-semibold text-slate-700">{label}</label>
       <input
-        type="number"
+        type="text"
+        inputMode="decimal"
         className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        value={valeurTexte}
+        onFocus={() => {
+          if (valeurTexte === "0") {
+            setValeurTexte("");
+          }
+        }}
+        onChange={(e) => {
+          const brut = e.target.value.replace(",", ".");
+
+          if (brut === "") {
+            setValeurTexte("");
+            onChange(0);
+            return;
+          }
+
+          if (!/^\d*\.?\d{0,2}$/.test(brut)) return;
+
+          setValeurTexte(brut);
+
+          const nombre = Number(brut);
+          if (!Number.isNaN(nombre)) {
+            onChange(nombre);
+          }
+        }}
+        onBlur={() => {
+          const nombre = Number(valeurTexte);
+
+          if (!valeurTexte || Number.isNaN(nombre)) {
+            setValeurTexte("0");
+            onChange(0);
+            return;
+          }
+
+          const arrondi = Math.round(nombre * 100) / 100;
+          setValeurTexte(String(arrondi));
+          onChange(arrondi);
+        }}
       />
     </div>
   );
