@@ -528,6 +528,9 @@ setClientFinalTelephone(b.clientFinalTelephone || "");
 setClientFinalAdresse(b.clientFinalAdresse || "");
 
 setKmAller(b.kmAller ?? 0);
+setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
+setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
+
 setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
@@ -563,11 +566,93 @@ setTypeRdv(b.typeRdv || "visite");
   alert("✅ Sauvegarde restaurée");
 }; 
   
+const appliquerSauvegardeComplete = (data: any) => {
+  if (!data) return;
+
+  setHistorique(data.historique || []);
+  setDepenses(data.depenses || []);
+  setClientsEnregistres(data.clientsEnregistres || clientsBase);
+
+  setCompteurDevis(data.compteurDevis ?? 1);
+  setCompteurFacture(data.compteurFacture ?? 1);
+
+  setNumeroDevis(data.numeroDevis || "");
+  setNumeroFacture(data.numeroFacture || "");
+
+  setMoisSelectionne(data.moisSelectionne ?? new Date().getMonth());
+  setAnneeSelectionnee(data.anneeSelectionnee ?? new Date().getFullYear());
+
+  setRibTitulaire(data.ribTitulaire || "");
+  setRibIban(data.ribIban || "");
+  setRibBic(data.ribBic || "");
+  setRibBanque(data.ribBanque || "");
+
+  setFactureSap(data.factureSap || false);
+  setNumeroSap(data.numeroSap || "");
+
+  if (data.brouillon) {
+    const b = data.brouillon;
+
+    setIdDossierActuel(b.idDossierActuel ?? null);
+
+    setClient(b.client || "");
+    setTelephone(b.telephone || "");
+    setEmail(b.email || "");
+    setAdresse(b.adresse || "");
+    setAdresseAgence(b.adresseAgence || "");
+    setComplementAdresse(b.complementAdresse || "");
+    setNotes(b.notes || "");
+
+    setModeClient(b.modeClient || "normal");
+
+    setClientFinalNom(b.clientFinalNom || "");
+    setClientFinalTelephone(b.clientFinalTelephone || "");
+    setClientFinalAdresse(b.clientFinalAdresse || "");
+
+    setLignesTravaux(b.lignesTravaux || []);
+
+    setKmAller(b.kmAller ?? 0);
+    setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
+    setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
+
+    setAchatFournitures(b.achatFournitures ?? 0);
+    setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
+    setFournituresClient(b.fournituresClient ?? true);
+    setDetailsFournitures(b.detailsFournitures || "");
+
+    setMontantEncaisse(b.montantEncaisse ?? 0);
+    setPourcentageAcompte(b.pourcentageAcompte ?? 30);
+
+    setFactureSap(b.factureSap || false);
+    setNumeroSap(b.numeroSap || "");
+
+    setStatutDevis(b.statutDevis || "en_cours");
+    setStatutChantier(b.statutChantier || "a_planifier");
+    setFacturePayee(b.facturePayee || false);
+
+    setDateChantier(b.dateChantier || "");
+    setHeureChantier(b.heureChantier || "");
+    setDatePaiement(b.datePaiement || "");
+
+    setDateRdv(b.dateRdv || "");
+    setHeureRdv(b.heureRdv || "");
+    setMotifRdv(b.motifRdv || "");
+    setTypeRdv(b.typeRdv || "visite");
+
+    setPriorite(b.priorite || "normale");
+
+    setLocataire(b.locataire || "");
+    setTelephoneLocataire(b.telephoneLocataire || "");
+    setProprietaire(b.proprietaire || "");
+    setTelephoneProprietaire(b.telephoneProprietaire || "");
+
+    setAgence(b.agence || "");
+    setReferenceChantier(b.referenceChantier || "");
+  }
+};
+
 const envoyerCloud = async () => {
-  const data = {
-    historique,
-    clientsEnregistres,
-  };
+  const data = construireSauvegardeComplete();
 
   const { error } = await supabase
     .from("dashboard_data")
@@ -575,15 +660,19 @@ const envoyerCloud = async () => {
       {
         id: "global",
         data,
+        updated_at: new Date().toISOString(),
       },
     ]);
 
   if (error) {
     console.error("Erreur cloud :", error);
-    alert("Erreur envoi cloud");
-  } else {
-    alert("✅ Données envoyées au cloud");
+    alert("❌ Erreur envoi cloud");
+    return;
   }
+
+  localStorage.setItem("tableauDeBordEntrepriseV24", JSON.stringify(data));
+
+  alert("✅ Données complètes envoyées au cloud");
 };
 
 const recupererCloud = async () => {
@@ -595,15 +684,23 @@ const recupererCloud = async () => {
 
   if (error) {
     console.error("Erreur récupération :", error);
-    alert("Erreur récupération cloud");
+    alert("❌ Erreur récupération cloud");
     return;
   }
 
-  if (data?.data) {
-    setHistorique(data.data.historique || []);
-    setClientsEnregistres(data.data.clientsEnregistres || []);
-    alert("✅ Données récupérées depuis le cloud");
+  if (!data?.data) {
+    alert("Aucune donnée cloud trouvée");
+    return;
   }
+
+  appliquerSauvegardeComplete(data.data);
+
+  localStorage.setItem(
+    "tableauDeBordEntrepriseV24",
+    JSON.stringify(data.data)
+  );
+
+  alert("✅ Données complètes récupérées depuis le cloud");
 };
 
   const importRef = useRef<HTMLInputElement | null>(null);
@@ -753,6 +850,9 @@ setClientFinalTelephone(b.clientFinalTelephone || "");
 setClientFinalAdresse(b.clientFinalAdresse || "");
 
 setKmAller(b.kmAller ?? 0);
+setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
+setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
+
 setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
@@ -832,6 +932,8 @@ numeroSap,
   agence,
   referenceChantier,
   complementAdresse,
+  fraisDeplacementManuelActif,
+fraisDeplacementManuel,
   clientsEnregistres,
 heureChantier,
 dateRdv,
@@ -1933,17 +2035,23 @@ const construireObjetMail = (type: "devis" | "facture") => {
   const numero = type === "facture" ? numeroFacture : numeroDevis;
   const libelle = type === "facture" ? "Facture" : "Devis";
 
-const nomPrincipal =
-  modeClient === "normal"
-    ? client || "Client"
-    : complementAdresse || adresse || clientFinalNom || client || "Chantier";
+  const nomAffiche =
+    modeClient === "jeremie"
+      ? clientFinalNom || "Client final"
+      : modeClient === "agence"
+      ? locataire || proprietaire || client || "Client"
+      : client || "Client";
 
-  const referenceAgence =
-    modeClient === "agence" && referenceChantier.trim()
-      ? ` - Réf. ${referenceChantier.trim()}`
-      : "";
+  const adresseAffichee =
+    modeClient === "jeremie"
+      ? clientFinalAdresse || ""
+      : modeClient === "agence"
+      ? `${adresse || ""} ${complementAdresse || ""}`.trim()
+      : `${adresse || ""} ${complementAdresse || ""}`.trim();
 
-  return `${libelle} ${numero} - ${nomPrincipal}${referenceAgence}`;
+  return `${libelle} ${numero} - ${nomAffiche}${
+    adresseAffichee ? `, ${adresseAffichee}` : ""
+  }`;
 };
 
 const ouvrirGoogleCalendar = ({
@@ -2148,6 +2256,45 @@ const tableauMensuel = useMemo(() => {
     alerteFaible: totalEncaisse < objectifMensuel,
   };
 }, [historique, depenses, moisSelectionne, anneeSelectionnee]);
+
+const depensesTriees = useMemo(() => {
+  return [...depenses].sort((a, b) => {
+    const dateA = parseDateFr(a.date)?.getTime() || 0;
+    const dateB = parseDateFr(b.date)?.getTime() || 0;
+    return dateB - dateA;
+  });
+}, [depenses]);
+
+const resumeDepenses = useMemo(() => {
+  const depensesDuMois = depenses.filter((depense) => {
+    const dateDepense = parseDateFr(depense.date);
+    if (!dateDepense) return false;
+
+    return (
+      dateDepense.getMonth() === moisSelectionne &&
+      dateDepense.getFullYear() === anneeSelectionnee
+    );
+  });
+
+  const depensesAnnee = depenses.filter((depense) => {
+    const dateDepense = parseDateFr(depense.date);
+    if (!dateDepense) return false;
+
+    return dateDepense.getFullYear() === anneeSelectionnee;
+  });
+
+  return {
+    totalMois: depensesDuMois.reduce(
+      (somme, d) => somme + (d.montant || 0),
+      0
+    ),
+    totalAnnee: depensesAnnee.reduce(
+      (somme, d) => somme + (d.montant || 0),
+      0
+    ),
+    nombreTotal: depenses.length,
+  };
+}, [depenses, moisSelectionne, anneeSelectionnee]);
 
 const alertesIntelligentes = useMemo(() => {
   const aujourdHui = new Date();
@@ -3252,6 +3399,169 @@ return new Promise<string>((resolve) => {
 
 return (
   <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
+<div className="sticky top-0 z-40 mb-2 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
+  <input
+    ref={importRef}
+    type="file"
+    accept="application/json"
+    className="hidden"
+    onChange={importer}
+  />
+
+  {/* VERSION ORDINATEUR */}
+  <div className="hidden space-y-2 md:block">
+    <div className="grid grid-cols-6 gap-1">
+      {[
+        ["Client", resumeExpress.clientEnCours || "-"],
+        ["Total", `${resumeExpress.totalDevis} €`],
+        ["Encaissé", `${resumeExpress.dejaEncaisse} €`],
+        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Paiement", resumeExpress.paiementPrevu || "-"],
+        ["Priorité", resumeExpress.prioriteActuelle || "-"],
+      ].map(([titre, valeur]) => (
+        <div key={titre} className="rounded-lg border bg-white px-2 py-1">
+          <p className="text-[10px] font-semibold text-slate-500">{titre}</p>
+          <p className="truncate text-sm font-bold text-slate-900">{valeur}</p>
+        </div>
+      ))}
+    </div>
+
+    <div className="grid grid-cols-13 gap-1">
+      <button onClick={envoyerCloud} className="btn-blue px-2 py-1 text-[11px]">
+        ☁️ Sauv. cloud
+      </button>
+
+      <button onClick={recupererCloud} className="btn-emerald px-2 py-1 text-[11px]">
+        📥 Charger
+      </button>
+
+      <button
+        onClick={() => {
+          setFicheOuverte(true);
+          setStatutDevis("estimation_rapide");
+          setNumeroDevis("");
+          setNumeroFacture("");
+        }}
+        className="btn-orange px-2 py-1 text-[11px]"
+      >
+        ⚡ Esti.
+      </button>
+
+      <button onClick={nouveauDossier} className="btn-dark px-2 py-1 text-[11px]">
+        Nouveau
+      </button>
+
+      <button onClick={enregistrer} className="btn-amber px-2 py-1 text-[11px]">
+        Enregistrer
+      </button>
+
+      <button onClick={() => genererPDF("devis")} className="btn-blue px-2 py-1 text-[11px]">
+        PDF devis
+      </button>
+
+      <button onClick={() => genererPDF("facture")} className="btn-emerald px-2 py-1 text-[11px]">
+        PDF facture
+      </button>
+
+      <button onClick={envoyerDevisMail} className="btn-green px-2 py-1 text-[11px]">
+        Mail devis
+      </button>
+
+      <button onClick={envoyerFactureMail} className="btn-green px-2 py-1 text-[11px]">
+        Mail facture
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setFactureSap(!factureSap)}
+        className={`${factureSap ? "btn-green" : "btn-outline"} px-2 py-1 text-[11px]`}
+      >
+        SAP
+      </button>
+
+      <button onClick={exporter} className="btn-purple px-2 py-1 text-[11px]">
+        Export
+      </button>
+
+      <button onClick={() => importRef.current?.click()} className="btn-outline px-2 py-1 text-[11px]">
+        Import
+      </button>
+
+      <button
+        onClick={reinitialiserApplicationComplete}
+        className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-bold text-red-700"
+      >
+        RAZ appli
+      </button>
+    </div>
+  </div>
+
+  {/* VERSION TÉLÉPHONE */}
+  <div className="space-y-1 md:hidden">
+    <div className="grid grid-cols-6 gap-1">
+      {[
+        ["Client", resumeExpress.clientEnCours || "-"],
+        ["Total", `${resumeExpress.totalDevis} €`],
+        ["Enc.", `${resumeExpress.dejaEncaisse} €`],
+        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Pay.", resumeExpress.paiementPrevu || "-"],
+        ["Prio", resumeExpress.prioriteActuelle || "-"],
+      ].map(([titre, valeur]) => (
+        <div key={titre} className="rounded-md border bg-white px-1 py-1">
+          <p className="text-[8px] leading-none text-slate-500">{titre}</p>
+          <p className="truncate text-[10px] font-bold leading-tight text-slate-900">
+            {valeur}
+          </p>
+        </div>
+      ))}
+    </div>
+
+    <div className="grid grid-cols-5 gap-1">
+      <button
+        onClick={() => {
+          setFicheOuverte(true);
+          setStatutDevis("estimation_rapide");
+          setNumeroDevis("");
+          setNumeroFacture("");
+        }}
+        className="rounded-md border border-orange-200 bg-orange-50 px-1 py-1 text-[10px] font-bold text-orange-800"
+      >
+        Estim.
+      </button>
+
+      <button
+        onClick={nouveauDossier}
+        className="rounded-md border border-slate-300 bg-slate-100 px-1 py-1 text-[10px] font-bold text-slate-800"
+      >
+        Nouveau
+      </button>
+
+<button
+        onClick={enregistrer}
+        className="rounded-md border border-amber-200 bg-amber-50 px-1 py-1 text-[10px] font-bold text-amber-800"
+      >
+        Enreg.
+      </button>
+
+      <button
+        onClick={envoyerCloud}
+        className="rounded-md border border-blue-200 bg-blue-50 px-1 py-1 text-[10px] font-bold text-blue-800"
+      >   
+        Sauv.
+      </button>
+
+      <button
+        onClick={recupererCloud}
+        className="rounded-md border border-emerald-200 bg-emerald-50 px-1 py-1 text-[10px] font-bold text-emerald-800"
+      >
+        Charger
+      </button>
+
+      
+      
+    </div>
+  </div>
+</div>
     <style jsx>{`
 
   .btn-green {
@@ -3339,87 +3649,50 @@ return (
 `}</style>
       <div className="mx-auto max-w-7xl space-y-3">
         <section className="rounded-xl bg-slate-800 px-4 py-3 text-white shadow-sm">
-<Bloc titre="Résumé express chantier">
-  <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
 
-    <MiniResult
-      titre="Client"
-      valeur={resumeExpress.clientEnCours}
-    />
+<div className="rounded-lg border bg-slate-50 p-3">
+  <button
+    type="button"
+    onClick={() => {
+      const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
+      setListeBackups(backups);
+      setSauvegardesOuvertes(!sauvegardesOuvertes);
+    }}
+    className="flex w-full items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800"
+  >
+    🔁 Sauvegardes de sécurité
+    <span>{sauvegardesOuvertes ? "▲" : "▼"}</span>
+  </button>
 
-    <MiniResult
-      titre="Total"
-      valeur={`${resumeExpress.totalDevis} €`}
-      couleur="text-blue-700"
-    />
+  {sauvegardesOuvertes && (
+    <div className="mt-2 space-y-2">
+      {listeBackups
+        .slice()
+        .reverse()
+        .map((b: any, i: number) => (
+          <button
+            key={i}
+            onClick={() => {
+              const confirmation = window.confirm(
+                `Restaurer la sauvegarde du ${b.date} ?`
+              );
+              if (!confirmation) return;
 
-    <MiniResult
-      titre="Encaissé"
-      valeur={`${resumeExpress.dejaEncaisse} €`}
-      couleur="text-green-700"
-    />
+              const backups = JSON.parse(
+                localStorage.getItem("backupHistoriqueV24") || "[]"
+              );
 
-    <MiniResult
-      titre="Reste"
-      valeur={`${resumeExpress.resteReel} €`}
-      couleur="text-orange-600"
-    />
+              restaurerBackup(backups.length - 1 - i);
+            }}
+            className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-semibold text-slate-800 hover:bg-amber-50"
+          >
+            {b.date}
+          </button>
+        ))}
+    </div>
+  )}
+</div>
 
-    <MiniResult
-      titre="Priorité"
-      valeur={resumeExpress.prioriteActuelle}
-    />
-
-    <MiniResult
-      titre="Paiement"
-      valeur={resumeExpress.paiementPrevu}
-    />
-
-  </div>
-
-  <div className="mt-3 rounded-lg border bg-slate-50 p-3">
-    <button
-      type="button"
-      onClick={() => {
-  const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
-  setListeBackups(backups);
-  setSauvegardesOuvertes(!sauvegardesOuvertes);
-}}
-      className="flex w-full items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800"
-    >
-      🔁 Sauvegardes de sécurité
-      <span>{sauvegardesOuvertes ? "▲" : "▼"}</span>
-    </button>
-
-    {sauvegardesOuvertes && (
-      <div className="mt-2 space-y-2">
-        {listeBackups
-  .slice()
-  .reverse()
-  .map((b: any, i: number) => (
-            <button
-              key={i}
-              onClick={() => {
-                const confirmation = window.confirm(
-                  `Restaurer la sauvegarde du ${b.date} ?`
-                );
-                if (!confirmation) return;
-
-                const backups = JSON.parse(
-                  localStorage.getItem("backupHistoriqueV24") || "[]"
-                );
-
-                restaurerBackup(backups.length - 1 - i);
-              }}
-              className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-semibold text-slate-800 hover:bg-amber-50"
-            >
-              {b.date}
-            </button>
-          ))}
-      </div>
-    )}
-  </div>
-</Bloc>
           <p className="text-sm text-amber-300">Adrien et ses mains</p>
           <h1 className="mt-1 text-2xl font-bold">Tableau de bord entreprise V24</h1>
           <p className="mt-1 text-sm text-slate-200">
@@ -3430,7 +3703,7 @@ return (
   </div>
 )}
         </section>
-<Bloc titre="Tableau de bord mensuel">
+<BlocRepliable titre="Tableau de bord mensuel" ouvertParDefaut={false}>
 
   <div className="flex items-center justify-between">
     <button
@@ -3489,9 +3762,29 @@ return (
     <GraphiqueCourbe donnees={donneesGraphique} />
   </BlocRepliable>
 
-</Bloc>
+</BlocRepliable>
 
 <Bloc titre="Dépenses entreprise">
+  <div className="grid gap-2 md:grid-cols-3">
+    <MiniResult
+      titre="Dépenses du mois"
+      valeur={`${resumeDepenses.totalMois.toFixed(2)} €`}
+      couleur="text-red-700"
+    />
+
+    <MiniResult
+      titre="Dépenses année"
+      valeur={`${resumeDepenses.totalAnnee.toFixed(2)} €`}
+      couleur="text-orange-700"
+    />
+
+    <MiniResult
+      titre="Nombre dépenses"
+      valeur={`${resumeDepenses.nombreTotal}`}
+      couleur="text-slate-900"
+    />
+  </div>
+
   <div className="grid gap-3 md:grid-cols-5">
     <DateInput label="Date dépense" value={depenseDate} onChange={setDepenseDate} />
 
@@ -3554,58 +3847,99 @@ return (
   >
     Ajouter dépense
   </button>
-  {depenses.length > 0 && (
-  <BlocRepliable titre="Historique dépenses" ouvertParDefaut={false}>
-    <div className="space-y-2">
-      {[...depenses]
-  .sort((a, b) => {
-    const da = parseDateFr(a.date)?.getTime() || 0;
-    const db = parseDateFr(b.date)?.getTime() || 0;
-    return db - da;
-  })
 
-  .map((depense) => (
-        <div
-          key={depense.id}
-          className="flex items-center justify-between gap-3 rounded-xl border bg-slate-50 p-3 text-sm"
-        >
-          <div>
-            <p className="font-bold text-slate-800">
-              {depense.date} — {depense.categorie}
-            </p>
-            <p className="text-slate-600">
-              {depense.description || "Sans description"} · {depense.modePaiement}
-            </p>
+  <BlocRepliable titre={`Historique dépenses (${depenses.length})`} ouvertParDefaut={false}>
+    {depensesTriees.length === 0 ? (
+      <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+        Aucune dépense enregistrée.
+      </p>
+    ) : (
+      <div className="space-y-2">
+        {depensesTriees.map((depense) => (
+          <div key={depense.id} className="rounded-xl border bg-slate-50 p-3 text-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-bold text-slate-800">
+                  {depense.date} — {depense.categorie}
+                </p>
+
+                <p className="text-slate-600">
+                  {depense.description || "Sans description"} · {depense.modePaiement}
+                </p>
+              </div>
+
+              <p className="font-bold text-red-700">
+                {(depense.montant || 0).toFixed(2)} €
+              </p>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const nouvelleDate = window.prompt("Date de la dépense :", depense.date);
+                  if (nouvelleDate === null) return;
+
+                  const nouvelleCategorie = window.prompt("Catégorie :", depense.categorie);
+                  if (nouvelleCategorie === null) return;
+
+                  const nouvelleDescription = window.prompt("Description :", depense.description);
+                  if (nouvelleDescription === null) return;
+
+                  const nouveauMontantTexte = window.prompt("Montant TTC :", String(depense.montant));
+                  if (nouveauMontantTexte === null) return;
+
+                  const nouveauMontant = Number(nouveauMontantTexte.replace(",", "."));
+
+                  if (Number.isNaN(nouveauMontant) || nouveauMontant < 0) {
+                    alert("Montant invalide.");
+                    return;
+                  }
+
+                  const nouveauModePaiement = window.prompt("Mode de paiement :", depense.modePaiement);
+                  if (nouveauModePaiement === null) return;
+
+                  setDepenses((anciennes) =>
+                    anciennes.map((d) =>
+                      d.id === depense.id
+                        ? {
+                            ...d,
+                            date: nouvelleDate,
+                            categorie: nouvelleCategorie,
+                            description: nouvelleDescription,
+                            montant: Math.round(nouveauMontant * 100) / 100,
+                            modePaiement: nouveauModePaiement,
+                          }
+                        : d
+                    )
+                  );
+                }}
+                className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700"
+              >
+                Modifier
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const confirmation = window.confirm("Supprimer cette dépense ?");
+                  if (!confirmation) return;
+
+                  setDepenses((anciennes) => anciennes.filter((d) => d.id !== depense.id));
+                }}
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
+              >
+                Supprimer
+              </button>
+            </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <p className="font-bold text-red-700">
-              {depense.montant.toFixed(2)} €
-            </p>
-
-            <button
-              type="button"
-              onClick={() => {
-                const confirmation = window.confirm("Supprimer cette dépense ?");
-                if (!confirmation) return;
-
-                setDepenses((ancien) =>
-                  ancien.filter((d) => d.id !== depense.id)
-                );
-              }}
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700"
-            >
-              Supprimer
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    )}
   </BlocRepliable>
-)}
 </Bloc>
 
-<Bloc titre="Calendrier chantier">
+<BlocRepliable titre="Calendrier chantier" ouvertParDefaut={false}>
   <div className="rounded-xl border bg-slate-50 p-3 space-y-3">
     <Input
       label="Recherche planning / client / devis / facture"
@@ -3737,97 +4071,8 @@ return (
       </div>
     ))}
   </div>
-</Bloc>
+</BlocRepliable>
 
-<div ref={actionsRef}>
-  <Bloc titre="Actions principales">
-
-<button
-  onClick={envoyerCloud}
-  className="btn-blue"
->
-  ☁️ Sauvegarder Cloud
-</button>
-
-<button
-  onClick={recupererCloud}
-  className="btn-emerald"
->
-  📥 Charger Cloud
-</button>
-    <input
-      ref={importRef}
-      type="file"
-      accept="application/json"
-      className="hidden"
-      onChange={importer}
-    />
-
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-
-
-      <button onClick={exporter} className="btn-purple">
-        Export
-      </button>
-
-      <button onClick={() => importRef.current?.click()} className="btn-outline">
-        Import
-      </button>
-
-      <button
-        onClick={() => {
-          setFicheOuverte(true);
-          setStatutDevis("estimation_rapide");
-          setNumeroDevis("");
-          setNumeroFacture("");
-        }}
-        className="btn-orange"
-      >
-        ⚡ Estimation rapide
-      </button>
-
-      <button onClick={nouveauDossier} className="btn-dark">
-        Nouveau
-      </button>
-
-      <button onClick={envoyerDevisMail} className="btn-green">
-        📧 Devis
-      </button>
-
-      <button onClick={envoyerFactureMail} className="btn-green">
-        📧 Facture
-      </button>
-
-      <button onClick={() => genererPDF("devis")} className="btn-blue">
-        PDF devis
-      </button>
-
-      <button onClick={() => genererPDF("facture")} className="btn-emerald">
-        PDF facture
-      </button>
-
-      <button onClick={enregistrer} className="btn-amber">
-        Enregistrer
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setFactureSap(!factureSap)}
-        className={factureSap ? "btn-green" : "btn-outline"}
-      >
-        {factureSap ? "✅ Facture SAP activée" : "🧾 Facture SAP"}
-      </button>
-
-      <button
-        onClick={reinitialiserApplicationComplete}
-        className="rounded-xl border border-red-200 bg-red-50 p-3 font-bold text-red-700 hover:bg-red-100"
-      >
-        🧹 Réinitialiser application
-      </button>
-
-    </div>
-  </Bloc>
-</div>
 
   
         {ficheOuverte && (
@@ -5437,6 +5682,8 @@ ${d.notes || ""}`,
   );
 
 }
+let blocsRepliablesOuvertsGlobal: string[] = [];
+
 function BlocRepliable({
   titre,
   children,
@@ -5446,13 +5693,61 @@ function BlocRepliable({
   children: ReactNode;
   ouvertParDefaut?: boolean;
 }) {
+  const idBloc = titre;
   const [ouvert, setOuvert] = useState(ouvertParDefaut);
+
+  useEffect(() => {
+    const fermerBloc = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+
+      if (detail?.idBloc === idBloc) {
+        setOuvert(false);
+      }
+    };
+
+    window.addEventListener("fermer-bloc-repliable", fermerBloc);
+
+    return () => {
+      window.removeEventListener("fermer-bloc-repliable", fermerBloc);
+    };
+  }, [idBloc]);
+
+  const basculerBloc = () => {
+    if (ouvert) {
+      blocsRepliablesOuvertsGlobal = blocsRepliablesOuvertsGlobal.filter(
+        (id) => id !== idBloc
+      );
+
+      setOuvert(false);
+      return;
+    }
+
+    blocsRepliablesOuvertsGlobal = blocsRepliablesOuvertsGlobal.filter(
+      (id) => id !== idBloc
+    );
+
+    blocsRepliablesOuvertsGlobal.push(idBloc);
+
+    if (blocsRepliablesOuvertsGlobal.length > 2) {
+      const blocAFermer = blocsRepliablesOuvertsGlobal.shift();
+
+      if (blocAFermer) {
+        window.dispatchEvent(
+          new CustomEvent("fermer-bloc-repliable", {
+            detail: { idBloc: blocAFermer },
+          })
+        );
+      }
+    }
+
+    setOuvert(true);
+  };
 
   return (
     <section className="rounded-xl border bg-white px-4 py-3 shadow-sm">
       <button
         type="button"
-        onClick={() => setOuvert(!ouvert)}
+        onClick={basculerBloc}
         className="flex w-full items-center justify-between gap-3 text-left"
       >
         <h2 className="text-base font-bold text-slate-900">{titre}</h2>

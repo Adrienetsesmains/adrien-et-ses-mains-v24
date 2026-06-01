@@ -706,6 +706,23 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
   ]
 },
 {
+  id: "traitement_tache_infiltration",
+  nom: "Traitement tache d'infiltration plafond",
+  unite: "m²",
+  prixMo220: 12,
+  prixMoJeremie150: 8.2,
+  heuresUnite: 0.30,
+  rentabilite: "🟢",
+  typeTravaux: "peinture",
+  sapCategorie: "ok",
+  detailsPdf: [
+    "Grattage des parties non adhérentes",
+    "Application bloqueur de taches",
+    "Préparation du support",
+    "Prêt avant mise en peinture"
+  ]
+},
+{
   id: "reprise_enduit_localisee",
   nom: "Reprise enduit localisée mur ou plafond",
   unite: "m²",
