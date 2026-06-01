@@ -3235,7 +3235,7 @@ y = yConditions + 58 + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
-    if (y + 36 > 292) {
+  if (y + 36 > 292) {
     doc.addPage();
     page += 1;
     y = 35;
@@ -3244,10 +3244,11 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setDrawColor(190, 145, 55);
   doc.setFillColor(248, 244, 236);
   doc.roundedRect(15, y, 180, 32, 3, 3, "FD");
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   doc.setTextColor(52, 63, 79);
-   doc.text("MODALITES DE PAIEMENT", 25, y + 8);
+  doc.text("MODALITES DE PAIEMENT", 25, y + 8);
 
   doc.setDrawColor(190, 145, 55);
   doc.line(25, y + 11, 72, y + 11);
@@ -3256,10 +3257,13 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setFontSize(8);
   doc.setTextColor(60, 60, 60);
 
-    doc.text("Règlement par virement bancaire :", 25, y + 19);
+  doc.text("Règlement par virement bancaire :", 25, y + 19);
 
   if (type === "devis") {
-  doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
+    doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
+  } else {
+    doc.text("Paiement à réception de facture.", 25, y + 25);
+  }
 
   doc.setDrawColor(220);
   doc.line(102, y + 6, 102, y + 27);
@@ -3306,9 +3310,6 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setFont("helvetica", "normal");
 
   y += 36;
-}
-
-// ✅ fermeture du bloc RIB
 }
 
 const totalPages = doc.getNumberOfPages();
