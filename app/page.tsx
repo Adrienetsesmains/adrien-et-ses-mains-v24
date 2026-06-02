@@ -5084,25 +5084,48 @@ return (
         </Bloc>
 
 <BlocRepliable titre="Historique" ouvertParDefaut={false}>
-  {historiqueFiltre.filter(
-    (item) =>
-      item.typeEvenement !== "rdv" &&
-      item.typeEvenement !== "rappel" &&
-      (item.numeroDevis || item.numeroFacture)
-  ).length === 0 ? (
-    <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-      Aucun devis ou facture enregistré.
-    </p>
-  ) : (
-    <div className="space-y-3">
-      {historiqueFiltre
-        .filter(
-          (item) =>
-            item.typeEvenement !== "rdv" &&
-            item.typeEvenement !== "rappel" &&
-            (item.numeroDevis || item.numeroFacture)
-        )
-        .map((item) => {
+  {(() => {
+    const extraireNumero = (numero?: string) => {
+      if (!numero) return 0;
+      const match = numero.match(/(\d+)$/);
+      return match ? Number(match[1]) : 0;
+    };
+
+    const historiqueDocuments = historiqueFiltre
+      .filter(
+        (item) =>
+          item.typeEvenement !== "rdv" &&
+          item.typeEvenement !== "rappel" &&
+          (item.numeroDevis || item.numeroFacture)
+      )
+      .sort((a, b) => {
+        const devisA = extraireNumero(a.numeroDevis);
+        const devisB = extraireNumero(b.numeroDevis);
+
+        if (devisA !== devisB) {
+          return devisB - devisA;
+        }
+
+        const aEstFacture = !!a.numeroFacture;
+        const bEstFacture = !!b.numeroFacture;
+
+        if (aEstFacture && !bEstFacture) return -1;
+        if (!aEstFacture && bEstFacture) return 1;
+
+        return extraireNumero(b.numeroFacture) - extraireNumero(a.numeroFacture);
+      });
+
+    if (historiqueDocuments.length === 0) {
+      return (
+        <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+          Aucun devis ou facture enregistré.
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {historiqueDocuments.map((item) => {
           const factureEnRetard =
             item.datePaiement &&
             !item.facturePayee &&
@@ -5126,17 +5149,17 @@ return (
             : "Devis";
 
           const nomChantier =
-  item.modeClient === "jeremie"
-    ? item.clientFinalAdresse ||
-      item.adresse ||
-      "Chantier non renseigné"
-    : item.modeClient === "agence"
-    ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
-      item.referenceChantier ||
-      "Chantier non renseigné"
-    : item.complementAdresse ||
-      item.adresse ||
-      "Chantier non renseigné";
+            item.modeClient === "jeremie"
+              ? item.clientFinalAdresse ||
+                item.adresse ||
+                "Chantier non renseigné"
+              : item.modeClient === "agence"
+              ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
+                item.referenceChantier ||
+                "Chantier non renseigné"
+              : item.complementAdresse ||
+                item.adresse ||
+                "Chantier non renseigné";
 
           return (
             <div
@@ -5146,24 +5169,23 @@ return (
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold text-slate-800">
-  {item.modeClient === "jeremie"
-    ? item.clientFinalNom || item.client || "Client non renseigné"
-    : item.modeClient === "agence"
-    ? item.locataire ||
-      item.proprietaire ||
-      item.client ||
-      "Client non renseigné"
-    : item.client || "Client non renseigné"}
-</p>
+                    {item.modeClient === "jeremie"
+                      ? item.clientFinalNom || item.client || "Client non renseigné"
+                      : item.modeClient === "agence"
+                      ? item.locataire ||
+                        item.proprietaire ||
+                        item.client ||
+                        "Client non renseigné"
+                      : item.client || "Client non renseigné"}
+                  </p>
 
-                 <div className="text-sm text-slate-500 space-y-1">
-  
-  <p>
-    {item.numeroDevis || "Aucun devis"} /{" "}
-    {item.numeroFacture || "Aucune facture"}
-  </p>
-  <p>{nomChantier}</p>
-</div> 
+                  <div className="space-y-1 text-sm text-slate-500">
+                    <p>
+                      {item.numeroDevis || "Aucun devis"} /{" "}
+                      {item.numeroFacture || "Aucune facture"}
+                    </p>
+                    <p>{nomChantier}</p>
+                  </div>
                 </div>
 
                 <span
@@ -5225,8 +5247,9 @@ return (
             </div>
           );
         })}
-    </div>
-  )}
+      </div>
+    );
+  })()}
 </BlocRepliable>
 
 <BlocRepliable titre="Paramètres entreprise / RIB" ouvertParDefaut={false}>
