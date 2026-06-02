@@ -5098,22 +5098,12 @@ return (
           item.typeEvenement !== "rappel" &&
           (item.numeroDevis || item.numeroFacture)
       )
-      .sort((a, b) => {
-        const devisA = extraireNumero(a.numeroDevis);
-        const devisB = extraireNumero(b.numeroDevis);
+  .sort((a, b) => {
+  const numeroA = extraireNumero(a.numeroDevis || a.numeroFacture);
+  const numeroB = extraireNumero(b.numeroDevis || b.numeroFacture);
 
-        if (devisA !== devisB) {
-          return devisB - devisA;
-        }
-
-        const aEstFacture = !!a.numeroFacture;
-        const bEstFacture = !!b.numeroFacture;
-
-        if (aEstFacture && !bEstFacture) return -1;
-        if (!aEstFacture && bEstFacture) return 1;
-
-        return extraireNumero(b.numeroFacture) - extraireNumero(a.numeroFacture);
-      });
+  return numeroB - numeroA;
+});
 
     if (historiqueDocuments.length === 0) {
       return (
