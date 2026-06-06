@@ -2807,6 +2807,8 @@ doc.text(titre, 105, 58, { align: "center" });
 if (type === "facture") {
   doc.setFontSize(10);
   doc.setTextColor(90, 90, 90);
+  
+console.log("numeroDevis PDF =", numeroDevis);
 
   doc.text(
     `Facture établie suite au devis signé n° ${numeroDevis}`,
