@@ -791,6 +791,7 @@ const [moisSelectionne, setMoisSelectionne] = useState(today.getMonth());
 const [anneeSelectionnee, setAnneeSelectionnee] = useState(today.getFullYear());
 const [sauvegardePrete, setSauvegardePrete] = useState(false);
 const [sauvegardesOuvertes, setSauvegardesOuvertes] = useState(false);
+const [detailsEncaissementsOuverts, setDetailsEncaissementsOuverts] = useState(false);
 const [listeBackups, setListeBackups] = useState<any[]>([]);
 
 useEffect(() => {
@@ -2201,7 +2202,6 @@ const tableauMensuel = useMemo(() => {
 
   const depensesDuMois = depenses.filter((d) => {
     const dateReference = parseDateFr(d.date);
-
     if (!dateReference) return false;
 
     return (
@@ -2210,8 +2210,50 @@ const tableauMensuel = useMemo(() => {
     );
   });
 
-  const totalEncaisse = dossiersDuMois.reduce(
-    (somme, d) => somme + (d.montantEncaisse || 0),
+  // ✅ Encaissements réels sans doublon
+  const encaissementsUniques = dossiersDuMois
+    .filter((d) => (d.montantEncaisse || 0) > 0)
+    .reduce((liste: any[], d) => {
+      const nomClient =
+        d.clientFinalNom ||
+        d.locataire ||
+        d.proprietaire ||
+        d.client ||
+        "Client non renseigné";
+
+      const chantier =
+        d.clientFinalAdresse ||
+        d.adresse ||
+        d.complementAdresse ||
+        d.referenceChantier ||
+        "";
+
+      const montant = d.montantEncaisse || 0;
+      const date = d.datePaiement || d.date || "";
+
+      const cleDoublon = normaliserTexte(
+        `${date}-${nomClient}-${chantier}-${montant}`
+      );
+
+      const existeDeja = liste.some((e) => e.cleDoublon === cleDoublon);
+
+      if (existeDeja) return liste;
+
+      return [
+        ...liste,
+        {
+          cleDoublon,
+          numero: d.numeroFacture || d.numeroDevis || "Sans numéro",
+          client: nomClient,
+          chantier,
+          date,
+          montant,
+        },
+      ];
+    }, []);
+
+  const totalEncaisse = encaissementsUniques.reduce(
+    (somme, e) => somme + (e.montant || 0),
     0
   );
 
@@ -2231,11 +2273,7 @@ const tableauMensuel = useMemo(() => {
   const totalRelance = dossiersDuMois.reduce((somme, d) => {
     const datePaiement = parseDateFr(d.datePaiement || "");
 
-    if (
-      datePaiement &&
-      datePaiement < new Date() &&
-      !d.facturePayee
-    ) {
+    if (datePaiement && datePaiement < new Date() && !d.facturePayee) {
       return somme + Math.max(0, (d.total || 0) - (d.montantEncaisse || 0));
     }
 
@@ -2253,9 +2291,43 @@ const tableauMensuel = useMemo(() => {
     totalRelance,
     estimationUrssaf,
     objectifMensuel,
+    encaissementsUniques,
     alerteFaible: totalEncaisse < objectifMensuel,
   };
 }, [historique, depenses, moisSelectionne, anneeSelectionnee]);
+
+<div className="rounded-xl border border-slate-200 bg-white p-3">
+  <button
+    type="button"
+    onClick={() => setDetailsEncaissementsOuverts(!detailsEncaissementsOuverts)}
+    className="flex w-full items-center justify-between text-left font-semibold text-slate-800"
+  >
+    <span>Détail des encaissements</span>
+    <span>{detailsEncaissementsOuverts ? "▲ Masquer" : "▼ Afficher"}</span>
+  </button>
+
+  {detailsEncaissementsOuverts && (
+    <div className="mt-3 space-y-2 text-sm">
+      {tableauMensuel.encaissementsUniques.length === 0 ? (
+        <p className="text-slate-500">Aucun encaissement ce mois-ci.</p>
+      ) : (
+        tableauMensuel.encaissementsUniques.map((e: any) => (
+          <div
+            key={e.cleDoublon}
+            className="rounded-lg border border-slate-200 bg-slate-50 p-2"
+          >
+            <p className="font-semibold text-slate-900">
+              {e.numero} — {e.montant} €
+            </p>
+            <p className="text-slate-600">{e.client}</p>
+            <p className="text-slate-500">{e.chantier}</p>
+            <p className="text-slate-400">Date : {e.date}</p>
+          </div>
+        ))
+      )}
+    </div>
+  )}
+</div>
 
 const depensesTriees = useMemo(() => {
   return [...depenses].sort((a, b) => {
@@ -2807,7 +2879,6 @@ doc.text(titre, 105, 58, { align: "center" });
 if (type === "facture") {
   doc.setFontSize(10);
   doc.setTextColor(90, 90, 90);
-  
 console.log("numeroDevis PDF =", numeroDevis);
 
   doc.text(
