@@ -2402,36 +2402,52 @@ const alertesIntelligentes = useMemo(() => {
 }, [historique]);
 const donneesGraphique = useMemo(() => {
   const aujourdHui = new Date();
-
   const data = [];
 
   for (let i = 11; i >= 0; i--) {
-    const date = new Date(
+    const dateMois = new Date(
       aujourdHui.getFullYear(),
       aujourdHui.getMonth() - i,
       1
     );
 
-    const mois = date.getMonth();
-    const annee = date.getFullYear();
+    const mois = dateMois.getMonth();
+    const annee = dateMois.getFullYear();
 
-    const total = historique.reduce((somme, d) => {
-      const datePaiement = parseDateFr(d.datePaiement || "") ||
+    const dossiersDuMois = historique.filter((d) => {
+      const dateReference =
+        parseDateFr(d.datePaiement || "") ||
         parseDateFr(d.date || "");
 
-      if (
-        datePaiement &&
-        datePaiement.getMonth() === mois &&
-        datePaiement.getFullYear() === annee
-      ) {
-        return somme + (d.montantEncaisse || 0);
-      }
+      return (
+        dateReference &&
+        dateReference.getMonth() === mois &&
+        dateReference.getFullYear() === annee
+      );
+    });
 
-      return somme;
-    }, 0);
+    const facturesDuMois = dossiersDuMois.filter(
+      (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
+    );
+
+    const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
+      if (!d.numeroDevis || d.numeroFacture) return false;
+      if ((d.montantEncaisse || 0) <= 0) return false;
+
+      const factureLieeExiste = historique.some(
+        (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
+      );
+
+      return !factureLieeExiste;
+    });
+
+    const total = [...facturesDuMois, ...devisDuMoisSansFacture].reduce(
+      (somme, d) => somme + (d.montantEncaisse || 0),
+      0
+    );
 
     data.push({
-      label: date.toLocaleString("fr-FR", {
+      label: dateMois.toLocaleString("fr-FR", {
         month: "short",
         year: "2-digit",
       }),
@@ -2441,6 +2457,7 @@ const donneesGraphique = useMemo(() => {
 
   return data;
 }, [historique]);
+
 const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
 }, [historique, idDossierActuel]);
