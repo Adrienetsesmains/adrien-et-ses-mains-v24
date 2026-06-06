@@ -2210,50 +2210,44 @@ const tableauMensuel = useMemo(() => {
     );
   });
 
-  // ✅ Encaissements réels sans doublon
-  const encaissementsUniques = dossiersDuMois
-    .filter((d) => (d.montantEncaisse || 0) > 0)
-    .reduce((liste: any[], d) => {
-      const nomClient =
+  const facturesDuMois = dossiersDuMois.filter(
+    (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
+  );
+
+  const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
+    if (!d.numeroDevis || d.numeroFacture) return false;
+    if ((d.montantEncaisse || 0) <= 0) return false;
+
+    const factureLieeExiste = historique.some(
+      (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
+    );
+
+    return !factureLieeExiste;
+  });
+
+  const encaissementsUniques = [...facturesDuMois, ...devisDuMoisSansFacture].map(
+    (d) => ({
+      cle: `${d.numeroFacture || d.numeroDevis}-${d.montantEncaisse}`,
+      numero: d.numeroFacture || d.numeroDevis || "Sans numéro",
+      client:
         d.clientFinalNom ||
         d.locataire ||
         d.proprietaire ||
         d.client ||
-        "Client non renseigné";
-
-      const chantier =
+        "Client non renseigné",
+      chantier:
         d.clientFinalAdresse ||
         d.adresse ||
         d.complementAdresse ||
         d.referenceChantier ||
-        "";
-
-      const montant = d.montantEncaisse || 0;
-      const date = d.datePaiement || d.date || "";
-
-      const cleDoublon = normaliserTexte(
-        `${date}-${nomClient}-${chantier}-${montant}`
-      );
-
-      const existeDeja = liste.some((e) => e.cleDoublon === cleDoublon);
-
-      if (existeDeja) return liste;
-
-      return [
-        ...liste,
-        {
-          cleDoublon,
-          numero: d.numeroFacture || d.numeroDevis || "Sans numéro",
-          client: nomClient,
-          chantier,
-          date,
-          montant,
-        },
-      ];
-    }, []);
+        "",
+      date: d.datePaiement || d.date || "",
+      montant: d.montantEncaisse || 0,
+    })
+  );
 
   const totalEncaisse = encaissementsUniques.reduce(
-    (somme, e) => somme + (e.montant || 0),
+    (somme, e) => somme + e.montant,
     0
   );
 
