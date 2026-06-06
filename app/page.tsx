@@ -5220,20 +5220,50 @@ return (
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  onClick={() => rechargerDossier(item)}
-                  className="btn-blue"
-                >
-                  Ouvrir
-                </button>
+  <button
+    onClick={() => rechargerDossier(item)}
+    className="btn-blue"
+  >
+    Ouvrir
+  </button>
 
-                <button
-                  onClick={() => supprimerDossier(item.id)}
-                  className="btn-orange"
-                >
-                  Supprimer
-                </button>
-              </div>
+  <button
+    onClick={() => {
+      rechargerDossier(item);
+
+      setIdDossierActuel(null);
+
+      setNumeroDevis("");
+      setNumeroFacture("");
+
+      setStatutDevis("en_cours");
+      setStatutChantier("a_planifier");
+      setFacturePayee(false);
+
+      setLignesTravaux(
+        item.lignesTravaux.map((ligne) => ({
+          ...ligne,
+          id: Date.now() + Math.random(),
+        }))
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }}
+    className="btn-purple"
+  >
+    Dupliquer
+  </button>
+
+  <button
+    onClick={() => supprimerDossier(item.id)}
+    className="btn-orange"
+  >
+    Supprimer
+  </button>
+</div>
             </div>
           );
         })}
