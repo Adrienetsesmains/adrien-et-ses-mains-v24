@@ -1184,9 +1184,33 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         heuresUnite: 0.5,
         rentabilite: "🟠 À surveiller",
       },
-    ],
-  },
+     {
+  id: "ouverture_caisson_entree_air_hygro",
+  nom: "Ouverture sur caisson avec pose d'entrée d'air hygroréglable",
+  unite: "u",
+  prixMo220: 35,
+  prixMoJeremie150: 24,
 
+  tva: 10,
+  prixJeremieTtc: 26.4,
+
+  heuresUnite: 1,
+  rentabilite: "🟢 Rentable",
+
+  typeTravaux: "ventilation",
+  sapCategorie: "non",
+
+  detailsPdf: [
+    "Repérage de l'emplacement",
+    "Ouverture du caisson ou menuiserie",
+    "Préparation du support",
+    "Pose de l'entrée d'air hygroréglable",
+    "Fixation et contrôle du bon fonctionnement",
+    "Nettoyage de la zone d'intervention"
+  ]
+},
+  ],
+  },
   {
     categorie: "Bricolage",
     prestations: [

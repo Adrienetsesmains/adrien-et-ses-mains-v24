@@ -791,6 +791,7 @@ const [moisSelectionne, setMoisSelectionne] = useState(today.getMonth());
 const [anneeSelectionnee, setAnneeSelectionnee] = useState(today.getFullYear());
 const [sauvegardePrete, setSauvegardePrete] = useState(false);
 const [sauvegardesOuvertes, setSauvegardesOuvertes] = useState(false);
+const [detailsEncaissementsOuverts, setDetailsEncaissementsOuverts] = useState(false);
 const [listeBackups, setListeBackups] = useState<any[]>([]);
 
 useEffect(() => {
@@ -2201,7 +2202,6 @@ const tableauMensuel = useMemo(() => {
 
   const depensesDuMois = depenses.filter((d) => {
     const dateReference = parseDateFr(d.date);
-
     if (!dateReference) return false;
 
     return (
@@ -2210,8 +2210,44 @@ const tableauMensuel = useMemo(() => {
     );
   });
 
-  const totalEncaisse = dossiersDuMois.reduce(
-    (somme, d) => somme + (d.montantEncaisse || 0),
+  const facturesDuMois = dossiersDuMois.filter(
+    (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
+  );
+
+  const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
+    if (!d.numeroDevis || d.numeroFacture) return false;
+    if ((d.montantEncaisse || 0) <= 0) return false;
+
+    const factureLieeExiste = historique.some(
+      (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
+    );
+
+    return !factureLieeExiste;
+  });
+
+  const encaissementsUniques = [...facturesDuMois, ...devisDuMoisSansFacture].map(
+    (d) => ({
+      cle: `${d.numeroFacture || d.numeroDevis}-${d.montantEncaisse}`,
+      numero: d.numeroFacture || d.numeroDevis || "Sans numéro",
+      client:
+        d.clientFinalNom ||
+        d.locataire ||
+        d.proprietaire ||
+        d.client ||
+        "Client non renseigné",
+      chantier:
+        d.clientFinalAdresse ||
+        d.adresse ||
+        d.complementAdresse ||
+        d.referenceChantier ||
+        "",
+      date: d.datePaiement || d.date || "",
+      montant: d.montantEncaisse || 0,
+    })
+  );
+
+  const totalEncaisse = encaissementsUniques.reduce(
+    (somme, e) => somme + e.montant,
     0
   );
 
@@ -2231,11 +2267,7 @@ const tableauMensuel = useMemo(() => {
   const totalRelance = dossiersDuMois.reduce((somme, d) => {
     const datePaiement = parseDateFr(d.datePaiement || "");
 
-    if (
-      datePaiement &&
-      datePaiement < new Date() &&
-      !d.facturePayee
-    ) {
+    if (datePaiement && datePaiement < new Date() && !d.facturePayee) {
       return somme + Math.max(0, (d.total || 0) - (d.montantEncaisse || 0));
     }
 
@@ -2253,9 +2285,43 @@ const tableauMensuel = useMemo(() => {
     totalRelance,
     estimationUrssaf,
     objectifMensuel,
+    encaissementsUniques,
     alerteFaible: totalEncaisse < objectifMensuel,
   };
 }, [historique, depenses, moisSelectionne, anneeSelectionnee]);
+
+<div className="rounded-xl border border-slate-200 bg-white p-3">
+  <button
+    type="button"
+    onClick={() => setDetailsEncaissementsOuverts(!detailsEncaissementsOuverts)}
+    className="flex w-full items-center justify-between text-left font-semibold text-slate-800"
+  >
+    <span>Détail des encaissements</span>
+    <span>{detailsEncaissementsOuverts ? "▲ Masquer" : "▼ Afficher"}</span>
+  </button>
+
+  {detailsEncaissementsOuverts && (
+    <div className="mt-3 space-y-2 text-sm">
+      {tableauMensuel.encaissementsUniques.length === 0 ? (
+        <p className="text-slate-500">Aucun encaissement ce mois-ci.</p>
+      ) : (
+        tableauMensuel.encaissementsUniques.map((e: any) => (
+          <div
+            key={e.cleDoublon}
+            className="rounded-lg border border-slate-200 bg-slate-50 p-2"
+          >
+            <p className="font-semibold text-slate-900">
+              {e.numero} — {e.montant} €
+            </p>
+            <p className="text-slate-600">{e.client}</p>
+            <p className="text-slate-500">{e.chantier}</p>
+            <p className="text-slate-400">Date : {e.date}</p>
+          </div>
+        ))
+      )}
+    </div>
+  )}
+</div>
 
 const depensesTriees = useMemo(() => {
   return [...depenses].sort((a, b) => {
@@ -2336,36 +2402,52 @@ const alertesIntelligentes = useMemo(() => {
 }, [historique]);
 const donneesGraphique = useMemo(() => {
   const aujourdHui = new Date();
-
   const data = [];
 
   for (let i = 11; i >= 0; i--) {
-    const date = new Date(
+    const dateMois = new Date(
       aujourdHui.getFullYear(),
       aujourdHui.getMonth() - i,
       1
     );
 
-    const mois = date.getMonth();
-    const annee = date.getFullYear();
+    const mois = dateMois.getMonth();
+    const annee = dateMois.getFullYear();
 
-    const total = historique.reduce((somme, d) => {
-      const datePaiement = parseDateFr(d.datePaiement || "") ||
+    const dossiersDuMois = historique.filter((d) => {
+      const dateReference =
+        parseDateFr(d.datePaiement || "") ||
         parseDateFr(d.date || "");
 
-      if (
-        datePaiement &&
-        datePaiement.getMonth() === mois &&
-        datePaiement.getFullYear() === annee
-      ) {
-        return somme + (d.montantEncaisse || 0);
-      }
+      return (
+        dateReference &&
+        dateReference.getMonth() === mois &&
+        dateReference.getFullYear() === annee
+      );
+    });
 
-      return somme;
-    }, 0);
+    const facturesDuMois = dossiersDuMois.filter(
+      (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
+    );
+
+    const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
+      if (!d.numeroDevis || d.numeroFacture) return false;
+      if ((d.montantEncaisse || 0) <= 0) return false;
+
+      const factureLieeExiste = historique.some(
+        (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
+      );
+
+      return !factureLieeExiste;
+    });
+
+    const total = [...facturesDuMois, ...devisDuMoisSansFacture].reduce(
+      (somme, d) => somme + (d.montantEncaisse || 0),
+      0
+    );
 
     data.push({
-      label: date.toLocaleString("fr-FR", {
+      label: dateMois.toLocaleString("fr-FR", {
         month: "short",
         year: "2-digit",
       }),
@@ -2375,6 +2457,7 @@ const donneesGraphique = useMemo(() => {
 
   return data;
 }, [historique]);
+
 const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
 }, [historique, idDossierActuel]);
@@ -2807,6 +2890,7 @@ doc.text(titre, 105, 58, { align: "center" });
 if (type === "facture") {
   doc.setFontSize(10);
   doc.setTextColor(90, 90, 90);
+console.log("numeroDevis PDF =", numeroDevis);
 
   doc.text(
     `Facture établie suite au devis signé n° ${numeroDevis}`,
@@ -2836,7 +2920,7 @@ doc.line(92, 60, 118, 60);
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = 70;
+const yCadres = 80;
 
 const largeurClient = 85;
 const largeurChantier = 90;
@@ -3235,7 +3319,7 @@ y = yConditions + 58 + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
-    if (y + 36 > 292) {
+  if (y + 36 > 292) {
     doc.addPage();
     page += 1;
     y = 35;
@@ -3244,10 +3328,11 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setDrawColor(190, 145, 55);
   doc.setFillColor(248, 244, 236);
   doc.roundedRect(15, y, 180, 32, 3, 3, "FD");
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   doc.setTextColor(52, 63, 79);
-   doc.text("MODALITES DE PAIEMENT", 25, y + 8);
+  doc.text("MODALITES DE PAIEMENT", 25, y + 8);
 
   doc.setDrawColor(190, 145, 55);
   doc.line(25, y + 11, 72, y + 11);
@@ -3256,10 +3341,13 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setFontSize(8);
   doc.setTextColor(60, 60, 60);
 
-    doc.text("Règlement par virement bancaire :", 25, y + 19);
+  doc.text("Règlement par virement bancaire :", 25, y + 19);
 
   if (type === "devis") {
-  doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
+    doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
+  } else {
+    doc.text("Paiement à réception de facture.", 25, y + 25);
+  }
 
   doc.setDrawColor(220);
   doc.line(102, y + 6, 102, y + 27);
@@ -3306,9 +3394,6 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setFont("helvetica", "normal");
 
   y += 36;
-}
-
-// ✅ fermeture du bloc RIB
 }
 
 const totalPages = doc.getNumberOfPages();
@@ -5083,25 +5168,38 @@ return (
         </Bloc>
 
 <BlocRepliable titre="Historique" ouvertParDefaut={false}>
-  {historiqueFiltre.filter(
-    (item) =>
-      item.typeEvenement !== "rdv" &&
-      item.typeEvenement !== "rappel" &&
-      (item.numeroDevis || item.numeroFacture)
-  ).length === 0 ? (
-    <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-      Aucun devis ou facture enregistré.
-    </p>
-  ) : (
-    <div className="space-y-3">
-      {historiqueFiltre
-        .filter(
-          (item) =>
-            item.typeEvenement !== "rdv" &&
-            item.typeEvenement !== "rappel" &&
-            (item.numeroDevis || item.numeroFacture)
-        )
-        .map((item) => {
+  {(() => {
+    const extraireNumero = (numero?: string) => {
+      if (!numero) return 0;
+      const match = numero.match(/(\d+)$/);
+      return match ? Number(match[1]) : 0;
+    };
+
+    const historiqueDocuments = historiqueFiltre
+      .filter(
+        (item) =>
+          item.typeEvenement !== "rdv" &&
+          item.typeEvenement !== "rappel" &&
+          (item.numeroDevis || item.numeroFacture)
+      )
+  .sort((a, b) => {
+  const numeroA = extraireNumero(a.numeroDevis || a.numeroFacture);
+  const numeroB = extraireNumero(b.numeroDevis || b.numeroFacture);
+
+  return numeroB - numeroA;
+});
+
+    if (historiqueDocuments.length === 0) {
+      return (
+        <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+          Aucun devis ou facture enregistré.
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {historiqueDocuments.map((item) => {
           const factureEnRetard =
             item.datePaiement &&
             !item.facturePayee &&
@@ -5125,17 +5223,17 @@ return (
             : "Devis";
 
           const nomChantier =
-  item.modeClient === "jeremie"
-    ? item.clientFinalAdresse ||
-      item.adresse ||
-      "Chantier non renseigné"
-    : item.modeClient === "agence"
-    ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
-      item.referenceChantier ||
-      "Chantier non renseigné"
-    : item.complementAdresse ||
-      item.adresse ||
-      "Chantier non renseigné";
+            item.modeClient === "jeremie"
+              ? item.clientFinalAdresse ||
+                item.adresse ||
+                "Chantier non renseigné"
+              : item.modeClient === "agence"
+              ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
+                item.referenceChantier ||
+                "Chantier non renseigné"
+              : item.complementAdresse ||
+                item.adresse ||
+                "Chantier non renseigné";
 
           return (
             <div
@@ -5145,24 +5243,23 @@ return (
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold text-slate-800">
-  {item.modeClient === "jeremie"
-    ? item.clientFinalNom || item.client || "Client non renseigné"
-    : item.modeClient === "agence"
-    ? item.locataire ||
-      item.proprietaire ||
-      item.client ||
-      "Client non renseigné"
-    : item.client || "Client non renseigné"}
-</p>
+                    {item.modeClient === "jeremie"
+                      ? item.clientFinalNom || item.client || "Client non renseigné"
+                      : item.modeClient === "agence"
+                      ? item.locataire ||
+                        item.proprietaire ||
+                        item.client ||
+                        "Client non renseigné"
+                      : item.client || "Client non renseigné"}
+                  </p>
 
-                 <div className="text-sm text-slate-500 space-y-1">
-  
-  <p>
-    {item.numeroDevis || "Aucun devis"} /{" "}
-    {item.numeroFacture || "Aucune facture"}
-  </p>
-  <p>{nomChantier}</p>
-</div> 
+                  <div className="space-y-1 text-sm text-slate-500">
+                    <p>
+                      {item.numeroDevis || "Aucun devis"} /{" "}
+                      {item.numeroFacture || "Aucune facture"}
+                    </p>
+                    <p>{nomChantier}</p>
+                  </div>
                 </div>
 
                 <span
@@ -5207,25 +5304,56 @@ return (
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  onClick={() => rechargerDossier(item)}
-                  className="btn-blue"
-                >
-                  Ouvrir
-                </button>
+  <button
+    onClick={() => rechargerDossier(item)}
+    className="btn-blue"
+  >
+    Ouvrir
+  </button>
 
-                <button
-                  onClick={() => supprimerDossier(item.id)}
-                  className="btn-orange"
-                >
-                  Supprimer
-                </button>
-              </div>
+  <button
+    onClick={() => {
+      rechargerDossier(item);
+
+      setIdDossierActuel(null);
+
+      setNumeroDevis("");
+      setNumeroFacture("");
+
+      setStatutDevis("en_cours");
+      setStatutChantier("a_planifier");
+      setFacturePayee(false);
+
+      setLignesTravaux(
+        item.lignesTravaux.map((ligne) => ({
+          ...ligne,
+          id: Date.now() + Math.random(),
+        }))
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }}
+    className="btn-purple"
+  >
+    Dupliquer
+  </button>
+
+  <button
+    onClick={() => supprimerDossier(item.id)}
+    className="btn-orange"
+  >
+    Supprimer
+  </button>
+</div>
             </div>
           );
         })}
-    </div>
-  )}
+      </div>
+    );
+  })()}
 </BlocRepliable>
 
 <BlocRepliable titre="Paramètres entreprise / RIB" ouvertParDefaut={false}>
