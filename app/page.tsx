@@ -539,6 +539,14 @@ setDetailsFournitures(b.detailsFournitures || "");
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
 
+    setAcompteManuelActif(
+  b.acompteManuelActif ?? false
+);
+
+setAcompteManuel(
+  b.acompteManuel ?? 0
+);
+
     setFactureSap(b.factureSap || false);
 setNumeroSap(b.numeroSap || "");
 
@@ -783,6 +791,8 @@ const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
 
   const [statutDevis, setStatutDevis] = useState("envoye");
   const [pourcentageAcompte, setPourcentageAcompte] = useState(30);
+  const [acompteManuelActif, setAcompteManuelActif] = useState(false);
+const [acompteManuel, setAcompteManuel] = useState(0);
   const [statutChantier, setStatutChantier] = useState("a_planifier");
   const [facturePayee, setFacturePayee] = useState(false);
   const today = new Date();
@@ -1066,8 +1076,11 @@ achatFournitures,
       fournituresClient,
       detailsFournitures,
 
-      montantEncaisse,
-      pourcentageAcompte,
+     montantEncaisse,
+pourcentageAcompte,
+
+acompteManuelActif,
+acompteManuel,
 
       factureSap,
       numeroSap,
@@ -1176,7 +1189,9 @@ const fraisLogistique =
     total = minimumChantier;
   }
 
-  const acompte = Math.round(total * (pourcentageAcompte / 100));
+  const acompte = acompteManuelActif
+  ? Number(acompteManuel || 0)
+  : Math.round(total * (pourcentageAcompte / 100));
 
   const reste = total - acompte;
   const resteReel = total - montantEncaisse;
@@ -1249,10 +1264,15 @@ return {
   achatFournitures,
   coefficientFournitures,
   montantEncaisse,
-pourcentageAcompte,
-fraisDeplacementManuelActif,
-fraisDeplacementManuel,
-factureSap,
+  pourcentageAcompte,
+
+  acompteManuelActif,
+  acompteManuel,
+
+  fraisDeplacementManuelActif,
+  fraisDeplacementManuel,
+
+  factureSap,
 ]);
 
 const joursCalendrier = useMemo(() => {
@@ -1503,6 +1523,8 @@ setFraisDeplacementManuel(0);
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
 
+  setAcompteManuelActif(false);
+setAcompteManuel(0);
 
   setFactureSap(false);
 setNumeroSap("");
@@ -1782,6 +1804,14 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
 
   setMontantEncaisse(d.montantEncaisse ?? 0);
   setPourcentageAcompte(d.pourcentageAcompte ?? 30);
+
+  setAcompteManuelActif(
+  (d as any).acompteManuelActif ?? false
+);
+
+setAcompteManuel(
+  (d as any).acompteManuel ?? 0
+);
 
   setFactureSap(d.factureSap || false);
 setNumeroSap(d.numeroSap || "");
@@ -5046,6 +5076,28 @@ return (
     ["50", "50 %"],
   ]}
 />
+<div className="mt-3 border rounded-lg p-3 bg-slate-50">
+  <label className="flex items-center gap-2 text-sm font-medium">
+    <input
+      type="checkbox"
+      checked={acompteManuelActif}
+      onChange={(e) => setAcompteManuelActif(e.target.checked)}
+    />
+    Acompte manuel
+  </label>
+
+  {acompteManuelActif && (
+    <div className="mt-2">
+      <input
+        type="number"
+        value={acompteManuel}
+        onChange={(e) => setAcompteManuel(Number(e.target.value))}
+        className="w-full border rounded px-2 py-1"
+        placeholder="Montant de l'acompte"
+      />
+    </div>
+  )}
+</div>
 
  <div className="grid gap-2 md:grid-cols-3">
   <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
