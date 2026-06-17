@@ -240,16 +240,16 @@ const clientsBase = [
     agence: "",
   },
   {
-    nom: "Elodie - Patrimoine Occitan",
-    telephone: "06 76 04 77 19",
-    email: "gestion@patrimoine-occitan.fr",
-    adresse: "Revel",
-    adresseAgence: "PO, 1 Gal du Midi - 31250 Revel",
-    complementAdresse: "",
-    agence: "Patrimoine Occitan",
-    notes: "05 61 27 72 77 Agence Patrimoine Occitan — devis serrés et rapides.",
-    modeClient: "agence",
-  },
+  nom: "Patrimoine Occitan",
+  telephone: "06 76 04 77 19",
+  email: "gestion@patrimoine-occitan.fr",
+  adresse: "",
+  adresseAgence: "PO, 1 Gal du Midi - 31250 Revel",
+  complementAdresse: "",
+  agence: "Patrimoine Occitan",
+  notes: "05 61 27 72 77 Agence Patrimoine Occitan — devis serrés et rapides.",
+  modeClient: "agence",
+},
   {
     nom: "Karine - Foncia",
     telephone: "07 84 51 78 21",
@@ -5295,14 +5295,22 @@ return (
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold text-slate-800">
-                    {item.modeClient === "jeremie"
-                      ? item.clientFinalNom || item.client || "Client non renseigné"
-                      : item.modeClient === "agence"
-                      ? item.locataire ||
-                        item.proprietaire ||
-                        item.client ||
-                        "Client non renseigné"
-                      : item.client || "Client non renseigné"}
+                    
+              {item.modeClient === "jeremie"
+  ? `${item.client || "SAS Meurisse Couverture"}${
+      item.clientFinalNom ? " / " + item.clientFinalNom : ""
+    }`
+  : item.modeClient === "agence"
+  ? `${item.agence || item.client || "Agence immobilière"}${
+      item.locataire
+        ? " / " + item.locataire
+        : item.proprietaire
+        ? " / " + item.proprietaire
+        : item.clientFinalNom
+        ? " / " + item.clientFinalNom
+        : ""
+    }`
+  : item.client || "Client non renseigné"}
                   </p>
 
                   <div className="space-y-1 text-sm text-slate-500">
