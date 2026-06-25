@@ -1606,6 +1606,37 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         notes: "Sécurité nécessaire / accès obligatoire.",
         conditions: "Vérifier accès + temps + fournitures séparées",
       },
+      {
+  nom: "Ramassage / chargement déchets verts",
+  unite: "m³",
+  prixMo220: 32,
+  prixMoJeremie150: 22,
+  heuresUnite: 0.45,
+  rentabilite: "🟢",
+  typeTravaux: "jardin",
+  sapCategorie: "ok",
+  conditions: "Ramassage, regroupement et chargement des végétaux. Hors transport et hors frais de dépôt éventuels.",
+  detailsPdf: [
+    "Ramassage et regroupement des végétaux",
+    "Chargement manuel",
+    "Nettoyage sommaire"
+  ]
+},
+{
+  nom: "Forfait évacuation déchetterie déchets verts",
+  unite: "forfait",
+  prixMo220: 25,
+  prixMoJeremie150: 17,
+  heuresUnite: 0.25,
+  rentabilite: "🟢",
+  typeTravaux: "jardin",
+  sapCategorie: "ok",
+  conditions: "Transport aller-retour et dépôt des déchets verts. À ajuster si volume important ou déchetterie éloignée.",
+  detailsPdf: [
+    "Transport des déchets verts",
+    "Dépôt en déchetterie"
+  ]
+}
     ],
   },
 
