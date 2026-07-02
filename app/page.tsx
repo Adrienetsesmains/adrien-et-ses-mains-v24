@@ -5138,28 +5138,52 @@ return (
   </div>
 )}
 
+{montantEncaisse > 0 && montantEncaisse < calcul.total && (
+  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+    <label className="block text-sm font-medium text-slate-700">
+      Date réelle de réception de l’acompte
+    </label>
+
+    <input
+      type="date"
+      value={formatDateFrVersInput(datePaiement)}
+      onChange={(e) =>
+        setDatePaiement(formatDateInputVersFr(e.target.value))
+      }
+      className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+    />
+  </div>
+)}
+
     <div className="flex flex-wrap gap-2">
       <button
-        onClick={() => {
-          setMontantEncaisse(calcul.acompte);
+  onClick={() => {
+    setMontantEncaisse(calcul.acompte);
 
-          setHistorique(
-            historique.map((d) =>
-              d.numeroDevis === numeroDevis
-                ? {
-                    ...d,
-                    montantEncaisse: calcul.acompte,
-                    reste: Math.max(0, calcul.total - calcul.acompte),
-                    total: calcul.total,
-                    acompte: calcul.acompte,
-                    facturePayee: false,
-                  }
-                : d
-            )
-          );
-        }}
+    if (!datePaiement) {
+      alert("Sélectionne la date réelle de réception de l’acompte.");
+    }
+
+    setHistorique(
+      historique.map((d) =>
+        d.numeroDevis === numeroDevis
+          ? {
+              ...d,
+              montantEncaisse: calcul.acompte,
+              reste: Math.max(0, calcul.total - calcul.acompte),
+              total: calcul.total,
+              acompte: calcul.acompte,
+              facturePayee: false,
+              datePaiement: datePaiement,
+            }
+          : d
+      )
+    );
+  }}
+  className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
+>
         className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
-      >
+    
         Acompte reçu
       </button>
 
