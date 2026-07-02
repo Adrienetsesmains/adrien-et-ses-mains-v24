@@ -719,6 +719,7 @@ const lignesTravauxRef = useRef<HTMLDivElement | null>(null);
 const derniereLigneRef = useRef<HTMLDivElement | null>(null);
   const [montantEncaisse, setMontantEncaisse] = useState(0);
 const [datePaiement, setDatePaiement] = useState("");
+const [saisieDateAcompteOuverte, setSaisieDateAcompteOuverte] = useState(false);
 const [dateChantier, setDateChantier] = useState("");
 const [heureChantier, setHeureChantier] = useState("");
 const [dateRdv, setDateRdv] = useState("");
@@ -5155,86 +5156,115 @@ return (
   </div>
 )}
 
-    <div className="flex flex-wrap gap-2">
-      <button
-  onClick={() => {
-    setMontantEncaisse(calcul.acompte);
+{saisieDateAcompteOuverte && (
+  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+    <label className="block text-sm font-medium text-slate-700">
+      Date réelle de réception de l’acompte
+    </label>
 
-    if (!datePaiement) {
-      alert("Sélectionne la date réelle de réception de l’acompte.");
-    }
+    <input
+      type="date"
+      value={formatDateFrVersInput(datePaiement)}
+      onChange={(e) =>
+        setDatePaiement(formatDateInputVersFr(e.target.value))
+      }
+      className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+    />
+  </div>
+)}
 
-    setHistorique(
-      historique.map((d) =>
-        d.numeroDevis === numeroDevis
-          ? {
-              ...d,
-              montantEncaisse: calcul.acompte,
-              reste: Math.max(0, calcul.total - calcul.acompte),
-              total: calcul.total,
-              acompte: calcul.acompte,
-              facturePayee: false,
-              datePaiement: datePaiement,
-            }
-          : d
-      )
-    );
-  }}
-  className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
->
-        className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
-    
-        Acompte reçu
-      </button>
+<div className="flex flex-wrap gap-2">
+  <button
+    onClick={() => {
+      if (!saisieDateAcompteOuverte) {
+        setSaisieDateAcompteOuverte(true);
+        return;
+      }
 
-      <button
-        onClick={() => {
-          setMontantEncaisse(calcul.total);
+      if (!datePaiement) {
+        alert("Sélectionne la date réelle de réception de l’acompte.");
+        return;
+      }
 
-          setHistorique(
-            historique.map((d) =>
-              d.numeroDevis === numeroDevis
-                ? {
-                    ...d,
-                    montantEncaisse: calcul.total,
-                    reste: 0,
-                    total: calcul.total,
-                    acompte: calcul.acompte,
-                    facturePayee: true,
-                  }
-                : d
-            )
-          );
-        }}
-        className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
-      >
-        Paiement complet
-      </button>
+      setMontantEncaisse(calcul.acompte);
 
-      <button
-        onClick={() => {
-          setMontantEncaisse(0);
+      setHistorique(
+        historique.map((d) =>
+          d.numeroDevis === numeroDevis
+            ? {
+                ...d,
+                montantEncaisse: calcul.acompte,
+                reste: Math.max(0, calcul.total - calcul.acompte),
+                total: calcul.total,
+                acompte: calcul.acompte,
+                facturePayee: false,
+                datePaiement: datePaiement,
+              }
+            : d
+        )
+      );
+    }}
+    className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
+  >
+    {saisieDateAcompteOuverte ? "Valider acompte" : "Acompte reçu"}
+  </button>
 
-          setHistorique(
-            historique.map((d) =>
-              d.numeroDevis === numeroDevis
-                ? {
-                    ...d,
-                    montantEncaisse: 0,
-                    reste: calcul.total,
-                    total: calcul.total,
-                    acompte: calcul.acompte,
-                    facturePayee: false,
-                  }
-                : d
-            )
-          );
-        }}
-        className="rounded-lg border px-3 py-2 text-sm font-semibold"
-      >
-        RAZ
-      </button>
-    </div>
+  <button
+    onClick={() => {
+      const dateFinale =
+        datePaiement || new Date().toLocaleDateString("fr-FR");
+
+      setDatePaiement(dateFinale);
+      setMontantEncaisse(calcul.total);
+
+      setHistorique(
+        historique.map((d) =>
+          d.numeroDevis === numeroDevis
+            ? {
+                ...d,
+                montantEncaisse: calcul.total,
+                reste: 0,
+                total: calcul.total,
+                acompte: calcul.acompte,
+                facturePayee: true,
+                datePaiement: dateFinale,
+              }
+            : d
+        )
+      );
+    }}
+    className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
+  >
+    Paiement complet
+  </button>
+
+  <button
+    onClick={() => {
+      setMontantEncaisse(0);
+      setDatePaiement("");
+      setSaisieDateAcompteOuverte(false);
+
+      setHistorique(
+        historique.map((d) =>
+          d.numeroDevis === numeroDevis
+            ? {
+                ...d,
+                montantEncaisse: 0,
+                reste: calcul.total,
+                total: calcul.total,
+                acompte: calcul.acompte,
+                facturePayee: false,
+                datePaiement: "",
+              }
+            : d
+        )
+      );
+    }}
+    className="rounded-lg border px-3 py-2 text-sm font-semibold"
+  >
+    RAZ
+  </button>
+</div>
   </div>
 </Bloc>      
 
