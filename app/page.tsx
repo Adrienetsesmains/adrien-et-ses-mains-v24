@@ -5101,7 +5101,7 @@ return (
   )}
 </div>
 
- <div className="grid gap-2 md:grid-cols-3">
+  <div className="grid gap-2 md:grid-cols-3">
   <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
   <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
   <MiniResult
@@ -5114,22 +5114,10 @@ return (
 {factureSap && (
   <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
     <div className="font-semibold">Mode SAP activé</div>
-
     <div className="mt-2 space-y-1">
-      <p>
-        Montant éligible au crédit d’impôt :{" "}
-        <strong>{calcul.montantEligibleSap} €</strong>
-      </p>
-
-      <p>
-        Fournitures non éligibles :{" "}
-        <strong>{calcul.montantNonEligibleSap} €</strong>
-      </p>
-
-      <p>
-        Crédit d’impôt estimatif client :{" "}
-        <strong>{calcul.creditImpotEstime} €</strong>
-      </p>
+      <p>Montant éligible au crédit d’impôt : <strong>{calcul.montantEligibleSap} €</strong></p>
+      <p>Fournitures non éligibles : <strong>{calcul.montantNonEligibleSap} €</strong></p>
+      <p>Crédit d’impôt estimatif client : <strong>{calcul.creditImpotEstime} €</strong></p>
     </div>
 
     {!numeroSap && (
@@ -5145,29 +5133,24 @@ return (
     <label className="block text-sm font-medium text-slate-700">
       Date réelle de réception de l’acompte
     </label>
-
     <input
       type="date"
       value={formatDateFrVersInput(datePaiement)}
-      onChange={(e) =>
-        setDatePaiement(formatDateInputVersFr(e.target.value))
-      }
+      onChange={(e) => setDatePaiement(formatDateInputVersFr(e.target.value))}
       className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
     />
   </div>
 )}
+
 {saisieDatePaiementCompletOuverte && (
   <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
     <label className="block text-sm font-medium text-slate-700">
       Date réelle du paiement complet
     </label>
-
     <input
       type="date"
       value={formatDateFrVersInput(datePaiement)}
-      onChange={(e) =>
-        setDatePaiement(formatDateInputVersFr(e.target.value))
-      }
+      onChange={(e) => setDatePaiement(formatDateInputVersFr(e.target.value))}
       className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
     />
   </div>
@@ -5176,6 +5159,8 @@ return (
 <div className="flex flex-wrap gap-2">
   <button
     onClick={() => {
+      setSaisieDatePaiementCompletOuverte(false);
+
       if (!saisieDateAcompteOuverte) {
         setSaisieDateAcompteOuverte(true);
         return;
@@ -5198,7 +5183,7 @@ return (
                 total: calcul.total,
                 acompte: calcul.acompte,
                 facturePayee: false,
-                datePaiement: datePaiement,
+                datePaiement,
               }
             : d
         )
@@ -5211,10 +5196,18 @@ return (
 
   <button
     onClick={() => {
-      const dateFinale =
-        datePaiement || new Date().toLocaleDateString("fr-FR");
+      setSaisieDateAcompteOuverte(false);
 
-      setDatePaiement(dateFinale);
+      if (!saisieDatePaiementCompletOuverte) {
+        setSaisieDatePaiementCompletOuverte(true);
+        return;
+      }
+
+      if (!datePaiement) {
+        alert("Sélectionne la date réelle du paiement complet.");
+        return;
+      }
+
       setMontantEncaisse(calcul.total);
 
       setHistorique(
@@ -5227,7 +5220,7 @@ return (
                 total: calcul.total,
                 acompte: calcul.acompte,
                 facturePayee: true,
-                datePaiement: dateFinale,
+                datePaiement,
               }
             : d
         )
@@ -5235,47 +5228,41 @@ return (
     }}
     className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
   >
+    {saisieDatePaiementCompletOuverte
+      ? "Valider paiement complet"
+      : "Paiement complet"}
+  </button>
+
   <button
-  onClick={() => {
-    if (!saisieDatePaiementCompletOuverte) {
-      setSaisieDatePaiementCompletOuverte(true);
-      return;
-    }
+    onClick={() => {
+      setMontantEncaisse(0);
+      setDatePaiement("");
+      setSaisieDateAcompteOuverte(false);
+      setSaisieDatePaiementCompletOuverte(false);
 
-    if (!datePaiement) {
-      alert("Sélectionne la date réelle du paiement complet.");
-      return;
-    }
-
-    setMontantEncaisse(calcul.total);
-
-    setHistorique(
-      historique.map((d) =>
-        d.numeroDevis === numeroDevis
-          ? {
-              ...d,
-              montantEncaisse: calcul.total,
-              reste: 0,
-              total: calcul.total,
-              acompte: calcul.acompte,
-              facturePayee: true,
-              datePaiement: datePaiement,
-            }
-          : d
-      )
-    );
-  }}
-  className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
->
-  {saisieDatePaiementCompletOuverte ? "Valider paiement complet" : "Paiement complet"}
-</button>
-
+      setHistorique(
+        historique.map((d) =>
+          d.numeroDevis === numeroDevis
+            ? {
+                ...d,
+                montantEncaisse: 0,
+                reste: calcul.total,
+                total: calcul.total,
+                acompte: calcul.acompte,
+                facturePayee: false,
+                datePaiement: "",
+              }
+            : d
+        )
+      );
+    }}
+    className="rounded-lg border px-3 py-2 text-sm font-semibold"
+  >
     RAZ
-    setSaisieDatePaiementCompletOuverte(false);
   </button>
 </div>
-  </div>
-</Bloc>      
+</div>
+</Bloc>
 
 
         <Bloc titre="Recherche historique">
