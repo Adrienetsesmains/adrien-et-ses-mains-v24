@@ -720,6 +720,7 @@ const derniereLigneRef = useRef<HTMLDivElement | null>(null);
   const [montantEncaisse, setMontantEncaisse] = useState(0);
 const [datePaiement, setDatePaiement] = useState("");
 const [saisieDateAcompteOuverte, setSaisieDateAcompteOuverte] = useState(false);
+const [saisieDatePaiementCompletOuverte, setSaisieDatePaiementCompletOuverte] = useState(false);
 const [dateChantier, setDateChantier] = useState("");
 const [heureChantier, setHeureChantier] = useState("");
 const [dateRdv, setDateRdv] = useState("");
@@ -5139,7 +5140,7 @@ return (
   </div>
 )}
 
-{montantEncaisse > 0 && montantEncaisse < calcul.total && (
+{saisieDateAcompteOuverte && (
   <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
     <label className="block text-sm font-medium text-slate-700">
       Date réelle de réception de l’acompte
@@ -5155,11 +5156,10 @@ return (
     />
   </div>
 )}
-
-{saisieDateAcompteOuverte && (
-  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+{saisieDatePaiementCompletOuverte && (
+  <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
     <label className="block text-sm font-medium text-slate-700">
-      Date réelle de réception de l’acompte
+      Date réelle du paiement complet
     </label>
 
     <input
@@ -5235,34 +5235,43 @@ return (
     }}
     className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
   >
-    Paiement complet
-  </button>
-
   <button
-    onClick={() => {
-      setMontantEncaisse(0);
-      setDatePaiement("");
-      setSaisieDateAcompteOuverte(false);
+  onClick={() => {
+    if (!saisieDatePaiementCompletOuverte) {
+      setSaisieDatePaiementCompletOuverte(true);
+      return;
+    }
 
-      setHistorique(
-        historique.map((d) =>
-          d.numeroDevis === numeroDevis
-            ? {
-                ...d,
-                montantEncaisse: 0,
-                reste: calcul.total,
-                total: calcul.total,
-                acompte: calcul.acompte,
-                facturePayee: false,
-                datePaiement: "",
-              }
-            : d
-        )
-      );
-    }}
-    className="rounded-lg border px-3 py-2 text-sm font-semibold"
-  >
+    if (!datePaiement) {
+      alert("Sélectionne la date réelle du paiement complet.");
+      return;
+    }
+
+    setMontantEncaisse(calcul.total);
+
+    setHistorique(
+      historique.map((d) =>
+        d.numeroDevis === numeroDevis
+          ? {
+              ...d,
+              montantEncaisse: calcul.total,
+              reste: 0,
+              total: calcul.total,
+              acompte: calcul.acompte,
+              facturePayee: true,
+              datePaiement: datePaiement,
+            }
+          : d
+      )
+    );
+  }}
+  className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
+>
+  {saisieDatePaiementCompletOuverte ? "Valider paiement complet" : "Paiement complet"}
+</button>
+
     RAZ
+    setSaisieDatePaiementCompletOuverte(false);
   </button>
 </div>
   </div>
