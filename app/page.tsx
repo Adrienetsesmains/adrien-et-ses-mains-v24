@@ -2068,23 +2068,28 @@ const construireObjetMail = (type: "devis" | "facture") => {
   const numero = type === "facture" ? numeroFacture : numeroDevis;
   const libelle = type === "facture" ? "Facture" : "Devis";
 
+  if (modeClient === "agence") {
+    return [
+      `${libelle} ${numero}`,
+      referenceChantier,
+      locataire,
+      `${adresse}${complementAdresse ? ", " + complementAdresse : ""}`,
+    ]
+      .filter((v) => v && v.trim() !== "")
+      .join(" - ");
+  }
+
   const nomAffiche =
-    modeClient === "jeremie"
-      ? clientFinalNom || "Client final"
-      : modeClient === "agence"
-      ? locataire || proprietaire || client || "Client"
-      : client || "Client";
+    clientFinalNom?.trim() ||
+    client?.trim();
 
-  const adresseAffichee =
-    modeClient === "jeremie"
-      ? clientFinalAdresse || ""
-      : modeClient === "agence"
-      ? `${adresse || ""} ${complementAdresse || ""}`.trim()
-      : `${adresse || ""} ${complementAdresse || ""}`.trim();
-
-  return `${libelle} ${numero} - ${nomAffiche}${
-    adresseAffichee ? `, ${adresseAffichee}` : ""
-  }`;
+  return [
+    `${libelle} ${numero}`,
+    nomAffiche,
+    `${adresse}${complementAdresse ? ", " + complementAdresse : ""}`,
+  ]
+    .filter((v) => v && v.trim() !== "")
+    .join(" - ");
 };
 
 const ouvrirGoogleCalendar = ({
