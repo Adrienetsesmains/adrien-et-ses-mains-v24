@@ -1343,13 +1343,26 @@ const joursCalendrier = useMemo(() => {
   setClient(fiche.nom);
   setTelephone(fiche.telephone || "");
   setEmail(fiche.email || "");
-  setAdresse(fiche.adresse || "");
-  setAdresseAgence(fiche.adresseAgence || "");
-  setComplementAdresse(fiche.complementAdresse || "");
   setNotes(fiche.notes || "");
   setModeClient(fiche.modeClient || "normal");
   setAgence(fiche.agence || "");
+
+  if (fiche.modeClient === "agence") {
+    setAdresse("");
+    setComplementAdresse("");
+    setAdresseAgence(fiche.adresseAgence || "");
+    setReferenceChantier("");
+    setLocataire("");
+    setTelephoneLocataire("");
+    setProprietaire("");
+    setTelephoneProprietaire("");
+  } else {
+    setAdresse(fiche.adresse || "");
+    setComplementAdresse(fiche.complementAdresse || "");
+    setAdresseAgence("");
+  }
 };
+
 const supprimerClientEnregistre = (nomClient: string) => {
   if (!nomClient.trim()) return;
 
@@ -4330,13 +4343,30 @@ return (
   </datalist>
 </div>
             <Input label="Email" value={email} onChange={setEmail} />
-            {modeClient === "agence" && (
-  <Input label="Adresse de l’agence" value={adresseAgence} onChange={setAdresseAgence} />
+ {modeClient === "agence" ? (
+  <>
+    <Input
+      label="Adresse de l’agence"
+      value={adresseAgence}
+      onChange={setAdresseAgence}
+    />
+    <TextArea label="Notes agence" value={notes} onChange={setNotes} />
+  </>
+) : (
+  <>
+    <Input
+      label="Adresse client / chantier"
+      value={adresse}
+      onChange={setAdresse}
+    />
+    <Input
+      label="Complément d’adresse / étage / appartement / bâtiment"
+      value={complementAdresse}
+      onChange={setComplementAdresse}
+    />
+    <TextArea label="Notes" value={notes} onChange={setNotes} />
+  </>
 )}
-
-<Input label={modeClient === "agence" ? "Adresse chantier / appartement" : "Adresse client / chantier"} value={adresse} onChange={setAdresse} />
-<Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
-            <TextArea label="Notes" value={notes} onChange={setNotes} />
           </Bloc>
 
           <Bloc titre="Dossier">
@@ -4365,10 +4395,12 @@ return (
             <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
 {(modeClient === "agence" || modeClient === "jeremie") && (
   <div className="space-y-4 rounded-2xl border bg-slate-50 p-4">
-    {modeClient === "agence" && (
-      <>
-        <Input label="Nom de l’agence" value={agence} onChange={setAgence} />
-        <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
+   {modeClient === "agence" && (
+  <>
+    <Input label="Nom de l’agence" value={agence} onChange={setAgence} />
+    <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
+    <Input label="Adresse chantier / appartement" value={adresse} onChange={setAdresse} />
+    <Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
         <Input label="Locataire" value={locataire} onChange={setLocataire} />
         <Input
           label="Téléphone locataire"
@@ -5865,17 +5897,17 @@ ${d.notes || ""}`,
     setHistorique((ancien) => [nouveauRdv, ...ancien]);
 
     setClientsEnregistres((anciens) => {
-      const ficheClient: ClientEnregistre = {
-        nom,
-        telephone: tel,
-        email: mail,
-        adresse: adresseRdv,
-        adresseAgence: "",
-        complementAdresse: "",
-        notes: observation,
-        modeClient: "normal",
-        agence: "",
-      };
+const ficheClient: ClientEnregistre = {
+  nom: client.trim(),
+  telephone,
+  email,
+  adresse: modeClient === "agence" ? "" : adresse,
+  adresseAgence: modeClient === "agence" ? adresseAgence : "",
+  complementAdresse: modeClient === "agence" ? "" : complementAdresse,
+  notes,
+  modeClient,
+  agence: modeClient === "agence" ? agence : "",
+};
 
       const existe = anciens.some(
         (c) => c.nom.toLowerCase() === nom.toLowerCase()
