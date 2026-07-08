@@ -1464,7 +1464,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
     ],
   },
 
-  {
+{
   categorie: "Structure / Bois",
   prestations: [
     {
@@ -1478,9 +1478,9 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         "Préparation des réservations dans mur",
         "Découpe et ajustement poutre",
         "Mise en place et scellement",
-        "Contrôle niveau et alignement"
+        "Contrôle niveau et alignement",
       ],
-      typeTravaux: "menuiserie"
+      typeTravaux: "menuiserie",
     },
 
     {
@@ -1494,9 +1494,9 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         "Prise de mesures",
         "Fabrication sur place",
         "Fixation structure",
-        "Finitions"
+        "Finitions",
       ],
-      typeTravaux: "menuiserie"
+      typeTravaux: "menuiserie",
     },
 
     {
@@ -1510,11 +1510,244 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         "Fabrication portillon",
         "Pose des gonds",
         "Réglages ouverture",
-        "Finitions"
+        "Finitions",
       ],
-      typeTravaux: "menuiserie"
-    }
-  ]
+      typeTravaux: "menuiserie",
+    },
+
+    {
+      nom: "Pose liteaux / contre-liteaux bardage",
+      unite: "ml",
+      prixMo220: 3.5,
+      prixMoJeremie150: 2.39,
+      tva: 10,
+      prixJeremieTtc: 2.63,
+      marcheHtMin: 4,
+      marcheHtMax: 8,
+      temps1Pers: "12 à 15 ml/h",
+      temps2Pers: "18 à 22 ml/h",
+      heuresUnite: 0.08,
+      rentabilite: "🟢 Rentable",
+      action: "Contrôler aplomb et ventilation avant pose",
+      notes:
+        "Pose de liteaux ou contre-liteaux sur support existant pour création d'une ossature secondaire avant isolation ou bardage.",
+      conditions:
+        "Support sain / hors reprise structurelle / hors défaut important d'aplomb / fournitures séparées",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Traçage de l'implantation des liteaux",
+        "Contrôle de l'aplomb du support existant",
+        "Découpe des liteaux",
+        "Fixation mécanique adaptée au support",
+        "Contrôle de l'alignement et de la lame d'air",
+      ],
+    },
+
+    {
+      nom: "Pose isolation extérieure fibre de bois",
+      unite: "m²",
+      prixMo220: 14,
+      prixMoJeremie150: 9.55,
+      tva: 10,
+      prixJeremieTtc: 10.5,
+      marcheHtMin: 18,
+      marcheHtMax: 35,
+      temps1Pers: "0,50h/m²",
+      temps2Pers: "0,30h/m²",
+      heuresUnite: 0.5,
+      rentabilite: "🟠 À surveiller",
+      action: "Vérifier épaisseur, fixation et compatibilité support",
+      notes:
+        "Pose de panneaux isolants fibre de bois en façade, découpes autour des ouvertures comprises en finition standard.",
+      conditions:
+        "Hors fourniture isolant / hors traitement humidité / hors reprise support / hors étude thermique",
+      sapCategorie: "non",
+      typeTravaux: "isolation",
+      detailsPdf: [
+        "Contrôle du support existant",
+        "Découpe des panneaux fibre de bois",
+        "Pose des panneaux isolants",
+        "Ajustement autour des ouvertures",
+        "Contrôle de la continuité de l'isolation",
+      ],
+    },
+
+    {
+      nom: "Pose écran pare-pluie façade",
+      unite: "m²",
+      prixMo220: 5.6,
+      prixMoJeremie150: 3.82,
+      tva: 10,
+      prixJeremieTtc: 4.2,
+      marcheHtMin: 8,
+      marcheHtMax: 14,
+      temps1Pers: "0,20h/m²",
+      temps2Pers: "0,12h/m²",
+      heuresUnite: 0.2,
+      rentabilite: "🟢 Rentable",
+      action: "Soigner recouvrements et adhésifs",
+      notes:
+        "Pose d'un écran pare-pluie avant bardage avec recouvrements et agrafage ou fixation adaptée.",
+      conditions:
+        "Hors fourniture pare-pluie / hors traitement étanchéité complexe / support prêt",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Déroulage de l'écran pare-pluie",
+        "Pose avec recouvrement adapté",
+        "Fixation provisoire ou définitive",
+        "Traitement des jonctions",
+        "Contrôle de la continuité avant bardage",
+      ],
+    },
+
+    {
+      nom: "Pose bardage bois extérieur",
+      unite: "m²",
+      prixMo220: 28,
+      prixMoJeremie150: 19.09,
+      tva: 10,
+      prixJeremieTtc: 21,
+      marcheHtMin: 35,
+      marcheHtMax: 65,
+      temps1Pers: "0,90h/m²",
+      temps2Pers: "0,55h/m²",
+      heuresUnite: 0.9,
+      rentabilite: "🟢 Rentable",
+      action: "Prévoir vis inox, ventilation et coupes propres",
+      notes:
+        "Pose de bardage bois extérieur sur ossature prête. Comprend calepinage, découpes courantes, fixation et alignement.",
+      conditions:
+        "Ossature prête / hors fourniture bardage / hors finition peinture ou saturateur / hors échafaudage",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Calepinage du bardage",
+        "Découpe des lames",
+        "Pose et fixation des lames de bardage",
+        "Contrôle des alignements",
+        "Respect des jeux de dilatation",
+        "Contrôle de la ventilation derrière bardage",
+      ],
+    },
+
+    {
+      nom: "Découpes bardage autour fenêtre ou porte",
+      unite: "u",
+      prixMo220: 55,
+      prixMoJeremie150: 37.5,
+      tva: 10,
+      prixJeremieTtc: 41.25,
+      marcheHtMin: 45,
+      marcheHtMax: 90,
+      temps1Pers: "2h",
+      temps2Pers: "1h15",
+      heuresUnite: 2,
+      rentabilite: "🟢 Rentable",
+      action: "Mesurer précisément avant coupe",
+      notes:
+        "Découpes spécifiques du bardage autour d'une fenêtre ou d'une porte avec ajustements et finition propre.",
+      conditions:
+        "Hors habillage complet des tableaux / hors reprise menuiserie / hors étanchéité complexe",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Prise de mesures précises autour de l'ouverture",
+        "Traçage des découpes",
+        "Découpe des lames de bardage",
+        "Ajustement autour de la menuiserie",
+        "Contrôle esthétique de la finition",
+      ],
+    },
+
+    {
+      nom: "Pose baguettes d'angle / profils finition bardage",
+      unite: "ml",
+      prixMo220: 8,
+      prixMoJeremie150: 5.45,
+      tva: 10,
+      prixJeremieTtc: 6,
+      marcheHtMin: 10,
+      marcheHtMax: 18,
+      temps1Pers: "0,28h/ml",
+      temps2Pers: "0,18h/ml",
+      heuresUnite: 0.28,
+      rentabilite: "🟢 Rentable",
+      action: "Soigner les coupes d'onglet et jonctions",
+      notes:
+        "Pose de baguettes d'angle, couvre-joints ou profils de finition pour bardage extérieur.",
+      conditions:
+        "Hors fourniture profils / hors profils spéciaux aluminium complexes",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Prise de mesure des profils",
+        "Découpe des baguettes ou profils",
+        "Pose et fixation",
+        "Traitement des angles",
+        "Contrôle visuel des finitions",
+      ],
+    },
+
+    {
+      nom: "Pose appui de fenêtre en tôle pliée",
+      unite: "u",
+      prixMo220: 70,
+      prixMoJeremie150: 47.75,
+      tva: 10,
+      prixJeremieTtc: 52.53,
+      marcheHtMin: 70,
+      marcheHtMax: 130,
+      temps1Pers: "2h30",
+      temps2Pers: "1h30",
+      heuresUnite: 2.5,
+      rentabilite: "🟢 Rentable",
+      action: "Vérifier pente, débord et étanchéité",
+      notes:
+        "Pose d'un appui de fenêtre ou bavette en tôle pliée fournie, avec fixation et traitement simple des jonctions.",
+      conditions:
+        "Tôle fournie aux bonnes dimensions / hors pliage sur place / hors reprise maçonnerie / hors étanchéité lourde",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Présentation de l'appui de fenêtre",
+        "Contrôle des dimensions et de la pente",
+        "Fixation de la tôle pliée",
+        "Traitement simple des jonctions",
+        "Contrôle de l'écoulement de l'eau",
+      ],
+    },
+
+    {
+      nom: "Forfait finitions bardage et nettoyage",
+      unite: "forfait",
+      prixMo220: 120,
+      prixMoJeremie150: 82,
+      tva: 10,
+      prixJeremieTtc: 90.2,
+      marcheHtMin: 120,
+      marcheHtMax: 250,
+      temps1Pers: "4h",
+      temps2Pers: "2h30",
+      heuresUnite: 4,
+      rentabilite: "🟢 Rentable",
+      action: "Prévoir contrôle complet avant réception",
+      notes:
+        "Finitions générales du bardage, contrôles, reprises mineures, nettoyage de la zone et réception chantier.",
+      conditions:
+        "Hors reprise importante / hors fourniture complémentaire / hors évacuation déchets volumineux",
+      sapCategorie: "non",
+      typeTravaux: "menuiserie",
+      detailsPdf: [
+        "Contrôle général du bardage",
+        "Vérification des fixations visibles",
+        "Reprises mineures si nécessaire",
+        "Nettoyage de la zone d'intervention",
+        "Photos de fin de chantier",
+      ],
+    },
+  ],
 },
   {
     categorie: "Toiture",
