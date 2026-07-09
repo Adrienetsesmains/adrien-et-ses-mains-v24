@@ -3200,31 +3200,52 @@ y += detailCoupe.length * 3.5;
 });
 
 // ================= BLOC TOTAL COMPACT =================
-if (y + 35 > 292) {
+if (y + 38 > 292) {
   doc.addPage();
   page += 1;
   y = 35;
 }
 
-const dejaEncaissePDF = montantEncaisse || 0;
-const resteAPayerPDF = Math.max(0, calcul.total - dejaEncaissePDF);
+const formatEuroPDF = (valeur: number) => {
+  return `${(Math.round((valeur || 0) * 100) / 100).toFixed(2)} €`;
+};
+
+const montantTotalPDF = Math.round((calcul.total || 0) * 100) / 100;
+
+const montantAcompteOuEncaissePDF =
+  type === "devis"
+    ? Math.round((calcul.acompte || 0) * 100) / 100
+    : Math.round((montantEncaisse || 0) * 100) / 100;
+
+const resteAPayerPDF = Math.max(
+  0,
+  Math.round((montantTotalPDF - montantAcompteOuEncaissePDF) * 100) / 100
+);
 
 doc.setFillColor(248, 244, 236);
 doc.setDrawColor(190, 145, 55);
-doc.roundedRect(108, y, 87, 32, 3, 3, "FD");
+doc.roundedRect(95, y, 100, 34, 3, 3, "FD");
 
 doc.setFont("helvetica", "normal");
 doc.setFontSize(10);
 doc.setTextColor(0, 0, 0);
 
-doc.text("Montant total", 115, y + 10);
-doc.text(`${calcul.total.toFixed(2)} €`, 188, y + 10, { align: "right" });
-doc.text(`${calcul.acompte.toFixed(2)} €`, 188, y + 18, { align: "right" });
-doc.text(`${calcul.reste.toFixed(2)} €`, 188, y + 28, { align: "right" });
-doc.text(`${dejaEncaissePDF.toFixed(2)} €`, 188, y + 18, { align: "right" });
-doc.text(`${resteAPayerPDF.toFixed(2)} €`, 188, y + 28, { align: "right" });
+doc.text("Montant total", 103, y + 10);
+doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10, { align: "right" });
 
-y += 38;
+doc.text(type === "devis" ? "Acompte demandé" : "Déjà encaissé", 103, y + 19);
+doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 19, {
+  align: "right",
+});
+
+doc.setDrawColor(180);
+doc.line(103, y + 23, 190, y + 23);
+
+doc.setFont("helvetica", "bold");
+doc.text("Reste à payer", 103, y + 31);
+doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 31, { align: "right" });
+
+y += 42;
 
 // ================= BLOC SAP UNIQUE PRO =================
 if (factureSap) {
