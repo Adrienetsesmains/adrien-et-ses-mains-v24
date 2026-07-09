@@ -1398,7 +1398,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       },
         ],
 },
-      {
+    {
   categorie: "Équipement",
   prestations: [
     {
@@ -1415,7 +1415,8 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       heuresUnite: 1,
       rentabilite: "🟢 Rentable agence",
       action: "Acceptable au tarif bas",
-      notes: "Mise en place électroménager (LL, LV, four). Raccordement standard eau et électricité. Test fonctionnement.",
+      notes:
+        "Mise en place électroménager (LL, LV, four). Raccordement standard eau et électricité. Test fonctionnement.",
       conditions:
         "Emplacement prêt / arrivées conformes / hors modification plomberie ou électricité / hors adaptation meuble",
       detailsPdf: [
@@ -1425,9 +1426,87 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       ],
       typeTravaux: "bricolage",
     },
-    ],
-  },
 
+    {
+      nom: "Dépose ancienne moustiquaire",
+      unite: "unité",
+      prixMo220: 28,
+      prixMoJeremie150: 19.09,
+      tva: 10,
+      prixJeremieTtc: 21,
+      marcheHtMin: 18,
+      marcheHtMax: 30,
+      temps1Pers: "0h20",
+      temps2Pers: "0h10",
+      heuresUnite: 0.33,
+      rentabilite: "🟢 Bonne",
+      action: "Vérifier l'état du support avant repose",
+      notes:
+        "Dépose de la moustiquaire existante, retrait des anciennes fixations si nécessaire et nettoyage sommaire du support.",
+      conditions:
+        "Support en bon état. Rebouchage ou réparation non compris.",
+      detailsPdf: [
+        "Dépose de l'ancienne moustiquaire",
+        "Retrait des anciennes fixations si nécessaire",
+        "Nettoyage sommaire du support avant repose",
+      ],
+      typeTravaux: "bricolage",
+    },
+
+    {
+      nom: "Pose moustiquaire standard",
+      unite: "unité",
+      prixMo220: 45,
+      prixMoJeremie150: 30.68,
+      tva: 10,
+      prixJeremieTtc: 33.75,
+      marcheHtMin: 45,
+      marcheHtMax: 70,
+      temps1Pers: "0h45",
+      temps2Pers: "0h25",
+      heuresUnite: 0.75,
+      rentabilite: "🟢 Bonne",
+      action: "Contrôler les dimensions avant fixation",
+      notes:
+        "Pose d'une moustiquaire sur fenêtre avec mise à niveau, réglages et contrôle du bon fonctionnement.",
+      conditions:
+        "Moustiquaire fournie par le client ou facturée séparément. Adaptation importante du support non comprise.",
+      detailsPdf: [
+        "Pose complète de la moustiquaire",
+        "Réglages",
+        "Vérification du bon fonctionnement",
+      ],
+      typeTravaux: "bricolage",
+    },
+
+    {
+      nom: "Pose moustiquaire grande dimension avec accès échelle",
+      unite: "unité",
+      prixMo220: 150,
+      prixMoJeremie150: 102.27,
+      tva: 10,
+      prixJeremieTtc: 112.50,
+      marcheHtMin: 90,
+      marcheHtMax: 180,
+      temps1Pers: "3h30",
+      temps2Pers: "1h50",
+      heuresUnite: 3.5,
+      rentabilite: "🟠 À surveiller",
+      action: "Sécuriser l'accès avant intervention",
+      notes:
+        "Pose d'une moustiquaire grande dimension avec accès difficile par échelle, fenêtre ne s'ouvrant pas entièrement, travail en hauteur au 2e étage.",
+      conditions:
+        "Intervention sous réserve d'un accès sécurisé et d'un sol stable pour l'échelle. Si accès dangereux, prévoir nacelle ou refus d'intervention.",
+      detailsPdf: [
+        "Pose moustiquaire grande dimension",
+        "Travail en hauteur avec accès échelle",
+        "Réglages",
+        "Contrôle de bonne tenue",
+      ],
+      typeTravaux: "bricolage",
+    },
+  ],
+},
   {
   categorie: "Extérieur / Métal / Divers",
   prestations: [
