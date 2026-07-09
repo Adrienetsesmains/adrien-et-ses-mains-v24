@@ -3180,7 +3180,7 @@ doc.text(designationCoupe, 15, y);
 // 👉 PRIX UNIQUE propre
 doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);
-doc.text(`${Math.round(montant)} €`, 190, y, { align: "right" });
+doc.text(`${montant.toFixed(2)} €`, 190, y, { align: "right" });
 
  y += designationCoupe.length * 3.5;
 
@@ -3218,31 +3218,11 @@ doc.setFontSize(10);
 doc.setTextColor(0, 0, 0);
 
 doc.text("Montant total", 115, y + 10);
-doc.text(`${Math.round(calcul.total)} €`, 188, y + 10, { align: "right" });
-
-if (type === "devis") {
-  doc.text("Acompte demandé", 115, y + 18);
-  doc.text(`${Math.round(calcul.acompte)} €`, 188, y + 18, { align: "right" });
-
-  doc.setDrawColor(180);
-  doc.line(115, y + 21, 190, y + 21);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Reste à payer", 115, y + 28);
-  doc.text(`${Math.round(calcul.reste)} €`, 188, y + 28, { align: "right" });
-}
-
-if (type === "facture") {
-  doc.text("Déjà encaissé", 115, y + 18);
-  doc.text(`${Math.round(dejaEncaissePDF)} €`, 188, y + 18, { align: "right" });
-
-  doc.setDrawColor(180);
-  doc.line(115, y + 21, 190, y + 21);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Reste à payer", 115, y + 28);
-  doc.text(`${Math.round(resteAPayerPDF)} €`, 188, y + 28, { align: "right" });
-}
+doc.text(`${calcul.total.toFixed(2)} €`, 188, y + 10, { align: "right" });
+doc.text(`${calcul.acompte.toFixed(2)} €`, 188, y + 18, { align: "right" });
+doc.text(`${calcul.reste.toFixed(2)} €`, 188, y + 28, { align: "right" });
+doc.text(`${dejaEncaissePDF.toFixed(2)} €`, 188, y + 18, { align: "right" });
+doc.text(`${resteAPayerPDF.toFixed(2)} €`, 188, y + 28, { align: "right" });
 
 y += 38;
 
