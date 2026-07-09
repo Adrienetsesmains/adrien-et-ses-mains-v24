@@ -1173,14 +1173,14 @@ const fraisLogistique =
     : fraisLogistiqueAuto;
 
   // ================= FOURNITURES =================
-  const reventeFournitures = fournituresClient
-    ? 0
-    : Math.round(achatFournitures * coefficientFournitures);
+ const reventeFournitures = fournituresClient
+  ? 0
+  : Math.round(achatFournitures * coefficientFournitures * 100) / 100;
 
-  const margeFournitures =
-    fournituresClient || achatFournitures === 0
-      ? 0
-      : reventeFournitures - achatFournitures;
+const margeFournitures =
+  fournituresClient || achatFournitures === 0
+    ? 0
+    : Math.round((reventeFournitures - achatFournitures) * 100) / 100;
 
   let total = totalTravaux + fraisLogistique + reventeFournitures;
 
@@ -4997,8 +4997,8 @@ return (
 
       <div className="grid gap-2 md:grid-cols-3">
         <MiniResult titre="Achat" valeur={`${achatFournitures} €`} />
-        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures} €`} couleur="text-blue-700" />
-        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures} €`} couleur="text-green-700" />
+        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures.toFixed(2)} €`} couleur="text-blue-700" />
+        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures.toFixed(2)} €`} couleur="text-green-700" />
       </div>
 
       <p className="text-xs text-slate-500">
@@ -5082,7 +5082,7 @@ return (
 
       <div className="flex justify-between">
         <span>Fournitures</span>
-        <strong>{calcul.reventeFournitures} €</strong>
+        <strong>{calcul.reventeFournitures.toFixed(2)} €</strong>
       </div>
 
       <div className="border-t pt-1 flex justify-between font-bold text-blue-700">
