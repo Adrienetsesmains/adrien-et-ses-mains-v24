@@ -2452,7 +2452,13 @@ const alertesIntelligentes = useMemo(() => {
 }, [historique]);
 const donneesGraphique = useMemo(() => {
   const aujourdHui = new Date();
-  const data = [];
+
+  const data: {
+    label: string;
+    encaissements: number;
+    depenses: number;
+    resultat: number;
+  }[] = [];
 
   for (let i = 11; i >= 0; i--) {
     const dateMois = new Date(
@@ -2464,20 +2470,24 @@ const donneesGraphique = useMemo(() => {
     const mois = dateMois.getMonth();
     const annee = dateMois.getFullYear();
 
+    // ================= ENCAISSEMENTS DU MOIS =================
+
     const dossiersDuMois = historique.filter((d) => {
       const dateReference =
         parseDateFr(d.datePaiement || "") ||
         parseDateFr(d.date || "");
 
       return (
-        dateReference &&
+        dateReference !== null &&
         dateReference.getMonth() === mois &&
         dateReference.getFullYear() === annee
       );
     });
 
     const facturesDuMois = dossiersDuMois.filter(
-      (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
+      (d) =>
+        Boolean(d.numeroFacture) &&
+        (d.montantEncaisse || 0) > 0
     );
 
     const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
@@ -2485,28 +2495,58 @@ const donneesGraphique = useMemo(() => {
       if ((d.montantEncaisse || 0) <= 0) return false;
 
       const factureLieeExiste = historique.some(
-        (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
+        (facture) =>
+          Boolean(facture.numeroFacture) &&
+          facture.numeroDevis === d.numeroDevis
       );
 
       return !factureLieeExiste;
     });
 
-    const total = [...facturesDuMois, ...devisDuMoisSansFacture].reduce(
-      (somme, d) => somme + (d.montantEncaisse || 0),
+    const encaissements = [
+      ...facturesDuMois,
+      ...devisDuMoisSansFacture,
+    ].reduce(
+      (somme, dossier) =>
+        somme + Number(dossier.montantEncaisse || 0),
       0
     );
+
+    // ================= DÉPENSES DU MOIS =================
+
+    const depensesDuMois = depenses.filter((depense) => {
+      const dateDepense = parseDateFr(depense.date || "");
+
+      return (
+        dateDepense !== null &&
+        dateDepense.getMonth() === mois &&
+        dateDepense.getFullYear() === annee
+      );
+    });
+
+    const totalDepenses = depensesDuMois.reduce(
+      (somme, depense) =>
+        somme + Number(depense.montant || 0),
+      0
+    );
+
+    // ================= RÉSULTAT RÉEL =================
+
+    const resultat = encaissements - totalDepenses;
 
     data.push({
       label: dateMois.toLocaleString("fr-FR", {
         month: "short",
         year: "2-digit",
       }),
-      total,
+      encaissements: Math.round(encaissements * 100) / 100,
+      depenses: Math.round(totalDepenses * 100) / 100,
+      resultat: Math.round(resultat * 100) / 100,
     });
   }
 
   return data;
-}, [historique]);
+}, [historique, depenses]);
 
 const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
@@ -6262,58 +6302,225 @@ function Check({
 function GraphiqueCourbe({
   donnees,
 }: {
-  donnees: { label: string; total: number }[];
+  donnees: {
+    label: string;
+    encaissements: number;
+    depenses: number;
+    resultat: number;
+  }[];
 }) {
-  const largeur = 900;
-  const hauteur = 260;
-  const margeX = 45;
-  const margeY = 35;
+  const largeur = 960;
+  const hauteur = 340;
 
-  const max = Math.max(...donnees.map((d) => d.total), 1);
+  const margeGauche = 70;
+  const margeDroite = 30;
+  const margeHaut = 45;
+  const margeBas = 55;
 
-  const points = donnees.map((d, index) => {
-    const x =
-      margeX +
-      (index * (largeur - margeX * 2)) / Math.max(donnees.length - 1, 1);
+  const largeurGraphique =
+    largeur - margeGauche - margeDroite;
 
-    const y =
-      hauteur - margeY - (d.total / max) * (hauteur - margeY * 2);
+  const hauteurGraphique =
+    hauteur - margeHaut - margeBas;
 
-    return { x, y, ...d };
-  });
+  const toutesLesValeurs = donnees.flatMap((donnee) => [
+    donnee.encaissements,
+    donnee.depenses,
+    donnee.resultat,
+  ]);
 
-  const chemin = points
-    .map((p, index) => `${index === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ");
+  const valeurMaximum = Math.max(
+    ...toutesLesValeurs,
+    0,
+    1
+  );
+
+  const valeurMinimum = Math.min(
+    ...toutesLesValeurs,
+    0
+  );
+
+  const amplitude = Math.max(
+    valeurMaximum - valeurMinimum,
+    1
+  );
+
+  const positionX = (index: number) => {
+    if (donnees.length <= 1) {
+      return margeGauche + largeurGraphique / 2;
+    }
+
+    return (
+      margeGauche +
+      (index * largeurGraphique) /
+        (donnees.length - 1)
+    );
+  };
+
+  const positionY = (valeur: number) => {
+    return (
+      margeHaut +
+      ((valeurMaximum - valeur) / amplitude) *
+        hauteurGraphique
+    );
+  };
+
+  const positionZero = positionY(0);
+
+  const creerPoints = (
+    cle: "encaissements" | "depenses" | "resultat"
+  ) => {
+    return donnees.map((donnee, index) => ({
+      x: positionX(index),
+      y: positionY(donnee[cle]),
+      valeur: donnee[cle],
+      label: donnee.label,
+    }));
+  };
+
+  const creerChemin = (
+    points: {
+      x: number;
+      y: number;
+    }[]
+  ) => {
+    return points
+      .map(
+        (point, index) =>
+          `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
+      )
+      .join(" ");
+  };
+
+  const pointsEncaissements =
+    creerPoints("encaissements");
+
+  const pointsDepenses =
+    creerPoints("depenses");
+
+  const pointsResultat =
+    creerPoints("resultat");
+
+  const cheminEncaissements =
+    creerChemin(pointsEncaissements);
+
+  const cheminDepenses =
+    creerChemin(pointsDepenses);
+
+  const cheminResultat =
+    creerChemin(pointsResultat);
+
+  const formaterMontant = (montant: number) => {
+    return `${new Intl.NumberFormat("fr-FR", {
+      maximumFractionDigits: 0,
+    }).format(montant)} €`;
+  };
+
+  const graduations = Array.from(
+    { length: 5 },
+    (_, index) => {
+      const valeur =
+        valeurMaximum -
+        (index * amplitude) / 4;
+
+      return {
+        valeur,
+        y: positionY(valeur),
+      };
+    }
+  );
 
   return (
-    <div className="rounded-2xl border bg-white p-4">
-      <h3 className="mb-4 text-lg font-bold text-slate-800">
-        Courbe des encaissements sur 12 mois
-      </h3>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">
+            Activité financière sur 12 mois
+          </h3>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Comparaison des encaissements, des dépenses
+            payées et du résultat réel.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-4 text-sm font-semibold">
+          <div className="flex items-center gap-2 text-blue-700">
+            <span className="h-3 w-3 rounded-full bg-blue-600" />
+            Encaissements
+          </div>
+
+          <div className="flex items-center gap-2 text-red-700">
+            <span className="h-3 w-3 rounded-full bg-red-600" />
+            Dépenses
+          </div>
+
+          <div className="flex items-center gap-2 text-emerald-700">
+            <span className="h-3 w-3 rounded-full bg-emerald-600" />
+            Résultat
+          </div>
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
-        <svg viewBox={`0 0 ${largeur} ${hauteur}`} className="min-w-[850px]">
+        <svg
+          viewBox={`0 0 ${largeur} ${hauteur}`}
+          className="min-w-[900px]"
+          role="img"
+          aria-label="Graphique des encaissements, dépenses et résultats sur douze mois"
+        >
+          {/* ================= GRILLE HORIZONTALE ================= */}
+
+          {graduations.map((graduation, index) => (
+            <g key={`graduation-${index}`}>
+              <line
+                x1={margeGauche}
+                y1={graduation.y}
+                x2={largeur - margeDroite}
+                y2={graduation.y}
+                stroke="#E2E8F0"
+                strokeWidth="1"
+                strokeDasharray="5 5"
+              />
+
+              <text
+                x={margeGauche - 10}
+                y={graduation.y + 4}
+                textAnchor="end"
+                fontSize="11"
+                fill="#64748B"
+              >
+                {formaterMontant(graduation.valeur)}
+              </text>
+            </g>
+          ))}
+
+          {/* ================= AXE VERTICAL ================= */}
+
           <line
-            x1={margeX}
-            y1={hauteur - margeY}
-            x2={largeur - margeX}
-            y2={hauteur - margeY}
+            x1={margeGauche}
+            y1={margeHaut}
+            x2={margeGauche}
+            y2={hauteur - margeBas}
             stroke="#CBD5E1"
             strokeWidth="2"
           />
 
+          {/* ================= LIGNE ZÉRO ================= */}
+
           <line
-            x1={margeX}
-            y1={margeY}
-            x2={margeX}
-            y2={hauteur - margeY}
-            stroke="#CBD5E1"
+            x1={margeGauche}
+            y1={positionZero}
+            x2={largeur - margeDroite}
+            y2={positionZero}
+            stroke="#94A3B8"
             strokeWidth="2"
           />
+
+          {/* ================= COURBE ENCAISSEMENTS ================= */}
 
           <path
-            d={chemin}
+            d={cheminEncaissements}
             fill="none"
             stroke="#2563EB"
             strokeWidth="4"
@@ -6321,32 +6528,132 @@ function GraphiqueCourbe({
             strokeLinejoin="round"
           />
 
-          {points.map((p, index) => (
-            <g key={index}>
-              <circle cx={p.x} cy={p.y} r="5" fill="#2563EB" />
+          {/* ================= COURBE DÉPENSES ================= */}
 
-              <text
-                x={p.x}
-                y={p.y - 12}
-                textAnchor="middle"
-                fontSize="12"
-                fill="#334155"
-              >
-                {p.total}€
-              </text>
+          <path
+            d={cheminDepenses}
+            fill="none"
+            stroke="#DC2626"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
 
-              <text
-                x={p.x}
-                y={hauteur - 10}
-                textAnchor="middle"
-                fontSize="12"
-                fill="#475569"
-              >
-                {p.label}
-              </text>
-            </g>
-          ))}
+          {/* ================= COURBE RÉSULTAT ================= */}
+
+          <path
+            d={cheminResultat}
+            fill="none"
+            stroke="#059669"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* ================= POINTS ET LIBELLÉS ================= */}
+
+          {donnees.map((donnee, index) => {
+            const x = positionX(index);
+
+            const yEncaissements = positionY(
+              donnee.encaissements
+            );
+
+            const yDepenses = positionY(
+              donnee.depenses
+            );
+
+            const yResultat = positionY(
+              donnee.resultat
+            );
+
+            return (
+              <g key={`${donnee.label}-${index}`}>
+                <circle
+                  cx={x}
+                  cy={yEncaissements}
+                  r="5"
+                  fill="#2563EB"
+                >
+                  <title>
+                    {`${donnee.label} — Encaissements : ${formaterMontant(
+                      donnee.encaissements
+                    )}`}
+                  </title>
+                </circle>
+
+                <circle
+                  cx={x}
+                  cy={yDepenses}
+                  r="5"
+                  fill="#DC2626"
+                >
+                  <title>
+                    {`${donnee.label} — Dépenses : ${formaterMontant(
+                      donnee.depenses
+                    )}`}
+                  </title>
+                </circle>
+
+                <circle
+                  cx={x}
+                  cy={yResultat}
+                  r="5"
+                  fill="#059669"
+                >
+                  <title>
+                    {`${donnee.label} — Résultat : ${formaterMontant(
+                      donnee.resultat
+                    )}`}
+                  </title>
+                </circle>
+
+                <text
+                  x={x}
+                  y={hauteur - 18}
+                  textAnchor="middle"
+                  fontSize="12"
+                  fill="#475569"
+                >
+                  {donnee.label}
+                </text>
+              </g>
+            );
+          })}
         </svg>
+      </div>
+
+      <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+          <div className="font-semibold text-blue-800">
+            Encaissements
+          </div>
+
+          <div className="mt-1 text-xs text-blue-700">
+            Sommes réellement reçues.
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+          <div className="font-semibold text-red-800">
+            Dépenses
+          </div>
+
+          <div className="mt-1 text-xs text-red-700">
+            Achats payés pendant le mois, y compris le
+            stock utilisé sur plusieurs chantiers.
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+          <div className="font-semibold text-emerald-800">
+            Résultat réel
+          </div>
+
+          <div className="mt-1 text-xs text-emerald-700">
+            Encaissements moins dépenses.
+          </div>
+        </div>
       </div>
     </div>
   );
