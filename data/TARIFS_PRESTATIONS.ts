@@ -1398,7 +1398,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       },
         ],
 },
-    {
+{
   categorie: "Équipement",
   prestations: [
     {
@@ -1485,7 +1485,7 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
       prixMo220: 150,
       prixMoJeremie150: 102.27,
       tva: 10,
-      prixJeremieTtc: 112.50,
+      prixJeremieTtc: 112.5,
       marcheHtMin: 90,
       marcheHtMax: 180,
       temps1Pers: "3h30",
@@ -1504,6 +1504,46 @@ export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
         "Contrôle de bonne tenue",
       ],
       typeTravaux: "bricolage",
+    },
+
+    {
+      id: "pose_equipements_appui_rampe_barres",
+      nom:
+        "Pose d'équipements d'appui - rampe d'escalier et 2 barres d'appui",
+      unite: "forfait",
+      prixMo220: 205,
+      prixMoJeremie150: 139.77,
+      tva: 10,
+      prixJeremieTtc: 153.75,
+      marcheHtMin: 205,
+      marcheHtMax: 295,
+      temps1Pers: "3h",
+      temps2Pers: "1h45",
+      heuresUnite: 3,
+      rentabilite: "🟢 Bonne",
+      action:
+        "Valider les emplacements et contrôler la nature des supports avant perçage",
+      notes:
+        "Pose groupée d'une rampe d'escalier d'environ 2 m, d'une barre d'appui dans la douche et d'une barre d'appui à proximité des toilettes. Comprend la protection des zones, le traçage, le perçage du carrelage et des supports, le chevillage, la fixation, les réglages et le contrôle de la solidité.",
+      conditions:
+        "Équipements fournis par le client ou facturés séparément. Supports sains et suffisamment résistants. Hors renfort dans cloison creuse, reprise du carrelage, modification structurelle, déplacement de réseaux ou adaptation particulière. Les fixations spécifiques peuvent être facturées séparément selon la nature des supports.",
+      detailsPdf: [
+        "Protection des zones d'intervention",
+        "Validation des hauteurs et emplacements avec le client",
+        "Contrôle de la nature des supports",
+        "Repérage des réseaux éventuels",
+        "Traçage des implantations",
+        "Perçage du carrelage sans percussion",
+        "Perçage des supports avec l'outillage adapté",
+        "Chevillage et fixation de la rampe d'escalier",
+        "Fixation de la barre d'appui de douche",
+        "Fixation de la barre d'appui des toilettes",
+        "Réglage des niveaux et alignements",
+        "Contrôle du serrage et de la solidité",
+        "Nettoyage des zones d'intervention",
+      ],
+      typeTravaux: "bricolage",
+      sapCategorie: "ok",
     },
   ],
 },
