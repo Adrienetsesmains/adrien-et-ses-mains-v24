@@ -775,9 +775,19 @@ const [depenseCategorie, setDepenseCategorie] = useState("Fournitures");
 const [depenseDescription, setDepenseDescription] = useState("");
 const [depenseMontant, setDepenseMontant] = useState(0);
 const [depenseModePaiement, setDepenseModePaiement] = useState("CB");
-  const [prestationSelectionnee, setPrestationSelectionnee] = useState("");
-  const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
-  const [numeroDevis, setNumeroDevis] = useState("");
+const [prestationSelectionnee, setPrestationSelectionnee] = useState("");
+const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
+
+const [recherchePrestation, setRecherchePrestation] = useState("");
+
+const [afficherFavorisSeulement, setAfficherFavorisSeulement] =
+  useState(false);
+
+const [prestationsFavorites, setPrestationsFavorites] = useState<string[]>(
+  []
+);
+
+const [numeroDevis, setNumeroDevis] = useState("");
 const [numeroFacture, setNumeroFacture] = useState("");
 
   const [lignesTravaux, setLignesTravaux] = useState<LigneTravaux[]>([]);
@@ -899,15 +909,41 @@ setTypeRdv(b.typeRdv || "visite");
       console.error("Erreur chargement sauvegarde :", error);
     }
   }
-
   setSauvegardePrete(true);
 }, []);
+
+// ================= FAVORIS PRESTATIONS V25 =================
+
+useEffect(() => {
+  try {
+    const favorisSauvegardes = JSON.parse(
+      localStorage.getItem("prestationsFavoritesV25") || "[]"
+    );
+
+    if (Array.isArray(favorisSauvegardes)) {
+      setPrestationsFavorites(favorisSauvegardes);
+    }
+  } catch (error) {
+    console.error(
+      "Erreur pendant le chargement des prestations favorites :",
+      error
+    );
+
+    setPrestationsFavorites([]);
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    "prestationsFavoritesV25",
+    JSON.stringify(prestationsFavorites)
+  );
+}, [prestationsFavorites]);
 
 useEffect(() => {
   if (!sauvegardePrete) return;
 
- const donnees = construireSauvegardeComplete();
-
+  const donnees = construireSauvegardeComplete();
   localStorage.setItem("tableauDeBordEntrepriseV24", JSON.stringify(donnees));
 }, [
   sauvegardePrete,
@@ -2615,7 +2651,172 @@ const resultatsCalendrier = useMemo(() => {
     `).includes(q)
   );
 }, [historique, rechercheCalendrier]);
-  
+
+// ================= RECHERCHE PRESTATIONS V25 =================
+
+const normaliserRecherchePrestation = (valeur: string) => {
+  return valeur
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
+const prestationEstFavorite = (idPrestation: string) => {
+  return prestationsFavorites.includes(idPrestation);
+};
+
+const basculerPrestationFavorite = (idPrestation: string) => {
+  setPrestationsFavorites((favorisActuels) => {
+    if (favorisActuels.includes(idPrestation)) {
+      return favorisActuels.filter(
+        (idFavorite) => idFavorite !== idPrestation
+      );
+    }
+
+    return [...favorisActuels, idPrestation];
+  });
+};
+
+const prestationsFiltrees = useMemo(() => {
+  const rechercheNormalisee =
+    normaliserRecherchePrestation(recherchePrestation);
+
+  return TARIFS_PRESTATIONS.filter((prestation: any) => {
+    const correspondCategorie =
+      !categorieSelectionnee ||
+      prestation.categorie === categorieSelectionnee;
+
+    const correspondFavori =
+      !afficherFavorisSeulement ||
+      prestationsFavorites.includes(prestation.id);
+
+    const textePrestation = normaliserRecherchePrestation(
+      [
+        getNomPrestation(prestation),
+        prestation.categorie,
+        prestation.unite,
+        prestation.action,
+        prestation.conditions,
+        ...(prestation.tags || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+    );
+
+    const correspondRecherche =
+      !rechercheNormalisee ||
+      textePrestation.includes(rechercheNormalisee);
+
+    return (
+      correspondCategorie &&
+      correspondFavori &&
+      correspondRecherche
+    );
+  }).sort((a: any, b: any) => {
+    const aFavori =
+      prestationsFavorites.includes(a.id);
+
+    const bFavori =
+      prestationsFavorites.includes(b.id);
+
+    if (aFavori !== bFavori) {
+      return aFavori ? -1 : 1;
+    }
+
+    return getNomPrestation(a).localeCompare(
+      getNomPrestation(b),
+      "fr"
+    );
+  });
+}, [
+  categorieSelectionnee,
+  recherchePrestation,
+  afficherFavorisSeulement,
+  prestationsFavorites,
+]);
+
+const ajouterPrestationAuDevis = (
+  idPrestation?: string
+) => {
+  const idAUtiliser =
+    idPrestation || prestationSelectionnee;
+
+  const prestationTrouvee: any =
+    TARIFS_PRESTATIONS.find(
+      (prestation: any) =>
+        prestation.id === idAUtiliser
+    );
+
+  if (!prestationTrouvee) {
+    alert(
+      "Choisis une prestation avant d'ajouter une ligne."
+    );
+    return;
+  }
+
+  const prixClient = getPrixPrestation(
+    prestationTrouvee,
+    modeClient
+  );
+
+  const detailsBase =
+    prestationTrouvee.detailsPdf &&
+    prestationTrouvee.detailsPdf.length > 0
+      ? prestationTrouvee.detailsPdf
+      : DETAILS_PDF_PAR_CATEGORIE[
+          prestationTrouvee.categorie
+        ] || [
+          "Réalisation de la prestation prévue au devis",
+          "Ajustements simples",
+          "Finitions standards",
+          "Nettoyage de fin d’intervention",
+        ];
+
+  setLignesTravaux((lignesActuelles) => [
+    ...lignesActuelles,
+    {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+
+      type:
+        prestationTrouvee.typeTravaux ||
+        "prestation_tableau",
+
+      q1: 1,
+      q2: 0,
+      r1: 0,
+      r2: 0,
+      option: 0,
+
+      tarifId: prestationTrouvee.id,
+
+      prestationNom:
+        getNomPrestation(prestationTrouvee),
+
+      unite: prestationTrouvee.unite,
+
+      prixUnitaire: prixClient,
+      prixUnitaireAuto: prixClient,
+      prixManuel: false,
+
+      heuresUnite:
+        prestationTrouvee.heuresUnite || 0,
+
+      detailsPdfPersonnalises: [...detailsBase],
+      detailsPdfOuvert: false,
+    },
+  ]);
+
+  setPrestationSelectionnee("");
+
+  setTimeout(() => {
+    derniereLigneRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 100);
+};
+
 const reinitialiserApplicationComplete = () => {
   const confirmation = window.confirm(
     "⚠️ Voulez-vous vraiment réinitialiser toute l’application ?\n\nCela va supprimer le brouillon actuel, l’historique, les clients enregistrés, les dépenses et les compteurs."
@@ -4568,95 +4769,225 @@ return (
         </section>
 )}
 <BlocRepliable titre="Lignes de travaux" ouvertParDefaut={true}>
-  <div ref={lignesTravauxRef} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+<div
+  ref={lignesTravauxRef}
+  className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+>
+  <div className="mb-4">
+    <h3 className="text-base font-bold text-slate-800">
+      Ajouter une prestation
+    </h3>
+
+    <p className="mt-1 text-sm text-slate-500">
+      Recherche directement une prestation ou
+      sélectionne une catégorie.
+    </p>
+  </div>
+
+  <div className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
+    <div>
+      <label className="text-xs font-semibold text-slate-700">
+        Rechercher une prestation
+      </label>
+
+      <input
+        type="text"
+        value={recherchePrestation}
+        onChange={(event) => {
+          setRecherchePrestation(
+            event.target.value
+          );
+
+          setPrestationSelectionnee("");
+        }}
+        placeholder="Ex. robinet, parquet, peinture plafond..."
+        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      />
+    </div>
+
     <Select
       label="Catégorie"
       value={categorieSelectionnee}
-      onChange={(v) => {
-        setCategorieSelectionnee(v);
+      onChange={(valeur) => {
+        setCategorieSelectionnee(valeur);
         setPrestationSelectionnee("");
       }}
       options={[
-        ["", "Choisir une catégorie"],
-        ...categories.map((categorie) => [categorie, categorie]),
+        ["", "Toutes les catégories"],
+        ...categories.map((categorie) => [
+          categorie,
+          categorie,
+        ]),
       ]}
     />
 
-  <Select
-  label="Prestation"
-  value={prestationSelectionnee}
-  onChange={setPrestationSelectionnee}
-  options={[
-  ["", "Choisir une prestation"],
-  ...getPrestationsByCategorie(categorieSelectionnee).map((p: any) => [
-    p.id,
-    `${getNomPrestation(p)} — ${getPrixPrestation(p, modeClient)} €/${p.unite}`,
-  ]),
-]}
-/>
-
-<button
-  type="button"
-  onClick={() => {
-    const prestationTrouvee: any = TARIFS_PRESTATIONS.find(
-      (p: any) => p.id === prestationSelectionnee
-    );
-
-    if (!prestationTrouvee) {
-      alert("Choisis une prestation avant d'ajouter une ligne.");
-      return;
-    }
-
-    const prixClient = getPrixPrestation(prestationTrouvee, modeClient);
-
-    const detailsBase =
-      prestationTrouvee.detailsPdf && prestationTrouvee.detailsPdf.length > 0
-        ? prestationTrouvee.detailsPdf
-        : DETAILS_PDF_PAR_CATEGORIE[prestationTrouvee.categorie] || [
-            "Réalisation de la prestation prévue au devis",
-            "Ajustements simples",
-            "Finitions standards",
-            "Nettoyage de fin d’intervention",
-          ];
-
-    setLignesTravaux([
-      ...lignesTravaux,
-      {
-        id: Date.now(),
-        type: prestationTrouvee.typeTravaux || "prestation_tableau",
-        q1: 1,
-        q2: 0,
-        r1: 0,
-        r2: 0,
-        option: 0,
-
-        tarifId: prestationTrouvee.id,
-        prestationNom: getNomPrestation(prestationTrouvee),
-        unite: prestationTrouvee.unite,
-        prixUnitaire: prixClient,
-        prixUnitaireAuto: prixClient,
-        prixManuel: false,
-        heuresUnite: prestationTrouvee.heuresUnite || 0,
-
-        detailsPdfPersonnalises: detailsBase,
-        detailsPdfOuvert: false,
-      },
-    ]);
-
-    setPrestationSelectionnee("");
-
-    setTimeout(() => {
-      derniereLigneRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 100);
-  }}
-  className="btn-green mt-6 rounded-xl px-4 py-2 text-sm font-semibold"
->
-  + Ajouter
-</button>
+    <div className="flex items-end">
+      <button
+        type="button"
+        onClick={() =>
+          setAfficherFavorisSeulement(
+            (valeurActuelle) =>
+              !valeurActuelle
+          )
+        }
+        className={`w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+          afficherFavorisSeulement
+            ? "border-amber-400 bg-amber-100 text-amber-900"
+            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+        }`}
+      >
+        {afficherFavorisSeulement
+          ? "⭐ Favoris affichés"
+          : "☆ Voir mes favoris"}
+      </button>
+    </div>
   </div>
+
+  {(recherchePrestation ||
+    categorieSelectionnee ||
+    afficherFavorisSeulement) && (
+    <div className="mt-4">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-slate-700">
+          {prestationsFiltrees.length} prestation
+          {prestationsFiltrees.length > 1
+            ? "s"
+            : ""}{" "}
+          trouvée
+          {prestationsFiltrees.length > 1
+            ? "s"
+            : ""}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            setRecherchePrestation("");
+            setCategorieSelectionnee("");
+            setPrestationSelectionnee("");
+            setAfficherFavorisSeulement(false);
+          }}
+          className="text-xs font-semibold text-blue-700 hover:underline"
+        >
+          Effacer les filtres
+        </button>
+      </div>
+
+      {prestationsFiltrees.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-sm text-slate-500">
+          Aucune prestation ne correspond à
+          cette recherche.
+        </div>
+      ) : (
+        <div className="max-h-[430px] space-y-2 overflow-y-auto pr-1">
+          {prestationsFiltrees.map(
+            (prestation: any) => {
+              const favorite =
+                prestationEstFavorite(
+                  prestation.id
+                );
+
+              const prixClient =
+                getPrixPrestation(
+                  prestation,
+                  modeClient
+                );
+
+              return (
+                <div
+                  key={prestation.id}
+                  className="rounded-xl border border-slate-200 bg-white p-3 transition hover:border-slate-300"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-bold text-slate-800">
+                          {getNomPrestation(
+                            prestation
+                          )}
+                        </p>
+
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                          {
+                            prestation.categorie
+                          }
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-sm font-semibold text-blue-700">
+                        {Number(
+                          prixClient || 0
+                        ).toFixed(2)}{" "}
+                        €
+                        {prestation.unite !==
+                        "forfait"
+                          ? ` / ${prestation.unite}`
+                          : " / forfait"}
+                      </p>
+
+                      {prestation.conditions && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          {
+                            prestation.conditions
+                          }
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        basculerPrestationFavorite(
+                          prestation.id
+                        )
+                      }
+                      className={`shrink-0 rounded-lg border px-3 py-2 text-lg ${
+                        favorite
+                          ? "border-amber-300 bg-amber-100 text-amber-700"
+                          : "border-slate-200 bg-white text-slate-400 hover:bg-amber-50 hover:text-amber-600"
+                      }`}
+                      title={
+                        favorite
+                          ? "Retirer des favoris"
+                          : "Ajouter aux favoris"
+                      }
+                    >
+                      {favorite ? "★" : "☆"}
+                    </button>
+                  </div>
+
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        ajouterPrestationAuDevis(
+                          prestation.id
+                        )
+                      }
+                      className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-800"
+                    >
+                      + Ajouter au devis
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+          )}
+        </div>
+      )}
+    </div>
+  )}
+
+  {!recherchePrestation &&
+    !categorieSelectionnee &&
+    !afficherFavorisSeulement && (
+      <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm text-slate-500">
+        Commence à écrire le nom d’une
+        prestation ou sélectionne une
+        catégorie.
+      </div>
+    )}
+</div>
 
   <div className="space-y-5">
     {lignesTravaux.map((ligne, index) => {
@@ -5179,7 +5510,7 @@ return (
   )}
 </div>
 
-  <div className="grid gap-2 md:grid-cols-3">
+<div className="grid gap-2 md:grid-cols-3">
   <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
   <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
   <MiniResult
@@ -5253,7 +5584,7 @@ return (
 
       setHistorique(
         historique.map((d) =>
-          d.numeroDevis === numeroDevis
+          d.id === idDossierActuel
             ? {
                 ...d,
                 montantEncaisse: calcul.acompte,
@@ -5290,7 +5621,7 @@ return (
 
       setHistorique(
         historique.map((d) =>
-          d.numeroDevis === numeroDevis
+          d.id === idDossierActuel
             ? {
                 ...d,
                 montantEncaisse: calcul.total,
@@ -5320,8 +5651,8 @@ return (
 
       setHistorique(
         historique.map((d) =>
-          d.numeroDevis === numeroDevis
-            ? {
+          d.id === idDossierActuel
+                  ? {
                 ...d,
                 montantEncaisse: 0,
                 reste: calcul.total,
