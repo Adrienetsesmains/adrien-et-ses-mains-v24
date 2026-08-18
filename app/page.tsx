@@ -132,7 +132,13 @@ type Dossier = {
   total: number;
   acompte: number;
   reste: number;
+
+  // Montant total encaissé actuellement sur le dossier
   montantEncaisse?: number;
+
+  // Mémoire séparée de l'acompte réellement reçu
+  montantAcompteEncaisse?: number;
+
   pourcentageAcompte?: number;
   facturePayee: boolean;
 
@@ -157,7 +163,11 @@ type Dossier = {
   typeRdv?: string;
   observationRdv?: string;
 
+  // Date du dernier paiement / paiement complet
   datePaiement?: string;
+
+  // Date réelle à laquelle l'acompte a été reçu
+  dateAcompte?: string;
 
   // ================= RAPPELS =================
   dateRappel?: string;
@@ -1694,7 +1704,14 @@ const enregistrer = () => {
     factureSap: estEvenementSimple ? false : factureSap,
     numeroSap: estEvenementSimple ? "" : numeroSap,
 
-    montantEncaisse: estEvenementSimple ? 0 : montantEncaisse,
+      montantEncaisse: estEvenementSimple ? 0 : montantEncaisse,
+
+    // On conserve la mémoire de l'acompte déjà enregistré.
+    // Important : ne pas la perdre lorsqu'on réenregistre le dossier.
+    montantAcompteEncaisse: estEvenementSimple
+      ? 0
+      : historique.find((d) => d.id === idFinal)?.montantAcompteEncaisse ?? 0,
+
     pourcentageAcompte: estEvenementSimple ? 0 : pourcentageAcompte,
 
     kmAller: estEvenementSimple ? 0 : kmAller,
@@ -1720,6 +1737,11 @@ fraisDeplacementManuel:
     planningChantier: [],
 
     datePaiement: estEvenementSimple ? "" : datePaiement,
+
+    // Conservation permanente de la vraie date d'acompte
+    dateAcompte: estEvenementSimple
+      ? ""
+      : historique.find((d) => d.id === idFinal)?.dateAcompte ?? "",
 
     dateRdv,
     heureRdv,
@@ -2508,67 +2530,114 @@ const donneesGraphique = useMemo(() => {
 
     // ============================================================
     // ENCAISSEMENTS RÉELS DU MOIS
-    // IMPORTANT :
-    // - uniquement la date réelle d'encaissement : datePaiement
-    // - jamais la date du devis / facture comme date de secours
-    // - on conserve la logique actuelle devis / facture
-    //   pour éviter les doublons
+    //
+    // Chaque dossier peut maintenant générer :
+    //
+    // 1 - un acompte à sa vraie date
+    // 2 - un solde à sa vraie date
+    //
+    // montantEncaisse reste le TOTAL encaissé sur le dossier.
+    // On ne modifie donc pas le fonctionnement actuel.
     // ============================================================
 
-    const dossiersAvecPaiementReelDuMois = historique.filter((d) => {
-      if ((d.montantEncaisse || 0) <= 0) return false;
+    let encaissements = 0;
 
-      const dateEncaissement = parseDateFr(d.datePaiement || "");
+    historique.forEach((d) => {
+      if ((d.montantEncaisse || 0) <= 0) {
+        return;
+      }
 
-      if (!dateEncaissement) return false;
+      // ==========================================================
+      // ACOMPTE
+      // ==========================================================
 
-      return (
-        dateEncaissement.getMonth() === mois &&
-        dateEncaissement.getFullYear() === annee
-      );
-    });
+      let montantAcompteReel =
+        Number(d.montantAcompteEncaisse || 0);
 
-    // Factures réellement encaissées pendant ce mois
-    const facturesDuMois = dossiersAvecPaiementReelDuMois.filter(
-      (d) => Boolean(d.numeroFacture)
-    );
+      let dateAcompteReelle =
+        parseDateFr(d.dateAcompte || "");
 
-    // Devis encaissés sans facture liée.
-    // Cela évite de compter deux fois le même dossier
-    // lorsqu'une facture a ensuite été créée.
-    const devisDuMoisSansFacture =
-      dossiersAvecPaiementReelDuMois.filter((d) => {
-        if (!d.numeroDevis) return false;
-        if (d.numeroFacture) return false;
+      /*
+       * COMPATIBILITÉ AVEC LES DOSSIERS EXISTANTS :
+       *
+       * Si le dossier n'est pas encore totalement payé,
+       * mais possède déjà un montant encaissé et une datePaiement,
+       * il s'agit très probablement de l'acompte enregistré
+       * avec l'ancien système.
+       *
+       * On peut donc encore le récupérer automatiquement.
+       */
+      if (
+        montantAcompteReel <= 0 &&
+        !d.facturePayee &&
+        (d.montantEncaisse || 0) > 0 &&
+        d.datePaiement
+      ) {
+        montantAcompteReel =
+          Number(d.montantEncaisse || 0);
 
-        const factureLieeExiste = historique.some(
-          (facture) =>
-            Boolean(facture.numeroFacture) &&
-            facture.numeroDevis === d.numeroDevis
+        dateAcompteReelle =
+          parseDateFr(d.datePaiement || "");
+      }
+
+      // Ajout de l'acompte dans SON mois réel
+      if (
+        montantAcompteReel > 0 &&
+        dateAcompteReelle &&
+        dateAcompteReelle.getMonth() === mois &&
+        dateAcompteReelle.getFullYear() === annee
+      ) {
+        encaissements += montantAcompteReel;
+      }
+
+      // ==========================================================
+      // SOLDE / PAIEMENT COMPLET
+      // ==========================================================
+
+      if (d.facturePayee && d.datePaiement) {
+        const dateSolde =
+          parseDateFr(d.datePaiement || "");
+
+        /*
+         * montantEncaisse contient le total reçu.
+         *
+         * Si acompte :
+         * 1500 total encaissé
+         * - 500 acompte
+         * = 1000 solde
+         *
+         * Si aucun acompte :
+         * 1500 - 0
+         * = 1500 paiement complet
+         */
+        const montantSolde = Math.max(
+          0,
+          Number(d.montantEncaisse || 0) -
+            montantAcompteReel
         );
 
-        return !factureLieeExiste;
-      });
-
-    const encaissements = [
-      ...facturesDuMois,
-      ...devisDuMoisSansFacture,
-    ].reduce(
-      (somme, dossier) =>
-        somme + Number(dossier.montantEncaisse || 0),
-      0
-    );
+        if (
+          montantSolde > 0 &&
+          dateSolde &&
+          dateSolde.getMonth() === mois &&
+          dateSolde.getFullYear() === annee
+        ) {
+          encaissements += montantSolde;
+        }
+      }
+    });
 
     // ============================================================
     // DÉPENSES RÉELLES DU MOIS
-    // Source directe : historique des dépenses
-    // Date utilisée : date réelle de la dépense
     // ============================================================
 
     const depensesDuMois = depenses.filter((depense) => {
-      const dateDepense = parseDateFr(depense.date || "");
+      const dateDepense =
+        parseDateFr(depense.date || "");
 
-      if (!dateDepense) return false;
+      if (!dateDepense) {
+        return false;
+      }
 
       return (
         dateDepense.getMonth() === mois &&
@@ -2583,10 +2652,11 @@ const donneesGraphique = useMemo(() => {
     );
 
     // ============================================================
-    // RÉSULTAT RÉEL
+    // RÉSULTAT
     // ============================================================
 
-    const resultat = encaissements - totalDepenses;
+    const resultat =
+      encaissements - totalDepenses;
 
     data.push({
       label: dateMois.toLocaleString("fr-FR", {
@@ -5590,6 +5660,7 @@ return (
 )}
 
 <div className="flex flex-wrap gap-2">
+  {/* ================= ACOMPTE REÇU ================= */}
   <button
     onClick={() => {
       setSaisieDatePaiementCompletOuverte(false);
@@ -5604,29 +5675,49 @@ return (
         return;
       }
 
-      setMontantEncaisse(calcul.acompte);
+      const montantAcompteRecu = calcul.acompte;
 
-      setHistorique(
-        historique.map((d) =>
+      setMontantEncaisse(montantAcompteRecu);
+
+      setHistorique((ancien) =>
+        ancien.map((d) =>
           d.id === idDossierActuel
             ? {
                 ...d,
-                montantEncaisse: calcul.acompte,
-                reste: Math.max(0, calcul.total - calcul.acompte),
+
+                // Fonctionnement actuel conservé
+                montantEncaisse: montantAcompteRecu,
+                reste: Math.max(
+                  0,
+                  calcul.total - montantAcompteRecu
+                ),
                 total: calcul.total,
                 acompte: calcul.acompte,
                 facturePayee: false,
+
+                // On conserve datePaiement pour ne rien casser
+                // dans le fonctionnement actuel de l'application
                 datePaiement,
+
+                // NOUVEAU :
+                // mémoire indépendante et permanente de l'acompte
+                dateAcompte: datePaiement,
+                montantAcompteEncaisse: montantAcompteRecu,
               }
             : d
         )
       );
+
+      setSaisieDateAcompteOuverte(false);
     }}
     className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
   >
-    {saisieDateAcompteOuverte ? "Valider acompte" : "Acompte reçu"}
+    {saisieDateAcompteOuverte
+      ? "Valider acompte"
+      : "Acompte reçu"}
   </button>
 
+  {/* ================= PAIEMENT COMPLET ================= */}
   <button
     onClick={() => {
       setSaisieDateAcompteOuverte(false);
@@ -5643,21 +5734,37 @@ return (
 
       setMontantEncaisse(calcul.total);
 
-      setHistorique(
-        historique.map((d) =>
-          d.id === idDossierActuel
-            ? {
-                ...d,
-                montantEncaisse: calcul.total,
-                reste: 0,
-                total: calcul.total,
-                acompte: calcul.acompte,
-                facturePayee: true,
-                datePaiement,
-              }
-            : d
-        )
+      setHistorique((ancien) =>
+        ancien.map((d) => {
+          if (d.id !== idDossierActuel) {
+            return d;
+          }
+
+          /*
+           * IMPORTANT :
+           * dateAcompte et montantAcompteEncaisse ne sont
+           * volontairement PAS modifiés ici.
+           *
+           * Le paiement complet ne doit plus effacer
+           * l'historique de l'acompte.
+           */
+
+          return {
+            ...d,
+
+            montantEncaisse: calcul.total,
+            reste: 0,
+            total: calcul.total,
+            acompte: calcul.acompte,
+            facturePayee: true,
+
+            // date réelle du paiement final
+            datePaiement,
+          };
+        })
       );
+
+      setSaisieDatePaiementCompletOuverte(false);
     }}
     className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
   >
@@ -5666,24 +5773,32 @@ return (
       : "Paiement complet"}
   </button>
 
+  {/* ================= REMISE À ZÉRO ================= */}
   <button
     onClick={() => {
       setMontantEncaisse(0);
       setDatePaiement("");
+
       setSaisieDateAcompteOuverte(false);
       setSaisieDatePaiementCompletOuverte(false);
 
-      setHistorique(
-        historique.map((d) =>
+      setHistorique((ancien) =>
+        ancien.map((d) =>
           d.id === idDossierActuel
-                  ? {
+            ? {
                 ...d,
+
                 montantEncaisse: 0,
+                montantAcompteEncaisse: 0,
+
                 reste: calcul.total,
                 total: calcul.total,
                 acompte: calcul.acompte,
+
                 facturePayee: false,
+
                 datePaiement: "",
+                dateAcompte: "",
               }
             : d
         )
