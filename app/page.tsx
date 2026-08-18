@@ -2506,38 +2506,49 @@ const donneesGraphique = useMemo(() => {
     const mois = dateMois.getMonth();
     const annee = dateMois.getFullYear();
 
-    // ================= ENCAISSEMENTS DU MOIS =================
+    // ============================================================
+    // ENCAISSEMENTS RÉELS DU MOIS
+    // IMPORTANT :
+    // - uniquement la date réelle d'encaissement : datePaiement
+    // - jamais la date du devis / facture comme date de secours
+    // - on conserve la logique actuelle devis / facture
+    //   pour éviter les doublons
+    // ============================================================
 
-    const dossiersDuMois = historique.filter((d) => {
-      const dateReference =
-        parseDateFr(d.datePaiement || "") ||
-        parseDateFr(d.date || "");
-
-      return (
-        dateReference !== null &&
-        dateReference.getMonth() === mois &&
-        dateReference.getFullYear() === annee
-      );
-    });
-
-    const facturesDuMois = dossiersDuMois.filter(
-      (d) =>
-        Boolean(d.numeroFacture) &&
-        (d.montantEncaisse || 0) > 0
-    );
-
-    const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
-      if (!d.numeroDevis || d.numeroFacture) return false;
+    const dossiersAvecPaiementReelDuMois = historique.filter((d) => {
       if ((d.montantEncaisse || 0) <= 0) return false;
 
-      const factureLieeExiste = historique.some(
-        (facture) =>
-          Boolean(facture.numeroFacture) &&
-          facture.numeroDevis === d.numeroDevis
-      );
+      const dateEncaissement = parseDateFr(d.datePaiement || "");
 
-      return !factureLieeExiste;
+      if (!dateEncaissement) return false;
+
+      return (
+        dateEncaissement.getMonth() === mois &&
+        dateEncaissement.getFullYear() === annee
+      );
     });
+
+    // Factures réellement encaissées pendant ce mois
+    const facturesDuMois = dossiersAvecPaiementReelDuMois.filter(
+      (d) => Boolean(d.numeroFacture)
+    );
+
+    // Devis encaissés sans facture liée.
+    // Cela évite de compter deux fois le même dossier
+    // lorsqu'une facture a ensuite été créée.
+    const devisDuMoisSansFacture =
+      dossiersAvecPaiementReelDuMois.filter((d) => {
+        if (!d.numeroDevis) return false;
+        if (d.numeroFacture) return false;
+
+        const factureLieeExiste = historique.some(
+          (facture) =>
+            Boolean(facture.numeroFacture) &&
+            facture.numeroDevis === d.numeroDevis
+        );
+
+        return !factureLieeExiste;
+      });
 
     const encaissements = [
       ...facturesDuMois,
@@ -2548,13 +2559,18 @@ const donneesGraphique = useMemo(() => {
       0
     );
 
-    // ================= DÉPENSES DU MOIS =================
+    // ============================================================
+    // DÉPENSES RÉELLES DU MOIS
+    // Source directe : historique des dépenses
+    // Date utilisée : date réelle de la dépense
+    // ============================================================
 
     const depensesDuMois = depenses.filter((depense) => {
       const dateDepense = parseDateFr(depense.date || "");
 
+      if (!dateDepense) return false;
+
       return (
-        dateDepense !== null &&
         dateDepense.getMonth() === mois &&
         dateDepense.getFullYear() === annee
       );
@@ -2566,7 +2582,9 @@ const donneesGraphique = useMemo(() => {
       0
     );
 
-    // ================= RÉSULTAT RÉEL =================
+    // ============================================================
+    // RÉSULTAT RÉEL
+    // ============================================================
 
     const resultat = encaissements - totalDepenses;
 
@@ -2575,9 +2593,15 @@ const donneesGraphique = useMemo(() => {
         month: "short",
         year: "2-digit",
       }),
-      encaissements: Math.round(encaissements * 100) / 100,
-      depenses: Math.round(totalDepenses * 100) / 100,
-      resultat: Math.round(resultat * 100) / 100,
+
+      encaissements:
+        Math.round(encaissements * 100) / 100,
+
+      depenses:
+        Math.round(totalDepenses * 100) / 100,
+
+      resultat:
+        Math.round(resultat * 100) / 100,
     });
   }
 
