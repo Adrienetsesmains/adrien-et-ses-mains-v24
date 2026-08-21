@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -5,11 +6,459 @@ import type { ReactNode } from "react";
 import { jsPDF } from "jspdf";
 
 import {
-  TARIFS_PRESTATIONS,
+  TARIFS_PRESTATIONS as TARIFS_PRESTATIONS_V24,
   DETAILS_PDF_PAR_CATEGORIE,
 } from "../data/TARIFS_PRESTATIONS";
 
 import { supabase } from "./lib/supabaseClient";
+
+const VERSION_APPLICATION = "V25";
+const CLE_SAUVEGARDE_V25 = "tableauDeBordEntrepriseV25";
+const CLE_SAUVEGARDE_V24 = "tableauDeBordEntrepriseV24";
+const CLE_BACKUPS_V25 = "backupHistoriqueV25";
+const CLE_BACKUPS_V24 = "backupHistoriqueV24";
+
+// Prestations volontairement générales : les dimensions, modèles, couleurs et
+// contraintes propres au chantier restent personnalisables dans chaque devis.
+const PRESTATIONS_SALLE_DE_BAIN_V25 = [
+  {
+    id: "SDB-PROT",
+    categorie: "Salle de bain",
+    prestation: "Protection et préparation de la zone d’intervention",
+    unite: "forfait",
+    prix220: 44,
+    prix150: 30,
+    heuresUnite: 1.6,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Protection courante des accès, sols et équipements conservés.",
+    tags: ["protection", "préparation", "salle de bain"],
+    detailsPdf: [
+      "Protection des accès et des éléments conservés",
+      "Préparation de la zone d’intervention",
+    ],
+  },
+  {
+    id: "SDB-DEM",
+    categorie: "Salle de bain",
+    prestation: "Dépose d’équipements et de revêtements existants",
+    unite: "forfait",
+    prix220: 220,
+    prix150: 150,
+    heuresUnite: 8,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Hors désamiantage et dégradations cachées importantes.",
+    tags: ["dépose", "démolition", "sanitaire", "revêtement"],
+    detailsPdf: [
+      "Dépose des équipements sanitaires prévus au devis",
+      "Dépose des revêtements concernés",
+      "Tri et mise en sacs des déchets",
+    ],
+  },
+  {
+    id: "SDB-EVAC",
+    categorie: "Salle de bain",
+    prestation: "Évacuation des déchets et gravats",
+    unite: "forfait",
+    prix220: 88,
+    prix150: 60,
+    heuresUnite: 3.2,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Pour un volume courant de rénovation intérieure.",
+    tags: ["gravats", "déchets", "évacuation", "déchetterie"],
+    detailsPdf: [
+      "Manutention et chargement des déchets",
+      "Évacuation vers une filière adaptée",
+    ],
+  },
+  {
+    id: "SDB-SUP-REP",
+    categorie: "Salle de bain",
+    prestation: "Préparation et reprise des supports",
+    unite: "m²",
+    prix220: 30,
+    prix150: 20.4,
+    heuresUnite: 1.1,
+    rentabilite: "À surveiller",
+    action: "Contrôler le support après dépose",
+    conditions: "Hors remplacement complet d’une cloison ou traitement d’une infiltration active.",
+    tags: ["mur", "support", "enduit", "ratissage", "rebouchage"],
+    detailsPdf: [
+      "Grattage des parties non adhérentes",
+      "Rebouchage et reprise des défauts du support",
+      "Dressage, ponçage et dépoussiérage avant finition",
+    ],
+  },
+  {
+    id: "SDB-PLOMB-ADP",
+    categorie: "Salle de bain",
+    prestation: "Adaptation des alimentations et évacuations existantes",
+    unite: "forfait",
+    prix220: 220,
+    prix150: 150,
+    heuresUnite: 8,
+    rentabilite: "À vérifier",
+    action: "Contrôler l’implantation",
+    conditions: "Adaptations simples et accessibles, sans création complète de réseau encastré.",
+    tags: ["plomberie", "évacuation", "alimentation", "raccordement"],
+    detailsPdf: [
+      "Adaptation des raccordements existants à la nouvelle implantation",
+      "Essais d’écoulement et contrôle d’étanchéité",
+    ],
+  },
+  {
+    id: "SDB-REC-POS",
+    categorie: "Salle de bain",
+    prestation: "Pose d’un receveur de douche",
+    unite: "forfait",
+    prix220: 220,
+    prix150: 150,
+    heuresUnite: 8,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Dimensions et modèle à préciser dans le devis.",
+    tags: ["receveur", "bac", "douche", "bonde"],
+    detailsPdf: [
+      "Préparation et mise à niveau de l’emplacement",
+      "Pose et calage du receveur",
+      "Pose de la bonde et raccordement à l’évacuation existante",
+      "Contrôle de l’écoulement et réalisation des finitions sanitaires",
+    ],
+  },
+  {
+    id: "SDB-ETANCH",
+    categorie: "Salle de bain",
+    prestation: "Protection à l’eau sous carrelage",
+    unite: "m²",
+    prix220: 25,
+    prix150: 17,
+    heuresUnite: 0.9,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Application suivant les prescriptions du système retenu et les temps de séchage.",
+    tags: ["SPEC", "étanchéité", "douche", "sous carrelage"],
+    detailsPdf: [
+      "Application du primaire adapté au support",
+      "Pose des bandes d’étanchéité dans les angles et points singuliers",
+      "Application du système de protection à l’eau sous carrelage",
+    ],
+  },
+  {
+    id: "SDB-FAI-DEP",
+    categorie: "Salle de bain",
+    prestation: "Dépose de faïence murale",
+    unite: "m²",
+    prix220: 25,
+    prix150: 17,
+    heuresUnite: 0.9,
+    rentabilite: "À surveiller",
+    action: "Contrôler le support après dépose",
+    conditions: "Hors remplacement du support découvert après dépose.",
+    tags: ["faïence", "carrelage", "dépose", "démolition"],
+    detailsPdf: [
+      "Dépose de la faïence murale existante",
+      "Grattage des résidus de colle non adhérents",
+    ],
+  },
+  {
+    id: "SDB-FAI-POS",
+    categorie: "Salle de bain",
+    prestation: "Pose de faïence murale",
+    unite: "m²",
+    prix220: 45,
+    prix150: 30.6,
+    heuresUnite: 1.65,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Format, calepinage et hauteur à préciser dans le devis.",
+    tags: ["faïence", "carrelage", "mur", "douche", "vasque"],
+    detailsPdf: [
+      "Implantation et calepinage du revêtement",
+      "Pose collée de la faïence murale",
+      "Réalisation des découpes et finitions courantes",
+    ],
+  },
+  {
+    id: "SDB-JOINT",
+    categorie: "Salle de bain",
+    prestation: "Joints et finitions sanitaires",
+    unite: "forfait",
+    prix220: 66,
+    prix150: 45,
+    heuresUnite: 2.4,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Pour une zone sanitaire courante.",
+    tags: ["joint", "silicone", "hydrofuge", "finition"],
+    detailsPdf: [
+      "Réalisation des joints de carrelage hydrofuges",
+      "Réalisation des joints sanitaires en silicone",
+      "Nettoyage des parements après finition",
+    ],
+  },
+  {
+    id: "SDB-PAROI-DEP",
+    categorie: "Salle de bain",
+    prestation: "Dépose d’une paroi ou cabine de douche",
+    unite: "forfait",
+    prix220: 66,
+    prix150: 45,
+    heuresUnite: 2.4,
+    rentabilite: "À surveiller",
+    action: "Prévoir une réserve en cas de réemploi",
+    conditions: "Dépose soigneuse, sans garantie sur les éléments vétustes réutilisés.",
+    tags: ["paroi", "cabine", "douche", "dépose", "verre"],
+    detailsPdf: [
+      "Dépose soigneuse de la paroi ou cabine existante",
+      "Stockage sur place des éléments destinés à être conservés",
+    ],
+  },
+  {
+    id: "SDB-PAROI-POS",
+    categorie: "Salle de bain",
+    prestation: "Pose d’une paroi ou cabine de douche",
+    unite: "forfait",
+    prix220: 110,
+    prix150: 75,
+    heuresUnite: 4,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Modèle, dimensions et état des supports à préciser.",
+    tags: ["paroi", "cabine", "douche", "pose", "verre"],
+    detailsPdf: [
+      "Implantation et fixation de la paroi ou cabine",
+      "Réglage des ouvrants et profilés",
+      "Réalisation des joints sanitaires périphériques",
+    ],
+  },
+  {
+    id: "SDB-SOL-PREP",
+    categorie: "Salle de bain",
+    prestation: "Préparation du support de sol",
+    unite: "m²",
+    prix220: 20,
+    prix150: 13.6,
+    heuresUnite: 0.75,
+    rentabilite: "À surveiller",
+    action: "Contrôler la planéité",
+    conditions: "Hors reprise structurelle ou ragréage de forte épaisseur.",
+    tags: ["sol", "préparation", "ragréage", "planéité"],
+    detailsPdf: [
+      "Nettoyage et préparation du support",
+      "Reprises localisées nécessaires à la pose du revêtement",
+    ],
+  },
+  {
+    id: "SDB-SOL-PVC",
+    categorie: "Salle de bain",
+    prestation: "Pose d’un revêtement de sol PVC",
+    unite: "m²",
+    prix220: 28,
+    prix150: 19,
+    heuresUnite: 1,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Revêtement et système de pose à préciser dans le devis.",
+    tags: ["sol", "PVC", "clipsable", "vinyle"],
+    detailsPdf: [
+      "Pose du revêtement de sol PVC",
+      "Réalisation des découpes et ajustements périphériques",
+      "Finitions au droit des passages et équipements",
+    ],
+  },
+  {
+    id: "SDB-PLINTHE",
+    categorie: "Salle de bain",
+    prestation: "Pose de plinthes de finition",
+    unite: "ml",
+    prix220: 8,
+    prix150: 5.5,
+    heuresUnite: 0.3,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Type, dimensions et coloris à définir selon le chantier.",
+    tags: ["plinthe", "finition", "recouvrement", "PVC", "blanche"],
+    detailsPdf: [
+      "Découpe et pose des plinthes de finition",
+      "Réalisation des raccords et finitions périphériques",
+    ],
+  },
+  {
+    id: "SDB-PEINT-PREP",
+    categorie: "Salle de bain",
+    prestation: "Préparation des murs et plafonds avant peinture",
+    unite: "m²",
+    prix220: 10,
+    prix150: 6.8,
+    heuresUnite: 0.36,
+    rentabilite: "À surveiller",
+    action: "Adapter à l’état du support",
+    conditions: "Comprend les préparations courantes, hors traitement d’une infiltration active.",
+    tags: ["peinture", "mur", "plafond", "enduit", "ponçage"],
+    detailsPdf: [
+      "Grattage des parties cloquées ou non adhérentes",
+      "Rebouchage, ponçage et dépoussiérage des supports",
+      "Application d’une impression sur les zones reprises",
+    ],
+  },
+  {
+    id: "SDB-PEINT",
+    categorie: "Salle de bain",
+    prestation: "Mise en peinture spéciale pièce humide",
+    unite: "m²",
+    prix220: 12,
+    prix150: 8.2,
+    heuresUnite: 0.44,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Sur supports préparés, murs ou plafonds.",
+    tags: ["peinture", "humide", "salle de bain", "mur", "plafond"],
+    detailsPdf: [
+      "Application de deux couches de peinture adaptée aux pièces humides",
+      "Réalisation des réchampis et finitions courantes",
+    ],
+  },
+  {
+    id: "SDB-MEUBLE-DEP",
+    categorie: "Salle de bain",
+    prestation: "Dépose d’un équipement sanitaire existant",
+    unite: "forfait",
+    prix220: 55,
+    prix150: 37.5,
+    heuresUnite: 2,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Pour un lavabo, meuble vasque ou équipement similaire accessible.",
+    tags: ["lavabo", "vasque", "meuble", "dépose"],
+    detailsPdf: [
+      "Déconnexion et dépose de l’équipement existant",
+      "Mise en sécurité provisoire des raccordements",
+    ],
+  },
+  {
+    id: "SDB-MEUBLE-POS",
+    categorie: "Salle de bain",
+    prestation: "Pose d’un meuble vasque",
+    unite: "forfait",
+    prix220: 132,
+    prix150: 90,
+    heuresUnite: 4.8,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Meuble, vasque et implantation à préciser dans le devis.",
+    tags: ["meuble", "vasque", "lavabo", "pose"],
+    detailsPdf: [
+      "Montage, implantation et fixation du meuble vasque",
+      "Pose de la vasque et réalisation des finitions périphériques",
+    ],
+  },
+  {
+    id: "SDB-ROBINET",
+    categorie: "Salle de bain",
+    prestation: "Pose et raccordement d’une robinetterie",
+    unite: "forfait",
+    prix220: 66,
+    prix150: 45,
+    heuresUnite: 2.4,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Sur alimentations et évacuation existantes accessibles.",
+    tags: ["robinet", "mitigeur", "vasque", "raccordement"],
+    detailsPdf: [
+      "Pose de la robinetterie et des raccordements accessibles",
+      "Contrôle de l’étanchéité et du bon fonctionnement",
+    ],
+  },
+  {
+    id: "SDB-ACCESS",
+    categorie: "Salle de bain",
+    prestation: "Pose d’accessoires de salle de bain",
+    unite: "forfait",
+    prix220: 44,
+    prix150: 30,
+    heuresUnite: 1.6,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Quantité et accessoires à préciser dans le devis.",
+    tags: ["accessoire", "miroir", "barre", "patère", "étagère"],
+    detailsPdf: ["Implantation et pose des accessoires prévus au devis"],
+  },
+  {
+    id: "SDB-NET",
+    categorie: "Salle de bain",
+    prestation: "Nettoyage de fin d’intervention",
+    unite: "forfait",
+    prix220: 44,
+    prix150: 30,
+    heuresUnite: 1.6,
+    rentabilite: "Correcte",
+    action: "Conserver",
+    conditions: "Nettoyage courant après intervention, hors remise en état générale du logement.",
+    tags: ["nettoyage", "fin de chantier", "finitions"],
+    detailsPdf: [
+      "Nettoyage de la zone d’intervention",
+      "Enlèvement des protections et remise en ordre",
+    ],
+  },
+];
+
+const TARIFS_PRESTATIONS = [
+  ...TARIFS_PRESTATIONS_V24.filter(
+    (prestation: any) =>
+      !PRESTATIONS_SALLE_DE_BAIN_V25.some(
+        (nouvellePrestation) => nouvellePrestation.id === prestation.id
+      )
+  ),
+  ...PRESTATIONS_SALLE_DE_BAIN_V25,
+];
+
+const PACKS_PRESTATIONS_V25 = [
+  {
+    id: "PACK-SDB-DOUCHE",
+    nom: "Réfection d’un espace douche",
+    description: "Dépose, reprise du support, protection à l’eau, faïence et repose de la paroi.",
+    lignes: [
+      ["SDB-PROT", 1],
+      ["SDB-PAROI-DEP", 1],
+      ["SDB-FAI-DEP", 3],
+      ["SDB-SUP-REP", 3],
+      ["SDB-ETANCH", 3],
+      ["SDB-FAI-POS", 3],
+      ["SDB-JOINT", 1],
+      ["SDB-PAROI-POS", 1],
+      ["SDB-EVAC", 1],
+      ["SDB-NET", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-SDB-RENOVATION",
+    nom: "Rénovation complète d’une salle de bain",
+    description: "Base complète et modifiable : déposes, douche, faïence, sol, peinture et meuble vasque.",
+    lignes: [
+      ["SDB-PROT", 1],
+      ["SDB-PAROI-DEP", 1],
+      ["SDB-DEM", 1],
+      ["SDB-EVAC", 1],
+      ["SDB-SUP-REP", 10],
+      ["SDB-PLOMB-ADP", 1],
+      ["SDB-REC-POS", 1],
+      ["SDB-ETANCH", 5],
+      ["SDB-FAI-POS", 7],
+      ["SDB-JOINT", 1],
+      ["SDB-SOL-PREP", 2],
+      ["SDB-SOL-PVC", 2],
+      ["SDB-PLINTHE", 4],
+      ["SDB-PEINT-PREP", 10],
+      ["SDB-PEINT", 10],
+      ["SDB-MEUBLE-POS", 1],
+      ["SDB-ROBINET", 1],
+      ["SDB-PAROI-POS", 1],
+      ["SDB-NET", 1],
+    ] as [string, number][],
+  },
+];
 
 const formatDateInputVersFr = (dateIso: string) => {
   if (!dateIso) return "";
@@ -500,7 +949,11 @@ const getSapInfoLigne = (ligne: LigneTravaux) => {
 
   export default function Home() {
    const restaurerBackup = (index: number) => {
-  const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
+  const backups = JSON.parse(
+    localStorage.getItem(CLE_BACKUPS_V25) ||
+      localStorage.getItem(CLE_BACKUPS_V24) ||
+      "[]"
+  );
 
   const sauvegarde = backups[index];
   if (!sauvegarde) return;
@@ -688,7 +1141,7 @@ const envoyerCloud = async () => {
     return;
   }
 
-  localStorage.setItem("tableauDeBordEntrepriseV24", JSON.stringify(data));
+  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(data));
 
   alert("✅ Données complètes envoyées au cloud");
 };
@@ -714,7 +1167,7 @@ const recupererCloud = async () => {
   appliquerSauvegardeComplete(data.data);
 
   localStorage.setItem(
-    "tableauDeBordEntrepriseV24",
+    CLE_SAUVEGARDE_V25,
     JSON.stringify(data.data)
   );
 
@@ -845,7 +1298,15 @@ useEffect(() => {
 }, [dateChantier, statutChantier]);
 
 useEffect(() => {
-  const sauvegarde = localStorage.getItem("tableauDeBordEntrepriseV24");
+  // Migration sans perte : au premier lancement de la V25, on reprend la
+  // sauvegarde V24 si aucune sauvegarde V25 n'existe encore.
+  const sauvegardeV25 = localStorage.getItem(CLE_SAUVEGARDE_V25);
+  const sauvegardeV24 = localStorage.getItem(CLE_SAUVEGARDE_V24);
+  const sauvegarde = sauvegardeV25 || sauvegardeV24;
+
+  if (!sauvegardeV25 && sauvegardeV24) {
+    localStorage.setItem(CLE_SAUVEGARDE_V25, sauvegardeV24);
+  }
 
   if (sauvegarde) {
     try {
@@ -954,7 +1415,7 @@ useEffect(() => {
   if (!sauvegardePrete) return;
 
   const donnees = construireSauvegardeComplete();
-  localStorage.setItem("tableauDeBordEntrepriseV24", JSON.stringify(donnees));
+  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(donnees));
 }, [
   sauvegardePrete,
   historique,
@@ -1021,7 +1482,9 @@ useEffect(() => {
  const donnees = construireSauvegardeComplete();
 
   // 🔁 historique des sauvegardes
-  const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
+  const backupsV25 = localStorage.getItem(CLE_BACKUPS_V25);
+  const backupsV24 = localStorage.getItem(CLE_BACKUPS_V24);
+  const backups = JSON.parse(backupsV25 || backupsV24 || "[]");
 
   const maintenant = new Date();
   const horodatage = `${maintenant.getDate()}-${maintenant.getMonth() + 1}-${maintenant.getFullYear()}_${maintenant.getHours()}h${maintenant.getMinutes()}`;
@@ -1034,7 +1497,7 @@ useEffect(() => {
   // 🔒 garde seulement les 10 dernières sauvegardes
   const backupsLimites = backups.slice(-10);
 
-  localStorage.setItem("backupHistoriqueV24", JSON.stringify(backupsLimites));
+  localStorage.setItem(CLE_BACKUPS_V25, JSON.stringify(backupsLimites));
 
 }, [
   sauvegardePrete,
@@ -2911,6 +3374,64 @@ const ajouterPrestationAuDevis = (
   }, 100);
 };
 
+const ajouterPackAuDevis = (idPack: string) => {
+  const pack = PACKS_PRESTATIONS_V25.find(
+    (packDisponible) => packDisponible.id === idPack
+  );
+
+  if (!pack) return;
+
+  const maintenant = Date.now();
+
+  const nouvellesLignes = pack.lignes
+    .map(([idPrestation, quantite], index) => {
+      const prestation: any = TARIFS_PRESTATIONS.find(
+        (element: any) => element.id === idPrestation
+      );
+
+      if (!prestation) return null;
+
+      const prixClient = getPrixPrestation(prestation, modeClient);
+      const detailsBase =
+        prestation.detailsPdf?.length > 0
+          ? prestation.detailsPdf
+          : DETAILS_PDF_PAR_CATEGORIE[prestation.categorie] || [];
+
+      return {
+        id: maintenant + index + Math.floor(Math.random() * 1000),
+        type: prestation.typeTravaux || "prestation_tableau",
+        q1: quantite,
+        q2: 0,
+        r1: 0,
+        r2: 0,
+        option: 0,
+        tarifId: prestation.id,
+        prestationNom: getNomPrestation(prestation),
+        unite: prestation.unite,
+        prixUnitaire: prixClient,
+        prixUnitaireAuto: prixClient,
+        prixManuel: false,
+        heuresUnite: prestation.heuresUnite || 0,
+        detailsPdfPersonnalises: [...detailsBase],
+        detailsPdfOuvert: false,
+        offert: false,
+      } as LigneTravaux;
+    })
+    .filter(Boolean) as LigneTravaux[];
+
+  setLignesTravaux((lignesActuelles) => [
+    ...lignesActuelles,
+    ...nouvellesLignes,
+  ]);
+
+  setTimeout(() => {
+    derniereLigneRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 100);
+};
+
 const reinitialiserApplicationComplete = () => {
   const confirmation = window.confirm(
     "⚠️ Voulez-vous vraiment réinitialiser toute l’application ?\n\nCela va supprimer le brouillon actuel, l’historique, les clients enregistrés, les dépenses et les compteurs."
@@ -2924,8 +3445,10 @@ const reinitialiserApplicationComplete = () => {
 
   if (!confirmationFinale) return;
 
-  localStorage.removeItem("tableauDeBordEntrepriseV24");
-  localStorage.removeItem("backupHistoriqueV24");
+  localStorage.removeItem(CLE_SAUVEGARDE_V25);
+  localStorage.removeItem(CLE_SAUVEGARDE_V24);
+  localStorage.removeItem(CLE_BACKUPS_V25);
+  localStorage.removeItem(CLE_BACKUPS_V24);
 
   setHistorique([]);
   setDepenses([]);
@@ -3003,7 +3526,7 @@ setFraisDeplacementManuel(0);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "sauvegarde-dashboard-adrien-v24.json";
+  a.download = "sauvegarde-dashboard-adrien-v25.json";
   a.click();
   URL.revokeObjectURL(url);
 };
@@ -4125,7 +4648,11 @@ return (
   <button
     type="button"
     onClick={() => {
-      const backups = JSON.parse(localStorage.getItem("backupHistoriqueV24") || "[]");
+      const backups = JSON.parse(
+        localStorage.getItem(CLE_BACKUPS_V25) ||
+          localStorage.getItem(CLE_BACKUPS_V24) ||
+          "[]"
+      );
       setListeBackups(backups);
       setSauvegardesOuvertes(!sauvegardesOuvertes);
     }}
@@ -4150,7 +4677,9 @@ return (
               if (!confirmation) return;
 
               const backups = JSON.parse(
-                localStorage.getItem("backupHistoriqueV24") || "[]"
+                localStorage.getItem(CLE_BACKUPS_V25) ||
+                  localStorage.getItem(CLE_BACKUPS_V24) ||
+                  "[]"
               );
 
               restaurerBackup(backups.length - 1 - i);
@@ -4165,7 +4694,9 @@ return (
 </div>
 
           <p className="text-sm text-amber-300">Adrien et ses mains</p>
-          <h1 className="mt-1 text-2xl font-bold">Tableau de bord entreprise V24</h1>
+          <h1 className="mt-1 text-2xl font-bold">
+            Tableau de bord entreprise {VERSION_APPLICATION}
+          </h1>
           <p className="mt-1 text-sm text-slate-200">
           Devis multi-lignes : plusieurs types de travaux dans un même devis.</p>
         {statutDevis === "estimation_rapide" && (
@@ -4878,6 +5409,38 @@ return (
     </p>
   </div>
 
+  <div className="mb-5 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+    <div className="mb-3">
+      <p className="text-sm font-bold text-blue-900">
+        Packs de prestations V25
+      </p>
+      <p className="mt-1 text-xs text-blue-700">
+        Ajoute une base complète puis adapte les quantités, les prix et les détails au chantier.
+      </p>
+    </div>
+
+    <div className="grid gap-3 md:grid-cols-2">
+      {PACKS_PRESTATIONS_V25.map((pack) => (
+        <div
+          key={pack.id}
+          className="rounded-xl border border-blue-200 bg-white p-3"
+        >
+          <p className="font-bold text-slate-800">{pack.nom}</p>
+          <p className="mt-1 text-xs text-slate-600">
+            {pack.description}
+          </p>
+          <button
+            type="button"
+            onClick={() => ajouterPackAuDevis(pack.id)}
+            className="mt-3 rounded-lg bg-blue-700 px-3 py-2 text-xs font-bold text-white hover:bg-blue-800"
+          >
+            + Ajouter le pack
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+
   <div className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
     <div>
       <label className="text-xs font-semibold text-slate-700">
@@ -5319,22 +5882,6 @@ return (
                   titre="Rentabilité"
                   valeur={`${tarifAssocie.rentabilite} ${tarifAssocie.action}`}
                 />
-
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-  <Card
-    titre="Temps estimé"
-    valeur={`${((ligne.q1 || 1) * (ligne.heuresUnite || tarifAssocie.heuresUnite || 0)).toFixed(1)} h`}
-  />
-
-  <input
-    type="number"
-    value={ligne.heuresUnite || tarifAssocie.heuresUnite || 0}
-    onChange={(e) =>
-      modifierLigne(ligne.id, "heuresUnite", Number(e.target.value))
-    }
-    style={{ width: 60 }}
-  />
-</div>
 
                 {tarifAssocie.conditions && (
                   <p className="text-sm text-slate-500">
