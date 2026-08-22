@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -4391,6 +4390,225 @@ return new Promise<string>((resolve) => {
 
 // 🔥 FERMETURE PROPRE DE LA FONCTION genererPDF
 
+const genererFicheChantier = () => {
+  if (lignesTravaux.length === 0) {
+    alert("Ajoute au moins une prestation avant de générer la fiche chantier.");
+    return;
+  }
+
+  const doc = new jsPDF();
+  const largeurPage = 210;
+  const marge = 15;
+  const largeurUtile = largeurPage - marge * 2;
+  let y = 18;
+
+  const texteChantier = normaliserTexte(
+    lignesTravaux
+      .map((ligne) => `${ligne.prestationNom || ""} ${detailsTravaux(ligne).join(" ")}`)
+      .join(" ")
+  );
+
+  const ajouterPiedDePage = () => {
+    const totalPages = doc.getNumberOfPages();
+
+    for (let page = 1; page <= totalPages; page++) {
+      doc.setPage(page);
+      doc.setDrawColor(203, 213, 225);
+      doc.line(marge, 285, largeurPage - marge, 285);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(
+        `Fiche chantier interne - ${numeroDevis || "Devis non numéroté"}`,
+        marge,
+        290
+      );
+      doc.text(`Page ${page}/${totalPages}`, largeurPage - marge, 290, {
+        align: "right",
+      });
+    }
+  };
+
+  const nouvellePageSiBesoin = (hauteurNecessaire = 18) => {
+    if (y + hauteurNecessaire <= 278) return;
+
+    doc.addPage();
+    y = 18;
+  };
+
+  const ajouterTitreSection = (titre: string) => {
+    nouvellePageSiBesoin(16);
+    doc.setFillColor(52, 63, 79);
+    doc.roundedRect(marge, y, largeurUtile, 9, 2, 2, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(titre.toUpperCase(), marge + 4, y + 6);
+    y += 14;
+  };
+
+  const ajouterTexte = (
+    texte: string,
+    options?: { gras?: boolean; retrait?: number; taille?: number; couleur?: number[] }
+  ) => {
+    const retrait = options?.retrait || 0;
+    const taille = options?.taille || 9;
+    const lignes = doc.splitTextToSize(texte || "-", largeurUtile - retrait);
+    const hauteur = lignes.length * 4.5 + 1;
+
+    nouvellePageSiBesoin(hauteur);
+    doc.setFont("helvetica", options?.gras ? "bold" : "normal");
+    doc.setFontSize(taille);
+    const couleur = options?.couleur || [30, 41, 59];
+    doc.setTextColor(couleur[0], couleur[1], couleur[2]);
+    doc.text(lignes, marge + retrait, y);
+    y += hauteur;
+  };
+
+  const ajouterListe = (elements: string[]) => {
+    elements.filter(Boolean).forEach((element) => {
+      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.5 });
+    });
+  };
+
+  doc.setFillColor(52, 63, 79);
+  doc.rect(0, 0, largeurPage, 31, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("FICHE CHANTIER", marge, 14);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text("Adrien et ses mains - Document interne", marge, 22);
+  doc.text(numeroDevis || "Devis non numéroté", largeurPage - marge, 14, {
+    align: "right",
+  });
+  doc.text(new Date().toLocaleDateString("fr-FR"), largeurPage - marge, 22, {
+    align: "right",
+  });
+  y = 41;
+
+  ajouterTitreSection("Identification du chantier");
+  ajouterTexte(`Client / agence : ${client || agence || "Non renseigné"}`, {
+    gras: true,
+  });
+  if (clientFinalNom) ajouterTexte(`Client final : ${clientFinalNom}`);
+  if (proprietaire) ajouterTexte(`Propriétaire : ${proprietaire}`);
+  if (locataire) ajouterTexte(`Locataire : ${locataire}`);
+  if (adresseAgence || adresse) {
+    ajouterTexte(`Adresse agence / client : ${adresseAgence || adresse}`);
+  }
+  ajouterTexte(
+    `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignée"}`
+  );
+  if (referenceChantier) ajouterTexte(`Référence : ${referenceChantier}`);
+  if (dateChantier) ajouterTexte(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
+  if (telephoneLocataire) ajouterTexte(`Téléphone sur place : ${telephoneLocataire}`);
+
+  ajouterTitreSection("Travaux prévus");
+  lignesTravaux.forEach((ligne, index) => {
+    const quantite = ligne.q1 || 1;
+    ajouterTexte(
+      `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
+      { gras: true, taille: 9.5 }
+    );
+    ajouterListe(
+      (ligne.detailsPdfPersonnalises?.length
+        ? ligne.detailsPdfPersonnalises
+        : detailsTravaux(ligne)
+      ).filter((detail) => detail.trim())
+    );
+    y += 2;
+  });
+
+  ajouterTitreSection("Fournitures et approvisionnement");
+  if (fournituresClient) {
+    ajouterTexte("Fournitures à la charge du client.", { gras: true });
+  } else {
+    ajouterTexte(`Budget d’achat prévu : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
+      gras: true,
+    });
+    ajouterTexte(`Coefficient de revente : x${coefficientFournitures}`);
+    ajouterTexte(
+      detailsFournitures?.trim() ||
+        "Vérifier la liste, les quantités, les références et la disponibilité avant le départ."
+    );
+  }
+
+  const outils = new Set<string>([
+    "Protections, bâches, ruban de masquage et sacs à gravats",
+    "Mètre, crayon, niveau et petit outillage à main",
+    "Aspirateur de chantier et matériel de nettoyage",
+  ]);
+
+  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
+    outils.add("Perforateur, burineur et équipements de protection");
+    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
+    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
+  }
+  if (/plomberie|receveur|vasque|robinet|evacuation/.test(texteChantier)) {
+    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
+    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
+  }
+  if (/peinture|enduit|ratissage|poncage/.test(texteChantier)) {
+    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
+  }
+  if (/sol pvc|revetement de sol|plinthe/.test(texteChantier)) {
+    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
+  }
+
+  ajouterTitreSection("Outils et matériel à prévoir");
+  ajouterListe(Array.from(outils));
+
+  const vigilance = new Set<string>([
+    "Photographier les lieux et les équipements avant toute intervention",
+    "Confirmer l’accès, le stationnement et la présence d’eau et d’électricité",
+    "Protéger les circulations et les éléments conservés",
+    "Faire valider toute anomalie ou prestation supplémentaire avant exécution",
+  ]);
+
+  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
+    vigilance.add("Contrôler l’humidité, la solidité et la planéité des supports après dépose");
+    vigilance.add("Respecter les temps de séchage du support, du SPEC, de la colle et des joints");
+    vigilance.add("Soigner les angles, traversées, liaisons avec le receveur et joints sanitaires");
+  }
+  if (/paroi|cabine/.test(texteChantier)) {
+    vigilance.add("Manipuler les vitrages à deux personnes et contrôler les pièces avant réemploi");
+  }
+  if (/peinture/.test(texteChantier)) {
+    vigilance.add("Vérifier le fonctionnement de la ventilation avant remise en peinture");
+  }
+
+  ajouterTitreSection("Points de vigilance");
+  ajouterListe(Array.from(vigilance));
+
+  ajouterTitreSection("Check-list avant départ");
+  ajouterListe([
+    "Photos avant travaux réalisées",
+    "Implantation et dimensions contrôlées",
+    "Fournitures et consommables vérifiés",
+    "Protections mises en place",
+    "Essais et contrôles de fin d’intervention réalisés",
+    "Photos de fin de chantier réalisées",
+    "Déchets évacués et zone nettoyée",
+  ]);
+
+  if (notes?.trim()) {
+    ajouterTitreSection("Notes du dossier");
+    ajouterTexte(notes.trim());
+  }
+
+  ajouterPiedDePage();
+
+  const nomClientFichier = (clientFinalNom || locataire || client || "chantier")
+    .replace(/[^a-zA-Z0-9À-ÿ -]/g, "")
+    .trim();
+
+  doc.save(
+    `FICHE-${numeroDevis || "CHANTIER"}-${nomClientFichier || "chantier"}.pdf`
+  );
+};
+
 return (
   <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
 <div className="sticky top-0 z-40 mb-2 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
@@ -4420,7 +4638,7 @@ return (
       ))}
     </div>
 
-    <div className="grid grid-cols-13 gap-1">
+    <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-1 xl:grid-cols-[repeat(14,minmax(0,1fr))]">
       <button onClick={envoyerCloud} className="btn-blue px-2 py-1 text-[11px]">
         ☁️ Sauv. cloud
       </button>
@@ -4451,6 +4669,13 @@ return (
 
       <button onClick={() => genererPDF("devis")} className="btn-blue px-2 py-1 text-[11px]">
         PDF devis
+      </button>
+
+      <button
+        onClick={genererFicheChantier}
+        className="btn-outline px-2 py-1 text-[11px]"
+      >
+        Fiche chantier
       </button>
 
       <button onClick={() => genererPDF("facture")} className="btn-emerald px-2 py-1 text-[11px]">
@@ -4510,7 +4735,7 @@ return (
       ))}
     </div>
 
-    <div className="grid grid-cols-5 gap-1">
+    <div className="grid grid-cols-6 gap-1">
       <button
         onClick={() => {
           setFicheOuverte(true);
@@ -4549,6 +4774,13 @@ return (
         className="rounded-md border border-emerald-200 bg-emerald-50 px-1 py-1 text-[10px] font-bold text-emerald-800"
       >
         Charger
+      </button>
+
+      <button
+        onClick={genererFicheChantier}
+        className="rounded-md border border-violet-200 bg-violet-50 px-1 py-1 text-[10px] font-bold text-violet-800"
+      >
+        Fiche
       </button>
 
       
