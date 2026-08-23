@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { jsPDF } from "jspdf";
 
 import {
-  TARIFS_PRESTATIONS as TARIFS_PRESTATIONS_V24,
+  TARIFS_PRESTATIONS as TARIFS_PRESTATIONS_BASE,
   DETAILS_PDF_PAR_CATEGORIE,
 } from "../data/TARIFS_PRESTATIONS";
 
@@ -26,7 +26,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Protection et préparation de la zone d’intervention",
     unite: "forfait",
     prix220: 44,
-    prix150: 30,
     heuresUnite: 1.6,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -43,8 +42,7 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Dépose d’équipements et de revêtements existants",
     unite: "forfait",
     prix220: 220,
-    prix150: 150,
-    heuresUnite: 8,
+      heuresUnite: 8,
     rentabilite: "Correcte",
     action: "Conserver",
     conditions: "Hors désamiantage et dégradations cachées importantes.",
@@ -61,7 +59,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Évacuation des déchets et gravats",
     unite: "forfait",
     prix220: 88,
-    prix150: 60,
     heuresUnite: 3.2,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -78,7 +75,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Préparation et reprise des supports",
     unite: "m²",
     prix220: 30,
-    prix150: 20.4,
     heuresUnite: 1.1,
     rentabilite: "À surveiller",
     action: "Contrôler le support après dépose",
@@ -96,7 +92,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Adaptation des alimentations et évacuations existantes",
     unite: "forfait",
     prix220: 220,
-    prix150: 150,
     heuresUnite: 8,
     rentabilite: "À vérifier",
     action: "Contrôler l’implantation",
@@ -113,7 +108,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose d’un receveur de douche",
     unite: "forfait",
     prix220: 220,
-    prix150: 150,
     heuresUnite: 8,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -132,7 +126,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Protection à l’eau sous carrelage",
     unite: "m²",
     prix220: 25,
-    prix150: 17,
     heuresUnite: 0.9,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -150,7 +143,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Dépose de faïence murale",
     unite: "m²",
     prix220: 25,
-    prix150: 17,
     heuresUnite: 0.9,
     rentabilite: "À surveiller",
     action: "Contrôler le support après dépose",
@@ -167,7 +159,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose de faïence murale",
     unite: "m²",
     prix220: 45,
-    prix150: 30.6,
     heuresUnite: 1.65,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -185,7 +176,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Joints et finitions sanitaires",
     unite: "forfait",
     prix220: 66,
-    prix150: 45,
     heuresUnite: 2.4,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -203,7 +193,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Dépose d’une paroi ou cabine de douche",
     unite: "forfait",
     prix220: 66,
-    prix150: 45,
     heuresUnite: 2.4,
     rentabilite: "À surveiller",
     action: "Prévoir une réserve en cas de réemploi",
@@ -220,7 +209,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose d’une paroi ou cabine de douche",
     unite: "forfait",
     prix220: 110,
-    prix150: 75,
     heuresUnite: 4,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -238,7 +226,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Préparation du support de sol",
     unite: "m²",
     prix220: 20,
-    prix150: 13.6,
     heuresUnite: 0.75,
     rentabilite: "À surveiller",
     action: "Contrôler la planéité",
@@ -255,7 +242,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose d’un revêtement de sol PVC",
     unite: "m²",
     prix220: 28,
-    prix150: 19,
     heuresUnite: 1,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -273,7 +259,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose de plinthes de finition",
     unite: "ml",
     prix220: 8,
-    prix150: 5.5,
     heuresUnite: 0.3,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -290,7 +275,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Préparation des murs et plafonds avant peinture",
     unite: "m²",
     prix220: 10,
-    prix150: 6.8,
     heuresUnite: 0.36,
     rentabilite: "À surveiller",
     action: "Adapter à l’état du support",
@@ -308,7 +292,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Mise en peinture spéciale pièce humide",
     unite: "m²",
     prix220: 12,
-    prix150: 8.2,
     heuresUnite: 0.44,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -325,7 +308,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Dépose d’un équipement sanitaire existant",
     unite: "forfait",
     prix220: 55,
-    prix150: 37.5,
     heuresUnite: 2,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -342,7 +324,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose d’un meuble vasque",
     unite: "forfait",
     prix220: 132,
-    prix150: 90,
     heuresUnite: 4.8,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -359,7 +340,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose et raccordement d’une robinetterie",
     unite: "forfait",
     prix220: 66,
-    prix150: 45,
     heuresUnite: 2.4,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -376,7 +356,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Pose d’accessoires de salle de bain",
     unite: "forfait",
     prix220: 44,
-    prix150: 30,
     heuresUnite: 1.6,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -390,7 +369,6 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
     prestation: "Nettoyage de fin d’intervention",
     unite: "forfait",
     prix220: 44,
-    prix150: 30,
     heuresUnite: 1.6,
     rentabilite: "Correcte",
     action: "Conserver",
@@ -404,10 +382,11 @@ const PRESTATIONS_SALLE_DE_BAIN_V25 = [
 ];
 
 const TARIFS_PRESTATIONS = [
-  ...TARIFS_PRESTATIONS_V24.filter(
+  ...TARIFS_PRESTATIONS_BASE.filter(
     (prestation: any) =>
       !PRESTATIONS_SALLE_DE_BAIN_V25.some(
-        (nouvellePrestation) => nouvellePrestation.id === prestation.id
+        (nouvellePrestation) =>
+          nouvellePrestation.id === prestation.id
       )
   ),
   ...PRESTATIONS_SALLE_DE_BAIN_V25,
@@ -489,11 +468,47 @@ const getNomPrestation = (prestation: any) => {
 };
 
 const getPrixPrestation = (prestation: any, modeClient: string) => {
-  if (modeClient === "jeremie") {
-    return prestation.prix150 ?? prestation.prixMoJeremie150 ?? prestation.prixMo150 ?? 0;
+  if (!prestation) return 0;
+
+  // ================= TARIF NORMAL =================
+  // Compatibilité ancien + nouveau catalogue.
+  let prixNormal = Number(
+    prestation.prix220 ??
+    prestation.prixMo220 ??
+    prestation.prixNormal ??
+    0
+  );
+
+  // Sécurité :
+  // si aucun prix n'est stocké mais qu'un temps existe,
+  // calcul automatique sur la base 220 € / journée de 7 h.
+  if (
+    (!prixNormal || prixNormal <= 0) &&
+    Number(prestation.heuresUnite || 0) > 0
+  ) {
+    prixNormal =
+      Number(prestation.heuresUnite || 0) * (220 / 7);
   }
 
-  return prestation.prix220 ?? prestation.prixMo220 ?? 0;
+  prixNormal = Math.round(prixNormal * 100) / 100;
+
+  // ================= CLIENT NORMAL =================
+  if (modeClient !== "jeremie") {
+    return prixNormal;
+  }
+
+  // ================= DEPLACEMENT =================
+  // Aucun coefficient Jérémie sur les frais de déplacement.
+  if (
+    prestation.typeTravaux === "deplacement" ||
+    prestation.categorie === "Déplacement / logistique"
+  ) {
+    return prixNormal;
+  }
+
+  // ================= JEREMIE =================
+  // 190 €/jour au lieu de 220 €/jour.
+  return Math.round(prixNormal * (190 / 220) * 100) / 100;
 };
 
 const parseDateFr = (date: string) => {
@@ -682,7 +697,7 @@ const clientsBase = [
   adresseAgence: "",
   complementAdresse: "",
   notes:
-    "Sous-traitance Jérémie — base 150 €/jour — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
+    "Sous-traitance Jérémie — base 190 €/jour — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
   modeClient: "jeremie",
   agence: "",
 },
@@ -863,7 +878,7 @@ function detailsTravaux(ligne: LigneTravaux): string[] {
   ];
 }
 function prixLigne(ligne: LigneTravaux, modeClient: string) {
-  const c = modeClient === "jeremie" ? 0.68 : 1;
+  const c = modeClient === "jeremie" ? 190 / 220 : 1;
 
   if (ligne.type === "peinture") {
     return Math.round(ligne.q1 * 9 * c + ligne.q2 * 12 * c + ligne.r1 * 18 * c + ligne.r2 * 2.5 * c + ligne.option * 20 * c);
@@ -910,42 +925,6 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
 
   return prixLigne(ligne, modeClient);
 }
-
-const getSapInfoLigne = (ligne: LigneTravaux) => {
-  const tarifAssocie: any = TARIFS_PRESTATIONS.find(
-    (t: any) => t.id === ligne.tarifId
-  );
-
-  const sapCategorie = tarifAssocie?.sapCategorie || "attention";
-
-  if (sapCategorie === "ok") {
-    return {
-      badge: "🟢 SAP OK",
-      message: "Prestation compatible avec le cadre SAP déclaré.",
-      classeCarte: "border-emerald-200 bg-emerald-50",
-      classeBadge: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    };
-  }
-
-  if (sapCategorie === "non") {
-    return {
-      badge: "🔴 Hors SAP",
-      message:
-        "Attention : cette prestation semble hors cadre SAP. À éviter sur une facture SAP sauf cas très particulier justifié.",
-      classeCarte: "border-red-200 bg-red-50",
-      classeBadge: "bg-red-100 text-red-800 border-red-200",
-    };
-  }
-
-  return {
-    badge: "🟡 À vérifier",
-    message:
-      "Possible uniquement si c’est une petite intervention de bricolage, sans transformation du logement.",
-    classeCarte: "border-amber-200 bg-amber-50",
-    classeBadge: "bg-amber-100 text-amber-800 border-amber-200",
-  };
-};
-
   export default function Home() {
    const restaurerBackup = (index: number) => {
   const backups = JSON.parse(
@@ -1218,7 +1197,7 @@ const [ribBanque, setRibBanque] = useState("");
   const [adresse, setAdresse] = useState("Revel");
   const [adresseAgence, setAdresseAgence] = useState("");
   const [complementAdresse, setComplementAdresse] = useState("");
-  const [notes, setNotes] = useState("Sous-traitance Jérémie — base 150 €/jour — hors fournitures.");
+  const [notes, setNotes] = useState("Sous-traitance Jérémie — base 190 €/jour — hors fournitures.");
   const [locataire, setLocataire] = useState("");
 const [telephoneLocataire, setTelephoneLocataire] = useState("");
 const [proprietaire, setProprietaire] = useState("");
@@ -1733,18 +1712,7 @@ const margeFournitures =
   const estimationHaute = Math.round(total * margeHaute);
   const prixConseille = Math.ceil(estimationHaute / 10) * 10;
 
-  const montantEligibleSap = factureSap
-  ? totalTravaux
-  : 0;
-
-const montantNonEligibleSap = factureSap
-  ? reventeFournitures
-  : 0;
-
-const creditImpotEstime = factureSap
-  ? Math.round(montantEligibleSap * 0.5)
-  : 0;
-
+  
 return {
   resteReel,
   totalTravaux,
@@ -1762,10 +1730,7 @@ return {
   estimationHaute,
   prixConseille,
 
-  montantEligibleSap,
-  montantNonEligibleSap,
-  creditImpotEstime,
-};
+ };
 }, [
   lignesTravaux,
   modeClient,
@@ -1782,7 +1747,7 @@ return {
   fraisDeplacementManuelActif,
   fraisDeplacementManuel,
 
-  factureSap,
+
 ]);
 
 const joursCalendrier = useMemo(() => {
@@ -4104,61 +4069,6 @@ doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 31, { align: "right" });
 
 y += 42;
 
-// ================= BLOC SAP UNIQUE PRO =================
-if (factureSap) {
-  if (y + 45 > 275) {
-    doc.addPage();
-    page += 1;
-    y = 35;
-  }
-
-  const montantEligible = Math.round(calcul.montantEligibleSap || 0);
-  const montantNonEligible = Math.round(calcul.montantNonEligibleSap || 0);
-  const creditImpot = Math.round(calcul.creditImpotEstime || 0);
-
-  // Cadre vert clair
-  doc.setFillColor(236, 253, 245);
-  doc.setDrawColor(16, 185, 129);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(15, y, 180, 40, 3, 3, "FD");
-
-  // Titre
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(6, 95, 70);
-  doc.text("INFORMATIONS FISCALES – SERVICES A LA PERSONNE", 20, y + 8);
-
-  // Contenu
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(30, 30, 30);
-
-  let cy = y + 15;
-
-  doc.text(`Organisme déclaré sous le numéro : ${numeroSap || "XXXXXXX"}`, 20, cy);
-  cy += 6;
-
-  doc.text(`Montant total éligible : ${montantEligible} €`, 20, cy);
-  cy += 5;
-
-  if (montantNonEligible > 0) {
-    doc.text(`Fournitures non éligibles : ${montantNonEligible} €`, 20, cy);
-    cy += 5;
-  }
-
-  doc.text(`Crédit d’impôt estimé : ${creditImpot} €`, 20, cy);
-  cy += 6;
-
-  doc.setFontSize(8);
-  doc.setTextColor(80, 80, 80);
-  doc.text(
-    "Prestations éligibles au crédit d’impôt selon l’article 199 sexdecies du CGI.",
-    20,
-    cy
-  );
-
-  y += 50;
-}
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
 if (y + 82 > 292) {
@@ -4690,14 +4600,7 @@ return (
         Mail facture
       </button>
 
-      <button
-        type="button"
-        onClick={() => setFactureSap(!factureSap)}
-        className={`${factureSap ? "btn-green" : "btn-outline"} px-2 py-1 text-[11px]`}
-      >
-        SAP
-      </button>
-
+     
       <button onClick={exporter} className="btn-purple px-2 py-1 text-[11px]">
         Export
       </button>
@@ -5477,20 +5380,7 @@ return (
             <Input label="Numéro devis" value={numeroDevis} onChange={setNumeroDevis} />
             <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
 
-            {factureSap && (
-  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-    <Input
-      label="Numéro déclaration SAP"
-      value={numeroSap}
-      onChange={setNumeroSap}
-    />
-
-    <p className="mt-2 text-xs font-semibold text-emerald-700">
-      Cette mention sera ajoutée uniquement sur les factures SAP.
-    </p>
-  </div>
-)}
-
+   
             <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
 {(modeClient === "agence" || modeClient === "jeremie") && (
   <div className="space-y-4 rounded-2xl border bg-slate-50 p-4">
@@ -5881,19 +5771,17 @@ return (
   <div className="space-y-5">
     {lignesTravaux.map((ligne, index) => {
   const labels = champsTravaux(ligne.type);
-  const tarifAssocie = TARIFS_PRESTATIONS.find(
-    (t) => t.id === ligne.tarifId
-  );
 
-  const sapInfo = getSapInfoLigne(ligne);
+  const tarifAssocie = TARIFS_PRESTATIONS.find(
+  (t: any) => t.id === ligne.tarifId
+);
+  
 
   return (
     <div
       key={ligne.id}
       ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
-      className={`rounded-2xl border p-5 space-y-4 ${
-        factureSap ? sapInfo.classeCarte : "bg-slate-50"
-      }`}
+      className="rounded-2xl border bg-slate-50 p-5 space-y-4"
     >
           <div className="flex items-center justify-between gap-3">
           <div>
@@ -5903,19 +5791,6 @@ return (
       : `${index + 1} — Prestation personnalisée`}
   </h3>
 
-  {factureSap && (
-    <div className="mt-2 flex flex-col gap-1">
-      <span
-        className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${sapInfo.classeBadge}`}
-      >
-        {sapInfo.badge}
-      </span>
-
-      <p className="text-xs font-medium text-slate-700">
-        {sapInfo.message}
-      </p>
-    </div>
-  )}
 </div>
 
            <div className="flex gap-2">
@@ -6393,22 +6268,6 @@ return (
   />
 </div>
 
-{factureSap && (
-  <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-    <div className="font-semibold">Mode SAP activé</div>
-    <div className="mt-2 space-y-1">
-      <p>Montant éligible au crédit d’impôt : <strong>{calcul.montantEligibleSap} €</strong></p>
-      <p>Fournitures non éligibles : <strong>{calcul.montantNonEligibleSap} €</strong></p>
-      <p>Crédit d’impôt estimatif client : <strong>{calcul.creditImpotEstime} €</strong></p>
-    </div>
-
-    {!numeroSap && (
-      <p className="mt-2 text-xs text-amber-700">
-        Démarche SAP en cours — numéro non renseigné
-      </p>
-    )}
-  </div>
-)}
 
 {saisieDateAcompteOuverte && (
   <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
