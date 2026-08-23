@@ -132,7 +132,13 @@ type Dossier = {
   total: number;
   acompte: number;
   reste: number;
+
+  // Montant total encaissé actuellement sur le dossier
   montantEncaisse?: number;
+
+  // Mémoire séparée de l'acompte réellement reçu
+  montantAcompteEncaisse?: number;
+
   pourcentageAcompte?: number;
   facturePayee: boolean;
 
@@ -157,7 +163,11 @@ type Dossier = {
   typeRdv?: string;
   observationRdv?: string;
 
+  // Date du dernier paiement / paiement complet
   datePaiement?: string;
+
+  // Date réelle à laquelle l'acompte a été reçu
+  dateAcompte?: string;
 
   // ================= RAPPELS =================
   dateRappel?: string;
@@ -240,16 +250,16 @@ const clientsBase = [
     agence: "",
   },
   {
-    nom: "Elodie - Patrimoine Occitan",
-    telephone: "06 76 04 77 19",
-    email: "gestion@patrimoine-occitan.fr",
-    adresse: "Revel",
-    adresseAgence: "PO, 1 Gal du Midi - 31250 Revel",
-    complementAdresse: "",
-    agence: "Patrimoine Occitan",
-    notes: "05 61 27 72 77 Agence Patrimoine Occitan — devis serrés et rapides.",
-    modeClient: "agence",
-  },
+  nom: "Patrimoine Occitan",
+  telephone: "06 76 04 77 19",
+  email: "gestion@patrimoine-occitan.fr",
+  adresse: "",
+  adresseAgence: "PO, 1 Gal du Midi - 31250 Revel",
+  complementAdresse: "",
+  agence: "Patrimoine Occitan",
+  notes: "05 61 27 72 77 Agence Patrimoine Occitan — devis serrés et rapides.",
+  modeClient: "agence",
+},
   {
     nom: "Karine - Foncia",
     telephone: "07 84 51 78 21",
@@ -539,6 +549,14 @@ setDetailsFournitures(b.detailsFournitures || "");
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
 
+    setAcompteManuelActif(
+  b.acompteManuelActif ?? false
+);
+
+setAcompteManuel(
+  b.acompteManuel ?? 0
+);
+
     setFactureSap(b.factureSap || false);
 setNumeroSap(b.numeroSap || "");
 
@@ -711,6 +729,8 @@ const lignesTravauxRef = useRef<HTMLDivElement | null>(null);
 const derniereLigneRef = useRef<HTMLDivElement | null>(null);
   const [montantEncaisse, setMontantEncaisse] = useState(0);
 const [datePaiement, setDatePaiement] = useState("");
+const [saisieDateAcompteOuverte, setSaisieDateAcompteOuverte] = useState(false);
+const [saisieDatePaiementCompletOuverte, setSaisieDatePaiementCompletOuverte] = useState(false);
 const [dateChantier, setDateChantier] = useState("");
 const [heureChantier, setHeureChantier] = useState("");
 const [dateRdv, setDateRdv] = useState("");
@@ -765,9 +785,19 @@ const [depenseCategorie, setDepenseCategorie] = useState("Fournitures");
 const [depenseDescription, setDepenseDescription] = useState("");
 const [depenseMontant, setDepenseMontant] = useState(0);
 const [depenseModePaiement, setDepenseModePaiement] = useState("CB");
-  const [prestationSelectionnee, setPrestationSelectionnee] = useState("");
-  const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
-  const [numeroDevis, setNumeroDevis] = useState("");
+const [prestationSelectionnee, setPrestationSelectionnee] = useState("");
+const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
+
+const [recherchePrestation, setRecherchePrestation] = useState("");
+
+const [afficherFavorisSeulement, setAfficherFavorisSeulement] =
+  useState(false);
+
+const [prestationsFavorites, setPrestationsFavorites] = useState<string[]>(
+  []
+);
+
+const [numeroDevis, setNumeroDevis] = useState("");
 const [numeroFacture, setNumeroFacture] = useState("");
 
   const [lignesTravaux, setLignesTravaux] = useState<LigneTravaux[]>([]);
@@ -783,6 +813,8 @@ const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
 
   const [statutDevis, setStatutDevis] = useState("envoye");
   const [pourcentageAcompte, setPourcentageAcompte] = useState(30);
+  const [acompteManuelActif, setAcompteManuelActif] = useState(false);
+const [acompteManuel, setAcompteManuel] = useState(0);
   const [statutChantier, setStatutChantier] = useState("a_planifier");
   const [facturePayee, setFacturePayee] = useState(false);
   const today = new Date();
@@ -887,15 +919,41 @@ setTypeRdv(b.typeRdv || "visite");
       console.error("Erreur chargement sauvegarde :", error);
     }
   }
-
   setSauvegardePrete(true);
 }, []);
+
+// ================= FAVORIS PRESTATIONS V25 =================
+
+useEffect(() => {
+  try {
+    const favorisSauvegardes = JSON.parse(
+      localStorage.getItem("prestationsFavoritesV25") || "[]"
+    );
+
+    if (Array.isArray(favorisSauvegardes)) {
+      setPrestationsFavorites(favorisSauvegardes);
+    }
+  } catch (error) {
+    console.error(
+      "Erreur pendant le chargement des prestations favorites :",
+      error
+    );
+
+    setPrestationsFavorites([]);
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    "prestationsFavoritesV25",
+    JSON.stringify(prestationsFavorites)
+  );
+}, [prestationsFavorites]);
 
 useEffect(() => {
   if (!sauvegardePrete) return;
 
- const donnees = construireSauvegardeComplete();
-
+  const donnees = construireSauvegardeComplete();
   localStorage.setItem("tableauDeBordEntrepriseV24", JSON.stringify(donnees));
 }, [
   sauvegardePrete,
@@ -1066,8 +1124,11 @@ achatFournitures,
       fournituresClient,
       detailsFournitures,
 
-      montantEncaisse,
-      pourcentageAcompte,
+     montantEncaisse,
+pourcentageAcompte,
+
+acompteManuelActif,
+acompteManuel,
 
       factureSap,
       numeroSap,
@@ -1158,14 +1219,14 @@ const fraisLogistique =
     : fraisLogistiqueAuto;
 
   // ================= FOURNITURES =================
-  const reventeFournitures = fournituresClient
-    ? 0
-    : Math.round(achatFournitures * coefficientFournitures);
+ const reventeFournitures = fournituresClient
+  ? 0
+  : Math.round(achatFournitures * coefficientFournitures * 100) / 100;
 
-  const margeFournitures =
-    fournituresClient || achatFournitures === 0
-      ? 0
-      : reventeFournitures - achatFournitures;
+const margeFournitures =
+  fournituresClient || achatFournitures === 0
+    ? 0
+    : Math.round((reventeFournitures - achatFournitures) * 100) / 100;
 
   let total = totalTravaux + fraisLogistique + reventeFournitures;
 
@@ -1176,7 +1237,9 @@ const fraisLogistique =
     total = minimumChantier;
   }
 
-  const acompte = Math.round(total * (pourcentageAcompte / 100));
+  const acompte = acompteManuelActif
+  ? Number(acompteManuel || 0)
+  : Math.round(total * (pourcentageAcompte / 100));
 
   const reste = total - acompte;
   const resteReel = total - montantEncaisse;
@@ -1249,10 +1312,15 @@ return {
   achatFournitures,
   coefficientFournitures,
   montantEncaisse,
-pourcentageAcompte,
-fraisDeplacementManuelActif,
-fraisDeplacementManuel,
-factureSap,
+  pourcentageAcompte,
+
+  acompteManuelActif,
+  acompteManuel,
+
+  fraisDeplacementManuelActif,
+  fraisDeplacementManuel,
+
+  factureSap,
 ]);
 
 const joursCalendrier = useMemo(() => {
@@ -1321,13 +1389,26 @@ const joursCalendrier = useMemo(() => {
   setClient(fiche.nom);
   setTelephone(fiche.telephone || "");
   setEmail(fiche.email || "");
-  setAdresse(fiche.adresse || "");
-  setAdresseAgence(fiche.adresseAgence || "");
-  setComplementAdresse(fiche.complementAdresse || "");
   setNotes(fiche.notes || "");
   setModeClient(fiche.modeClient || "normal");
   setAgence(fiche.agence || "");
+
+  if (fiche.modeClient === "agence") {
+    setAdresse("");
+    setComplementAdresse("");
+    setAdresseAgence(fiche.adresseAgence || "");
+    setReferenceChantier("");
+    setLocataire("");
+    setTelephoneLocataire("");
+    setProprietaire("");
+    setTelephoneProprietaire("");
+  } else {
+    setAdresse(fiche.adresse || "");
+    setComplementAdresse(fiche.complementAdresse || "");
+    setAdresseAgence("");
+  }
 };
+
 const supprimerClientEnregistre = (nomClient: string) => {
   if (!nomClient.trim()) return;
 
@@ -1503,6 +1584,8 @@ setFraisDeplacementManuel(0);
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
 
+  setAcompteManuelActif(false);
+setAcompteManuel(0);
 
   setFactureSap(false);
 setNumeroSap("");
@@ -1621,7 +1704,14 @@ const enregistrer = () => {
     factureSap: estEvenementSimple ? false : factureSap,
     numeroSap: estEvenementSimple ? "" : numeroSap,
 
-    montantEncaisse: estEvenementSimple ? 0 : montantEncaisse,
+      montantEncaisse: estEvenementSimple ? 0 : montantEncaisse,
+
+    // On conserve la mémoire de l'acompte déjà enregistré.
+    // Important : ne pas la perdre lorsqu'on réenregistre le dossier.
+    montantAcompteEncaisse: estEvenementSimple
+      ? 0
+      : historique.find((d) => d.id === idFinal)?.montantAcompteEncaisse ?? 0,
+
     pourcentageAcompte: estEvenementSimple ? 0 : pourcentageAcompte,
 
     kmAller: estEvenementSimple ? 0 : kmAller,
@@ -1647,6 +1737,11 @@ fraisDeplacementManuel:
     planningChantier: [],
 
     datePaiement: estEvenementSimple ? "" : datePaiement,
+
+    // Conservation permanente de la vraie date d'acompte
+    dateAcompte: estEvenementSimple
+      ? ""
+      : historique.find((d) => d.id === idFinal)?.dateAcompte ?? "",
 
     dateRdv,
     heureRdv,
@@ -1782,6 +1877,14 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
 
   setMontantEncaisse(d.montantEncaisse ?? 0);
   setPourcentageAcompte(d.pourcentageAcompte ?? 30);
+
+  setAcompteManuelActif(
+  (d as any).acompteManuelActif ?? false
+);
+
+setAcompteManuel(
+  (d as any).acompteManuel ?? 0
+);
 
   setFactureSap(d.factureSap || false);
 setNumeroSap(d.numeroSap || "");
@@ -2036,23 +2139,28 @@ const construireObjetMail = (type: "devis" | "facture") => {
   const numero = type === "facture" ? numeroFacture : numeroDevis;
   const libelle = type === "facture" ? "Facture" : "Devis";
 
+  if (modeClient === "agence") {
+    return [
+      `${libelle} ${numero}`,
+      referenceChantier,
+      locataire,
+      `${adresse}${complementAdresse ? ", " + complementAdresse : ""}`,
+    ]
+      .filter((v) => v && v.trim() !== "")
+      .join(" - ");
+  }
+
   const nomAffiche =
-    modeClient === "jeremie"
-      ? clientFinalNom || "Client final"
-      : modeClient === "agence"
-      ? locataire || proprietaire || client || "Client"
-      : client || "Client";
+    clientFinalNom?.trim() ||
+    client?.trim();
 
-  const adresseAffichee =
-    modeClient === "jeremie"
-      ? clientFinalAdresse || ""
-      : modeClient === "agence"
-      ? `${adresse || ""} ${complementAdresse || ""}`.trim()
-      : `${adresse || ""} ${complementAdresse || ""}`.trim();
-
-  return `${libelle} ${numero} - ${nomAffiche}${
-    adresseAffichee ? `, ${adresseAffichee}` : ""
-  }`;
+  return [
+    `${libelle} ${numero}`,
+    nomAffiche,
+    `${adresse}${complementAdresse ? ", " + complementAdresse : ""}`,
+  ]
+    .filter((v) => v && v.trim() !== "")
+    .join(" - ");
 };
 
 const ouvrirGoogleCalendar = ({
@@ -2402,7 +2510,13 @@ const alertesIntelligentes = useMemo(() => {
 }, [historique]);
 const donneesGraphique = useMemo(() => {
   const aujourdHui = new Date();
-  const data = [];
+
+  const data: {
+    label: string;
+    encaissements: number;
+    depenses: number;
+    resultat: number;
+  }[] = [];
 
   for (let i = 11; i >= 0; i--) {
     const dateMois = new Date(
@@ -2414,49 +2528,155 @@ const donneesGraphique = useMemo(() => {
     const mois = dateMois.getMonth();
     const annee = dateMois.getFullYear();
 
-    const dossiersDuMois = historique.filter((d) => {
-      const dateReference =
-        parseDateFr(d.datePaiement || "") ||
-        parseDateFr(d.date || "");
+    // ============================================================
+    // ENCAISSEMENTS RÉELS DU MOIS
+    //
+    // Chaque dossier peut maintenant générer :
+    //
+    // 1 - un acompte à sa vraie date
+    // 2 - un solde à sa vraie date
+    //
+    // montantEncaisse reste le TOTAL encaissé sur le dossier.
+    // On ne modifie donc pas le fonctionnement actuel.
+    // ============================================================
+
+    let encaissements = 0;
+
+    historique.forEach((d) => {
+      if ((d.montantEncaisse || 0) <= 0) {
+        return;
+      }
+
+      // ==========================================================
+      // ACOMPTE
+      // ==========================================================
+
+      let montantAcompteReel =
+        Number(d.montantAcompteEncaisse || 0);
+
+      let dateAcompteReelle =
+        parseDateFr(d.dateAcompte || "");
+
+      /*
+       * COMPATIBILITÉ AVEC LES DOSSIERS EXISTANTS :
+       *
+       * Si le dossier n'est pas encore totalement payé,
+       * mais possède déjà un montant encaissé et une datePaiement,
+       * il s'agit très probablement de l'acompte enregistré
+       * avec l'ancien système.
+       *
+       * On peut donc encore le récupérer automatiquement.
+       */
+      if (
+        montantAcompteReel <= 0 &&
+        !d.facturePayee &&
+        (d.montantEncaisse || 0) > 0 &&
+        d.datePaiement
+      ) {
+        montantAcompteReel =
+          Number(d.montantEncaisse || 0);
+
+        dateAcompteReelle =
+          parseDateFr(d.datePaiement || "");
+      }
+
+      // Ajout de l'acompte dans SON mois réel
+      if (
+        montantAcompteReel > 0 &&
+        dateAcompteReelle &&
+        dateAcompteReelle.getMonth() === mois &&
+        dateAcompteReelle.getFullYear() === annee
+      ) {
+        encaissements += montantAcompteReel;
+      }
+
+      // ==========================================================
+      // SOLDE / PAIEMENT COMPLET
+      // ==========================================================
+
+      if (d.facturePayee && d.datePaiement) {
+        const dateSolde =
+          parseDateFr(d.datePaiement || "");
+
+        /*
+         * montantEncaisse contient le total reçu.
+         *
+         * Si acompte :
+         * 1500 total encaissé
+         * - 500 acompte
+         * = 1000 solde
+         *
+         * Si aucun acompte :
+         * 1500 - 0
+         * = 1500 paiement complet
+         */
+        const montantSolde = Math.max(
+          0,
+          Number(d.montantEncaisse || 0) -
+            montantAcompteReel
+        );
+
+        if (
+          montantSolde > 0 &&
+          dateSolde &&
+          dateSolde.getMonth() === mois &&
+          dateSolde.getFullYear() === annee
+        ) {
+          encaissements += montantSolde;
+        }
+      }
+    });
+
+    // ============================================================
+    // DÉPENSES RÉELLES DU MOIS
+    // ============================================================
+
+    const depensesDuMois = depenses.filter((depense) => {
+      const dateDepense =
+        parseDateFr(depense.date || "");
+
+      if (!dateDepense) {
+        return false;
+      }
 
       return (
-        dateReference &&
-        dateReference.getMonth() === mois &&
-        dateReference.getFullYear() === annee
+        dateDepense.getMonth() === mois &&
+        dateDepense.getFullYear() === annee
       );
     });
 
-    const facturesDuMois = dossiersDuMois.filter(
-      (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
-    );
-
-    const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
-      if (!d.numeroDevis || d.numeroFacture) return false;
-      if ((d.montantEncaisse || 0) <= 0) return false;
-
-      const factureLieeExiste = historique.some(
-        (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
-      );
-
-      return !factureLieeExiste;
-    });
-
-    const total = [...facturesDuMois, ...devisDuMoisSansFacture].reduce(
-      (somme, d) => somme + (d.montantEncaisse || 0),
+    const totalDepenses = depensesDuMois.reduce(
+      (somme, depense) =>
+        somme + Number(depense.montant || 0),
       0
     );
+
+    // ============================================================
+    // RÉSULTAT
+    // ============================================================
+
+    const resultat =
+      encaissements - totalDepenses;
 
     data.push({
       label: dateMois.toLocaleString("fr-FR", {
         month: "short",
         year: "2-digit",
       }),
-      total,
+
+      encaissements:
+        Math.round(encaissements * 100) / 100,
+
+      depenses:
+        Math.round(totalDepenses * 100) / 100,
+
+      resultat:
+        Math.round(resultat * 100) / 100,
     });
   }
 
   return data;
-}, [historique]);
+}, [historique, depenses]);
 
 const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
@@ -2525,7 +2745,172 @@ const resultatsCalendrier = useMemo(() => {
     `).includes(q)
   );
 }, [historique, rechercheCalendrier]);
-  
+
+// ================= RECHERCHE PRESTATIONS V25 =================
+
+const normaliserRecherchePrestation = (valeur: string) => {
+  return valeur
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
+const prestationEstFavorite = (idPrestation: string) => {
+  return prestationsFavorites.includes(idPrestation);
+};
+
+const basculerPrestationFavorite = (idPrestation: string) => {
+  setPrestationsFavorites((favorisActuels) => {
+    if (favorisActuels.includes(idPrestation)) {
+      return favorisActuels.filter(
+        (idFavorite) => idFavorite !== idPrestation
+      );
+    }
+
+    return [...favorisActuels, idPrestation];
+  });
+};
+
+const prestationsFiltrees = useMemo(() => {
+  const rechercheNormalisee =
+    normaliserRecherchePrestation(recherchePrestation);
+
+  return TARIFS_PRESTATIONS.filter((prestation: any) => {
+    const correspondCategorie =
+      !categorieSelectionnee ||
+      prestation.categorie === categorieSelectionnee;
+
+    const correspondFavori =
+      !afficherFavorisSeulement ||
+      prestationsFavorites.includes(prestation.id);
+
+    const textePrestation = normaliserRecherchePrestation(
+      [
+        getNomPrestation(prestation),
+        prestation.categorie,
+        prestation.unite,
+        prestation.action,
+        prestation.conditions,
+        ...(prestation.tags || []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+    );
+
+    const correspondRecherche =
+      !rechercheNormalisee ||
+      textePrestation.includes(rechercheNormalisee);
+
+    return (
+      correspondCategorie &&
+      correspondFavori &&
+      correspondRecherche
+    );
+  }).sort((a: any, b: any) => {
+    const aFavori =
+      prestationsFavorites.includes(a.id);
+
+    const bFavori =
+      prestationsFavorites.includes(b.id);
+
+    if (aFavori !== bFavori) {
+      return aFavori ? -1 : 1;
+    }
+
+    return getNomPrestation(a).localeCompare(
+      getNomPrestation(b),
+      "fr"
+    );
+  });
+}, [
+  categorieSelectionnee,
+  recherchePrestation,
+  afficherFavorisSeulement,
+  prestationsFavorites,
+]);
+
+const ajouterPrestationAuDevis = (
+  idPrestation?: string
+) => {
+  const idAUtiliser =
+    idPrestation || prestationSelectionnee;
+
+  const prestationTrouvee: any =
+    TARIFS_PRESTATIONS.find(
+      (prestation: any) =>
+        prestation.id === idAUtiliser
+    );
+
+  if (!prestationTrouvee) {
+    alert(
+      "Choisis une prestation avant d'ajouter une ligne."
+    );
+    return;
+  }
+
+  const prixClient = getPrixPrestation(
+    prestationTrouvee,
+    modeClient
+  );
+
+  const detailsBase =
+    prestationTrouvee.detailsPdf &&
+    prestationTrouvee.detailsPdf.length > 0
+      ? prestationTrouvee.detailsPdf
+      : DETAILS_PDF_PAR_CATEGORIE[
+          prestationTrouvee.categorie
+        ] || [
+          "Réalisation de la prestation prévue au devis",
+          "Ajustements simples",
+          "Finitions standards",
+          "Nettoyage de fin d’intervention",
+        ];
+
+  setLignesTravaux((lignesActuelles) => [
+    ...lignesActuelles,
+    {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+
+      type:
+        prestationTrouvee.typeTravaux ||
+        "prestation_tableau",
+
+      q1: 1,
+      q2: 0,
+      r1: 0,
+      r2: 0,
+      option: 0,
+
+      tarifId: prestationTrouvee.id,
+
+      prestationNom:
+        getNomPrestation(prestationTrouvee),
+
+      unite: prestationTrouvee.unite,
+
+      prixUnitaire: prixClient,
+      prixUnitaireAuto: prixClient,
+      prixManuel: false,
+
+      heuresUnite:
+        prestationTrouvee.heuresUnite || 0,
+
+      detailsPdfPersonnalises: [...detailsBase],
+      detailsPdfOuvert: false,
+    },
+  ]);
+
+  setPrestationSelectionnee("");
+
+  setTimeout(() => {
+    derniereLigneRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 100);
+};
+
 const reinitialiserApplicationComplete = () => {
   const confirmation = window.confirm(
     "⚠️ Voulez-vous vraiment réinitialiser toute l’application ?\n\nCela va supprimer le brouillon actuel, l’historique, les clients enregistrés, les dépenses et les compteurs."
@@ -3130,7 +3515,7 @@ doc.text(designationCoupe, 15, y);
 // 👉 PRIX UNIQUE propre
 doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);
-doc.text(`${Math.round(montant)} €`, 190, y, { align: "right" });
+doc.text(`${montant.toFixed(2)} €`, 190, y, { align: "right" });
 
  y += designationCoupe.length * 3.5;
 
@@ -3150,51 +3535,52 @@ y += detailCoupe.length * 3.5;
 });
 
 // ================= BLOC TOTAL COMPACT =================
-if (y + 35 > 292) {
+if (y + 38 > 292) {
   doc.addPage();
   page += 1;
   y = 35;
 }
 
-const dejaEncaissePDF = montantEncaisse || 0;
-const resteAPayerPDF = Math.max(0, calcul.total - dejaEncaissePDF);
+const formatEuroPDF = (valeur: number) => {
+  return `${(Math.round((valeur || 0) * 100) / 100).toFixed(2)} €`;
+};
+
+const montantTotalPDF = Math.round((calcul.total || 0) * 100) / 100;
+
+const montantAcompteOuEncaissePDF =
+  type === "devis"
+    ? Math.round((calcul.acompte || 0) * 100) / 100
+    : Math.round((montantEncaisse || 0) * 100) / 100;
+
+const resteAPayerPDF = Math.max(
+  0,
+  Math.round((montantTotalPDF - montantAcompteOuEncaissePDF) * 100) / 100
+);
 
 doc.setFillColor(248, 244, 236);
 doc.setDrawColor(190, 145, 55);
-doc.roundedRect(108, y, 87, 32, 3, 3, "FD");
+doc.roundedRect(95, y, 100, 34, 3, 3, "FD");
 
 doc.setFont("helvetica", "normal");
 doc.setFontSize(10);
 doc.setTextColor(0, 0, 0);
 
-doc.text("Montant total", 115, y + 10);
-doc.text(`${Math.round(calcul.total)} €`, 188, y + 10, { align: "right" });
+doc.text("Montant total", 103, y + 10);
+doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10, { align: "right" });
 
-if (type === "devis") {
-  doc.text("Acompte demandé", 115, y + 18);
-  doc.text(`${Math.round(calcul.acompte)} €`, 188, y + 18, { align: "right" });
+doc.text(type === "devis" ? "Acompte demandé" : "Déjà encaissé", 103, y + 19);
+doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 19, {
+  align: "right",
+});
 
-  doc.setDrawColor(180);
-  doc.line(115, y + 21, 190, y + 21);
+doc.setDrawColor(180);
+doc.line(103, y + 23, 190, y + 23);
 
-  doc.setFont("helvetica", "bold");
-  doc.text("Reste à payer", 115, y + 28);
-  doc.text(`${Math.round(calcul.reste)} €`, 188, y + 28, { align: "right" });
-}
+doc.setFont("helvetica", "bold");
+doc.text("Reste à payer", 103, y + 31);
+doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 31, { align: "right" });
 
-if (type === "facture") {
-  doc.text("Déjà encaissé", 115, y + 18);
-  doc.text(`${Math.round(dejaEncaissePDF)} €`, 188, y + 18, { align: "right" });
-
-  doc.setDrawColor(180);
-  doc.line(115, y + 21, 190, y + 21);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Reste à payer", 115, y + 28);
-  doc.text(`${Math.round(resteAPayerPDF)} €`, 188, y + 28, { align: "right" });
-}
-
-y += 38;
+y += 42;
 
 // ================= BLOC SAP UNIQUE PRO =================
 if (factureSap) {
@@ -4293,13 +4679,30 @@ return (
   </datalist>
 </div>
             <Input label="Email" value={email} onChange={setEmail} />
-            {modeClient === "agence" && (
-  <Input label="Adresse de l’agence" value={adresseAgence} onChange={setAdresseAgence} />
+ {modeClient === "agence" ? (
+  <>
+    <Input
+      label="Adresse de l’agence"
+      value={adresseAgence}
+      onChange={setAdresseAgence}
+    />
+    <TextArea label="Notes agence" value={notes} onChange={setNotes} />
+  </>
+) : (
+  <>
+    <Input
+      label="Adresse client / chantier"
+      value={adresse}
+      onChange={setAdresse}
+    />
+    <Input
+      label="Complément d’adresse / étage / appartement / bâtiment"
+      value={complementAdresse}
+      onChange={setComplementAdresse}
+    />
+    <TextArea label="Notes" value={notes} onChange={setNotes} />
+  </>
 )}
-
-<Input label={modeClient === "agence" ? "Adresse chantier / appartement" : "Adresse client / chantier"} value={adresse} onChange={setAdresse} />
-<Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
-            <TextArea label="Notes" value={notes} onChange={setNotes} />
           </Bloc>
 
           <Bloc titre="Dossier">
@@ -4328,10 +4731,12 @@ return (
             <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
 {(modeClient === "agence" || modeClient === "jeremie") && (
   <div className="space-y-4 rounded-2xl border bg-slate-50 p-4">
-    {modeClient === "agence" && (
-      <>
-        <Input label="Nom de l’agence" value={agence} onChange={setAgence} />
-        <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
+   {modeClient === "agence" && (
+  <>
+    <Input label="Nom de l’agence" value={agence} onChange={setAgence} />
+    <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
+    <Input label="Adresse chantier / appartement" value={adresse} onChange={setAdresse} />
+    <Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
         <Input label="Locataire" value={locataire} onChange={setLocataire} />
         <Input
           label="Téléphone locataire"
@@ -4458,95 +4863,225 @@ return (
         </section>
 )}
 <BlocRepliable titre="Lignes de travaux" ouvertParDefaut={true}>
-  <div ref={lignesTravauxRef} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+<div
+  ref={lignesTravauxRef}
+  className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+>
+  <div className="mb-4">
+    <h3 className="text-base font-bold text-slate-800">
+      Ajouter une prestation
+    </h3>
+
+    <p className="mt-1 text-sm text-slate-500">
+      Recherche directement une prestation ou
+      sélectionne une catégorie.
+    </p>
+  </div>
+
+  <div className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
+    <div>
+      <label className="text-xs font-semibold text-slate-700">
+        Rechercher une prestation
+      </label>
+
+      <input
+        type="text"
+        value={recherchePrestation}
+        onChange={(event) => {
+          setRecherchePrestation(
+            event.target.value
+          );
+
+          setPrestationSelectionnee("");
+        }}
+        placeholder="Ex. robinet, parquet, peinture plafond..."
+        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      />
+    </div>
+
     <Select
       label="Catégorie"
       value={categorieSelectionnee}
-      onChange={(v) => {
-        setCategorieSelectionnee(v);
+      onChange={(valeur) => {
+        setCategorieSelectionnee(valeur);
         setPrestationSelectionnee("");
       }}
       options={[
-        ["", "Choisir une catégorie"],
-        ...categories.map((categorie) => [categorie, categorie]),
+        ["", "Toutes les catégories"],
+        ...categories.map((categorie) => [
+          categorie,
+          categorie,
+        ]),
       ]}
     />
 
-  <Select
-  label="Prestation"
-  value={prestationSelectionnee}
-  onChange={setPrestationSelectionnee}
-  options={[
-  ["", "Choisir une prestation"],
-  ...getPrestationsByCategorie(categorieSelectionnee).map((p: any) => [
-    p.id,
-    `${getNomPrestation(p)} — ${getPrixPrestation(p, modeClient)} €/${p.unite}`,
-  ]),
-]}
-/>
-
-<button
-  type="button"
-  onClick={() => {
-    const prestationTrouvee: any = TARIFS_PRESTATIONS.find(
-      (p: any) => p.id === prestationSelectionnee
-    );
-
-    if (!prestationTrouvee) {
-      alert("Choisis une prestation avant d'ajouter une ligne.");
-      return;
-    }
-
-    const prixClient = getPrixPrestation(prestationTrouvee, modeClient);
-
-    const detailsBase =
-      prestationTrouvee.detailsPdf && prestationTrouvee.detailsPdf.length > 0
-        ? prestationTrouvee.detailsPdf
-        : DETAILS_PDF_PAR_CATEGORIE[prestationTrouvee.categorie] || [
-            "Réalisation de la prestation prévue au devis",
-            "Ajustements simples",
-            "Finitions standards",
-            "Nettoyage de fin d’intervention",
-          ];
-
-    setLignesTravaux([
-      ...lignesTravaux,
-      {
-        id: Date.now(),
-        type: prestationTrouvee.typeTravaux || "prestation_tableau",
-        q1: 1,
-        q2: 0,
-        r1: 0,
-        r2: 0,
-        option: 0,
-
-        tarifId: prestationTrouvee.id,
-        prestationNom: getNomPrestation(prestationTrouvee),
-        unite: prestationTrouvee.unite,
-        prixUnitaire: prixClient,
-        prixUnitaireAuto: prixClient,
-        prixManuel: false,
-        heuresUnite: prestationTrouvee.heuresUnite || 0,
-
-        detailsPdfPersonnalises: detailsBase,
-        detailsPdfOuvert: false,
-      },
-    ]);
-
-    setPrestationSelectionnee("");
-
-    setTimeout(() => {
-      derniereLigneRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 100);
-  }}
-  className="btn-green mt-6 rounded-xl px-4 py-2 text-sm font-semibold"
->
-  + Ajouter
-</button>
+    <div className="flex items-end">
+      <button
+        type="button"
+        onClick={() =>
+          setAfficherFavorisSeulement(
+            (valeurActuelle) =>
+              !valeurActuelle
+          )
+        }
+        className={`w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+          afficherFavorisSeulement
+            ? "border-amber-400 bg-amber-100 text-amber-900"
+            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+        }`}
+      >
+        {afficherFavorisSeulement
+          ? "⭐ Favoris affichés"
+          : "☆ Voir mes favoris"}
+      </button>
+    </div>
   </div>
+
+  {(recherchePrestation ||
+    categorieSelectionnee ||
+    afficherFavorisSeulement) && (
+    <div className="mt-4">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-slate-700">
+          {prestationsFiltrees.length} prestation
+          {prestationsFiltrees.length > 1
+            ? "s"
+            : ""}{" "}
+          trouvée
+          {prestationsFiltrees.length > 1
+            ? "s"
+            : ""}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            setRecherchePrestation("");
+            setCategorieSelectionnee("");
+            setPrestationSelectionnee("");
+            setAfficherFavorisSeulement(false);
+          }}
+          className="text-xs font-semibold text-blue-700 hover:underline"
+        >
+          Effacer les filtres
+        </button>
+      </div>
+
+      {prestationsFiltrees.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-sm text-slate-500">
+          Aucune prestation ne correspond à
+          cette recherche.
+        </div>
+      ) : (
+        <div className="max-h-[430px] space-y-2 overflow-y-auto pr-1">
+          {prestationsFiltrees.map(
+            (prestation: any) => {
+              const favorite =
+                prestationEstFavorite(
+                  prestation.id
+                );
+
+              const prixClient =
+                getPrixPrestation(
+                  prestation,
+                  modeClient
+                );
+
+              return (
+                <div
+                  key={prestation.id}
+                  className="rounded-xl border border-slate-200 bg-white p-3 transition hover:border-slate-300"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-bold text-slate-800">
+                          {getNomPrestation(
+                            prestation
+                          )}
+                        </p>
+
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                          {
+                            prestation.categorie
+                          }
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-sm font-semibold text-blue-700">
+                        {Number(
+                          prixClient || 0
+                        ).toFixed(2)}{" "}
+                        €
+                        {prestation.unite !==
+                        "forfait"
+                          ? ` / ${prestation.unite}`
+                          : " / forfait"}
+                      </p>
+
+                      {prestation.conditions && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          {
+                            prestation.conditions
+                          }
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        basculerPrestationFavorite(
+                          prestation.id
+                        )
+                      }
+                      className={`shrink-0 rounded-lg border px-3 py-2 text-lg ${
+                        favorite
+                          ? "border-amber-300 bg-amber-100 text-amber-700"
+                          : "border-slate-200 bg-white text-slate-400 hover:bg-amber-50 hover:text-amber-600"
+                      }`}
+                      title={
+                        favorite
+                          ? "Retirer des favoris"
+                          : "Ajouter aux favoris"
+                      }
+                    >
+                      {favorite ? "★" : "☆"}
+                    </button>
+                  </div>
+
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        ajouterPrestationAuDevis(
+                          prestation.id
+                        )
+                      }
+                      className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-800"
+                    >
+                      + Ajouter au devis
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+          )}
+        </div>
+      )}
+    </div>
+  )}
+
+  {!recherchePrestation &&
+    !categorieSelectionnee &&
+    !afficherFavorisSeulement && (
+      <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm text-slate-500">
+        Commence à écrire le nom d’une
+        prestation ou sélectionne une
+        catégorie.
+      </div>
+    )}
+</div>
 
   <div className="space-y-5">
     {lignesTravaux.map((ligne, index) => {
@@ -4928,8 +5463,8 @@ return (
 
       <div className="grid gap-2 md:grid-cols-3">
         <MiniResult titre="Achat" valeur={`${achatFournitures} €`} />
-        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures} €`} couleur="text-blue-700" />
-        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures} €`} couleur="text-green-700" />
+        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures.toFixed(2)} €`} couleur="text-blue-700" />
+        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures.toFixed(2)} €`} couleur="text-green-700" />
       </div>
 
       <p className="text-xs text-slate-500">
@@ -5013,7 +5548,7 @@ return (
 
       <div className="flex justify-between">
         <span>Fournitures</span>
-        <strong>{calcul.reventeFournitures} €</strong>
+        <strong>{calcul.reventeFournitures.toFixed(2)} €</strong>
       </div>
 
       <div className="border-t pt-1 flex justify-between font-bold text-blue-700">
@@ -5046,8 +5581,30 @@ return (
     ["50", "50 %"],
   ]}
 />
+<div className="mt-3 border rounded-lg p-3 bg-slate-50">
+  <label className="flex items-center gap-2 text-sm font-medium">
+    <input
+      type="checkbox"
+      checked={acompteManuelActif}
+      onChange={(e) => setAcompteManuelActif(e.target.checked)}
+    />
+    Acompte manuel
+  </label>
 
- <div className="grid gap-2 md:grid-cols-3">
+  {acompteManuelActif && (
+    <div className="mt-2">
+      <input
+        type="number"
+        value={acompteManuel}
+        onChange={(e) => setAcompteManuel(Number(e.target.value))}
+        className="w-full border rounded px-2 py-1"
+        placeholder="Montant de l'acompte"
+      />
+    </div>
+  )}
+</div>
+
+<div className="grid gap-2 md:grid-cols-3">
   <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
   <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
   <MiniResult
@@ -5060,22 +5617,10 @@ return (
 {factureSap && (
   <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
     <div className="font-semibold">Mode SAP activé</div>
-
     <div className="mt-2 space-y-1">
-      <p>
-        Montant éligible au crédit d’impôt :{" "}
-        <strong>{calcul.montantEligibleSap} €</strong>
-      </p>
-
-      <p>
-        Fournitures non éligibles :{" "}
-        <strong>{calcul.montantNonEligibleSap} €</strong>
-      </p>
-
-      <p>
-        Crédit d’impôt estimatif client :{" "}
-        <strong>{calcul.creditImpotEstime} €</strong>
-      </p>
+      <p>Montant éligible au crédit d’impôt : <strong>{calcul.montantEligibleSap} €</strong></p>
+      <p>Fournitures non éligibles : <strong>{calcul.montantNonEligibleSap} €</strong></p>
+      <p>Crédit d’impôt estimatif client : <strong>{calcul.creditImpotEstime} €</strong></p>
     </div>
 
     {!numeroSap && (
@@ -5086,81 +5631,186 @@ return (
   </div>
 )}
 
-    <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => {
-          setMontantEncaisse(calcul.acompte);
-
-          setHistorique(
-            historique.map((d) =>
-              d.numeroDevis === numeroDevis
-                ? {
-                    ...d,
-                    montantEncaisse: calcul.acompte,
-                    reste: Math.max(0, calcul.total - calcul.acompte),
-                    total: calcul.total,
-                    acompte: calcul.acompte,
-                    facturePayee: false,
-                  }
-                : d
-            )
-          );
-        }}
-        className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
-      >
-        Acompte reçu
-      </button>
-
-      <button
-        onClick={() => {
-          setMontantEncaisse(calcul.total);
-
-          setHistorique(
-            historique.map((d) =>
-              d.numeroDevis === numeroDevis
-                ? {
-                    ...d,
-                    montantEncaisse: calcul.total,
-                    reste: 0,
-                    total: calcul.total,
-                    acompte: calcul.acompte,
-                    facturePayee: true,
-                  }
-                : d
-            )
-          );
-        }}
-        className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
-      >
-        Paiement complet
-      </button>
-
-      <button
-        onClick={() => {
-          setMontantEncaisse(0);
-
-          setHistorique(
-            historique.map((d) =>
-              d.numeroDevis === numeroDevis
-                ? {
-                    ...d,
-                    montantEncaisse: 0,
-                    reste: calcul.total,
-                    total: calcul.total,
-                    acompte: calcul.acompte,
-                    facturePayee: false,
-                  }
-                : d
-            )
-          );
-        }}
-        className="rounded-lg border px-3 py-2 text-sm font-semibold"
-      >
-        RAZ
-      </button>
-    </div>
+{saisieDateAcompteOuverte && (
+  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+    <label className="block text-sm font-medium text-slate-700">
+      Date réelle de réception de l’acompte
+    </label>
+    <input
+      type="date"
+      value={formatDateFrVersInput(datePaiement)}
+      onChange={(e) => setDatePaiement(formatDateInputVersFr(e.target.value))}
+      className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+    />
   </div>
-</Bloc>      
+)}
+
+{saisieDatePaiementCompletOuverte && (
+  <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
+    <label className="block text-sm font-medium text-slate-700">
+      Date réelle du paiement complet
+    </label>
+    <input
+      type="date"
+      value={formatDateFrVersInput(datePaiement)}
+      onChange={(e) => setDatePaiement(formatDateInputVersFr(e.target.value))}
+      className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+    />
+  </div>
+)}
+
+<div className="flex flex-wrap gap-2">
+  {/* ================= ACOMPTE REÇU ================= */}
+  <button
+    onClick={() => {
+      setSaisieDatePaiementCompletOuverte(false);
+
+      if (!saisieDateAcompteOuverte) {
+        setSaisieDateAcompteOuverte(true);
+        return;
+      }
+
+      if (!datePaiement) {
+        alert("Sélectionne la date réelle de réception de l’acompte.");
+        return;
+      }
+
+      const montantAcompteRecu = calcul.acompte;
+
+      setMontantEncaisse(montantAcompteRecu);
+
+      setHistorique((ancien) =>
+        ancien.map((d) =>
+          d.id === idDossierActuel
+            ? {
+                ...d,
+
+                // Fonctionnement actuel conservé
+                montantEncaisse: montantAcompteRecu,
+                reste: Math.max(
+                  0,
+                  calcul.total - montantAcompteRecu
+                ),
+                total: calcul.total,
+                acompte: calcul.acompte,
+                facturePayee: false,
+
+                // On conserve datePaiement pour ne rien casser
+                // dans le fonctionnement actuel de l'application
+                datePaiement,
+
+                // NOUVEAU :
+                // mémoire indépendante et permanente de l'acompte
+                dateAcompte: datePaiement,
+                montantAcompteEncaisse: montantAcompteRecu,
+              }
+            : d
+        )
+      );
+
+      setSaisieDateAcompteOuverte(false);
+    }}
+    className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white"
+  >
+    {saisieDateAcompteOuverte
+      ? "Valider acompte"
+      : "Acompte reçu"}
+  </button>
+
+  {/* ================= PAIEMENT COMPLET ================= */}
+  <button
+    onClick={() => {
+      setSaisieDateAcompteOuverte(false);
+
+      if (!saisieDatePaiementCompletOuverte) {
+        setSaisieDatePaiementCompletOuverte(true);
+        return;
+      }
+
+      if (!datePaiement) {
+        alert("Sélectionne la date réelle du paiement complet.");
+        return;
+      }
+
+      setMontantEncaisse(calcul.total);
+
+      setHistorique((ancien) =>
+        ancien.map((d) => {
+          if (d.id !== idDossierActuel) {
+            return d;
+          }
+
+          /*
+           * IMPORTANT :
+           * dateAcompte et montantAcompteEncaisse ne sont
+           * volontairement PAS modifiés ici.
+           *
+           * Le paiement complet ne doit plus effacer
+           * l'historique de l'acompte.
+           */
+
+          return {
+            ...d,
+
+            montantEncaisse: calcul.total,
+            reste: 0,
+            total: calcul.total,
+            acompte: calcul.acompte,
+            facturePayee: true,
+
+            // date réelle du paiement final
+            datePaiement,
+          };
+        })
+      );
+
+      setSaisieDatePaiementCompletOuverte(false);
+    }}
+    className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white"
+  >
+    {saisieDatePaiementCompletOuverte
+      ? "Valider paiement complet"
+      : "Paiement complet"}
+  </button>
+
+  {/* ================= REMISE À ZÉRO ================= */}
+  <button
+    onClick={() => {
+      setMontantEncaisse(0);
+      setDatePaiement("");
+
+      setSaisieDateAcompteOuverte(false);
+      setSaisieDatePaiementCompletOuverte(false);
+
+      setHistorique((ancien) =>
+        ancien.map((d) =>
+          d.id === idDossierActuel
+            ? {
+                ...d,
+
+                montantEncaisse: 0,
+                montantAcompteEncaisse: 0,
+
+                reste: calcul.total,
+                total: calcul.total,
+                acompte: calcul.acompte,
+
+                facturePayee: false,
+
+                datePaiement: "",
+                dateAcompte: "",
+              }
+            : d
+        )
+      );
+    }}
+    className="rounded-lg border px-3 py-2 text-sm font-semibold"
+  >
+    RAZ
+  </button>
+</div>
+</div>
+</Bloc>
 
 
         <Bloc titre="Recherche historique">
@@ -5243,14 +5893,22 @@ return (
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold text-slate-800">
-                    {item.modeClient === "jeremie"
-                      ? item.clientFinalNom || item.client || "Client non renseigné"
-                      : item.modeClient === "agence"
-                      ? item.locataire ||
-                        item.proprietaire ||
-                        item.client ||
-                        "Client non renseigné"
-                      : item.client || "Client non renseigné"}
+                    
+              {item.modeClient === "jeremie"
+  ? `${item.client || "SAS Meurisse Couverture"}${
+      item.clientFinalNom ? " / " + item.clientFinalNom : ""
+    }`
+  : item.modeClient === "agence"
+  ? `${item.agence || item.client || "Agence immobilière"}${
+      item.locataire
+        ? " / " + item.locataire
+        : item.proprietaire
+        ? " / " + item.proprietaire
+        : item.clientFinalNom
+        ? " / " + item.clientFinalNom
+        : ""
+    }`
+  : item.client || "Client non renseigné"}
                   </p>
 
                   <div className="space-y-1 text-sm text-slate-500">
@@ -5750,17 +6408,17 @@ ${d.notes || ""}`,
     setHistorique((ancien) => [nouveauRdv, ...ancien]);
 
     setClientsEnregistres((anciens) => {
-      const ficheClient: ClientEnregistre = {
-        nom,
-        telephone: tel,
-        email: mail,
-        adresse: adresseRdv,
-        adresseAgence: "",
-        complementAdresse: "",
-        notes: observation,
-        modeClient: "normal",
-        agence: "",
-      };
+const ficheClient: ClientEnregistre = {
+  nom: client.trim(),
+  telephone,
+  email,
+  adresse: modeClient === "agence" ? "" : adresse,
+  adresseAgence: modeClient === "agence" ? adresseAgence : "",
+  complementAdresse: modeClient === "agence" ? "" : complementAdresse,
+  notes,
+  modeClient,
+  agence: modeClient === "agence" ? agence : "",
+};
 
       const existe = anciens.some(
         (c) => c.nom.toLowerCase() === nom.toLowerCase()
@@ -6114,58 +6772,225 @@ function Check({
 function GraphiqueCourbe({
   donnees,
 }: {
-  donnees: { label: string; total: number }[];
+  donnees: {
+    label: string;
+    encaissements: number;
+    depenses: number;
+    resultat: number;
+  }[];
 }) {
-  const largeur = 900;
-  const hauteur = 260;
-  const margeX = 45;
-  const margeY = 35;
+  const largeur = 960;
+  const hauteur = 340;
 
-  const max = Math.max(...donnees.map((d) => d.total), 1);
+  const margeGauche = 70;
+  const margeDroite = 30;
+  const margeHaut = 45;
+  const margeBas = 55;
 
-  const points = donnees.map((d, index) => {
-    const x =
-      margeX +
-      (index * (largeur - margeX * 2)) / Math.max(donnees.length - 1, 1);
+  const largeurGraphique =
+    largeur - margeGauche - margeDroite;
 
-    const y =
-      hauteur - margeY - (d.total / max) * (hauteur - margeY * 2);
+  const hauteurGraphique =
+    hauteur - margeHaut - margeBas;
 
-    return { x, y, ...d };
-  });
+  const toutesLesValeurs = donnees.flatMap((donnee) => [
+    donnee.encaissements,
+    donnee.depenses,
+    donnee.resultat,
+  ]);
 
-  const chemin = points
-    .map((p, index) => `${index === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ");
+  const valeurMaximum = Math.max(
+    ...toutesLesValeurs,
+    0,
+    1
+  );
+
+  const valeurMinimum = Math.min(
+    ...toutesLesValeurs,
+    0
+  );
+
+  const amplitude = Math.max(
+    valeurMaximum - valeurMinimum,
+    1
+  );
+
+  const positionX = (index: number) => {
+    if (donnees.length <= 1) {
+      return margeGauche + largeurGraphique / 2;
+    }
+
+    return (
+      margeGauche +
+      (index * largeurGraphique) /
+        (donnees.length - 1)
+    );
+  };
+
+  const positionY = (valeur: number) => {
+    return (
+      margeHaut +
+      ((valeurMaximum - valeur) / amplitude) *
+        hauteurGraphique
+    );
+  };
+
+  const positionZero = positionY(0);
+
+  const creerPoints = (
+    cle: "encaissements" | "depenses" | "resultat"
+  ) => {
+    return donnees.map((donnee, index) => ({
+      x: positionX(index),
+      y: positionY(donnee[cle]),
+      valeur: donnee[cle],
+      label: donnee.label,
+    }));
+  };
+
+  const creerChemin = (
+    points: {
+      x: number;
+      y: number;
+    }[]
+  ) => {
+    return points
+      .map(
+        (point, index) =>
+          `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
+      )
+      .join(" ");
+  };
+
+  const pointsEncaissements =
+    creerPoints("encaissements");
+
+  const pointsDepenses =
+    creerPoints("depenses");
+
+  const pointsResultat =
+    creerPoints("resultat");
+
+  const cheminEncaissements =
+    creerChemin(pointsEncaissements);
+
+  const cheminDepenses =
+    creerChemin(pointsDepenses);
+
+  const cheminResultat =
+    creerChemin(pointsResultat);
+
+  const formaterMontant = (montant: number) => {
+    return `${new Intl.NumberFormat("fr-FR", {
+      maximumFractionDigits: 0,
+    }).format(montant)} €`;
+  };
+
+  const graduations = Array.from(
+    { length: 5 },
+    (_, index) => {
+      const valeur =
+        valeurMaximum -
+        (index * amplitude) / 4;
+
+      return {
+        valeur,
+        y: positionY(valeur),
+      };
+    }
+  );
 
   return (
-    <div className="rounded-2xl border bg-white p-4">
-      <h3 className="mb-4 text-lg font-bold text-slate-800">
-        Courbe des encaissements sur 12 mois
-      </h3>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">
+            Activité financière sur 12 mois
+          </h3>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Comparaison des encaissements, des dépenses
+            payées et du résultat réel.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-4 text-sm font-semibold">
+          <div className="flex items-center gap-2 text-blue-700">
+            <span className="h-3 w-3 rounded-full bg-blue-600" />
+            Encaissements
+          </div>
+
+          <div className="flex items-center gap-2 text-red-700">
+            <span className="h-3 w-3 rounded-full bg-red-600" />
+            Dépenses
+          </div>
+
+          <div className="flex items-center gap-2 text-emerald-700">
+            <span className="h-3 w-3 rounded-full bg-emerald-600" />
+            Résultat
+          </div>
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
-        <svg viewBox={`0 0 ${largeur} ${hauteur}`} className="min-w-[850px]">
+        <svg
+          viewBox={`0 0 ${largeur} ${hauteur}`}
+          className="min-w-[900px]"
+          role="img"
+          aria-label="Graphique des encaissements, dépenses et résultats sur douze mois"
+        >
+          {/* ================= GRILLE HORIZONTALE ================= */}
+
+          {graduations.map((graduation, index) => (
+            <g key={`graduation-${index}`}>
+              <line
+                x1={margeGauche}
+                y1={graduation.y}
+                x2={largeur - margeDroite}
+                y2={graduation.y}
+                stroke="#E2E8F0"
+                strokeWidth="1"
+                strokeDasharray="5 5"
+              />
+
+              <text
+                x={margeGauche - 10}
+                y={graduation.y + 4}
+                textAnchor="end"
+                fontSize="11"
+                fill="#64748B"
+              >
+                {formaterMontant(graduation.valeur)}
+              </text>
+            </g>
+          ))}
+
+          {/* ================= AXE VERTICAL ================= */}
+
           <line
-            x1={margeX}
-            y1={hauteur - margeY}
-            x2={largeur - margeX}
-            y2={hauteur - margeY}
+            x1={margeGauche}
+            y1={margeHaut}
+            x2={margeGauche}
+            y2={hauteur - margeBas}
             stroke="#CBD5E1"
             strokeWidth="2"
           />
 
+          {/* ================= LIGNE ZÉRO ================= */}
+
           <line
-            x1={margeX}
-            y1={margeY}
-            x2={margeX}
-            y2={hauteur - margeY}
-            stroke="#CBD5E1"
+            x1={margeGauche}
+            y1={positionZero}
+            x2={largeur - margeDroite}
+            y2={positionZero}
+            stroke="#94A3B8"
             strokeWidth="2"
           />
+
+          {/* ================= COURBE ENCAISSEMENTS ================= */}
 
           <path
-            d={chemin}
+            d={cheminEncaissements}
             fill="none"
             stroke="#2563EB"
             strokeWidth="4"
@@ -6173,32 +6998,132 @@ function GraphiqueCourbe({
             strokeLinejoin="round"
           />
 
-          {points.map((p, index) => (
-            <g key={index}>
-              <circle cx={p.x} cy={p.y} r="5" fill="#2563EB" />
+          {/* ================= COURBE DÉPENSES ================= */}
 
-              <text
-                x={p.x}
-                y={p.y - 12}
-                textAnchor="middle"
-                fontSize="12"
-                fill="#334155"
-              >
-                {p.total}€
-              </text>
+          <path
+            d={cheminDepenses}
+            fill="none"
+            stroke="#DC2626"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
 
-              <text
-                x={p.x}
-                y={hauteur - 10}
-                textAnchor="middle"
-                fontSize="12"
-                fill="#475569"
-              >
-                {p.label}
-              </text>
-            </g>
-          ))}
+          {/* ================= COURBE RÉSULTAT ================= */}
+
+          <path
+            d={cheminResultat}
+            fill="none"
+            stroke="#059669"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* ================= POINTS ET LIBELLÉS ================= */}
+
+          {donnees.map((donnee, index) => {
+            const x = positionX(index);
+
+            const yEncaissements = positionY(
+              donnee.encaissements
+            );
+
+            const yDepenses = positionY(
+              donnee.depenses
+            );
+
+            const yResultat = positionY(
+              donnee.resultat
+            );
+
+            return (
+              <g key={`${donnee.label}-${index}`}>
+                <circle
+                  cx={x}
+                  cy={yEncaissements}
+                  r="5"
+                  fill="#2563EB"
+                >
+                  <title>
+                    {`${donnee.label} — Encaissements : ${formaterMontant(
+                      donnee.encaissements
+                    )}`}
+                  </title>
+                </circle>
+
+                <circle
+                  cx={x}
+                  cy={yDepenses}
+                  r="5"
+                  fill="#DC2626"
+                >
+                  <title>
+                    {`${donnee.label} — Dépenses : ${formaterMontant(
+                      donnee.depenses
+                    )}`}
+                  </title>
+                </circle>
+
+                <circle
+                  cx={x}
+                  cy={yResultat}
+                  r="5"
+                  fill="#059669"
+                >
+                  <title>
+                    {`${donnee.label} — Résultat : ${formaterMontant(
+                      donnee.resultat
+                    )}`}
+                  </title>
+                </circle>
+
+                <text
+                  x={x}
+                  y={hauteur - 18}
+                  textAnchor="middle"
+                  fontSize="12"
+                  fill="#475569"
+                >
+                  {donnee.label}
+                </text>
+              </g>
+            );
+          })}
         </svg>
+      </div>
+
+      <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+          <div className="font-semibold text-blue-800">
+            Encaissements
+          </div>
+
+          <div className="mt-1 text-xs text-blue-700">
+            Sommes réellement reçues.
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+          <div className="font-semibold text-red-800">
+            Dépenses
+          </div>
+
+          <div className="mt-1 text-xs text-red-700">
+            Achats payés pendant le mois, y compris le
+            stock utilisé sur plusieurs chantiers.
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+          <div className="font-semibold text-emerald-800">
+            Résultat réel
+          </div>
+
+          <div className="mt-1 text-xs text-emerald-700">
+            Encaissements moins dépenses.
+          </div>
+        </div>
       </div>
     </div>
   );

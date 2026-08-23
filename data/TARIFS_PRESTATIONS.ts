@@ -1,2575 +1,889 @@
-
 export type PrestationTarif = {
-  id?: string;
-  nom: string;
-  unite: string;
-  prixMo220: number;
-  prixMoJeremie150: number;
-  tva?: number;
-  prixJeremieTtc?: number;
-  marcheHtMin?: number;
-  marcheHtMax?: number;
-  temps1Pers?: string;
-  temps2Pers?: string;
-  heuresUnite?: number;
-  rentabilite: string;
-  action?: string;
-  notes?: string;
-  conditions?: string;
-  detailsPdf?: string[];
-  typeTravaux?: string;
-    sapCategorie?: "ok" | "attention" | "non";
-};
-
-export type CategorieTarifs = {
-  categorie: string;
-  prestations: PrestationTarif[];
-};
-
-export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
-  Nettoyage: ["Protection et préparation", "Nettoyage des surfaces", "Contrôle de fin d’intervention"],
-  Débarras: ["Repérage", "Manutention", "Évacuation prévue", "Nettoyage sommaire"],
-  Sols: ["Contrôle support", "Préparation simple", "Pose", "Découpes", "Finitions"],
-  Carrelage: ["Contrôle support", "Pose", "Découpes", "Joints si prévus", "Nettoyage"],
-  Peinture: ["Protection", "Préparation support", "Application peinture", "Nettoyage"],
-  Plomberie: ["Dépose si nécessaire", "Pose/remplacement", "Raccordement simple", "Test étanchéité"],
-  Électricité: ["Mise hors tension", "Pose/remplacement", "Raccordement existant", "Test"],
-  Ventilation: ["Dépose si nécessaire", "Pose/remplacement", "Raccordement", "Test"],
-  Bricolage: ["Préparation", "Pose/montage/fixation", "Ajustements", "Vérification"],
-  Équipement: ["Préparation de l’emplacement","Mise en place de l’équipement","Raccordement standard si prévu","Test de fonctionnement",],
-"Extérieur / Métal / Divers": ["Préparation de la zone d’intervention","Contrôle du support existant","Intervention prévue au devis","Ajustements et finitions simples","Nettoyage sommaire de fin d’intervention",],
-  Toiture: ["Contrôle visuel", "Intervention simple prévue", "Hors travaux structurels"],
-  Jardin: ["Préparation zone", "Réalisation prestation", "Nettoyage sommaire"],
-  PACK: ["Regroupement prestations", "Réalisation travaux", "Nettoyage final"],
-  "Déplacement / logistique": ["Frais aller-retour", "Temps et logistique"],
-};
-
-export const TARIFS_PRESTATIONS_PAR_CATEGORIE: CategorieTarifs[] = [
-  {
-    categorie: "Nettoyage",
-    prestations: [
-      {
-        nom: "Nettoyage fin de chantier / remise en état",
-        unite: "m²",
-        prixMo220: 2.24,
-        prixMoJeremie150: 1.53,
-        tva: 10,
-        prixJeremieTtc: 1.68,
-        marcheHtMin: 8,
-        marcheHtMax: 12,
-        temps1Pers: "0,08h/m²",
-        temps2Pers: "0,05h/m²",
-        heuresUnite: 0.08,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Dépoussiérage, sols, sanitaires; hors gros gravats.",
-        conditions: "Minimum facturation 2h ou 80€",
-      },
-      {
-        nom: "Nettoyage vitres (faces int/ext)",
-        unite: "m²",
-        prixMo220: 1.4,
-        prixMoJeremie150: 0.95,
-        tva: 10,
-        prixJeremieTtc: 1.05,
-        marcheHtMin: 5,
-        marcheHtMax: 8,
-        temps1Pers: "0,05h/m²",
-        temps2Pers: "0,03h/m²",
-        heuresUnite: 0.05,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Dégressif si grande surface. Hors accès difficile.",
-        conditions: "Minimum 60€ / hors accès difficile / hors hauteur",
-      },
-      {
-        nom: "Ménage logement standard minimum 2h",
-        unite: "h",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        marcheHtMin: 30,
-        marcheHtMax: 60,
-        heuresUnite: 1,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Entretien courant logement vide ou meublé.",
-        conditions: "Forfait déplacement si hors zone",
-      },
-    ],
-  },
-
-  {
-    categorie: "Débarras",
-    prestations: [
-      {
-        nom: "Débarras / évacuation encombrants",
-        unite: "m³",
-        prixMo220: 14,
-        prixMoJeremie150: 9.55,
-        tva: 10,
-        prixJeremieTtc: 10.5,
-        marcheHtMin: 55,
-        marcheHtMax: 85,
-        heuresUnite: 0.5,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Accès + étages influent.",
-        conditions: "Hors déchèterie / minimum chantier",
-      },
-      {
-        nom: "Évacuation déchèterie",
-        unite: "forfait",
-        prixMo220: 75,
-        prixMoJeremie150: 51.13,
-        tva: 10,
-        prixJeremieTtc: 56.24,
-        marcheHtMin: 30,
-        marcheHtMax: 120,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Mise en sac / tri",
-        unite: "h",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        heuresUnite: 1,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Évacuation gravats",
-        unite: "m³",
-        prixMo220: 66.96,
-        prixMoJeremie150: 45.65,
-        tva: 10,
-        prixJeremieTtc: 50.22,
-        heuresUnite: 2.39,
-        rentabilite: "🔴 À majorer",
-        action: "Prendre avec conditions",
-        notes: "Chargement + déchèterie. Poids lourd.",
-        conditions: "Minimum 150€ / selon accessibilité / hors imprévus",
-      },
-    ],
-  },
-
-   {
-    categorie: "Sols",
-    prestations: [
-      {
-        nom: "Ragréage autolissant préparation comprise",
-        unite: "m²",
-        prixMo220: 6.09,
-        prixMoJeremie150: 4.15,
-        tva: 10,
-        prixJeremieTtc: 4.56,
-        marcheHtMin: 28,
-        marcheHtMax: 35,
-        temps1Pers: "0,22h/m²",
-        heuresUnite: 0.22,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes:
-          "Sur sol intérieur. Épaisseur standard. Hors gros rattrapage. Ponçage, grattage du béton, dépoussiérage et primaire d’accroche. Fournitures incluses.",
-        conditions:
-          "Hors gros rattrapage / hors forte épaisseur / support sain obligatoire",
-      },
-      {
-        nom: "Ragréage autolissant moyen de déco",
-        unite: "m²",
-        prixMo220: 2.8,
-        prixMoJeremie150: 1.91,
-        tva: 10,
-        prixJeremieTtc: 2.1,
-        marcheHtMin: 25,
-        marcheHtMax: 32,
-        temps1Pers: "0,10h/m²",
-        heuresUnite: 0.1,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes:
-          "Sur sol intérieur. Surface plane / faible rattrapage uniquement. Hors fournitures.",
-      },
-      {
-        nom: "Ragréage autolissant important ou retrait colles anciennes",
-        unite: "m²",
-        prixMo220: 3.5,
-        prixMoJeremie150: 2.39,
-        tva: 10,
-        prixJeremieTtc: 2.62,
-        marcheHtMin: 30,
-        marcheHtMax: 42,
-        temps1Pers: "0,13h/m²",
-        heuresUnite: 0.13,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes:
-          "Rattrapage moyen à important sans reprise lourde du support. Hors fournitures.",
-        conditions: "Hors dalle très dégradée",
-      },
-      {
-        nom: "Ragréage autolissant sur dalle trop piquée",
-        unite: "m²",
-        prixMo220: 7.3,
-        prixMoJeremie150: 4.98,
-        tva: 10,
-        prixJeremieTtc: 5.48,
-        marcheHtMin: 35,
-        marcheHtMax: 50,
-        heuresUnite: 0.26,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes:
-          "Meulage ou surfaçage de la dalle, aspiration, primaire spécifique, ragréage fibré forte épaisseur, parfois deux passes, contrôle planéité.",
-        conditions: "Prévoir diagnostic préalable / possibilité ajustement prix",
-      },
-      {
-        nom: "Pose parquet flottant stratifié ou contrecollé pose seule",
-        unite: "m²",
-        prixMo220: 5.6,
-        prixMoJeremie150: 3.82,
-        tva: 10,
-        prixJeremieTtc: 4.2,
-        marcheHtMin: 28,
-        marcheHtMax: 35,
-        temps1Pers: "0,20h/m²",
-        heuresUnite: 0.2,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes:
-          "Support prêt. Hors fourniture, hors ragréage. Prix dégressif au-delà de 30 m².",
-        conditions:
-          "Support prêt / pièces standard / hors découpe complexe / fournitures séparées",
-      },
-      {
-        nom: "Pose parquet flottant petite surface inférieur à 30 m²",
-        unite: "m²",
-        prixMo220: 8.4,
-        prixMoJeremie150: 5.73,
-        tva: 10,
-        prixJeremieTtc: 6.3,
-        marcheHtMin: 32,
-        marcheHtMax: 40,
-        temps1Pers: "0,30h/m²",
-        temps2Pers: "0,18h/m²",
-        heuresUnite: 0.3,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Pose parquet flottant avec minimum d’intervention.",
-        conditions: "Vérifier accès + temps + fournitures séparées / minimum chantier applicable",
-      },
-      {
-        nom: "Pose parquet massif collé",
-        unite: "m²",
-        prixMo220: 15,
-        prixMoJeremie150: 10.23,
-        tva: 10,
-        prixJeremieTtc: 11.25,
-        marcheHtMin: 45,
-        marcheHtMax: 60,
-        heuresUnite: 0.4,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Pose seule. Hors fournitures.",
-        conditions: "Vérifier accès + temps + fournitures séparées",
-      },
-      {
-        nom: "Découpe parquet complexe",
-        unite: "forfait",
-        prixMo220: 50,
-        prixMoJeremie150: 34.09,
-        tva: 10,
-        prixJeremieTtc: 37.49,
-        marcheHtMin: 30,
-        marcheHtMax: 80,
-        rentabilite: "🟢 Rentable agence",
-        notes: "Selon complexité, angles et obstacles.",
-        conditions: "Selon complexité / angles / obstacles",
-      },
-      {
-        nom: "Ponçage complet parquet massif aspiration des poussières 3 passes",
-        unite: "m²",
-        prixMo220: 7,
-        prixMoJeremie150: 4.77,
-        tva: 10,
-        prixJeremieTtc: 5.25,
-        marcheHtMin: 35,
-        marcheHtMax: 55,
-        temps1Pers: "0,25h/m²",
-        heuresUnite: 0.25,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Location machine et abrasifs en supplément.",
-        conditions: "Vérifier accès + temps + fournitures séparées",
-      },
-      {
-        nom: "Application huile fournie par le client",
-        unite: "m²",
-        prixMo220: 2.8,
-        prixMoJeremie150: 1.91,
-        tva: 10,
-        prixJeremieTtc: 2.1,
-        marcheHtMin: 12,
-        marcheHtMax: 18,
-        temps1Pers: "0,10h/m²",
-        heuresUnite: 0.1,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Deux couches, lissage et essuyage. Hors fournitures.",
-        conditions: "Fournitures séparées",
-      },
-      {
-        nom: "Dépose ancien parquet / sol flottant",
-        unite: "m²",
-        prixMo220: 4.87,
-        prixMoJeremie150: 3.32,
-        tva: 10,
-        prixJeremieTtc: 3.65,
-        marcheHtMin: 10,
-        marcheHtMax: 16,
-        temps1Pers: "0,17h/m²",
-        heuresUnite: 0.17,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Inclut dépose, hors évacuation en déchèterie.",
-        conditions: "Vérifier accès + temps + fournitures séparées",
-      },
-      {
-        nom: "Pose sous-couche / pare-vapeur",
-        unite: "m²",
-        prixMo220: 2.43,
-        prixMoJeremie150: 1.66,
-        tva: 10,
-        prixJeremieTtc: 1.83,
-        marcheHtMin: 4,
-        marcheHtMax: 7,
-        heuresUnite: 0.09,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Pose uniquement. Fourniture à part.",
-        conditions: "Fournitures séparées",
-      },
-      {
-        nom: "Pose plinthes bois/PVC/MDF",
-        unite: "ml",
-        prixMo220: 3.5,
-        prixMoJeremie150: 2.39,
-        tva: 10,
-        prixJeremieTtc: 2.62,
-        marcheHtMin: 8,
-        marcheHtMax: 12,
-        temps1Pers: "8ml/h",
-        heuresUnite: 0.13,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Pose seule, hors fourniture. Angles simples.",
-        conditions: "Angles simples uniquement",
-      },
-      {
-        nom: "Pose plinthes carrelage",
-        unite: "ml",
-        prixMo220: 7.3,
-        prixMoJeremie150: 4.98,
-        tva: 10,
-        prixJeremieTtc: 5.48,
-        marcheHtMin: 12,
-        marcheHtMax: 18,
-        heuresUnite: 0.26,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Pose seule, hors fourniture.",
-        conditions: "Hors coupe complexe / angles multiples + fournitures séparées",
-      },
-      {
-        nom: "Pose sol PVC clipsable lames/dalles pose seule",
-        unite: "m²",
-        prixMo220: 7.84,
-        prixMoJeremie150: 5.34,
-        tva: 10,
-        prixJeremieTtc: 5.88,
-        marcheHtMin: 22,
-        marcheHtMax: 24,
-        temps1Pers: "0,28h/m²",
-        temps2Pers: "0,17h/m²",
-        heuresUnite: 0.28,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Support prêt. Hors ragréage.",
-        conditions: "Fournitures séparées",
-      },
-      {
-        nom: "Pose sol PVC collé lames/dalles/rouleau pose seule",
-        unite: "m²",
-        prixMo220: 7.84,
-        prixMoJeremie150: 5.34,
-        tva: 10,
-        prixJeremieTtc: 5.88,
-        marcheHtMin: 32,
-        marcheHtMax: 40,
-        temps1Pers: "0,28h/m²",
-        temps2Pers: "0,17h/m²",
-        heuresUnite: 0.28,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Préparation plus stricte. Hors ragréage.",
-        conditions: "Support prêt obligatoire / hors ragréage + temps + fournitures séparées",
-      },
-      {
-        nom: "Pose moquette pose seule",
-        unite: "m²",
-        prixMo220: 6.09,
-        prixMoJeremie150: 4.15,
-        tva: 10,
-        prixJeremieTtc: 4.56,
-        marcheHtMin: 18,
-        marcheHtMax: 28,
-        heuresUnite: 0.22,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Hors colle et sous-couche.",
-        conditions: "Support prêt obligatoire / hors ragréage + temps + fournitures séparées",
-      },
-      {
-        nom: "Pose lino / balatum pose seule",
-        unite: "m²",
-        prixMo220: 6.09,
-        prixMoJeremie150: 4.15,
-        tva: 10,
-        prixJeremieTtc: 4.56,
-        marcheHtMin: 20,
-        marcheHtMax: 32,
-        heuresUnite: 0.22,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Hors fourniture.",
-        conditions: "Support prêt obligatoire / hors ragréage + temps + fournitures séparées",
-      },
-    ],
-  }, 
-
-  {
-    categorie: "Carrelage",
-    prestations: [
-      {
-        nom: "Pose carrelage sol pose droite standard",
-        unite: "m²",
-        prixMo220: 14,
-        prixMoJeremie150: 9.55,
-        tva: 10,
-        prixJeremieTtc: 10.5,
-        heuresUnite: 0.5,
-        rentabilite: "🟠 À surveiller",
-        conditions: "Support prêt / hors ragréage / hors découpe complexe",
-      },
-      {
-        nom: "Pose carrelage sol pose diagonale",
-        unite: "m²",
-        prixMo220: 18.26,
-        prixMoJeremie150: 12.45,
-        tva: 10,
-        prixJeremieTtc: 13.7,
-        heuresUnite: 0.65,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-        nom: "Pose faïence murale",
-        unite: "m²",
-        prixMo220: 17.04,
-        prixMoJeremie150: 11.62,
-        tva: 10,
-        prixJeremieTtc: 12.78,
-        heuresUnite: 0.61,
-        rentabilite: "🟠 À surveiller",
-        conditions: "Hors SPEC / SEL / étanchéité",
-      },
-      {
-        nom: "Dépose ancien carrelage",
-        unite: "m²",
-        prixMo220: 15.22,
-        prixMoJeremie150: 10.38,
-        tva: 10,
-        prixJeremieTtc: 11.41,
-        heuresUnite: 0.54,
-        rentabilite: "🟠 À surveiller",
-        conditions: "Hors évacuation gravats",
-      },
-      {
-        nom: "Réalisation joints carrelage",
-        unite: "m²",
-        prixMo220: 7.3,
-        prixMoJeremie150: 4.98,
-        tva: 10,
-        prixJeremieTtc: 5.48,
-        heuresUnite: 0.26,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-  nom: "Application étanchéité sous faïence (SPEC)",
-  unite: "m²",
-  prixMo220: 12,
-  prixMoJeremie150: 8.2,
-  heuresUnite: 0.35,
-  rentabilite: "🟠 À surveiller",
-  typeTravaux: "carrelage",
-  conditions: "Support sain et préparé / hors reprises lourdes",
-  detailsPdf: [
-    "Préparation du support (propre, sec et sain)",
-    "Application primaire d’accrochage si nécessaire",
-    "Application produit d’étanchéité type SPEC",
-    "Traitement des angles et points sensibles",
-    "Séchage avant pose faïence",
-  ],
-},
-    ],
-  },
-{
-  categorie: "Peinture",
-  prestations: [
-    {
-      nom: "Protection chantier peinture",
-      unite: "forfait",
-      prixMo220: 45,
-      prixMoJeremie150: 30.68,
-      tva: 10,
-      prixJeremieTtc: 33.74,
-      heuresUnite: 1.5,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Protection des sols et zones sensibles",
-        "Mise en place des bâches et adhésifs",
-        "Protection des menuiseries, prises et interrupteurs",
-        "Retrait des protections en fin d’intervention",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Peinture murs support neuf/lisse",
-      unite: "m²",
-      prixMo220: 5,
-      prixMoJeremie150: 3.4,
-      tva: 10,
-      prixJeremieTtc: 3.74,
-      heuresUnite: 0.2,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Contrôle du support",
-        "Application peinture murs en deux passes si nécessaire",
-        "Finition propre et uniforme",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Peinture murs état moyen",
-      unite: "m²",
-      prixMo220: 6.09,
-      prixMoJeremie150: 4.15,
-      tva: 10,
-      prixJeremieTtc: 4.57,
-      heuresUnite: 0.22,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Préparation légère du support",
-        "Reprises simples avant peinture",
-        "Application peinture murs",
-        "Contrôle finition",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Peinture plafond",
-      unite: "m²",
-      prixMo220: 7,
-      prixMoJeremie150: 4.76,
-      tva: 10,
-      prixJeremieTtc: 5.24,
-      heuresUnite: 0.25,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Préparation simple du plafond",
-        "Application peinture plafond",
-        "Finition uniforme",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Peinture porte / boiseries",
-      unite: "u",
-      prixMo220: 54.78,
-      prixMoJeremie150: 37.35,
-      tva: 10,
-      prixJeremieTtc: 41.09,
-      heuresUnite: 1.96,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Protection autour de la porte ou boiserie",
-        "Égrenage léger du support",
-        "Préparation avant peinture",
-        "Application peinture adaptée",
-        "Finition soignée",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Joint acrylique finition peinture",
-      unite: "ml",
-      prixMo220: 2.75,
-      prixMoJeremie150: 1.87,
-      tva: 0,
-      prixJeremieTtc: 1.87,
-      heuresUnite: 0.08,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Nettoyage de la jonction",
-        "Application joint acrylique",
-        "Lissage du joint",
-        "Préparation pour finition peinture",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Préparation plafond bois (poutres / lames)",
-      unite: "m²",
-      prixMo220: 18,
-      prixMoJeremie150: 12,
-      heuresUnite: 0.6,
-      rentabilite: "🟠",
-      detailsPdf: [
-        "Nettoyage du support bois",
-        "Égrenage des poutres ou lames",
-        "Préparation avant mise en peinture",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Application primaire isolant anti-taches bois",
-      unite: "m²",
-      prixMo220: 14,
-      prixMoJeremie150: 9,
-      heuresUnite: 0.45,
-      rentabilite: "🟠",
-      detailsPdf: [
-        "Application primaire isolant",
-        "Blocage des remontées tanniques",
-        "Traitement des traces visibles",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-      nom: "Peinture plafond bois (2 couches)",
-      unite: "m²",
-      prixMo220: 22,
-      prixMoJeremie150: 15,
-      heuresUnite: 0.7,
-      rentabilite: "🟢",
-      detailsPdf: [
-        "Application peinture adaptée pièce humide si nécessaire",
-        "Application de deux couches",
-        "Finition blanche uniforme",
-      ],
-      typeTravaux: "peinture",
-    },
-    {
-  id: "traitement_fissure_fine",
-  nom: "Traitement fissure fine mur ou plafond",
-  unite: "ml",
-  prixMo220: 8,
-  prixMoJeremie150: 5.45,
-  heuresUnite: 0.25,
-  rentabilite: "🟢 Rentable agence",
-  typeTravaux: "peinture",
-  sapCategorie: "ok",
-  detailsPdf: [
-    "Ouverture légère de la fissure",
-    "Dépoussiérage du support",
-    "Application enduit fibré",
-    "Ponçage et préparation avant finition"
-  ]
-},
-{
-  id: "traitement_fissure_bande",
-  nom: "Traitement fissure avec bande de renfort",
-  unite: "ml",
-  prixMo220: 15,
-  prixMoJeremie150: 10.2,
-  heuresUnite: 0.50,
-  rentabilite: "🟢 Rentable agence",
-  typeTravaux: "peinture",
-  sapCategorie: "ok",
-  detailsPdf: [
-    "Ouverture de la fissure",
-    "Pose bande papier ou fibre",
-    "Application enduit de rebouchage",
-    "Application enduit de finition",
-    "Ponçage et préparation avant peinture"
-  ]
-},
-{
-  id: "traitement_tache_infiltration",
-  nom: "Traitement tache d'infiltration plafond",
-  unite: "m²",
-  prixMo220: 12,
-  prixMoJeremie150: 8.2,
-  heuresUnite: 0.30,
-  rentabilite: "🟢",
-  typeTravaux: "peinture",
-  sapCategorie: "ok",
-  detailsPdf: [
-    "Grattage des parties non adhérentes",
-    "Application bloqueur de taches",
-    "Préparation du support",
-    "Prêt avant mise en peinture"
-  ]
-},
-{
-  id: "reprise_enduit_localisee",
-  nom: "Reprise enduit localisée mur ou plafond",
-  unite: "m²",
-  prixMo220: 18,
-  prixMoJeremie150: 12.25,
-  heuresUnite: 0.60,
-  rentabilite: "🟢 Rentable agence",
-  typeTravaux: "peinture",
-  sapCategorie: "ok",
-  detailsPdf: [
-    "Purge des parties non adhérentes",
-    "Reprise des défauts du support",
-    "Application enduit de rebouchage",
-    "Application enduit de finition",
-    "Ponçage prêt à peindre"
-  ]
-},
-{
-  id: "purge_platre_decolle",
-  nom: "Purge plâtre ou enduit décollé",
-  unite: "m²",
-  prixMo220: 25,
-  prixMoJeremie150: 17,
-  heuresUnite: 0.80,
-  rentabilite: "🟢 Rentable agence",
-  typeTravaux: "peinture",
-  sapCategorie: "ok",
-  detailsPdf: [
-    "Dépose des parties décollées",
-    "Nettoyage du support",
-    "Préparation avant reprise d'enduit",
-    "Mise en sécurité de la zone"
-  ]
-},
-{
-  id: "reprise_angle_ouverture",
-  nom: "Reprise fissure angle de porte ou fenêtre",
-  unite: "u",
-  prixMo220: 35,
-  prixMoJeremie150: 23.8,
-  heuresUnite: 1.20,
-  rentabilite: "🟢 Rentable agence",
-  typeTravaux: "peinture",
-  sapCategorie: "ok",
-  detailsPdf: [
-    "Ouverture des fissures",
-    "Renforcement des angles sensibles",
-    "Pose bande de renfort",
-    "Reprise complète des enduits",
-    "Ponçage prêt à peindre"
-  ]
-},
-    {
-      nom: "Enduit / ratissage complet + ponçage",
-      unite: "m²",
-      prixMo220: 9.33,
-      prixMoJeremie150: 6.36,
-      tva: 10,
-      prixJeremieTtc: 7,
-      heuresUnite: 0.45,
-      rentabilite: "🟢 Rentable agence",
-      detailsPdf: [
-        "Préparation du support",
-        "Application enduit ou ratissage",
-        "Séchage selon support",
-        "Ponçage soigné",
-        "Support prêt pour finition",
-      ],
-      typeTravaux: "peinture",
-    },
-{
-  nom: "Reprise / lissage encadrement fenêtre",
-  unite: "u",
-  prixMo220: 65,
-  prixMoJeremie150: 44,
-  heuresUnite: 2,
-  rentabilite: "🟠 À surveiller",
-  typeTravaux: "peinture",
-  sapCategorie: "non",
-  conditions: "Encadrement accessible / hors reprise structurelle / hors échafaudage",
-  detailsPdf: [
-    "Grattage et préparation des parties maçonnées irrégulières",
-    "Reprise localisée de l’enduit pour améliorer la planéité",
-    "Ponçage et lissage de l’encadrement avant finition",
-    "Nettoyage du support avant mise en peinture",
-  ],
-},
-{
-  nom: "Peinture encadrement fenêtre",
-  unite: "u",
-  prixMo220: 50,
-  prixMoJeremie150: 34,
-  heuresUnite: 1.5,
-  rentabilite: "🟢 Rentable",
-  typeTravaux: "peinture",
-  sapCategorie: "non",
-  conditions: "Support préparé / hors décapage lourd / hors échafaudage",
-  detailsPdf: [
-    "Protection des abords de la fenêtre",
-    "Application d’une impression ou sous-couche si nécessaire",
-    "Mise en peinture de l’encadrement extérieur",
-    "Finition propre des angles et reprises périphériques",
-  ],
-},
-  ],
-},
-                  {
-    categorie: "Déco",
-    prestations: [
-      {
-        nom: "Pose papier peint simple intissé/vinyle pose seule",
-        unite: "m²",
-        prixMo220: 8.52,
-        prixMoJeremie150: 5.81,
-        tva: 10,
-        prixJeremieTtc: 6.39,
-        marcheHtMin: 18,
-        marcheHtMax: 28,
-        heuresUnite: 0.3,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes:
-          "Pose papier peint intissé ou vinyle. Application colle + pose soignée. Découpe et ajustement standard.",
-        conditions:
-          "Mur droit / sans raccord complexe / hors motifs à raccord / hors préparation lourde + fournitures séparées",
-        detailsPdf: [
-          "Préparation simple du support",
-          "Application de la colle",
-          "Pose du papier peint",
-          "Découpes et ajustements standards",
-        ],
-      },
-      {
-        nom: "Dépose papier peint simple intissé/vinyle",
-        unite: "m²",
-        prixMo220: 4.87,
-        prixMoJeremie150: 3.32,
-        tva: 10,
-        prixJeremieTtc: 3.65,
-        marcheHtMin: 14,
-        marcheHtMax: 22,
-        heuresUnite: 0.37,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes:
-          "Dépose papier peint simple. Grattage et nettoyage léger du support.",
-        conditions:
-          "Selon facilité de dépose / hors colle tenace / hors reprise lourde du support + fournitures séparées",
-        detailsPdf: [
-          "Dépose du papier peint existant",
-          "Grattage léger du support",
-          "Nettoyage simple avant reprise",
-        ],
-      },
-    ],
-  },
-
-  {
-    categorie: "Placo",
-    prestations: [
-      {
-        nom: "Pose cloison placo BA13 ossature + plaque",
-        unite: "m²",
-        prixMo220: 33.48,
-        prixMoJeremie150: 22.82,
-        tva: 10,
-        prixJeremieTtc: 25.1,
-        marcheHtMin: 45,
-        marcheHtMax: 70,
-        heuresUnite: 1.2,
-        rentabilite: "🔴 À majorer",
-        action: "Prendre avec conditions",
-        notes:
-          "Pose ossature métallique + plaques BA13. Montage cloison standard. Hors bandes, hors finitions, hors isolation.",
-        conditions:
-          "Hauteur standard / accès simple / hors formes complexes / hors contraintes techniques + fournitures séparées",
-      },
-      {
-        nom: "Doublage placo + isolant murs",
-        unite: "m²",
-        prixMo220: 39.57,
-        prixMoJeremie150: 26.97,
-        tva: 10,
-        prixJeremieTtc: 29.67,
-        marcheHtMin: 55,
-        marcheHtMax: 85,
-        heuresUnite: 1.41,
-        rentabilite: "🔴 À majorer",
-        action: "Prendre avec conditions",
-        notes:
-          "Pose doublage placo avec isolant. Fixation + ajustement standard.",
-        conditions:
-          "Selon isolant / murs réguliers / hors reprises lourdes / hors contraintes spécifiques + fournitures séparées",
-      },
-      {
-        nom: "Bandes + joints placo finition standard",
-        unite: "m²",
-        prixMo220: 12.17,
-        prixMoJeremie150: 8.3,
-        tva: 10,
-        prixJeremieTtc: 9.13,
-        marcheHtMin: 18,
-        marcheHtMax: 28,
-        heuresUnite: 0.43,
-        rentabilite: "🔴 À majorer",
-        action: "Prendre avec conditions",
-        notes:
-          "Réalisation bandes + enduits. Ponçage. Finition standard Q2/Q3.",
-        conditions:
-          "Support correctement posé / hors reprise défauts plaques / hors finition peinture",
-      },
-    ],
-  },
-  {
-    categorie: "Plomberie",
-    prestations: [
-      {
-        nom: "Main d’œuvre plomberie",
-        unite: "h",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        heuresUnite: 1,
-        rentabilite: "🔴 À majorer",
-      },
-      {
-        nom: "Remplacement robinet / mitigeur",
-        unite: "forfait",
-        prixMo220: 100,
-        prixMoJeremie150: 68,
-        tva: 10,
-        prixJeremieTtc: 74.8,
-        heuresUnite: 1,
-        rentabilite: "🔴 À majorer",
-      },
-      {
-        nom: "Remplacement lavabo / vasque",
-        unite: "forfait",
-        prixMo220: 84,
-        prixMoJeremie150: 57.26,
-        tva: 10,
-        prixJeremieTtc: 62.99,
-        heuresUnite: 3,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-        nom: "Remplacement mécanisme WC",
-        unite: "forfait",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        heuresUnite: 1,
-        rentabilite: "🔴 À majorer",
-      },
-      {
-        nom: "Remplacement WC",
-        unite: "forfait",
-        prixMo220: 84,
-        prixMoJeremie150: 57.27,
-        tva: 10,
-        prixJeremieTtc: 63,
-        heuresUnite: 3,
-        rentabilite: "🔴 À majorer",
-      },
-      {
-        nom: "Dépose et repose WC problème fixation",
-        unite: "forfait",
-        prixMo220: 224,
-        prixMoJeremie150: 152.73,
-        tva: 10,
-        prixJeremieTtc: 168,
-        heuresUnite: 8,
-        rentabilite: "🔴 À majorer",
-      },
-{
-  nom: "Démolition baignoire existante",
-  unite: "forfait",
-  prixMo220: 180,
-  prixMoJeremie150: 122,
-  heuresUnite: 6,
-  rentabilite: "🟠",
-  detailsPdf: [
-    "Protection de la zone",
-    "Déconnexion des arrivées d’eau",
-    "Dépose de la baignoire",
-    "Évacuation interne",
-    "Nettoyage sommaire"
-  ],
-  typeTravaux: "plomberie"
-},
-
-{
-  nom: "Pose receveur de douche",
-  unite: "forfait",
-  prixMo220: 220,
-  prixMoJeremie150: 150,
-  heuresUnite: 7,
-  rentabilite: "🟠",
-  detailsPdf: [
-    "Préparation du support",
-    "Mise à niveau",
-    "Pose du receveur",
-    "Raccordement évacuation",
-    "Contrôle étanchéité"
-  ],
-  typeTravaux: "plomberie"
-},
-
-{
-  nom: "Pose paroi de douche",
-  unite: "u",
-  prixMo220: 95,
-  prixMoJeremie150: 65,
-  heuresUnite: 3,
-  rentabilite: "🟢",
-  detailsPdf: [
-    "Mise en place de la paroi",
-    "Fixations murales",
-    "Réglages",
-    "Joint silicone"
-  ],
-  typeTravaux: "plomberie"
-},
-      {
-        nom: "Recherche fuite + réparation simple",
-        unite: "forfait",
-        prixMo220: 56,
-        prixMoJeremie150: 38.18,
-        tva: 10,
-        prixJeremieTtc: 42,
-        heuresUnite: 2,
-        rentabilite: "🔴 À majorer",
-      },
-
-      {
-  nom: "Remplacement bonde d'évier complète",
-  unite: "forfait",
-  prixMo220: 55,
-  prixMoJeremie150: 37.50,
-  tva: 10,
-  prixJeremieTtc: 41.25,
-  marcheHtMin: 55,
-  marcheHtMax: 85,
-  temps1Pers: "1h",
-  temps2Pers: "0h45",
-  heuresUnite: 1,
-  rentabilite: "🟢 Bonne",
-  action: "Identifier le type de bonde avant intervention",
-  notes:
-    "Dépose de l'ancienne bonde suite à une fuite. Nettoyage des portées d'étanchéité. Fourniture et pose d'une bonde complète neuve avec joints. Raccordement, remise en eau et contrôle de l'étanchéité.",
-  conditions:
-    "Hors remplacement de siphon, hors modification de plomberie, hors remplacement d'évier. Fourniture de la bonde facturée séparément si nécessaire.",
-  detailsPdf: [
-    "Dépose de l'ancienne bonde défectueuse",
-    "Nettoyage des surfaces d'appui",
-    "Pose de la bonde complète avec joints neufs",
-    "Raccordement de l'évacuation",
-    "Remise en eau",
-    "Contrôle de l'étanchéité et essais",
-  ],
-},
-    ],
-  },
-
-  {
-    categorie: "Électricité",
-    prestations: [
-      {
-        nom: "Main d’œuvre électricité",
-        unite: "h",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        heuresUnite: 1,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Remplacement prise / interrupteur",
-        unite: "u",
-        prixMo220: 14,
-        prixMoJeremie150: 9.55,
-        tva: 10,
-        prixJeremieTtc: 10.5,
-        heuresUnite: 0.5,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Pose luminaire simple",
-        unite: "u",
-        prixMo220: 42.61,
-        prixMoJeremie150: 29.05,
-        tva: 10,
-        prixJeremieTtc: 31.96,
-        heuresUnite: 1.52,
-        rentabilite: "🟢 Rentable agence",
-      },
-    ],
-  },
-  {
-    categorie: "Chauffage",
-    prestations: [
-      {
-        nom: "Remplacement radiateur électrique standard",
-        unite: "forfait",
-        prixMo220: 42,
-        prixMoJeremie150: 28.63,
-        tva: 10,
-        prixJeremieTtc: 31.49,
-        marcheHtMin: 180,
-        marcheHtMax: 280,
-        temps1Pers: "1h30",
-        temps2Pers: "1h",
-        heuresUnite: 1.5,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes:
-          "Dépose ancien radiateur. Pose nouveau radiateur électrique. Fixation et raccordement. Test fonctionnement. Hors fournitures.",
-        conditions:
-          "Installation existante conforme / hors modification ligne électrique / hors reprise support mur + fournitures séparées",
-        detailsPdf: [
-          "Dépose de l’ancien radiateur",
-          "Pose du nouveau radiateur électrique",
-          "Fixation et raccordement sur installation existante",
-          "Test de fonctionnement",
-        ],
-      },
-      {
-        nom: "Remplacement radiateur électrique inertie",
-        unite: "forfait",
-        prixMo220: 56,
-        prixMoJeremie150: 38.18,
-        tva: 10,
-        prixJeremieTtc: 41.99,
-        marcheHtMin: 220,
-        marcheHtMax: 340,
-        temps1Pers: "2h",
-        temps2Pers: "1h15",
-        heuresUnite: 2,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes:
-          "Dépose ancien radiateur. Pose radiateur inertie. Fixation renforcée. Raccordement et test. Hors fourniture.",
-        conditions:
-          "Support adapté / hors renfort mur / hors modification électrique / hors ligne dédiée + fournitures séparées",
-        detailsPdf: [
-          "Dépose de l’ancien radiateur",
-          "Pose du radiateur à inertie",
-          "Fixation renforcée si nécessaire",
-          "Raccordement et test de fonctionnement",
-        ],
-      },
-    ],
-  },
-  {
-    categorie: "Ventilation",
-    prestations: [
-      {
-        nom: "Remplacement VMC simple flux groupe seul",
-        unite: "forfait",
-        prixMo220: 70,
-        prixMoJeremie150: 47.73,
-        tva: 10,
-        prixJeremieTtc: 52.5,
-        heuresUnite: 2.5,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-        nom: "Remplacement VMC complète",
-        unite: "forfait",
-        prixMo220: 517.39,
-        prixMoJeremie150: 352.77,
-        tva: 10,
-        prixJeremieTtc: 388.04,
-        heuresUnite: 18.48,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-        nom: "Remplacement bouche VMC",
-        unite: "u",
-        prixMo220: 14,
-        prixMoJeremie150: 9.55,
-        tva: 10,
-        prixJeremieTtc: 10.5,
-        heuresUnite: 0.5,
-        rentabilite: "🟠 À surveiller",
-      },
-     {
-  id: "ouverture_caisson_entree_air_hygro",
-  nom: "Ouverture sur caisson avec pose d'entrée d'air hygroréglable",
-  unite: "u",
-  prixMo220: 35,
-  prixMoJeremie150: 24,
-
-  tva: 10,
-  prixJeremieTtc: 26.4,
-
-  heuresUnite: 1,
-  rentabilite: "🟢 Rentable",
-
-  typeTravaux: "ventilation",
-  sapCategorie: "non",
-
-  detailsPdf: [
-    "Repérage de l'emplacement",
-    "Ouverture du caisson ou menuiserie",
-    "Préparation du support",
-    "Pose de l'entrée d'air hygroréglable",
-    "Fixation et contrôle du bon fonctionnement",
-    "Nettoyage de la zone d'intervention"
-  ]
-},
-  ],
-  },
-  {
-    categorie: "Bricolage",
-    prestations: [
-      {
-        nom: "Montage meuble simple",
-        unite: "u",
-        prixMo220: 21,
-        prixMoJeremie150: 14.32,
-        tva: 10,
-        prixJeremieTtc: 15.75,
-        heuresUnite: 0.75,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Montage cuisine en kit",
-        unite: "forfait",
-        prixMo220: 448,
-        prixMoJeremie150: 305.45,
-        tva: 10,
-        prixJeremieTtc: 336,
-        heuresUnite: 16,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-        nom: "Pose crédence",
-        unite: "ml",
-        prixMo220: 35,
-        prixMoJeremie150: 23.86,
-        tva: 10,
-        prixJeremieTtc: 26.25,
-        heuresUnite: 1.5,
-        rentabilite: "🟠 À surveiller",
-      },
-      {
-        nom: "Pose plan de travail",
-        unite: "ml",
-        prixMo220: 80,
-        prixMoJeremie150: 54.54,
-        tva: 10,
-        prixJeremieTtc: 59.99,
-        heuresUnite: 2.8,
-        rentabilite: "🔴 À cadrer",
-      },
-      {
-        nom: "Découpe plan de travail évier/plaque",
-        unite: "u",
-        prixMo220: 40,
-        prixMoJeremie150: 27.27,
-        tva: 10,
-        prixJeremieTtc: 29.99,
-        heuresUnite: 1.2,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Pose évier",
-        unite: "u",
-        prixMo220: 65,
-        prixMoJeremie150: 44.31,
-        tva: 10,
-        prixJeremieTtc: 48.74,
-        heuresUnite: 1.75,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Pose tringle / store / étagère",
-        unite: "u",
-        prixMo220: 35,
-        prixMoJeremie150: 23.86,
-        tva: 10,
-        prixJeremieTtc: 26.25,
-        heuresUnite: 1.25,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-  nom: "Pose tringle à rideaux fixation plafond",
-  unite: "forfait",
-  prixMo220: 55,
-  prixMoJeremie150: 37.50,
-  tva: 10,
-  prixJeremieTtc: 41.25,
-  marcheHtMin: 55,
-  marcheHtMax: 85,
-  temps1Pers: "1h",
-  temps2Pers: "0h45",
-  heuresUnite: 1,
-  rentabilite: "🟢 Bonne",
-  action: "Vérifier la nature du plafond et les points de fixation avant intervention",
-  notes:
-    "Traçage des repères. Perçage du plafond. Pose des chevilles adaptées et des supports. Installation de la tringle, réglage de l'alignement et contrôle de la solidité. Hors fourniture de la tringle et des fixations spécifiques.",
-  conditions:
-    "Hors fourniture de la tringle, des embouts, des anneaux et des fixations spécifiques. Hors renfort de plafond, reprise de support, travail en grande hauteur ou adaptation particulière.",
-  detailsPdf: [
-    "Traçage de l'emplacement",
-    "Perçage du plafond",
-    "Pose des chevilles adaptées",
-    "Fixation des supports",
-    "Installation de la tringle",
-    "Réglage de l'alignement",
-    "Contrôle de la solidité",
-    "Nettoyage de la zone d'intervention",
-  ],
-},
-      {
-        nom: "Fixation étagère / tableau",
-        unite: "forfait",
-        prixMo220: 30.43,
-        prixMoJeremie150: 20.75,
-        tva: 10,
-        prixJeremieTtc: 22.83,
-        heuresUnite: 1.09,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Rabotage de porte",
-        unite: "u",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        heuresUnite: 1,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-  nom: "Réglage porte coulissante",
-  unite: "u",
-  prixMo220: 60,
-  prixMoJeremie150: 40,
-  heuresUnite: 0.7,
-  rentabilite: "🟢 Rentable",
-  typeTravaux: "bricolage",
-  conditions: "Système existant fonctionnel",
-  detailsPdf: [
-    "Réglage du rail et des galets",
-    "Alignement de la porte",
-    "Test de fonctionnement",
-  ],
-},
-      {
-        nom: "Petite assistance bricolage",
-        unite: "h",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        heuresUnite: 1,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Silicone sanitaire",
-        unite: "u",
-        prixMo220: 25.87,
-        prixMoJeremie150: 17.64,
-        tva: 10,
-        prixJeremieTtc: 19.4,
-        heuresUnite: 0.92,
-        rentabilite: "🟢 Rentable agence",
-      },
-        ],
-},
-{
-  categorie: "Équipement",
-  prestations: [
-    {
-      nom: "Pose électroménager",
-      unite: "forfait",
-      prixMo220: 28,
-      prixMoJeremie150: 19.09,
-      tva: 10,
-      prixJeremieTtc: 21,
-      marcheHtMin: 60,
-      marcheHtMax: 140,
-      temps1Pers: "1h",
-      temps2Pers: "0,6h",
-      heuresUnite: 1,
-      rentabilite: "🟢 Rentable agence",
-      action: "Acceptable au tarif bas",
-      notes:
-        "Mise en place électroménager (LL, LV, four). Raccordement standard eau et électricité. Test fonctionnement.",
-      conditions:
-        "Emplacement prêt / arrivées conformes / hors modification plomberie ou électricité / hors adaptation meuble",
-      detailsPdf: [
-        "Mise en place de l’électroménager prévu",
-        "Raccordement standard eau et/ou électricité si prévu",
-        "Test de fonctionnement",
-      ],
-      typeTravaux: "bricolage",
-    },
-
-    {
-      nom: "Dépose ancienne moustiquaire",
-      unite: "unité",
-      prixMo220: 28,
-      prixMoJeremie150: 19.09,
-      tva: 10,
-      prixJeremieTtc: 21,
-      marcheHtMin: 18,
-      marcheHtMax: 30,
-      temps1Pers: "0h20",
-      temps2Pers: "0h10",
-      heuresUnite: 0.33,
-      rentabilite: "🟢 Bonne",
-      action: "Vérifier l'état du support avant repose",
-      notes:
-        "Dépose de la moustiquaire existante, retrait des anciennes fixations si nécessaire et nettoyage sommaire du support.",
-      conditions:
-        "Support en bon état. Rebouchage ou réparation non compris.",
-      detailsPdf: [
-        "Dépose de l'ancienne moustiquaire",
-        "Retrait des anciennes fixations si nécessaire",
-        "Nettoyage sommaire du support avant repose",
-      ],
-      typeTravaux: "bricolage",
-    },
-
-    {
-      nom: "Pose moustiquaire standard",
-      unite: "unité",
-      prixMo220: 45,
-      prixMoJeremie150: 30.68,
-      tva: 10,
-      prixJeremieTtc: 33.75,
-      marcheHtMin: 45,
-      marcheHtMax: 70,
-      temps1Pers: "0h45",
-      temps2Pers: "0h25",
-      heuresUnite: 0.75,
-      rentabilite: "🟢 Bonne",
-      action: "Contrôler les dimensions avant fixation",
-      notes:
-        "Pose d'une moustiquaire sur fenêtre avec mise à niveau, réglages et contrôle du bon fonctionnement.",
-      conditions:
-        "Moustiquaire fournie par le client ou facturée séparément. Adaptation importante du support non comprise.",
-      detailsPdf: [
-        "Pose complète de la moustiquaire",
-        "Réglages",
-        "Vérification du bon fonctionnement",
-      ],
-      typeTravaux: "bricolage",
-    },
-
-    {
-      nom: "Pose moustiquaire grande dimension avec accès échelle",
-      unite: "unité",
-      prixMo220: 150,
-      prixMoJeremie150: 102.27,
-      tva: 10,
-      prixJeremieTtc: 112.5,
-      marcheHtMin: 90,
-      marcheHtMax: 180,
-      temps1Pers: "3h30",
-      temps2Pers: "1h50",
-      heuresUnite: 3.5,
-      rentabilite: "🟠 À surveiller",
-      action: "Sécuriser l'accès avant intervention",
-      notes:
-        "Pose d'une moustiquaire grande dimension avec accès difficile par échelle, fenêtre ne s'ouvrant pas entièrement, travail en hauteur au 2e étage.",
-      conditions:
-        "Intervention sous réserve d'un accès sécurisé et d'un sol stable pour l'échelle. Si accès dangereux, prévoir nacelle ou refus d'intervention.",
-      detailsPdf: [
-        "Pose moustiquaire grande dimension",
-        "Travail en hauteur avec accès échelle",
-        "Réglages",
-        "Contrôle de bonne tenue",
-      ],
-      typeTravaux: "bricolage",
-    },
-{
-  id: "pose_rampe_escalier_2m",
-  nom: "Pose rampe d'escalier jusqu'à 2 m",
-  unite: "forfait",
-  prixMo220: 95,
-  prixMoJeremie150: 64.77,
-  tva: 10,
-  prixJeremieTtc: 71.25,
-  marcheHtMin: 95,
-  marcheHtMax: 145,
-  temps1Pers: "1h15",
-  temps2Pers: "0h45",
-  heuresUnite: 1.25,
-  rentabilite: "🟢 Bonne",
-  action:
-    "Contrôler la nature du support et valider la hauteur avant perçage",
-  notes:
-    "Pose d'une rampe d'escalier d'une longueur maximale d'environ 2 m. Comprend la protection de la zone, le traçage, le perçage, le chevillage, la fixation, la mise à niveau et le contrôle de la solidité.",
-  conditions:
-    "Rampe fournie par le client ou facturée séparément. Support sain et suffisamment résistant. Hors renfort de cloison, reprise du support, modification de la rampe, déplacement de réseaux ou travail en grande hauteur.",
-  detailsPdf: [
-    "Protection de la zone d'intervention",
-    "Validation de la hauteur et de l'emplacement",
-    "Contrôle de la nature du support",
-    "Repérage des réseaux éventuels",
-    "Traçage des points de fixation",
-    "Perçage avec l'outillage adapté",
-    "Pose des chevilles adaptées au support",
-    "Fixation de la rampe d'escalier",
-    "Contrôle du niveau et de l'alignement",
-    "Contrôle du serrage et de la solidité",
-    "Nettoyage de la zone d'intervention",
-  ],
-  typeTravaux: "bricolage",
-  sapCategorie: "ok",
-},
-
-{
-  id: "pose_barre_appui_douche",
-  nom: "Pose barre d'appui de douche sur carrelage",
-  unite: "forfait",
-  prixMo220: 55,
-  prixMoJeremie150: 37.5,
-  tva: 10,
-  prixJeremieTtc: 41.25,
-  marcheHtMin: 55,
-  marcheHtMax: 85,
-  temps1Pers: "0h45",
-  temps2Pers: "0h30",
-  heuresUnite: 0.75,
-  rentabilite: "🟢 Bonne",
-  action:
-    "Valider la hauteur avec le client et percer le carrelage sans percussion",
-  notes:
-    "Pose d'une barre d'appui dans une douche sur carrelage ou faïence. Comprend le traçage, le perçage du carrelage et du support, le chevillage, la fixation, l'étanchéité simple autour des platines si nécessaire et le contrôle de la solidité.",
-  conditions:
-    "Barre fournie par le client ou facturée séparément. Support sain et résistant derrière le carrelage. Hors renfort de cloison creuse, reprise de carrelage, reprise d'étanchéité ou modification de plomberie.",
-  detailsPdf: [
-    "Protection de la zone de douche",
-    "Validation de la hauteur et de l'emplacement",
-    "Contrôle du support derrière le carrelage",
-    "Repérage des réseaux éventuels",
-    "Traçage des points de fixation",
-    "Perçage du carrelage sans percussion",
-    "Perçage du support",
-    "Pose des chevilles adaptées",
-    "Fixation de la barre d'appui",
-    "Réalisation d'une étanchéité simple autour des platines si nécessaire",
-    "Contrôle du serrage et de la solidité",
-    "Nettoyage de la zone d'intervention",
-  ],
-  typeTravaux: "bricolage",
-  sapCategorie: "ok",
-},
-
-{
-  id: "pose_barre_appui_wc",
-  nom: "Pose barre d'appui WC sur carrelage",
-  unite: "forfait",
-  prixMo220: 55,
-  prixMoJeremie150: 37.5,
-  tva: 10,
-  prixJeremieTtc: 41.25,
-  marcheHtMin: 55,
-  marcheHtMax: 85,
-  temps1Pers: "0h45",
-  temps2Pers: "0h30",
-  heuresUnite: 0.75,
-  rentabilite: "🟢 Bonne",
-  action:
-    "Valider la position par rapport au WC avant le perçage",
-  notes:
-    "Pose d'une barre d'appui à proximité des toilettes sur carrelage, faïence ou support mural courant. Comprend le traçage, le perçage, le chevillage, la fixation et le contrôle de la solidité.",
-  conditions:
-    "Barre fournie par le client ou facturée séparément. Support sain et suffisamment résistant. Hors renfort de cloison creuse, reprise du carrelage, déplacement du WC ou adaptation particulière.",
-  detailsPdf: [
-    "Protection de la zone d'intervention",
-    "Validation de la hauteur et de la position par rapport au WC",
-    "Contrôle de la nature du support",
-    "Repérage des réseaux éventuels",
-    "Traçage des points de fixation",
-    "Perçage du carrelage sans percussion si nécessaire",
-    "Perçage du support",
-    "Pose des chevilles adaptées",
-    "Fixation de la barre d'appui",
-    "Contrôle du serrage et de la solidité",
-    "Nettoyage de la zone d'intervention",
-  ],
-  typeTravaux: "bricolage",
-  sapCategorie: "ok",
-},
-    {
-      id: "pose_equipements_appui_rampe_barres",
-      nom:
-        "Pose d'équipements d'appui - rampe d'escalier et 2 barres d'appui",
-      unite: "forfait",
-      prixMo220: 205,
-      prixMoJeremie150: 139.77,
-      tva: 10,
-      prixJeremieTtc: 153.75,
-      marcheHtMin: 205,
-      marcheHtMax: 295,
-      temps1Pers: "3h",
-      temps2Pers: "1h45",
-      heuresUnite: 3,
-      rentabilite: "🟢 Bonne",
-      action:
-        "Valider les emplacements et contrôler la nature des supports avant perçage",
-      notes:
-        "Pose groupée d'une rampe d'escalier d'environ 2 m, d'une barre d'appui dans la douche et d'une barre d'appui à proximité des toilettes. Comprend la protection des zones, le traçage, le perçage du carrelage et des supports, le chevillage, la fixation, les réglages et le contrôle de la solidité.",
-      conditions:
-        "Équipements fournis par le client ou facturés séparément. Supports sains et suffisamment résistants. Hors renfort dans cloison creuse, reprise du carrelage, modification structurelle, déplacement de réseaux ou adaptation particulière. Les fixations spécifiques peuvent être facturées séparément selon la nature des supports.",
-      detailsPdf: [
-        "Protection des zones d'intervention",
-        "Validation des hauteurs et emplacements avec le client",
-        "Contrôle de la nature des supports",
-        "Repérage des réseaux éventuels",
-        "Traçage des implantations",
-        "Perçage du carrelage sans percussion",
-        "Perçage des supports avec l'outillage adapté",
-        "Chevillage et fixation de la rampe d'escalier",
-        "Fixation de la barre d'appui de douche",
-        "Fixation de la barre d'appui des toilettes",
-        "Réglage des niveaux et alignements",
-        "Contrôle du serrage et de la solidité",
-        "Nettoyage des zones d'intervention",
-      ],
-      typeTravaux: "bricolage",
-      sapCategorie: "ok",
-    },
-  ],
-},
-  {
-  categorie: "Extérieur / Métal / Divers",
-  prestations: [
-    {
-  nom: "Peinture portail / portillon / garde-corps",
-  unite: "m²",
-  prixMo220: 35,
-  prixMoJeremie150: 25,
-  heuresUnite: 0.6,
-  rentabilite: "🟢 Rentable",
-  typeTravaux: "peinture",
-  conditions: "Support sain, hors corrosion lourde",
-  detailsPdf: [
-    "Décapage / grattage si nécessaire",
-    "Application primaire et peinture",
-    "Finition soignée",
-  ],
-},
-     {
-  nom: "Reprise soudure métal",
-  unite: "u",
-  prixMo220: 45,
-  prixMoJeremie150: 30,
-  heuresUnite: 0.5,
-  rentabilite: "🟢 Rentable",
-  typeTravaux: "bricolage",
-  conditions: "Accès simple",
-  detailsPdf: [
-    "Reprise des points de soudure",
-    "Renforcement simple si nécessaire",
-    "Nettoyage de la zone d’intervention",
-  ],
-},
-    ],
-  },
-
-{
-  categorie: "Structure / Bois",
-  prestations: [
-    {
-      nom: "Structure mezzanine poutres",
-      unite: "u",
-      prixMo220: 60,
-      prixMoJeremie150: 40.9,
-      heuresUnite: 2,
-      rentabilite: "🟠",
-      detailsPdf: [
-        "Préparation des réservations dans mur",
-        "Découpe et ajustement poutre",
-        "Mise en place et scellement",
-        "Contrôle niveau et alignement",
-      ],
-      typeTravaux: "menuiserie",
-    },
-
-    {
-      nom: "Réalisation garde corps bois",
-      unite: "ml",
-      prixMo220: 85,
-      prixMoJeremie150: 58,
-      heuresUnite: 3,
-      rentabilite: "🟠",
-      detailsPdf: [
-        "Prise de mesures",
-        "Fabrication sur place",
-        "Fixation structure",
-        "Finitions",
-      ],
-      typeTravaux: "menuiserie",
-    },
-
-    {
-      nom: "Fabrication et pose portillon bois",
-      unite: "u",
-      prixMo220: 180,
-      prixMoJeremie150: 122,
-      heuresUnite: 6,
-      rentabilite: "🟢",
-      detailsPdf: [
-        "Fabrication portillon",
-        "Pose des gonds",
-        "Réglages ouverture",
-        "Finitions",
-      ],
-      typeTravaux: "menuiserie",
-    },
-
-    {
-      nom: "Pose liteaux / contre-liteaux bardage",
-      unite: "ml",
-      prixMo220: 3.5,
-      prixMoJeremie150: 2.39,
-      tva: 10,
-      prixJeremieTtc: 2.63,
-      marcheHtMin: 4,
-      marcheHtMax: 8,
-      temps1Pers: "12 à 15 ml/h",
-      temps2Pers: "18 à 22 ml/h",
-      heuresUnite: 0.08,
-      rentabilite: "🟢 Rentable",
-      action: "Contrôler aplomb et ventilation avant pose",
-      notes:
-        "Pose de liteaux ou contre-liteaux sur support existant pour création d'une ossature secondaire avant isolation ou bardage.",
-      conditions:
-        "Support sain / hors reprise structurelle / hors défaut important d'aplomb / fournitures séparées",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Traçage de l'implantation des liteaux",
-        "Contrôle de l'aplomb du support existant",
-        "Découpe des liteaux",
-        "Fixation mécanique adaptée au support",
-        "Contrôle de l'alignement et de la lame d'air",
-      ],
-    },
-
-    {
-      nom: "Pose isolation extérieure fibre de bois",
-      unite: "m²",
-      prixMo220: 14,
-      prixMoJeremie150: 9.55,
-      tva: 10,
-      prixJeremieTtc: 10.5,
-      marcheHtMin: 18,
-      marcheHtMax: 35,
-      temps1Pers: "0,50h/m²",
-      temps2Pers: "0,30h/m²",
-      heuresUnite: 0.5,
-      rentabilite: "🟠 À surveiller",
-      action: "Vérifier épaisseur, fixation et compatibilité support",
-      notes:
-        "Pose de panneaux isolants fibre de bois en façade, découpes autour des ouvertures comprises en finition standard.",
-      conditions:
-        "Hors fourniture isolant / hors traitement humidité / hors reprise support / hors étude thermique",
-      sapCategorie: "non",
-      typeTravaux: "isolation",
-      detailsPdf: [
-        "Contrôle du support existant",
-        "Découpe des panneaux fibre de bois",
-        "Pose des panneaux isolants",
-        "Ajustement autour des ouvertures",
-        "Contrôle de la continuité de l'isolation",
-      ],
-    },
-
-    {
-      nom: "Pose écran pare-pluie façade",
-      unite: "m²",
-      prixMo220: 5.6,
-      prixMoJeremie150: 3.82,
-      tva: 10,
-      prixJeremieTtc: 4.2,
-      marcheHtMin: 8,
-      marcheHtMax: 14,
-      temps1Pers: "0,20h/m²",
-      temps2Pers: "0,12h/m²",
-      heuresUnite: 0.2,
-      rentabilite: "🟢 Rentable",
-      action: "Soigner recouvrements et adhésifs",
-      notes:
-        "Pose d'un écran pare-pluie avant bardage avec recouvrements et agrafage ou fixation adaptée.",
-      conditions:
-        "Hors fourniture pare-pluie / hors traitement étanchéité complexe / support prêt",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Déroulage de l'écran pare-pluie",
-        "Pose avec recouvrement adapté",
-        "Fixation provisoire ou définitive",
-        "Traitement des jonctions",
-        "Contrôle de la continuité avant bardage",
-      ],
-    },
-
-    {
-      nom: "Pose bardage bois extérieur",
-      unite: "m²",
-      prixMo220: 28,
-      prixMoJeremie150: 19.09,
-      tva: 10,
-      prixJeremieTtc: 21,
-      marcheHtMin: 35,
-      marcheHtMax: 65,
-      temps1Pers: "0,90h/m²",
-      temps2Pers: "0,55h/m²",
-      heuresUnite: 0.9,
-      rentabilite: "🟢 Rentable",
-      action: "Prévoir vis inox, ventilation et coupes propres",
-      notes:
-        "Pose de bardage bois extérieur sur ossature prête. Comprend calepinage, découpes courantes, fixation et alignement.",
-      conditions:
-        "Ossature prête / hors fourniture bardage / hors finition peinture ou saturateur / hors échafaudage",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Calepinage du bardage",
-        "Découpe des lames",
-        "Pose et fixation des lames de bardage",
-        "Contrôle des alignements",
-        "Respect des jeux de dilatation",
-        "Contrôle de la ventilation derrière bardage",
-      ],
-    },
-
-    {
-      nom: "Découpes bardage autour fenêtre ou porte",
-      unite: "u",
-      prixMo220: 55,
-      prixMoJeremie150: 37.5,
-      tva: 10,
-      prixJeremieTtc: 41.25,
-      marcheHtMin: 45,
-      marcheHtMax: 90,
-      temps1Pers: "2h",
-      temps2Pers: "1h15",
-      heuresUnite: 2,
-      rentabilite: "🟢 Rentable",
-      action: "Mesurer précisément avant coupe",
-      notes:
-        "Découpes spécifiques du bardage autour d'une fenêtre ou d'une porte avec ajustements et finition propre.",
-      conditions:
-        "Hors habillage complet des tableaux / hors reprise menuiserie / hors étanchéité complexe",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Prise de mesures précises autour de l'ouverture",
-        "Traçage des découpes",
-        "Découpe des lames de bardage",
-        "Ajustement autour de la menuiserie",
-        "Contrôle esthétique de la finition",
-      ],
-    },
-
-    {
-      nom: "Pose baguettes d'angle / profils finition bardage",
-      unite: "ml",
-      prixMo220: 8,
-      prixMoJeremie150: 5.45,
-      tva: 10,
-      prixJeremieTtc: 6,
-      marcheHtMin: 10,
-      marcheHtMax: 18,
-      temps1Pers: "0,28h/ml",
-      temps2Pers: "0,18h/ml",
-      heuresUnite: 0.28,
-      rentabilite: "🟢 Rentable",
-      action: "Soigner les coupes d'onglet et jonctions",
-      notes:
-        "Pose de baguettes d'angle, couvre-joints ou profils de finition pour bardage extérieur.",
-      conditions:
-        "Hors fourniture profils / hors profils spéciaux aluminium complexes",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Prise de mesure des profils",
-        "Découpe des baguettes ou profils",
-        "Pose et fixation",
-        "Traitement des angles",
-        "Contrôle visuel des finitions",
-      ],
-    },
-
-    {
-      nom: "Pose appui de fenêtre en tôle pliée",
-      unite: "u",
-      prixMo220: 70,
-      prixMoJeremie150: 47.75,
-      tva: 10,
-      prixJeremieTtc: 52.53,
-      marcheHtMin: 70,
-      marcheHtMax: 130,
-      temps1Pers: "2h30",
-      temps2Pers: "1h30",
-      heuresUnite: 2.5,
-      rentabilite: "🟢 Rentable",
-      action: "Vérifier pente, débord et étanchéité",
-      notes:
-        "Pose d'un appui de fenêtre ou bavette en tôle pliée fournie, avec fixation et traitement simple des jonctions.",
-      conditions:
-        "Tôle fournie aux bonnes dimensions / hors pliage sur place / hors reprise maçonnerie / hors étanchéité lourde",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Présentation de l'appui de fenêtre",
-        "Contrôle des dimensions et de la pente",
-        "Fixation de la tôle pliée",
-        "Traitement simple des jonctions",
-        "Contrôle de l'écoulement de l'eau",
-      ],
-    },
-
-    {
-      nom: "Forfait finitions bardage et nettoyage",
-      unite: "forfait",
-      prixMo220: 120,
-      prixMoJeremie150: 82,
-      tva: 10,
-      prixJeremieTtc: 90.2,
-      marcheHtMin: 120,
-      marcheHtMax: 250,
-      temps1Pers: "4h",
-      temps2Pers: "2h30",
-      heuresUnite: 4,
-      rentabilite: "🟢 Rentable",
-      action: "Prévoir contrôle complet avant réception",
-      notes:
-        "Finitions générales du bardage, contrôles, reprises mineures, nettoyage de la zone et réception chantier.",
-      conditions:
-        "Hors reprise importante / hors fourniture complémentaire / hors évacuation déchets volumineux",
-      sapCategorie: "non",
-      typeTravaux: "menuiserie",
-      detailsPdf: [
-        "Contrôle général du bardage",
-        "Vérification des fixations visibles",
-        "Reprises mineures si nécessaire",
-        "Nettoyage de la zone d'intervention",
-        "Photos de fin de chantier",
-      ],
-    },
-  ],
-},
-  {
-    categorie: "Toiture",
-    prestations: [
-      {
-        nom: "Recherche fuite toiture",
-        unite: "forfait",
-        prixMo220: 56,
-        prixMoJeremie150: 38.18,
-        tva: 10,
-        prixJeremieTtc: 42,
-        heuresUnite: 2,
-        rentabilite: "🔴 À majorer",
-      },
-      {
-        nom: "Remplacement tuile",
-        unite: "u",
-        prixMo220: 7,
-        prixMoJeremie150: 4.77,
-        tva: 10,
-        prixJeremieTtc: 5.25,
-        heuresUnite: 0.25,
-        rentabilite: "🔴 À majorer",
-      },
-      {
-        nom: "Lambris bois / PVC sous toiture",
-        unite: "m²",
-        prixMo220: 11.2,
-        prixMoJeremie150: 7.64,
-        tva: 10,
-        prixJeremieTtc: 8.4,
-        heuresUnite: 0.4,
-        rentabilite: "🟠 À surveiller",
-      },  
-     {
-  nom: "Dépose / repose toiture bac acier",
-  unite: "m²",
-  prixMo220: 55,
-  prixMoJeremie150: 40,
-  heuresUnite: 0.8,
-  rentabilite: "🟠 À surveiller",
-  typeTravaux: "toiture",
-  conditions: "Hors charpente / hors étanchéité lourde",
-  detailsPdf: [
-    "Dépose de l’ancienne couverture si prévue",
-    "Repose ou pose des plaques bac acier",
-    "Fixations et ajustements simples",
-  ],
-},
-     {
-  nom: "Pose rives et faîtage",
-  unite: "ml",
-  prixMo220: 18,
-  prixMoJeremie150: 12,
-  heuresUnite: 0.3,
-  rentabilite: "🟢 Rentable",
-  typeTravaux: "toiture",
-  conditions: "Accès toiture sécurisé",
-  detailsPdf: [
-    "Pose des éléments de finition",
-    "Fixation et alignement",
-    "Traitement simple des jonctions",
-  ],
-},
-     ],
-  },
-   {
-    categorie: "Jardin",
-    prestations: [
-      {
-        nom: "Tonte pelouse surface hors ramassage",
-        unite: "m²",
-        prixMo220: 0.28,
-        prixMoJeremie150: 0.19,
-        tva: 10,
-        prixJeremieTtc: 0.21,
-        marcheHtMin: 0.35,
-        marcheHtMax: 0.55,
-        temps1Pers: "0,01h/m²",
-        temps2Pers: "0,006h/m²",
-        heuresUnite: 0.01,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Terrain dégagé / herbe normale / hors terrain en pente.",
-        conditions: "Selon terrain / densité végétation",
-      },
-      {
-        nom: "Tonte pelouse surface avec ramassage",
-        unite: "m²",
-        prixMo220: 0.46,
-        prixMoJeremie150: 0.31,
-        tva: 10,
-        prixJeremieTtc: 0.34,
-        marcheHtMin: 0.55,
-        marcheHtMax: 0.85,
-        heuresUnite: 0.02,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Inclut ramassage basique. Évacuation possible en option.",
-        conditions: "Selon terrain / densité végétation",
-      },
-      {
-        nom: "Tonte pelouse tarif horaire",
-        unite: "h",
-        prixMo220: 28,
-        prixMoJeremie150: 19.09,
-        tva: 10,
-        prixJeremieTtc: 21,
-        marcheHtMin: 25,
-        marcheHtMax: 35,
-        heuresUnite: 1,
-        rentabilite: "🟢 Rentable agence",
-        action: "Acceptable au tarif bas",
-        notes: "Minimum 1h / déplacement en supplément.",
-        conditions: "Selon terrain / densité végétation",
-      },
-      {
-        nom: "Taille de haies 1 à 3 m évacuation comprise",
-        unite: "ml",
-        prixMo220: 2.8,
-        prixMoJeremie150: 1.91,
-        tva: 10,
-        prixJeremieTtc: 2.1,
-        marcheHtMin: 6,
-        marcheHtMax: 10,
-        temps1Pers: "0,1h/ml",
-        temps2Pers: "0,06h/ml",
-        heuresUnite: 0.1,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Accès facile / hors haies très denses.",
-        conditions: "Vérifier accès + temps + fournitures séparées",
-      },
-      {
-        nom: "Taille de haies supérieur à 3 m évacuation comprise",
-        unite: "ml",
-        prixMo220: 8.52,
-        prixMoJeremie150: 5.81,
-        tva: 10,
-        prixJeremieTtc: 6.39,
-        marcheHtMin: 10,
-        marcheHtMax: 18,
-        heuresUnite: 0.3,
-        rentabilite: "🟠 À surveiller",
-        action: "Mesurer avant devis",
-        notes: "Sécurité nécessaire / accès obligatoire.",
-        conditions: "Vérifier accès + temps + fournitures séparées",
-      },
-      {
-  nom: "Ramassage / chargement déchets verts",
-  unite: "m³",
-  prixMo220: 32,
-  prixMoJeremie150: 22,
-  heuresUnite: 0.45,
-  rentabilite: "🟢",
-  typeTravaux: "jardin",
-  sapCategorie: "ok",
-  conditions: "Ramassage, regroupement et chargement des végétaux. Hors transport et hors frais de dépôt éventuels.",
-  detailsPdf: [
-    "Ramassage et regroupement des végétaux",
-    "Chargement manuel",
-    "Nettoyage sommaire"
-  ]
-},
-{
-  nom: "Forfait évacuation déchetterie déchets verts",
-  unite: "forfait",
-  prixMo220: 25,
-  prixMoJeremie150: 17,
-  heuresUnite: 0.25,
-  rentabilite: "🟢",
-  typeTravaux: "jardin",
-  sapCategorie: "ok",
-  conditions: "Transport aller-retour et dépôt des déchets verts. À ajuster si volume important ou déchetterie éloignée.",
-  detailsPdf: [
-    "Transport des déchets verts",
-    "Dépôt en déchetterie"
-  ]
-}
-    ],
-  },
-
-{
-  categorie: "Clôtures / Palissades",
-  prestations: [
-    {
-      nom: "Implantation et préparation clôture / palissade",
-      unite: "forfait",
-      prixMo220: 84,
-      prixMoJeremie150: 57,
-      heuresUnite: 3,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Terrain accessible / limite séparative définie par le client",
-      detailsPdf: [
-        "Repérage de l’implantation",
-        "Traçage au cordeau",
-        "Contrôle des niveaux",
-        "Préparation de la zone d’intervention",
-        "Vérification des entraxes et alignements",
-      ],
-    },
-    {
-      nom: "Création fondations béton pour poteaux",
-      unite: "u",
-      prixMo220: 24,
-      prixMoJeremie150: 16.5,
-      heuresUnite: 0.85,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "maçonnerie",
-      sapCategorie: "non",
-      conditions: "Hors roche, racines importantes ou réseaux enterrés",
-      detailsPdf: [
-        "Creusement manuel de la fondation",
-        "Préparation du trou",
-        "Préparation et coulage du béton",
-        "Mise à niveau",
-        "Nettoyage sommaire autour de la fondation",
-      ],
-    },
-    {
-      nom: "Pose supports métalliques pour poteaux",
-      unite: "u",
-      prixMo220: 12,
-      prixMoJeremie150: 8,
-      heuresUnite: 0.4,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Fondations ou support existant prêts à recevoir les supports",
-      detailsPdf: [
-        "Mise en place des supports métalliques",
-        "Réglage de l’aplomb",
-        "Contrôle de l’alignement",
-        "Fixation ou scellement selon configuration",
-      ],
-    },
-    {
-      nom: "Réalisation structure porteuse palissade bois",
-      unite: "ml",
-      prixMo220: 18,
-      prixMoJeremie150: 12.3,
-      heuresUnite: 0.65,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Supports prêts / hors fourniture bois / hors terrain instable",
-      detailsPdf: [
-        "Pose des poteaux bois",
-        "Réglage des aplombs",
-        "Contrôle de l’alignement",
-        "Fixation de la structure porteuse",
-        "Ajustements nécessaires avant habillage",
-      ],
-    },
-    {
-      nom: "Habillage complet palissade bois horizontale",
-      unite: "m²",
-      prixMo220: 14,
-      prixMoJeremie150: 9.55,
-      heuresUnite: 0.5,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Structure porteuse prête / hors fourniture des lames",
-      detailsPdf: [
-        "Découpe des lames",
-        "Préperçage si nécessaire",
-        "Pose et fixation des lames horizontales",
-        "Contrôle des jeux entre lames",
-        "Contrôle esthétique de l’ensemble",
-      ],
-    },
-    {
-      nom: "Habillage complet palissade bois verticale",
-      unite: "m²",
-      prixMo220: 16,
-      prixMoJeremie150: 10.9,
-      heuresUnite: 0.57,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Structure porteuse prête / hors fourniture des lames",
-      detailsPdf: [
-        "Découpe des lames",
-        "Pose verticale du parement bois",
-        "Réglage des espacements",
-        "Fixation des lames",
-        "Contrôle esthétique de l’ensemble",
-      ],
-    },
-    {
-      nom: "Pose panneaux occultants bois ou composite",
-      unite: "u",
-      prixMo220: 42,
-      prixMoJeremie150: 28.6,
-      heuresUnite: 1.5,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Poteaux ou supports prêts / hors adaptation lourde",
-      detailsPdf: [
-        "Présentation du panneau",
-        "Mise à niveau",
-        "Fixation sur structure existante ou créée",
-        "Réglages et contrôles",
-      ],
-    },
-    {
-      nom: "Pose finitions de palissade",
-      unite: "ml",
-      prixMo220: 8,
-      prixMoJeremie150: 5.45,
-      heuresUnite: 0.28,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Palissade posée / hors éléments décoratifs complexes",
-      detailsPdf: [
-        "Pose des couvre-joints si prévus",
-        "Pose des chapeaux de poteaux",
-        "Reprise des coupes visibles",
-        "Contrôle des finitions",
-      ],
-    },
-    {
-      nom: "Fabrication et pose portillon bois extérieur",
-      unite: "u",
-      prixMo220: 220,
-      prixMoJeremie150: 150,
-      heuresUnite: 7.85,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "menuiserie",
-      sapCategorie: "non",
-      conditions: "Dimensions standards / hors motorisation / hors maçonnerie lourde",
-      detailsPdf: [
-        "Fabrication du portillon bois",
-        "Pose des gonds",
-        "Mise en place",
-        "Réglage de l’ouverture",
-        "Pose de la fermeture",
-        "Contrôle final",
-      ],
-    },
-    {
-      nom: "Application protection bois extérieur",
-      unite: "m²",
-      prixMo220: 5.6,
-      prixMoJeremie150: 3.82,
-      heuresUnite: 0.2,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "peinture",
-      sapCategorie: "non",
-      conditions: "Bois propre, sec et compatible avec le produit appliqué",
-      detailsPdf: [
-        "Préparation légère du support",
-        "Application d’une lasure ou saturateur",
-        "Contrôle de la couverture",
-        "Nettoyage du matériel",
-      ],
-    },
-    {
-      nom: "Dépose clôture ou grillage existant",
-      unite: "ml",
-      prixMo220: 8,
-      prixMoJeremie150: 5.45,
-      heuresUnite: 0.28,
-      rentabilite: "🟠 À surveiller",
-      typeTravaux: "demolition",
-      sapCategorie: "non",
-      conditions: "Hors scellements béton importants / hors évacuation",
-      detailsPdf: [
-        "Dépose des éléments existants",
-        "Démontage des fixations accessibles",
-        "Mise en tas des éléments déposés",
-        "Nettoyage sommaire de la zone",
-      ],
-    },
-    {
-      nom: "Évacuation ancienne clôture ou déblais",
-      unite: "forfait",
-      prixMo220: 95,
-      prixMoJeremie150: 65,
-      heuresUnite: 2.5,
-      rentabilite: "🟢 Rentable",
-      typeTravaux: "deplacement",
-      sapCategorie: "non",
-      conditions: "Volume raisonnable / hors frais spécifiques de déchetterie",
-      detailsPdf: [
-        "Chargement des déchets",
-        "Transport vers déchetterie",
-        "Dépôt des déchets",
-        "Nettoyage sommaire",
-      ],
-    },
-  ],
-},
-
-  {
-    categorie: "PACK",
-    prestations: [
-      {
-        nom: "Pack rafraîchissement Studio",
-        unite: "forfait",
-        prixMo220: 336,
-        prixMoJeremie150: 229.09,
-        tva: 10,
-        prixJeremieTtc: 252,
-        heuresUnite: 12,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Pack rafraîchissement T2",
-        unite: "forfait",
-        prixMo220: 504,
-        prixMoJeremie150: 343.64,
-        tva: 10,
-        prixJeremieTtc: 378,
-        heuresUnite: 18,
-        rentabilite: "🟢 Rentable agence",
-      },
-      {
-        nom: "Pack rafraîchissement T3",
-        unite: "forfait",
-        prixMo220: 728,
-        prixMoJeremie150: 496.36,
-        tva: 10,
-        prixJeremieTtc: 546,
-        heuresUnite: 26,
-        rentabilite: "🟢 Rentable agence",
-      },
-    ],
-  },
-
-{
-  categorie: "Déplacement / logistique",
-  prestations: [
-    {
-      nom: "Déplacement premier jour chantier",
-      unite: "km",
-      prixMo220: 0.75,
-      prixMoJeremie150: 0.75,
-      heuresUnite: 0,
-      rentabilite: "🟢",
-      action: "Base déplacement premier passage",
-      conditions: "Applicable uniquement au premier passage chantier.",
-      detailsPdf: [
-        "Déplacement aller-retour chantier",
-        "Temps de trajet",
-        "Usure véhicule",
-      ],
-      typeTravaux: "deplacement",
-    },
-
-    {
-      nom: "Déplacement jours suivants",
-      unite: "km",
-      prixMo220: 0.70,
-      prixMoJeremie150: 0.70,
-      heuresUnite: 0,
-      rentabilite: "🟢",
-      action: "Base déplacement jours suivants",
-      conditions: "Applicable après le premier jour chantier.",
-      detailsPdf: [
-        "Déplacement chantier",
-        "Trajet journalier",
-      ],
-      typeTravaux: "deplacement",
-    },
-
-    {
-      nom: "Forfait mise en place chantier",
-      unite: "forfait",
-      prixMo220: 20,
-      prixMoJeremie150: 20,
-      heuresUnite: 0,
-      rentabilite: "🟢",
-      action: "Organisation chantier",
-      conditions: "Chargement matériel, achats fournitures, mise en place.",
-      detailsPdf: [
-        "Organisation chantier",
-        "Chargement matériel",
-        "Temps logistique",
-      ],
-      typeTravaux: "deplacement",
-    },
-  ],
-},
-
-];
-export type TarifPrestationPlat = {
   id: string;
   categorie: string;
   prestation: string;
   unite: string;
-  prix220: number;
-  prix150: number;
   heuresUnite: number;
+  prix220: number;
+  // Conservé uniquement pour compatibilité avec l'ancien code.
+  // Le tarif Jérémie réel est désormais calculé dans page.tsx à partir de prix220 × 190 / 220.
+  prix190: number;
   rentabilite: string;
-  action: string;
-  conditions: string;
+  action?: string;
+  conditions?: string;
   detailsPdf: string[];
   typeTravaux?: string;
-    sapCategorie: "ok" | "attention" | "non";
+  tags?: string[];
 };
 
-const creerIdPrestation = (nom: string) =>
-  nom
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+const HEURES_PAR_JOUR = 7;
+const TARIF_JOUR_NORMAL = 220;
+const TARIF_HORAIRE_NORMAL = TARIF_JOUR_NORMAL / HEURES_PAR_JOUR;
 
-const determinerCategorieSap = (
+const arrondir2 = (n: number) => Math.round(n * 100) / 100;
+
+const prixDepuisTemps = (heures: number) => arrondir2(heures * TARIF_HORAIRE_NORMAL);
+
+const p = (
+  id: string,
   categorie: string,
-  nom: string
-): "ok" | "attention" | "non" => {
-  const c = categorie.toLowerCase();
-  const n = nom.toLowerCase();
+  prestation: string,
+  unite: string,
+  heuresUnite: number,
+  detailsPdf: string[],
+  options: {
+    prixFixe?: number;
+    rentabilite?: string;
+    action?: string;
+    conditions?: string;
+    typeTravaux?: string;
+    tags?: string[];
+  } = {}
+): PrestationTarif => {
+  const prix220 = options.prixFixe ?? prixDepuisTemps(heuresUnite);
 
-  // 🟢 SAP OK : petit bricolage / jardinage / entretien simple
-  if (c.includes("bricolage")) return "ok";
-  if (c.includes("jardin")) return "ok";
-  if (c.includes("nettoyage")) return "ok";
-
-  // 🟡 SAP possible selon contexte : petite intervention uniquement
-  if (c.includes("peinture")) return "attention";
-  if (c.includes("plomberie")) return "attention";
-  if (c.includes("électricité") || c.includes("electricite")) return "attention";
-  if (c.includes("équipement") || c.includes("equipement")) return "attention";
-  if (c.includes("chauffage")) return "attention";
-  if (c.includes("ventilation")) return "attention";
-  if (c.includes("débarras") || c.includes("debarras")) return "attention";
-
-  // 🔴 Hors SAP : travaux bâtiment / transformation logement
-  if (c.includes("sols")) return "non";
-  if (c.includes("carrelage")) return "non";
-  if (c.includes("placo")) return "non";
-  if (c.includes("toiture")) return "non";
-  if (c.includes("métal") || c.includes("metal")) return "non";
-  if (c.includes("structure")) return "non";
-  if (c.includes("bois")) return "non";
-  if (c.includes("déplacement") || c.includes("deplacement")) return "non";
-
-  // Cas particuliers par nom
-  if (n.includes("carrelage")) return "non";
-  if (n.includes("faïence") || n.includes("faience")) return "non";
-  if (n.includes("ragréage") || n.includes("ragreage")) return "non";
-  if (n.includes("parquet")) return "non";
-  if (n.includes("sol pvc")) return "non";
-  if (n.includes("toiture")) return "non";
-  if (n.includes("gouttière") || n.includes("gouttiere")) return "non";
-  if (n.includes("placo")) return "non";
-  if (n.includes("soudure")) return "non";
-
-  return "attention";
+  return {
+    id,
+    categorie,
+    prestation,
+    unite,
+    heuresUnite,
+    prix220,
+    prix190: prix220,
+    rentabilite: options.rentabilite ?? "🟢 Base cohérente",
+    action: options.action ?? "Adapter au chantier si nécessaire",
+    conditions: options.conditions ?? "Hors fournitures sauf mention contraire.",
+    detailsPdf,
+    typeTravaux: options.typeTravaux ?? "main_oeuvre",
+    tags: options.tags ?? [],
+  };
 };
 
-export const TARIFS_PRESTATIONS: TarifPrestationPlat[] =
-  TARIFS_PRESTATIONS_PAR_CATEGORIE.flatMap((categorie) =>
-    categorie.prestations.map((prestation) => ({
-      id: creerIdPrestation(prestation.nom),
+export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
+  Nettoyage: [
+    "Préparation de la zone d’intervention",
+    "Nettoyage des surfaces concernées",
+    "Contrôle et remise en ordre de fin d’intervention",
+  ],
+  Débarras: [
+    "Repérage des éléments concernés",
+    "Manutention et tri si nécessaire",
+    "Évacuation prévue au devis",
+    "Nettoyage sommaire de la zone",
+  ],
+  Sols: [
+    "Contrôle du support existant",
+    "Préparation prévue au devis",
+    "Pose et découpes courantes",
+    "Ajustements et finitions périphériques",
+  ],
+  "Carrelage / Faïence": [
+    "Contrôle et préparation du support",
+    "Implantation et pose du revêtement",
+    "Découpes et ajustements courants",
+    "Finitions prévues au devis",
+  ],
+  Peinture: [
+    "Protection de la zone d’intervention",
+    "Préparation du support selon son état",
+    "Application des produits prévus",
+    "Réalisation des finitions courantes",
+  ],
+  Déco: [
+    "Préparation du support",
+    "Pose ou dépose du revêtement prévu",
+    "Découpes et ajustements courants",
+    "Nettoyage de fin d’intervention",
+  ],
+  Placo: [
+    "Contrôle de la zone d’intervention",
+    "Pose ou reprise des éléments prévus",
+    "Ajustements et finitions courantes",
+  ],
+  "Plomberie / Sanitaires": [
+    "Dépose si prévue au devis",
+    "Pose ou remplacement de l’équipement",
+    "Raccordement sur installation existante accessible",
+    "Contrôle d’étanchéité et de fonctionnement",
+  ],
+  Électricité: [
+    "Mise en sécurité de l’intervention",
+    "Pose ou remplacement sur installation existante",
+    "Raccordement courant",
+    "Essai de fonctionnement",
+  ],
+  Chauffage: [
+    "Dépose de l’équipement existant si prévue",
+    "Pose et fixation du nouvel équipement",
+    "Raccordement sur installation existante",
+    "Essai de fonctionnement",
+  ],
+  Ventilation: [
+    "Contrôle de l’installation existante",
+    "Dépose si nécessaire",
+    "Pose ou remplacement de l’élément prévu",
+    "Essai de fonctionnement",
+  ],
+  Cuisine: [
+    "Implantation de l’élément concerné",
+    "Montage ou pose prévue au devis",
+    "Découpes et ajustements courants",
+    "Contrôle des fixations et finitions",
+  ],
+  "Bricolage / Menuiserie légère": [
+    "Repérage et préparation",
+    "Montage, pose, réglage ou réparation prévue",
+    "Ajustements courants",
+    "Contrôle final",
+  ],
+  Équipement: [
+    "Préparation de l’emplacement",
+    "Mise en place de l’équipement",
+    "Raccordement standard si prévu",
+    "Essai de fonctionnement",
+  ],
+  "Extérieur / Métal": [
+    "Préparation de la zone d’intervention",
+    "Contrôle du support existant",
+    "Réalisation de l’intervention prévue",
+    "Ajustements et finitions courantes",
+  ],
+  "Toiture légère": [
+    "Contrôle visuel de la zone accessible",
+    "Intervention ponctuelle prévue au devis",
+    "Ajustements et finitions courantes",
+    "Hors travaux structurels et réfection complète",
+  ],
+  Jardin: [
+    "Préparation de la zone",
+    "Réalisation de l’entretien prévu",
+    "Ramassage si prévu",
+    "Nettoyage sommaire de fin d’intervention",
+  ],
+  "Déplacement / logistique": [
+    "Déplacement aller-retour chantier",
+    "Temps et organisation logistique",
+  ],
+};
 
-      categorie: categorie.categorie,
+export const TARIFS_PRESTATIONS: PrestationTarif[] = [
+  // ================= NETTOYAGE =================
+  p("NET-FIN-CHANTIER", "Nettoyage", "Nettoyage de fin de chantier / remise en état", "m²", 0.08, [
+    "Dépoussiérage et nettoyage des surfaces accessibles",
+    "Nettoyage courant des sols et équipements concernés",
+    "Contrôle et remise en ordre de la zone",
+  ], { conditions: "Hors gros gravats et nettoyage spécialisé. Minimum chantier applicable.", tags: ["nettoyage", "fin chantier"] }),
 
-      prestation: prestation.nom,
+  p("NET-VITRAGE", "Nettoyage", "Nettoyage de vitrages", "m²", 0.05, [
+    "Nettoyage des faces accessibles prévues au devis",
+    "Essuyage et contrôle visuel de finition",
+  ], { conditions: "Hors travail en hauteur ou accès nécessitant un moyen spécifique.", tags: ["vitre", "vitrage"] }),
 
-      unite: prestation.unite,
+  p("NET-LOGEMENT", "Nettoyage", "Nettoyage / ménage de logement", "h", 1, [
+    "Entretien courant des surfaces prévues",
+    "Nettoyage des équipements accessibles",
+    "Remise en ordre de fin d’intervention",
+  ], { conditions: "Temps minimum et niveau de remise en état à préciser selon le logement.", tags: ["ménage", "logement"] }),
 
-      prix220: prestation.prixMo220,
+  // ================= DEBARRAS =================
+  p("DEB-ENCOMBRANTS", "Débarras", "Débarras et manutention d’encombrants", "m³", 0.5, [
+    "Manutention des encombrants prévus au devis",
+    "Regroupement et chargement",
+  ], { conditions: "Accès, étages, poids et volume à contrôler avant devis. Hors frais de déchèterie.", rentabilite: "🟠 À contrôler", tags: ["débarras", "encombrants"] }),
 
-      prix150: prestation.prixMoJeremie150,
+  p("DEB-TRI", "Débarras", "Tri et mise en sac", "h", 1, [
+    "Tri des déchets ou éléments concernés",
+    "Mise en sacs ou regroupement pour évacuation",
+  ], { tags: ["tri", "sac"] }),
 
-      heuresUnite: prestation.heuresUnite ?? 0,
+  p("DEB-DECHETTERIE", "Débarras", "Transport / évacuation en déchèterie", "forfait", 2.5, [
+    "Chargement des déchets préparés",
+    "Transport vers une filière adaptée",
+    "Déchargement et retour",
+  ], { prixFixe: 80, conditions: "Forfait de base hors frais exceptionnels de traitement et hors volume important.", rentabilite: "🟠 À adapter", typeTravaux: "deplacement", tags: ["déchèterie", "transport"] }),
 
-      rentabilite: prestation.rentabilite,
+  p("DEB-GRAVATS", "Débarras", "Manutention et évacuation de gravats", "m³", 2.5, [
+    "Manutention et chargement des gravats",
+    "Évacuation vers une filière adaptée",
+  ], { prixFixe: 80, conditions: "Prix indicatif par m³ à ajuster selon poids, accès, distance et coût de traitement.", rentabilite: "🟠 À adapter", tags: ["gravats", "évacuation"] }),
 
-      action: prestation.action ?? "",
+  // ================= SOLS =================
+  p("SOL-DEPOSE", "Sols", "Dépose d’un revêtement de sol souple ou flottant", "m²", 0.17, [
+    "Dépose du revêtement existant",
+    "Retrait des éléments non adhérents accessibles",
+    "Regroupement des déchets",
+  ], { conditions: "Hors dépose collée difficile et hors évacuation en déchèterie.", tags: ["sol", "dépose"] }),
 
-      conditions: prestation.conditions ?? "",
+  p("SOL-PREP-MECA", "Sols", "Préparation mécanique d’un support de sol", "m²", 0.25, [
+    "Grattage ou ponçage localisé du support",
+    "Retrait des résidus non adhérents",
+    "Aspiration et préparation avant finition",
+  ], { conditions: "Niveau de préparation à adapter à l’état réel du support.", tags: ["sol", "préparation", "ponçage", "colle"] }),
 
-      detailsPdf:
-        prestation.detailsPdf ??
-        (prestation.notes
-          ? [prestation.notes]
-          : DETAILS_PDF_PAR_CATEGORIE[categorie.categorie] ?? []),
+  p("SOL-RAGREAGE", "Sols", "Ragréage autolissant du support", "m²", 0.3, [
+    "Contrôle et dépoussiérage du support",
+    "Application du primaire adapté si prévu",
+    "Mise en œuvre du ragréage autolissant",
+    "Contrôle de la planéité après séchage",
+  ], { conditions: "Épaisseur courante. Hors reprise structurelle, forte épaisseur ou support très dégradé.", tags: ["ragréage", "sol"] }),
 
-      typeTravaux: prestation.typeTravaux ?? "main_oeuvre",
+  p("SOL-SOUS-COUCHE", "Sols", "Pose d’une sous-couche / pare-vapeur", "m²", 0.09, [
+    "Déroulage et pose de la sous-couche",
+    "Découpes et raccords courants",
+  ], { tags: ["sous couche", "pare vapeur"] }),
 
-      sapCategorie:
-        prestation.sapCategorie ??
-        determinerCategorieSap(categorie.categorie, prestation.nom),
-    }))
-  );
+  p("SOL-FLOTTANT", "Sols", "Pose d’un revêtement de sol flottant", "m²", 0.25, [
+    "Implantation du sens de pose",
+    "Pose flottante du revêtement",
+    "Découpes et jeux périphériques",
+    "Finitions courantes",
+  ], { conditions: "Support prêt. Minimum chantier applicable pour petite surface.", tags: ["parquet", "stratifié", "flottant"] }),
+
+  p("SOL-PARQUET-COLLE", "Sols", "Pose d’un parquet massif collé", "m²", 0.45, [
+    "Implantation et préparation de la pose",
+    "Encollage et pose du parquet",
+    "Découpes et ajustements périphériques",
+  ], { conditions: "Support prêt et compatible. Hors fourniture de colle et reprise du support.", rentabilite: "🟠 À contrôler", tags: ["parquet", "massif", "collé"] }),
+
+  p("SOL-PVC-CLIP", "Sols", "Pose d’un sol PVC clipsable", "m²", 0.28, [
+    "Implantation du sens de pose",
+    "Pose des lames ou dalles clipsables",
+    "Découpes et ajustements périphériques",
+  ], { conditions: "Support prêt. Hors ragréage.", tags: ["PVC", "vinyle", "clipsable"] }),
+
+  p("SOL-PVC-COLLE", "Sols", "Pose d’un sol PVC collé", "m²", 0.32, [
+    "Implantation du revêtement",
+    "Encollage et pose",
+    "Découpes et marouflage",
+    "Finitions périphériques",
+  ], { conditions: "Support plan, propre et prêt. Hors ragréage.", tags: ["PVC", "vinyle", "collé"] }),
+
+  p("SOL-MOQUETTE", "Sols", "Pose d’une moquette", "m²", 0.22, [
+    "Implantation et découpe du revêtement",
+    "Pose selon le système prévu",
+    "Finitions périphériques",
+  ], { conditions: "Support prêt. Hors préparation lourde.", tags: ["moquette"] }),
+
+  p("SOL-ROULEAU", "Sols", "Pose d’un revêtement souple en rouleau", "m²", 0.25, [
+    "Implantation et découpe du revêtement",
+    "Pose et ajustement",
+    "Finitions périphériques",
+  ], { conditions: "Support prêt. Hors préparation lourde.", tags: ["lino", "rouleau", "souple"] }),
+
+  p("SOL-PLINTHE-BOIS", "Sols", "Pose de plinthes bois / MDF / PVC", "ml", 0.13, [
+    "Mesure et découpe des plinthes",
+    "Pose et fixation",
+    "Raccords et finitions courantes",
+  ], { conditions: "Angles et supports courants.", tags: ["plinthe", "MDF", "PVC", "bois"] }),
+
+  p("SOL-PLINTHE-CARR", "Sols", "Pose de plinthes carrelées", "ml", 0.26, [
+    "Découpe et implantation des plinthes",
+    "Pose collée",
+    "Réalisation des joints courants",
+  ], { tags: ["plinthe", "carrelage"] }),
+
+  p("SOL-PONCAGE-PARQUET", "Sols", "Ponçage d’un parquet bois", "m²", 0.25, [
+    "Ponçage mécanique du parquet",
+    "Passes adaptées à l’état du bois",
+    "Aspiration des poussières",
+  ], { conditions: "Location de matériel spécifique et abrasifs à chiffrer séparément si nécessaire.", tags: ["parquet", "ponçage"] }),
+
+  p("SOL-FINITION-PARQUET", "Sols", "Application d’une finition sur parquet", "m²", 0.18, [
+    "Préparation légère avant finition",
+    "Application de la finition prévue",
+    "Égrenage intermédiaire si nécessaire",
+  ], { conditions: "Produit et nombre de couches à préciser dans le devis.", tags: ["parquet", "huile", "vernis"] }),
+
+  p("SOL-DECOUPE-CPLX", "Sols", "Découpes complexes / adaptations particulières", "forfait", 1.5, [
+    "Repérage des contraintes",
+    "Découpes ou ajustements spécifiques prévus au devis",
+  ], { conditions: "Forfait à ajuster selon nombre d’obstacles et complexité.", rentabilite: "🟠 À adapter", tags: ["découpe", "complexe"] }),
+
+  // ================= CARRELAGE / FAIENCE =================
+  p("CAR-DEPOSE", "Carrelage / Faïence", "Dépose de carrelage ou faïence", "m²", 0.5, [
+    "Dépose du revêtement existant",
+    "Grattage des résidus non adhérents",
+    "Regroupement des gravats",
+  ], { conditions: "Hors évacuation et hors remplacement complet du support.", tags: ["carrelage", "faïence", "dépose"] }),
+
+  p("CAR-PREP", "Carrelage / Faïence", "Préparation simple du support avant carrelage", "m²", 0.25, [
+    "Nettoyage et contrôle du support",
+    "Reprises localisées courantes",
+    "Dépoussiérage avant pose",
+  ], { conditions: "Hors ragréage important ou reprise complète du support.", tags: ["carrelage", "support"] }),
+
+  p("CAR-SOL", "Carrelage / Faïence", "Pose de carrelage au sol", "m²", 0.65, [
+    "Implantation et calepinage courant",
+    "Pose collée du carrelage",
+    "Découpes et ajustements courants",
+  ], { conditions: "Support prêt. Hors calepinage complexe et grands formats difficiles.", tags: ["carrelage", "sol"] }),
+
+  p("CAR-COMPLEXE", "Carrelage / Faïence", "Pose de carrelage avec calepinage complexe", "m²", 0.85, [
+    "Étude et implantation du calepinage",
+    "Pose du revêtement",
+    "Découpes et ajustements complexes",
+  ], { conditions: "Motifs, diagonales, nombreux angles ou contraintes particulières.", rentabilite: "🟠 À contrôler", tags: ["carrelage", "diagonale", "calepinage"] }),
+
+  p("CAR-FAIENCE", "Carrelage / Faïence", "Pose de faïence murale", "m²", 0.75, [
+    "Implantation et calepinage courant",
+    "Pose collée de la faïence",
+    "Découpes et finitions courantes",
+  ], { conditions: "Hors étanchéité sous carrelage et hors reprise importante du support.", tags: ["faïence", "mur"] }),
+
+  p("CAR-JOINT", "Carrelage / Faïence", "Réalisation des joints de carrelage / faïence", "m²", 0.25, [
+    "Préparation et nettoyage des joints",
+    "Application du mortier de jointoiement",
+    "Nettoyage des parements",
+  ], { tags: ["joint", "carrelage", "faïence"] }),
+
+  p("CAR-ETANCH", "Carrelage / Faïence", "Protection à l’eau sous carrelage", "m²", 0.35, [
+    "Application du primaire adapté au support",
+    "Pose des bandes d’étanchéité aux points singuliers",
+    "Application du système de protection à l’eau",
+  ], { conditions: "Selon prescriptions du système retenu et temps de séchage.", tags: ["SPEC", "étanchéité"] }),
+
+  p("CAR-SILICONE", "Carrelage / Faïence", "Réalisation de joints silicone de finition", "ml", 0.08, [
+    "Préparation et dégraissage des zones concernées",
+    "Application du joint silicone",
+    "Lissage et nettoyage de finition",
+  ], { tags: ["silicone", "joint"] }),
+
+  // ================= PEINTURE =================
+  p("PEINT-PROT", "Peinture", "Protection et préparation du chantier peinture", "forfait", 1.5, [
+    "Protection des sols, équipements et zones conservées",
+    "Mise en place du chantier peinture",
+  ], { tags: ["peinture", "protection"] }),
+
+  p("PEINT-PREP-LEG", "Peinture", "Préparation légère d’un support avant peinture", "m²", 0.15, [
+    "Grattage léger des parties non adhérentes",
+    "Rebouchages ponctuels",
+    "Ponçage et dépoussiérage",
+  ], { conditions: "Pour support globalement sain.", tags: ["peinture", "préparation"] }),
+
+  p("PEINT-PREP-RENF", "Peinture", "Préparation renforcée / reprise d’un support", "m²", 0.35, [
+    "Grattage des parties non adhérentes",
+    "Rebouchage et reprise des défauts",
+    "Ponçage et dépoussiérage avant finition",
+  ], { conditions: "Hors reprise structurelle ou traitement de la cause d’une infiltration active.", tags: ["peinture", "reprise", "enduit"] }),
+
+  p("PEINT-RATISSAGE", "Peinture", "Ratissage complet et ponçage", "m²", 0.4, [
+    "Application d’un enduit de ratissage",
+    "Ponçage après séchage",
+    "Dépoussiérage avant mise en peinture",
+  ], { tags: ["ratissage", "enduit", "ponçage"] }),
+
+  p("PEINT-PRIMAIRE", "Peinture", "Application d’un primaire d’accrochage", "m²", 0.12, [
+    "Préparation légère du support",
+    "Application du primaire adapté",
+  ], { conditions: "Produit à adapter à la nature du support.", tags: ["primaire", "accrochage"] }),
+
+  p("PEINT-ISOLANT", "Peinture", "Application d’un primaire isolant / bloqueur de taches", "m²", 0.2, [
+    "Préparation locale du support",
+    "Application du primaire isolant adapté",
+    "Blocage des taches ou remontées compatibles avec le produit retenu",
+  ], { conditions: "Hors traitement de la cause d’une humidité ou infiltration active.", tags: ["primaire", "tache", "isolant"] }),
+
+  p("PEINT-MURS", "Peinture", "Mise en peinture des murs", "m²", 0.22, [
+    "Application de la peinture prévue sur support préparé",
+    "Réalisation des réchampis",
+    "Finitions courantes",
+  ], { conditions: "Nombre de couches et type de peinture à préciser si nécessaire.", tags: ["peinture", "mur"] }),
+
+  p("PEINT-PLAFOND", "Peinture", "Mise en peinture des plafonds", "m²", 0.25, [
+    "Application de la peinture prévue sur support préparé",
+    "Réalisation des réchampis",
+    "Finitions courantes",
+  ], { conditions: "Nombre de couches et type de peinture à préciser si nécessaire.", tags: ["peinture", "plafond"] }),
+
+  p("PEINT-BOIS-SURF", "Peinture", "Mise en peinture d’un support bois", "m²", 0.35, [
+    "Égrenage ou préparation légère du support",
+    "Application de la finition prévue",
+    "Réalisation des finitions courantes",
+  ], { conditions: "Primaire spécifique à ajouter séparément si nécessaire.", tags: ["peinture", "bois"] }),
+
+  p("PEINT-MENUISERIE", "Peinture", "Mise en peinture de boiseries / menuiseries", "u", 1.75, [
+    "Préparation de la menuiserie",
+    "Application de la finition prévue",
+    "Réalisation des réchampis et finitions",
+  ], { conditions: "Temps à adapter selon dimensions, reliefs et état.", tags: ["porte", "boiserie", "menuiserie"] }),
+
+  p("PEINT-ACRYLIQUE", "Peinture", "Réalisation d’un joint acrylique de finition", "ml", 0.08, [
+    "Préparation des supports",
+    "Application et lissage du joint acrylique",
+  ], { tags: ["joint", "acrylique"] }),
+
+  // ================= DECO =================
+  p("DECO-DEPOSE-MURAL", "Déco", "Dépose d’un revêtement mural", "m²", 0.18, [
+    "Dépose du revêtement mural existant",
+    "Grattage léger des résidus",
+    "Nettoyage simple du support",
+  ], { conditions: "Hors colle très tenace et hors reprise lourde du support.", tags: ["papier peint", "revêtement mural", "dépose"] }),
+
+  p("DECO-POSE-MURAL", "Déco", "Pose d’un revêtement mural", "m²", 0.3, [
+    "Préparation simple du support",
+    "Application de la colle si nécessaire",
+    "Pose du revêtement",
+    "Découpes et ajustements courants",
+  ], { conditions: "Motifs à raccord ou revêtement technique : temps à adapter.", tags: ["papier peint", "revêtement mural"] }),
+
+  p("DECO-PREP-LEG", "Déco", "Préparation légère d’un support mural", "m²", 0.15, [
+    "Rebouchages ponctuels",
+    "Ponçage et dépoussiérage",
+  ], { tags: ["mur", "préparation"] }),
+
+  p("DECO-PREP-RENF", "Déco", "Préparation renforcée d’un support mural", "m²", 0.35, [
+    "Grattage et reprise des défauts",
+    "Enduit localisé ou généralisé selon état",
+    "Ponçage et dépoussiérage",
+  ], { tags: ["mur", "préparation", "enduit"] }),
+
+  // ================= PLACO =================
+  p("PLAC-OSSATURE", "Placo", "Pose d’une ossature métallique légère", "m²", 0.55, [
+    "Traçage et implantation",
+    "Pose de l’ossature métallique",
+    "Réglage et contrôle de l’alignement",
+  ], { conditions: "Travaux non structurels. Hauteur et configuration courantes.", rentabilite: "🟠 À contrôler", tags: ["placo", "ossature"] }),
+
+  p("PLAC-PLAQUE", "Placo", "Pose de plaques de plâtre", "m²", 0.45, [
+    "Découpe et présentation des plaques",
+    "Pose et fixation sur support prévu",
+    "Ajustements courants",
+  ], { conditions: "Hors bandes, peinture et renforts spécifiques.", tags: ["placo", "BA13"] }),
+
+  p("PLAC-DOUBLAGE", "Placo", "Pose d’un doublage isolant léger", "m²", 0.7, [
+    "Mise en place de l’isolant prévu",
+    "Pose du parement associé",
+    "Découpes et ajustements courants",
+  ], { conditions: "Travaux intérieurs non structurels. Composition à préciser au devis.", rentabilite: "🟠 À contrôler", tags: ["placo", "isolant", "doublage"] }),
+
+  p("PLAC-BANDES", "Placo", "Réalisation des bandes et joints", "m²", 0.45, [
+    "Pose des bandes",
+    "Passes d’enduit nécessaires",
+    "Ponçage de finition courant",
+  ], { conditions: "Hors reprise de plaques mal posées et hors peinture.", tags: ["placo", "bandes", "joints"] }),
+
+  p("PLAC-REPARATION", "Placo", "Réparation locale d’une plaque de plâtre", "u", 2, [
+    "Découpe de la zone endommagée si nécessaire",
+    "Mise en place d’un renfort léger",
+    "Pose de la pièce de réparation",
+    "Reprise locale des joints",
+  ], { conditions: "Petite réparation non structurelle. Taille à préciser au devis.", tags: ["placo", "réparation"] }),
+
+  // ================= PLOMBERIE / SANITAIRES =================
+  p("PLOMB-H", "Plomberie / Sanitaires", "Intervention de plomberie courante", "h", 1, [
+    "Intervention sur éléments accessibles",
+    "Raccordements courants prévus au devis",
+    "Contrôle d’étanchéité",
+  ], { conditions: "Sans création de réseau encastré ni modification lourde de l’installation.", tags: ["plomberie", "main d'œuvre"] }),
+
+  p("PLOMB-DEPOSE-EQP", "Plomberie / Sanitaires", "Dépose d’un équipement sanitaire", "u", 1.5, [
+    "Déconnexion des raccordements accessibles",
+    "Dépose de l’équipement",
+    "Mise en sécurité provisoire si nécessaire",
+  ], { conditions: "Hors évacuation en déchèterie.", tags: ["sanitaire", "dépose"] }),
+
+  p("PLOMB-ROBINET", "Plomberie / Sanitaires", "Pose / remplacement d’un robinet ou mitigeur", "u", 1.5, [
+    "Dépose de l’ancienne robinetterie si prévue",
+    "Pose de la nouvelle robinetterie",
+    "Raccordement sur arrivées existantes accessibles",
+    "Contrôle d’étanchéité",
+  ], { conditions: "Hors modification des alimentations encastrées.", tags: ["robinet", "mitigeur"] }),
+
+  p("PLOMB-VASQUE", "Plomberie / Sanitaires", "Pose / remplacement d’un lavabo ou d’une vasque", "u", 3, [
+    "Dépose de l’ancien équipement si prévue",
+    "Mise en place et fixation",
+    "Raccordement du vidage et des éléments accessibles",
+    "Contrôle d’étanchéité",
+  ], { tags: ["lavabo", "vasque"] }),
+
+  p("PLOMB-MEUBLE-VASQUE", "Plomberie / Sanitaires", "Pose / remplacement d’un meuble vasque", "u", 4.5, [
+    "Montage et implantation du meuble",
+    "Fixation au support",
+    "Pose de la vasque",
+    "Raccordements accessibles et finitions courantes",
+  ], { conditions: "Hors modification lourde de plomberie et hors renfort structurel du support.", tags: ["meuble vasque", "lavabo"] }),
+
+  p("PLOMB-WC", "Plomberie / Sanitaires", "Pose / remplacement d’un WC", "u", 3, [
+    "Dépose de l’ancien WC si prévue",
+    "Mise en place et fixation du nouvel équipement",
+    "Raccordement sur attentes existantes",
+    "Essai de chasse et contrôle d’étanchéité",
+  ], { conditions: "Pour WC posé au sol sur raccordements existants accessibles.", tags: ["WC", "toilettes"] }),
+
+  p("PLOMB-WC-DEPOSE-REPOSE", "Plomberie / Sanitaires", "Dépose et repose d’un WC existant", "u", 3.5, [
+    "Déconnexion et dépose soigneuse du WC",
+    "Intervention prévue sur la zone de fixation",
+    "Repose, fixation et raccordement",
+    "Contrôle d’étanchéité et de fonctionnement",
+  ], { conditions: "Réparation du support non comprise sauf mention au devis.", tags: ["WC", "dépose", "repose"] }),
+
+  p("PLOMB-WC-MECA", "Plomberie / Sanitaires", "Remplacement d’un mécanisme de WC", "u", 1, [
+    "Dépose du mécanisme existant",
+    "Pose et réglage du nouveau mécanisme",
+    "Essai et contrôle d’étanchéité",
+  ], { tags: ["WC", "mécanisme"] }),
+
+  p("PLOMB-SIPHON", "Plomberie / Sanitaires", "Remplacement d’un siphon / vidage", "u", 1, [
+    "Dépose du siphon ou vidage existant",
+    "Pose et raccordement du nouvel élément",
+    "Essai d’écoulement et contrôle d’étanchéité",
+  ], { tags: ["siphon", "vidage"] }),
+
+  p("PLOMB-RACC", "Plomberie / Sanitaires", "Raccordement sanitaire sur attentes existantes", "u", 1.5, [
+    "Adaptation simple des raccordements accessibles",
+    "Raccordement de l’équipement prévu",
+    "Essai d’écoulement et contrôle d’étanchéité",
+  ], { conditions: "Sans création de réseau encastré.", tags: ["raccordement", "sanitaire"] }),
+
+  p("PLOMB-FUITE-RECH", "Plomberie / Sanitaires", "Recherche de fuite apparente", "forfait", 2, [
+    "Contrôle visuel des éléments accessibles",
+    "Recherche de l’origine apparente de la fuite",
+    "Compte rendu de l’intervention",
+  ], { conditions: "Hors recherche destructive, caméra, réseau encastré ou diagnostic spécialisé.", rentabilite: "🟠 À contrôler", tags: ["fuite", "recherche"] }),
+
+  p("PLOMB-FUITE-REP", "Plomberie / Sanitaires", "Réparation simple d’une fuite accessible", "forfait", 2, [
+    "Mise hors eau locale si nécessaire",
+    "Réparation ou remplacement simple de l’élément accessible",
+    "Remise en eau et contrôle d’étanchéité",
+  ], { conditions: "Hors réseau encastré et hors remplacement important de canalisation.", tags: ["fuite", "réparation"] }),
+
+  p("PLOMB-REC-DCH", "Plomberie / Sanitaires", "Pose d’un receveur de douche", "u", 7, [
+    "Préparation et contrôle de l’emplacement",
+    "Pose et calage du receveur",
+    "Pose de la bonde et raccordement accessible",
+    "Contrôle de l’écoulement et finitions sanitaires",
+  ], { conditions: "Dimensions, modèle et état du support à préciser au devis. Hors création complète du réseau.", rentabilite: "🟠 À contrôler", tags: ["receveur", "douche"] }),
+
+  p("PLOMB-PAROI-DEP", "Plomberie / Sanitaires", "Dépose d’une paroi ou cabine de douche", "u", 2, [
+    "Dépose soigneuse de la paroi ou cabine",
+    "Regroupement ou stockage des éléments selon devis",
+  ], { conditions: "Réemploi d’un équipement ancien sans garantie sur sa tenue au démontage.", tags: ["paroi", "douche", "dépose"] }),
+
+  p("PLOMB-PAROI-POS", "Plomberie / Sanitaires", "Pose d’une paroi ou cabine de douche", "u", 3.5, [
+    "Implantation et fixation",
+    "Réglage des profilés et ouvrants",
+    "Réalisation des joints sanitaires périphériques",
+  ], { conditions: "Support adapté et modèle compatible avec l’implantation.", tags: ["paroi", "douche"] }),
+
+  // ================= ELECTRICITE =================
+  p("ELEC-H", "Électricité", "Intervention électrique courante", "h", 1, [
+    "Mise hors tension de la zone concernée",
+    "Intervention sur appareillage existant",
+    "Raccordement courant et essai",
+  ], { conditions: "Sur installation existante, sans création de circuit ni modification du tableau.", tags: ["électricité", "main d'œuvre"] }),
+
+  p("ELEC-PRISE", "Électricité", "Remplacement d’une prise existante", "u", 0.5, [
+    "Mise hors tension",
+    "Dépose de la prise existante",
+    "Pose et raccordement de la nouvelle prise",
+    "Essai de fonctionnement",
+  ], { conditions: "Sur câblage existant en état et conforme à l’intervention prévue.", tags: ["prise"] }),
+
+  p("ELEC-INT", "Électricité", "Remplacement d’un interrupteur existant", "u", 0.5, [
+    "Mise hors tension",
+    "Dépose de l’interrupteur existant",
+    "Pose et raccordement du nouvel appareillage",
+    "Essai de fonctionnement",
+  ], { tags: ["interrupteur"] }),
+
+  p("ELEC-APP", "Électricité", "Remplacement d’un appareillage électrique existant", "u", 0.75, [
+    "Mise hors tension",
+    "Dépose de l’appareillage existant",
+    "Pose et raccordement de l’appareillage prévu",
+    "Essai de fonctionnement",
+  ], { conditions: "Type d’appareillage à préciser au devis.", tags: ["appareillage"] }),
+
+  p("ELEC-LUM", "Électricité", "Pose / remplacement d’un luminaire", "u", 1.25, [
+    "Dépose du luminaire existant si prévue",
+    "Montage et fixation du nouveau luminaire",
+    "Raccordement sur sortie existante",
+    "Essai de fonctionnement",
+  ], { conditions: "Hors création de point lumineux ou modification du circuit.", tags: ["luminaire"] }),
+
+  p("ELEC-SORTIE", "Électricité", "Remplacement d’une sortie de câble / connexion existante", "u", 0.5, [
+    "Mise hors tension",
+    "Remplacement ou reprise simple de la connexion",
+    "Contrôle et essai",
+  ], { conditions: "Sur câblage existant accessible.", tags: ["sortie de câble", "connexion"] }),
+
+  p("ELEC-DIAG", "Électricité", "Diagnostic simple d’un équipement électrique", "forfait", 1.5, [
+    "Contrôle visuel de l’équipement et de ses connexions accessibles",
+    "Essais simples de fonctionnement",
+    "Identification d’une anomalie apparente",
+  ], { conditions: "Ne remplace pas un diagnostic réglementaire ni une recherche spécialisée sur circuit.", tags: ["diagnostic", "électrique"] }),
+
+  // ================= CHAUFFAGE =================
+  p("CHAU-RADIATEUR", "Chauffage", "Pose / remplacement d’un radiateur électrique", "u", 1.75, [
+    "Dépose de l’ancien radiateur si prévue",
+    "Implantation et fixation du nouvel appareil",
+    "Raccordement sur alimentation existante",
+    "Réglage et essai de fonctionnement",
+  ], { conditions: "Hors création ou modification du circuit électrique et hors renfort important du support.", tags: ["radiateur", "chauffage"] }),
+
+  // ================= VENTILATION =================
+  p("VMC-GROUPE", "Ventilation", "Remplacement d’un groupe VMC existant", "u", 2.5, [
+    "Dépose du groupe existant",
+    "Pose du nouveau groupe sur réseau existant",
+    "Raccordements accessibles",
+    "Essai de fonctionnement",
+  ], { conditions: "Hors création ou modification importante du réseau de gaines.", tags: ["VMC", "groupe"] }),
+
+  p("VMC-BOUCHE", "Ventilation", "Remplacement d’une bouche de ventilation", "u", 0.5, [
+    "Dépose de la bouche existante",
+    "Nettoyage simple de la zone",
+    "Pose de la nouvelle bouche",
+  ], { tags: ["VMC", "bouche"] }),
+
+  p("VMC-NET", "Ventilation", "Nettoyage / entretien d’une bouche de ventilation", "u", 0.35, [
+    "Dépose accessible de la bouche si nécessaire",
+    "Nettoyage de l’élément",
+    "Repose et contrôle simple",
+  ], { tags: ["VMC", "nettoyage"] }),
+
+  p("VMC-DIAG", "Ventilation", "Diagnostic simple d’une ventilation existante", "forfait", 1.5, [
+    "Contrôle visuel des éléments accessibles",
+    "Essai simple de fonctionnement",
+    "Identification des anomalies apparentes",
+  ], { conditions: "Hors mesure réglementaire de débit et étude de dimensionnement.", tags: ["VMC", "diagnostic"] }),
+
+  // ================= CUISINE =================
+  p("CUI-MEUBLE-MONT", "Cuisine", "Montage d’un meuble de cuisine", "u", 1.25, [
+    "Assemblage du meuble",
+    "Réglage des éléments courants",
+    "Préparation pour la pose",
+  ], { tags: ["cuisine", "meuble", "montage"] }),
+
+  p("CUI-MEUBLE-POS", "Cuisine", "Pose / fixation d’un meuble de cuisine", "u", 1, [
+    "Implantation et mise à niveau",
+    "Fixation au support",
+    "Réglage des portes ou façades",
+  ], { conditions: "Support apte à recevoir les fixations prévues.", tags: ["cuisine", "meuble", "pose"] }),
+
+  p("CUI-PLAN", "Cuisine", "Pose d’un plan de travail", "ml", 1.5, [
+    "Mesure et présentation du plan",
+    "Ajustements et mise à niveau",
+    "Fixation sur meubles existants ou posés",
+    "Finitions courantes",
+  ], { conditions: "Découpes d’évier/plaque comptées séparément si nécessaires.", rentabilite: "🟠 À contrôler", tags: ["plan de travail"] }),
+
+  p("CUI-DECOUPE", "Cuisine", "Découpe d’un plan de travail", "u", 1.25, [
+    "Traçage de la découpe",
+    "Découpe pour l’équipement prévu",
+    "Protection et finition du chant découpé si nécessaire",
+  ], { conditions: "Matériau courant. Hors pierre, quartz ou matériaux nécessitant un atelier spécialisé.", tags: ["plan de travail", "découpe"] }),
+
+  p("CUI-CREDENCE", "Cuisine", "Pose d’une crédence", "m²", 0.75, [
+    "Implantation et prise de mesures",
+    "Découpes courantes",
+    "Pose de la crédence",
+    "Finitions périphériques",
+  ], { conditions: "Matériau et système de pose à préciser au devis.", tags: ["crédence"] }),
+
+  p("CUI-EVIER", "Cuisine", "Pose d’un évier", "u", 1.75, [
+    "Mise en place de l’évier",
+    "Fixation et étanchéité périphérique",
+    "Raccordement du vidage accessible",
+    "Contrôle d’étanchéité",
+  ], { conditions: "Découpe du plan de travail comptée séparément si nécessaire.", tags: ["évier"] }),
+
+  p("CUI-MITIGEUR", "Cuisine", "Pose d’un mitigeur de cuisine", "u", 1.25, [
+    "Pose de la robinetterie",
+    "Raccordement sur alimentations existantes accessibles",
+    "Contrôle d’étanchéité",
+  ], { tags: ["mitigeur", "cuisine"] }),
+
+  p("CUI-ENCASTRABLE", "Cuisine", "Pose d’un équipement encastrable", "u", 1.25, [
+    "Mise en place de l’équipement",
+    "Fixation selon le système prévu",
+    "Raccordement standard sur attentes existantes si prévu",
+    "Essai de fonctionnement",
+  ], { conditions: "Hors modification de meuble importante, plomberie ou circuit électrique.", tags: ["four", "lave vaisselle", "encastrable"] }),
+
+  p("CUI-AJUST", "Cuisine", "Ajustement / finition de cuisine", "h", 1, [
+    "Réglages des éléments concernés",
+    "Petits ajustements et finitions prévus au devis",
+  ], { tags: ["cuisine", "réglage", "finition"] }),
+
+  // ================= BRICOLAGE / MENUISERIE LEGERE =================
+  p("BRI-MEUBLE", "Bricolage / Menuiserie légère", "Montage d’un meuble", "u", 0.75, [
+    "Déballage et contrôle des éléments",
+    "Assemblage du meuble",
+    "Réglages courants",
+  ], { conditions: "Temps à adapter selon dimensions et complexité.", tags: ["meuble", "montage"] }),
+
+  p("BRI-FIX-MURAL", "Bricolage / Menuiserie légère", "Pose / fixation d’un équipement mural", "u", 1, [
+    "Repérage de l’emplacement",
+    "Perçage et fixation adaptés au support accessible",
+    "Contrôle de l’alignement et de la tenue",
+  ], { conditions: "Hors renfort structurel du support et hors équipement exceptionnellement lourd.", tags: ["fixation", "mur"] }),
+
+  p("BRI-ETAGERE", "Bricolage / Menuiserie légère", "Pose d’une étagère", "u", 0.75, [
+    "Implantation et traçage",
+    "Perçage et fixation",
+    "Contrôle du niveau et de la tenue",
+  ], { tags: ["étagère"] }),
+
+  p("BRI-TRINGLE", "Bricolage / Menuiserie légère", "Pose d’une tringle ou d’un store", "u", 1, [
+    "Prise de mesures et implantation",
+    "Pose des supports",
+    "Montage et réglage de l’équipement",
+  ], { tags: ["tringle", "store"] }),
+
+  p("BRI-PORTE-REG", "Bricolage / Menuiserie légère", "Réglage d’une porte", "u", 0.75, [
+    "Contrôle des jeux et points de frottement",
+    "Réglage des paumelles ou éléments accessibles",
+    "Essai de fonctionnement",
+  ], { conditions: "Hors remplacement complet du bloc-porte.", tags: ["porte", "réglage"] }),
+
+  p("BRI-COULISSANTE", "Bricolage / Menuiserie légère", "Réglage d’une porte coulissante", "u", 0.75, [
+    "Contrôle du rail et des galets",
+    "Réglage et alignement",
+    "Essai de fonctionnement",
+  ], { conditions: "Système existant réparable sans remplacement complet.", tags: ["porte coulissante", "réglage"] }),
+
+  p("BRI-RABOT", "Bricolage / Menuiserie légère", "Rabotage / ajustement d’une porte", "u", 1, [
+    "Repérage de la zone de frottement",
+    "Dépose si nécessaire",
+    "Rabotage ou ajustement",
+    "Repose et essai",
+  ], { tags: ["porte", "rabotage"] }),
+
+  p("BRI-MENUISERIE-H", "Bricolage / Menuiserie légère", "Petite réparation de menuiserie", "h", 1, [
+    "Diagnostic simple de la réparation",
+    "Reprise ou ajustement courant",
+    "Contrôle final",
+  ], { conditions: "Hors réparation structurelle ou fabrication complexe.", tags: ["menuiserie", "réparation"] }),
+
+  p("BRI-H", "Bricolage / Menuiserie légère", "Intervention de bricolage courante", "h", 1, [
+    "Préparation de l’intervention",
+    "Réalisation du petit bricolage prévu",
+    "Contrôle et nettoyage sommaire",
+  ], { conditions: "Pour interventions simples relevant du multiservice.", tags: ["bricolage"] }),
+
+  // ================= EQUIPEMENT =================
+  p("EQP-ELECTRO", "Équipement", "Pose / remplacement d’un appareil électroménager", "u", 1.25, [
+    "Mise en place et mise à niveau",
+    "Raccordement standard sur attentes existantes si prévu",
+    "Essai de fonctionnement",
+  ], { conditions: "Hors modification plomberie, électricité ou meuble.", tags: ["électroménager"] }),
+
+  p("EQP-DEPOSE", "Équipement", "Dépose d’un appareil existant", "u", 0.75, [
+    "Déconnexion accessible de l’appareil",
+    "Dépose et déplacement dans la zone prévue",
+  ], { conditions: "Hors évacuation en déchèterie.", tags: ["équipement", "dépose"] }),
+
+  // ================= EXTERIEUR / METAL =================
+  p("EXT-METAL-PREP", "Extérieur / Métal", "Préparation d’un support métallique", "m²", 0.35, [
+    "Grattage et élimination des parties non adhérentes",
+    "Ponçage ou préparation mécanique légère",
+    "Dépoussiérage avant finition",
+  ], { conditions: "Hors décapage lourd ou corrosion structurelle.", tags: ["métal", "préparation"] }),
+
+  p("EXT-METAL-PEINT", "Extérieur / Métal", "Mise en peinture d’un support métallique", "m²", 0.35, [
+    "Application de la finition prévue",
+    "Réalisation des reprises et finitions courantes",
+  ], { conditions: "Support préparé. Primaire anticorrosion à ajouter si nécessaire.", tags: ["métal", "peinture"] }),
+
+  p("EXT-ANTIROUILLE", "Extérieur / Métal", "Traitement anticorrosion", "m²", 0.2, [
+    "Préparation légère des zones concernées",
+    "Application du traitement anticorrosion prévu",
+  ], { conditions: "Hors corrosion perforante ou structurelle.", tags: ["antirouille", "métal"] }),
+
+  p("EXT-METAL-REP-H", "Extérieur / Métal", "Réparation / reprise légère d’un élément métallique", "h", 1, [
+    "Repérage de la zone à reprendre",
+    "Réparation ou renforcement léger prévu",
+    "Nettoyage de la zone",
+  ], { conditions: "Hors élément structurel ou réparation nécessitant une certification spécifique.", tags: ["métal", "réparation"] }),
+
+  p("EXT-SOUDURE", "Extérieur / Métal", "Reprise ponctuelle par soudure", "u", 1, [
+    "Préparation de la zone",
+    "Reprise ponctuelle de la soudure",
+    "Nettoyage et contrôle visuel",
+  ], { conditions: "Petite reprise accessible, hors ouvrage structurel ou soumis à qualification spécifique.", tags: ["soudure", "métal"] }),
+
+  // ================= TOITURE LEGERE =================
+  p("TOIT-DIAG", "Toiture légère", "Diagnostic visuel ponctuel d’une couverture", "forfait", 1.5, [
+    "Contrôle visuel des éléments accessibles",
+    "Repérage d’une anomalie apparente",
+    "Compte rendu de l’observation",
+  ], { conditions: "Accès sécurisé obligatoire. Ne remplace pas un diagnostic spécialisé.", rentabilite: "🟠 À contrôler", tags: ["toiture", "diagnostic"] }),
+
+  p("TOIT-ELEM", "Toiture légère", "Remplacement ponctuel d’un élément de couverture", "u", 0.5, [
+    "Dépose de l’élément endommagé accessible",
+    "Pose de l’élément de remplacement",
+    "Contrôle visuel de la zone",
+  ], { conditions: "Intervention ponctuelle uniquement, accès sécurisé, hors réfection de couverture.", rentabilite: "🟠 À contrôler", tags: ["tuile", "couverture"] }),
+
+  p("TOIT-HABILLAGE", "Toiture légère", "Pose / remplacement d’un habillage sous toiture", "m²", 0.45, [
+    "Dépose locale si prévue",
+    "Découpe et pose de l’habillage",
+    "Ajustements et finitions courantes",
+  ], { conditions: "Hors intervention structurelle sur charpente.", tags: ["lambris", "sous toiture"] }),
+
+  p("TOIT-FINITION", "Toiture légère", "Intervention légère de finition de couverture", "ml", 0.4, [
+    "Contrôle de la zone",
+    "Pose ou reprise ponctuelle de l’élément de finition prévu",
+    "Fixations et ajustements courants",
+  ], { conditions: "Accès sécurisé obligatoire. Hors étanchéité lourde et réfection complète.", rentabilite: "🟠 À contrôler", tags: ["rive", "finition", "toiture"] }),
+
+  // ================= JARDIN =================
+  p("JAR-TONTE", "Jardin", "Tonte de pelouse", "m²", 0.01, [
+    "Tonte de la surface prévue",
+    "Finitions courantes des zones accessibles",
+  ], { conditions: "Terrain courant, dégagé et accessible.", tags: ["tonte", "pelouse"] }),
+
+  p("JAR-RAMASSAGE", "Jardin", "Ramassage des déchets verts", "m²", 0.008, [
+    "Ramassage des déchets verts issus de l’intervention",
+    "Regroupement pour évacuation ou stockage sur place",
+  ], { tags: ["déchets verts", "ramassage"] }),
+
+  p("JAR-HAIE", "Jardin", "Taille de haie", "ml", 0.12, [
+    "Taille d’entretien de la haie",
+    "Finitions courantes",
+    "Regroupement des déchets de taille",
+  ], { conditions: "Hauteur, largeur, densité et accès à préciser. Hors élagage nécessitant déplacement dans l’arbre.", rentabilite: "🟠 À contrôler", tags: ["haie", "taille"] }),
+
+  p("JAR-ARBUSTE", "Jardin", "Taille / entretien d’arbustes", "h", 1, [
+    "Taille d’entretien des végétaux prévus",
+    "Regroupement des déchets verts",
+  ], { conditions: "Hors élagage spécialisé ou travail nécessitant déplacement dans l’arbre.", tags: ["arbuste", "taille"] }),
+
+  p("JAR-DEBROU", "Jardin", "Débroussaillage léger", "m²", 0.02, [
+    "Débroussaillage de la zone prévue",
+    "Regroupement sommaire des déchets verts",
+  ], { conditions: "Entretien courant uniquement, hors débroussaillage mécanisé lourd.", tags: ["débroussaillage"] }),
+
+  p("JAR-NET-H", "Jardin", "Ramassage / nettoyage extérieur", "h", 1, [
+    "Ramassage des déchets végétaux ou salissures courantes",
+    "Nettoyage sommaire de la zone extérieure",
+  ], { tags: ["extérieur", "nettoyage"] }),
+
+  p("JAR-EVAC", "Jardin", "Évacuation de déchets verts", "forfait", 2, [
+    "Chargement des déchets verts préparés",
+    "Transport vers une filière adaptée",
+    "Déchargement et retour",
+  ], { prixFixe: 70, conditions: "Forfait de base à ajuster selon volume et distance.", typeTravaux: "deplacement", rentabilite: "🟠 À adapter", tags: ["déchets verts", "évacuation"] }),
+
+  p("JAR-H", "Jardin", "Intervention d’entretien extérieur", "h", 1, [
+    "Préparation de la zone",
+    "Réalisation de l’entretien prévu",
+    "Nettoyage sommaire de fin d’intervention",
+  ], { tags: ["jardin", "entretien"] }),
+
+  // ================= DEPLACEMENT / LOGISTIQUE =================
+  p("deplacement_premier_jour_chantier", "Déplacement / logistique", "Déplacement premier jour chantier", "km", 0, [
+    "Déplacement aller-retour chantier",
+    "Temps de trajet et usure du véhicule",
+  ], { prixFixe: 0.75, conditions: "Tarif par kilomètre aller-retour, premier passage chantier.", typeTravaux: "deplacement", tags: ["déplacement", "km"] }),
+
+  p("deplacement_jours_suivants", "Déplacement / logistique", "Déplacement jours suivants", "km", 0, [
+    "Déplacement aller-retour chantier",
+    "Trajet journalier",
+  ], { prixFixe: 0.7,conditions: "Tarif par kilomètre aller-retour après le premier jour.", typeTravaux: "deplacement", tags: ["déplacement", "km"] }),
+
+  p("forfait_mise_en_place_chantier", "Déplacement / logistique", "Forfait mise en place chantier", "forfait", 0, [
+    "Organisation du chantier",
+    "Chargement du matériel",
+    "Temps logistique de mise en place",
+  ], { prixFixe: 20, conditions: "Forfait logistique chantier.", typeTravaux: "deplacement", tags: ["logistique", "mise en place"] }),
+];
