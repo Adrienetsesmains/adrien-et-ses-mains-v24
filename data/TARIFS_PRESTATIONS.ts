@@ -760,6 +760,34 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Contrôle et nettoyage sommaire",
   ], { conditions: "Pour interventions simples relevant du multiservice.", tags: ["bricolage"] }),
 
+  p("BRI-BAL-DEPOSE-BLOC", "Bricolage / Menuiserie légère", "Dépose d’un bloc de boîtes aux lettres encastrées", "forfait", 3.5, [
+    "Protection et préparation de la zone d’intervention",
+    "Descellement et dépose de l’ensemble de boîtes aux lettres existant",
+    "Démolition périphérique strictement nécessaire à la dépose",
+    "Regroupement des éléments déposés et gravats",
+  ], { conditions: "Pour bloc existant encastré en maçonnerie. Hors évacuation en déchèterie et hors reprise structurelle du mur.", rentabilite: "🟠 À contrôler", tags: ["boîte aux lettres", "dépose", "bloc", "encastré"] }),
+
+  p("BRI-BAL-PREP", "Bricolage / Menuiserie légère", "Préparation / adaptation d’une réservation pour boîtes aux lettres", "forfait", 2.5, [
+    "Nettoyage et préparation de la réservation existante",
+    "Piquage et reprises localisées nécessaires",
+    "Adaptation courante de l’ouverture au nouvel ensemble",
+    "Préparation des supports avant scellement",
+  ], { conditions: "Hors modification structurelle, linteau ou reconstruction importante de maçonnerie.", rentabilite: "🟠 À contrôler", tags: ["boîte aux lettres", "maçonnerie", "réservation", "préparation"] }),
+
+  p("BRI-BAL-POSE", "Bricolage / Menuiserie légère", "Pose et scellement d’une boîte aux lettres en ensemble", "u", 0.65, [
+    "Présentation et assemblage avec les boîtes adjacentes",
+    "Calage, alignement et mise à niveau",
+    "Fixation et scellement dans la réservation préparée",
+    "Contrôle de l’ouverture et du fonctionnement",
+  ], { conditions: "Boîte fournie séparément. Pose en ensemble accessible, support préparé. Temps à adapter si fixation ou assemblage particulier.", tags: ["boîte aux lettres", "pose", "scellement", "ensemble"] }),
+
+  p("BRI-BAL-FIN-MAC", "Bricolage / Menuiserie légère", "Reprise de maçonnerie périphérique autour d’un bloc de boîtes aux lettres", "forfait", 2.8, [
+    "Rebouchage et scellement périphérique au mortier adapté",
+    "Reprise localisée des parties dégradées autour du bloc",
+    "Dressage et finition des raccords avec la maçonnerie existante",
+    "Nettoyage de fin d’intervention",
+  ], { conditions: "Finition raccordée à l’existant, hors ravalement complet, peinture de façade et reprise structurelle.", rentabilite: "🟠 À contrôler", tags: ["boîte aux lettres", "maçonnerie", "mortier", "finition"] }),
+
   // ================= EQUIPEMENT =================
   p("EQP-ELECTRO", "Équipement", "Pose / remplacement d’un appareil électroménager", "u", 1.25, [
     "Mise en place et mise à niveau",
