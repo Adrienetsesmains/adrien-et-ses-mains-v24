@@ -389,6 +389,30 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Finitions courantes",
   ], { conditions: "Nombre de couches et type de peinture à préciser si nécessaire.", tags: ["peinture", "mur"] }),
 
+ p("PEINT-MURS-2C",
+    "Peinture",
+    "Mise en peinture des murs - 2 couches",
+    "m²",
+    0.30,
+    [
+      "Protection courante des zones conservées",
+      "Préparation légère du support prêt à peindre",
+      "Application de deux couches de peinture murale",
+      "Réalisation des réchampis",
+      "Contrôle et finitions courantes",
+    ],
+    {
+      conditions:
+        "Support globalement sain et prêt à peindre. Rebouchages importants, reprises renforcées, ratissage ou primaire spécifique comptés séparément.",
+      tags: [
+        "peinture",
+        "mur",
+        "2 couches",
+        "deux couches",
+        "finition",
+      ],
+    }
+  ),
   p("PEINT-PLAFOND", "Peinture", "Mise en peinture des plafonds", "m²", 0.25, [
     "Application de la peinture prévue sur support préparé",
     "Réalisation des réchampis",
@@ -788,6 +812,60 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Nettoyage de fin d’intervention",
   ], { conditions: "Finition raccordée à l’existant, hors ravalement complet, peinture de façade et reprise structurelle.", rentabilite: "🟠 À contrôler", tags: ["boîte aux lettres", "maçonnerie", "mortier", "finition"] }),
 
+ // ================= FIXATIONS / MAINS COURANTES =================
+  p("BRI-MAIN-COURANTE-REP",
+    "Bricolage / Menuiserie légère",
+    "Réparation / reprise de fixations de main courante",
+    "h",
+    1,
+    [
+      "Contrôle des fixations existantes accessibles",
+      "Dépose des éléments nécessaires à l’intervention",
+      "Retrait des fixations défectueuses",
+      "Reprise localisée des anciens points de fixation si nécessaire",
+      "Création de nouveaux points d’ancrage adaptés au support",
+      "Repose, réglage et contrôle de la tenue de la main courante",
+    ],
+    {
+      conditions:
+        "Méthode de fixation à adapter à la nature et à l’état du support. Hors renforcement structurel de la paroi. Reprises de peinture comptées séparément si nécessaires.",
+      rentabilite: "🟠 À contrôler",
+      tags: [
+        "main courante",
+        "rambarde",
+        "escalier",
+        "fixation",
+        "ancrage",
+        "réparation",
+      ],
+    }
+  ),
+
+  p(
+    "BRI-REB-FIX-MURAL",
+    "Bricolage / Menuiserie légère",
+    "Rebouchage et reprise locale d’anciens points de fixation",
+    "u",
+    0.25,
+    [
+      "Purge et nettoyage du point de fixation dégradé",
+      "Rebouchage avec produit adapté au support",
+      "Ponçage et préparation locale après séchage",
+    ],
+    {
+      conditions:
+        "Pour reprises localisées courantes. Hors réparation structurelle du support et hors mise en peinture.",
+      tags: [
+        "rebouchage",
+        "fixation",
+        "trou",
+        "mur",
+        "enduit",
+        "réparation",
+      ],
+    }
+  ),
+
   // ================= EQUIPEMENT =================
   p("EQP-ELECTRO", "Équipement", "Pose / remplacement d’un appareil électroménager", "u", 1.25, [
     "Mise en place et mise à niveau",
@@ -854,7 +932,64 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Fixations et ajustements courants",
   ], { conditions: "Accès sécurisé obligatoire. Hors étanchéité lourde et réfection complète.", rentabilite: "🟠 À contrôler", tags: ["rive", "finition", "toiture"] }),
 
-  // ================= JARDIN =================
+// ================= HABILLAGE SOUS-FACE =================
+  p(
+    "TOIT-HAB-DEPOSE-COMP",
+    "Toiture légère",
+    "Dépose complète d’un habillage de sous-face",
+    "m²",
+    0.22,
+    [
+      "Protection et préparation de la zone d’intervention",
+      "Dépose complète de l’habillage existant",
+      "Retrait des fixations accessibles devenues inutiles",
+      "Regroupement des éléments déposés",
+      "Contrôle visuel du support rendu accessible",
+    ],
+    {
+      conditions:
+        "Hors réparation ou remplacement des éléments porteurs découverts après dépose et hors évacuation en déchèterie.",
+      rentabilite: "🟠 À contrôler",
+      tags: [
+        "lambris",
+        "sous-face",
+        "sous toiture",
+        "dépose",
+        "habillage",
+      ],
+    }
+  ),
+
+  p(
+    "TOIT-HAB-PVC",
+    "Toiture légère",
+    "Pose d’un habillage PVC de sous-face",
+    "m²",
+    0.55,
+    [
+      "Contrôle du support existant accessible",
+      "Implantation de l’habillage",
+      "Pose des profils de départ et de finition",
+      "Découpe et pose des lames PVC",
+      "Fixation sur support adapté",
+      "Ajustements et finitions périphériques",
+    ],
+    {
+      conditions:
+        "Support existant sain, stable et apte à recevoir l’habillage. Fourniture PVC adaptée à l’usage prévu. Hors réparation de charpente, structure ou infiltration.",
+      rentabilite: "🟠 À contrôler",
+      tags: [
+        "PVC",
+        "lambris PVC",
+        "sous-face",
+        "sous toiture",
+        "habillage",
+        "extérieur",
+      ],
+    }
+  ),
+
+  // ================= JARDIN - REMISE EN ETAT =================
   p("JAR-TONTE", "Jardin", "Tonte de pelouse", "m²", 0.01, [
     "Tonte de la surface prévue",
     "Finitions courantes des zones accessibles",
@@ -897,6 +1032,33 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Réalisation de l’entretien prévu",
     "Nettoyage sommaire de fin d’intervention",
   ], { tags: ["jardin", "entretien"] }),
+
+   p(
+    "JAR-REMISE-ETAT",
+    "Jardin",
+    "Remise en état d’un espace vert",
+    "h",
+    1,
+    [
+      "Tonte ou débroussaillage selon l’état de la végétation",
+      "Taille légère des arbustes prévue au devis",
+      "Nettoyage des bordures et zones accessibles",
+      "Ramassage et regroupement des déchets verts",
+      "Nettoyage sommaire de fin d’intervention",
+    ],
+    {
+      conditions:
+        "Temps à adapter à la surface, à la hauteur et à la densité de la végétation. Hors élagage spécialisé et abattage.",
+      tags: [
+        "jardin",
+        "remise en état",
+        "tonte",
+        "débroussaillage",
+        "arbuste",
+        "nettoyage",
+      ],
+    }
+  ),
 
   // ================= DEPLACEMENT / LOGISTIQUE =================
   p("deplacement_premier_jour_chantier", "Déplacement / logistique", "Déplacement premier jour chantier", "km", 0, [
