@@ -276,6 +276,12 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Raccords et finitions courantes",
   ], { conditions: "Angles et supports courants.", tags: ["plinthe", "MDF", "PVC", "bois"] }),
 
+  p("SOL-PLINTHE-DEPOSE", "Sols", "Dépose de plinthes existantes", "ml", 0.08, [
+    "Dépose soignée des plinthes existantes",
+    "Retrait des résidus de fixation non adhérents",
+    "Regroupement des éléments déposés",
+  ], { conditions: "Hors réparation importante du support et hors évacuation en déchèterie.", tags: ["plinthe", "dépose"] }),
+
   p("SOL-PLINTHE-CARR", "Sols", "Pose de plinthes carrelées", "ml", 0.26, [
     "Découpe et implantation des plinthes",
     "Pose collée",
@@ -527,6 +533,20 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Raccordements accessibles et finitions courantes",
   ], { conditions: "Hors modification lourde de plomberie et hors renfort structurel du support.", tags: ["meuble vasque", "lavabo"] }),
 
+  p("PLOMB-MEUBLE-VASQUE-REEMPLOI", "Plomberie / Sanitaires", "Remplacement d’un meuble sous-vasque avec réemploi des équipements", "u", 5, [
+    "Déconnexion et dépose soigneuse de la vasque et de la robinetterie existantes",
+    "Dépose de l’ancien meuble et montage du nouveau meuble",
+    "Réinstallation de la vasque et de la robinetterie conservées",
+    "Fixation, raccordements accessibles et contrôle d’étanchéité",
+  ], { conditions: "Sous réserve du bon état, de la compatibilité et des dimensions de la vasque et de la robinetterie conservées. Hors modification lourde de plomberie et renfort structurel.", rentabilite: "🟠 À contrôler", tags: ["meuble vasque", "réemploi", "vasque", "robinet"] }),
+
+  p("PLOMB-POMME-HAUTE", "Plomberie / Sanitaires", "Pose d’une pomme haute de douche", "u", 1, [
+    "Contrôle de la compatibilité avec l’installation existante",
+    "Montage et fixation de la pomme haute et de son support",
+    "Raccordement sur la robinetterie existante accessible",
+    "Essai de fonctionnement et contrôle d’étanchéité",
+  ], { conditions: "Sur installation existante compatible, sans modification encastrée des alimentations.", tags: ["douche", "pomme haute", "pomme de tête"] }),
+
   p("PLOMB-WC", "Plomberie / Sanitaires", "Pose / remplacement d’un WC", "u", 3, [
     "Dépose de l’ancien WC si prévue",
     "Mise en place et fixation du nouvel équipement",
@@ -658,6 +678,34 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Pose de la nouvelle bouche",
   ], { tags: ["VMC", "bouche"] }),
 
+  p("VMC-ENTREE-AIR-HYGRO", "Ventilation", "Pose d’une entrée d’air hygroréglable", "u", 0.75, [
+    "Repérage et traçage de l’emplacement",
+    "Découpe courante du support accessible",
+    "Pose et fixation de l’entrée d’air",
+    "Contrôle de l’ouverture et nettoyage de la zone",
+  ], { conditions: "Sur coffre de volet roulant ou menuiserie compatible et accessible. Dimensionnement, réservation et absence d’obstacle à contrôler avant intervention.", tags: ["ventilation", "entrée d’air", "hygroréglable", "coffre volet roulant"] }),
+
+  p("VMC-TRAVERSEE-MUR", "Ventilation", "Création d’une traversée murale pour ventilation", "u", 3.5, [
+    "Repérage et contrôle de la zone de percement",
+    "Percement du mur au diamètre prévu",
+    "Mise en place du conduit de traversée",
+    "Calfeutrement et finitions courantes autour du passage",
+  ], { conditions: "Pour mur non porteur en matériau courant, accessible sur les deux faces et sans réseau dans la zone. Hors béton armé, pierre, amiante, travail en hauteur et reprise importante de façade.", rentabilite: "🟠 À contrôler", tags: ["ventilation", "traversée murale", "percement", "brique"] }),
+
+  p("VMC-EXTRACTEUR", "Ventilation", "Pose d’un extracteur d’air individuel", "u", 2, [
+    "Implantation et fixation de l’extracteur",
+    "Raccordement au conduit de rejet existant ou créé séparément",
+    "Raccordement sur alimentation électrique existante accessible",
+    "Essai de fonctionnement et finitions courantes",
+  ], { conditions: "Hors création de circuit électrique, modification du tableau et réseau de gaines. Appareil adapté au volume de sécurité de la pièce humide.", rentabilite: "🟠 À contrôler", tags: ["ventilation", "extracteur", "aérateur", "salle de bain"] }),
+
+  p("VMC-GRILLE-EXT", "Ventilation", "Pose d’une grille extérieure de ventilation", "u", 0.75, [
+    "Présentation et ajustement de la grille",
+    "Fixation sur le support extérieur",
+    "Calfeutrement périphérique courant",
+    "Contrôle du passage d’air",
+  ], { conditions: "Accès extérieur simple et sécurisé. Hors travail en hauteur ou reprise importante de façade.", tags: ["ventilation", "grille extérieure", "rejet extérieur"] }),
+
   p("VMC-NET", "Ventilation", "Nettoyage / entretien d’une bouche de ventilation", "u", 0.35, [
     "Dépose accessible de la bouche si nécessaire",
     "Nettoyage de l’élément",
@@ -690,6 +738,13 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Finitions courantes",
   ], { conditions: "Découpes d’évier/plaque comptées séparément si nécessaires.", rentabilite: "🟠 À contrôler", tags: ["plan de travail"] }),
 
+  p("CUI-PLAN-DEPOSE", "Cuisine", "Dépose d’un plan de travail existant", "ml", 0.75, [
+    "Déconnexion des équipements accessibles si prévue au devis",
+    "Découpe des joints et dépose soigneuse du plan de travail",
+    "Préservation des meubles et revêtements muraux conservés",
+    "Regroupement des éléments déposés",
+  ], { conditions: "Sous réserve d’une dépose possible sans détériorer la crédence ou les supports conservés. Hors évacuation en déchèterie et réparation des dommages cachés.", rentabilite: "🟠 À contrôler", tags: ["plan de travail", "dépose", "crédence conservée"] }),
+
   p("CUI-DECOUPE", "Cuisine", "Découpe d’un plan de travail", "u", 1.25, [
     "Traçage de la découpe",
     "Découpe pour l’équipement prévu",
@@ -709,6 +764,13 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Raccordement du vidage accessible",
     "Contrôle d’étanchéité",
   ], { conditions: "Découpe du plan de travail comptée séparément si nécessaire.", tags: ["évier"] }),
+
+  p("CUI-EVIER-DEPOSE-REPOSE", "Cuisine", "Dépose et repose d’un évier existant", "u", 3, [
+    "Déconnexion et dépose soigneuse de l’évier et de la robinetterie",
+    "Nettoyage des éléments conservés et préparation de la repose",
+    "Réinstallation, fixation et réalisation de l’étanchéité périphérique",
+    "Raccordement du vidage et de la robinetterie puis contrôle d’étanchéité",
+  ], { conditions: "Sous réserve du bon état et de la compatibilité des équipements conservés avec le nouveau plan de travail. Découpe du plan comptée séparément.", rentabilite: "🟠 À contrôler", tags: ["évier", "dépose", "repose", "réemploi", "robinetterie"] }),
 
   p("CUI-MITIGEUR", "Cuisine", "Pose d’un mitigeur de cuisine", "u", 1.25, [
     "Pose de la robinetterie",
