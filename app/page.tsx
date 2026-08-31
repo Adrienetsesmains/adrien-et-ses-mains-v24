@@ -4071,7 +4071,11 @@ y += 42;
 
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
-if (y + 82 > 292) {
+// Le pied de page de la dernière page commence à 256 mm.
+// On arrête donc tous les blocs de contenu à 250 mm pour garder une marge sûre.
+const limiteBasseContenu = 250;
+
+if (y + 72 > limiteBasseContenu) {
   doc.addPage();
   page += 1;
   y = 35;
@@ -4131,13 +4135,24 @@ doc.setFontSize(8);
 doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 }
 
-// Le cadre conditions mesure 72 mm de haut.
-// On repart donc après le cadre + marge, sinon le RIB chevauche les conditions.
-y = yConditions + 58 + 8;
+// Le cadre conditions mesure réellement 72 mm de haut.
+// On repart après ses 72 mm + 8 mm de marge.
+y = yConditions + 72 + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
-  if (y + 36 > 292) {
+  // Préparation des lignes avant de dessiner le cadre afin d'en calculer
+  // la hauteur exacte, notamment lorsque l'IBAN passe sur deux lignes.
+  const ibanCoupe = ribIban ? doc.splitTextToSize(ribIban, 56) : [];
+  const nombreLignesRib =
+    (ribTitulaire ? 1 : 0) +
+    (ribBanque ? 1 : 0) +
+    ibanCoupe.length +
+    (ribBic ? 1 : 0);
+
+  const hauteurBlocRib = Math.max(36, 14 + nombreLignesRib * 6);
+
+  if (y + hauteurBlocRib > limiteBasseContenu) {
     doc.addPage();
     page += 1;
     y = 35;
@@ -4145,7 +4160,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
 
   doc.setDrawColor(190, 145, 55);
   doc.setFillColor(248, 244, 236);
-  doc.roundedRect(15, y, 180, 32, 3, 3, "FD");
+  doc.roundedRect(15, y, 180, hauteurBlocRib, 3, 3, "FD");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
@@ -4168,7 +4183,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   }
 
   doc.setDrawColor(220);
-  doc.line(102, y + 6, 102, y + 27);
+  doc.line(102, y + 6, 102, y + hauteurBlocRib - 6);
 
   let ribY = y + 8;
 
@@ -4195,10 +4210,8 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
     doc.setFont("helvetica", "bold");
     doc.text("IBAN :", 108, ribY);
     doc.setFont("helvetica", "normal");
-
-    const ibanCoupe = doc.splitTextToSize(ribIban, 56);
     doc.text(ibanCoupe, 132, ribY);
-    ribY += ibanCoupe.length * 5;
+    ribY += ibanCoupe.length * 6;
   }
 
   if (ribBic) {
@@ -4211,7 +4224,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "normal");
 
-  y += 36;
+  y += hauteurBlocRib + 4;
 }
 
 const totalPages = doc.getNumberOfPages();
@@ -7766,3 +7779,4 @@ function GraphiqueCourbe({
     </div>
   );
 }
+
