@@ -874,6 +874,34 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
     "Nettoyage de fin d’intervention",
   ], { conditions: "Finition raccordée à l’existant, hors ravalement complet, peinture de façade et reprise structurelle.", rentabilite: "🟠 À contrôler", tags: ["boîte aux lettres", "maçonnerie", "mortier", "finition"] }),
 
+p(
+  "BRI-FENETRE-REG",
+  "Bricolage / Menuiserie légère",
+  "Réglage / petite réparation d’une fenêtre ou fenêtre de toit",
+  "u",
+  0.75,
+  [
+    "Contrôle de l’ouvrant et des éléments accessibles",
+    "Dépose partielle si nécessaire à l’intervention",
+    "Resserrage, réglage ou reprise simple de la quincaillerie",
+    "Repose et essai de fonctionnement",
+  ],
+  {
+    conditions:
+      "Pour intervention simple sur fenêtre ou fenêtre de toit existante. Hors remplacement complet de menuiserie, vitrage ou mécanisme complexe.",
+    tags: [
+      "fenêtre",
+      "fenêtre de toit",
+      "Velux",
+      "poignée",
+      "quincaillerie",
+      "réglage",
+      "resserrage",
+      "réparation",
+    ],
+  }
+),
+  
  // ================= FIXATIONS / MAINS COURANTES =================
   p("BRI-MAIN-COURANTE-REP",
     "Bricolage / Menuiserie légère",
