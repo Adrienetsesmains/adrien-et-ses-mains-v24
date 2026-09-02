@@ -17,17 +17,17 @@ const CLE_SAUVEGARDE_V24 = "tableauDeBordEntrepriseV24";
 const CLE_BACKUPS_V25 = "backupHistoriqueV25";
 const CLE_BACKUPS_V24 = "backupHistoriqueV24";
 
-// Le catalogue officiel est l’unique source des temps, tarifs, unités et détails PDF.
-// Les packs ne conservent que des identifiants et des quantités de départ.
-// Toute modification d’une prestation du catalogue actualise donc automatiquement les packs.
+// Le catalogue officiel est lâ€™unique source des temps, tarifs, unitÃ©s et dÃ©tails PDF.
+// Les packs ne conservent que des identifiants et des quantitÃ©s de dÃ©part.
+// Toute modification dâ€™une prestation du catalogue actualise donc automatiquement les packs.
 const TARIFS_PRESTATIONS = TARIFS_PRESTATIONS_BASE;
 
 const PACKS_PRESTATIONS_V25 = [
   {
     id: "PACK-SDB-DOUCHE",
-    nom: "Réfection d’un espace douche",
+    nom: "RÃ©fection dâ€™un espace douche",
     description:
-      "Dépose de la paroi et de la faïence, reprise du support, protection à l’eau, faïence et finitions.",
+      "DÃ©pose de la paroi et de la faÃ¯ence, reprise du support, protection Ã  lâ€™eau, faÃ¯ence et finitions.",
     lignes: [
       ["PEINT-PROT", 1],
       ["PLOMB-PAROI-DEP", 1],
@@ -44,9 +44,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-SDB-RENOVATION",
-    nom: "Rénovation complète d’une salle de bain",
+    nom: "RÃ©novation complÃ¨te dâ€™une salle de bain",
     description:
-      "Base complète : déposes, douche, faïence, sol PVC, peintures, meuble vasque et finitions.",
+      "Base complÃ¨te : dÃ©poses, douche, faÃ¯ence, sol PVC, peintures, meuble vasque et finitions.",
     lignes: [
       ["PEINT-PROT", 1],
       ["PLOMB-PAROI-DEP", 1],
@@ -73,9 +73,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-PEINT-PIECE",
-    nom: "Remise en peinture complète d’une pièce",
+    nom: "Remise en peinture complÃ¨te dâ€™une piÃ¨ce",
     description:
-      "Protection, préparation légère, deux couches sur murs et plafond, joints acryliques et nettoyage.",
+      "Protection, prÃ©paration lÃ©gÃ¨re, deux couches sur murs et plafond, joints acryliques et nettoyage.",
     lignes: [
       ["PEINT-PROT", 1],
       ["PEINT-PREP-LEG", 1],
@@ -87,9 +87,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-SOL-PVC",
-    nom: "Pose complète d’un sol PVC clipsable",
+    nom: "Pose complÃ¨te dâ€™un sol PVC clipsable",
     description:
-      "Dépose éventuelle, préparation du support, sous-couche, sol PVC, plinthes et nettoyage.",
+      "DÃ©pose Ã©ventuelle, prÃ©paration du support, sous-couche, sol PVC, plinthes et nettoyage.",
     lignes: [
       ["SOL-DEPOSE", 1],
       ["SOL-PREP-MECA", 1],
@@ -101,9 +101,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-BOITES-LETTRES",
-    nom: "Remplacement d’un bloc de boîtes aux lettres",
+    nom: "Remplacement dâ€™un bloc de boÃ®tes aux lettres",
     description:
-      "Dépose du bloc, préparation de la réservation, pose des boîtes, scellement et évacuation.",
+      "DÃ©pose du bloc, prÃ©paration de la rÃ©servation, pose des boÃ®tes, scellement et Ã©vacuation.",
     lignes: [
       ["BRI-BAL-DEPOSE-BLOC", 1],
       ["BRI-BAL-PREP", 1],
@@ -115,9 +115,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-SOUS-FACE-PVC",
-    nom: "Remplacement d’une sous-face par du lambris PVC",
+    nom: "Remplacement dâ€™une sous-face par du lambris PVC",
     description:
-      "Dépose complète de l’habillage existant, pose du PVC, évacuation et nettoyage.",
+      "DÃ©pose complÃ¨te de lâ€™habillage existant, pose du PVC, Ã©vacuation et nettoyage.",
     lignes: [
       ["TOIT-HAB-DEPOSE-COMP", 1],
       ["TOIT-HAB-PVC", 1],
@@ -127,9 +127,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-JARDIN-REMISE-ETAT",
-    nom: "Remise en état d’un jardin",
+    nom: "Remise en Ã©tat dâ€™un jardin",
     description:
-      "Entretien global d’un espace vert laissé sans entretien, avec nettoyage et évacuation.",
+      "Entretien global dâ€™un espace vert laissÃ© sans entretien, avec nettoyage et Ã©vacuation.",
     lignes: [
       ["JAR-REMISE-ETAT", 1],
       ["JAR-EVAC", 1],
@@ -137,9 +137,9 @@ const PACKS_PRESTATIONS_V25 = [
   },
   {
     id: "PACK-LOGEMENT-RELOCATION",
-    nom: "Remise en état d’un logement avant relocation",
+    nom: "Remise en Ã©tat dâ€™un logement avant relocation",
     description:
-      "Base adaptable : débarras, peinture, rénovation du sol et nettoyage général du logement.",
+      "Base adaptable : dÃ©barras, peinture, rÃ©novation du sol et nettoyage gÃ©nÃ©ral du logement.",
     lignes: [
       ["DEB-ENCOMBRANTS", 1],
       ["DEB-DECHETTERIE", 1],
@@ -189,7 +189,7 @@ const getPrixPrestation = (prestation: any, modeClient: string) => {
   if (!prestation) return 0;
 
   // ================= TARIF NORMAL =================
-  // Compatibilité ancien + nouveau catalogue.
+  // CompatibilitÃ© ancien + nouveau catalogue.
   let prixNormal = Number(
     prestation.prix220 ??
     prestation.prixMo220 ??
@@ -197,9 +197,9 @@ const getPrixPrestation = (prestation: any, modeClient: string) => {
     0
   );
 
-  // Sécurité :
-  // si aucun prix n'est stocké mais qu'un temps existe,
-  // calcul automatique sur la base 220 € / journée de 7 h.
+  // SÃ©curitÃ© :
+  // si aucun prix n'est stockÃ© mais qu'un temps existe,
+  // calcul automatique sur la base 220 â‚¬ / journÃ©e de 7 h.
   if (
     (!prixNormal || prixNormal <= 0) &&
     Number(prestation.heuresUnite || 0) > 0
@@ -216,16 +216,16 @@ const getPrixPrestation = (prestation: any, modeClient: string) => {
   }
 
   // ================= DEPLACEMENT =================
-  // Aucun coefficient Jérémie sur les frais de déplacement.
+  // Aucun coefficient JÃ©rÃ©mie sur les frais de dÃ©placement.
   if (
     prestation.typeTravaux === "deplacement" ||
-    prestation.categorie === "Déplacement / logistique"
+    prestation.categorie === "DÃ©placement / logistique"
   ) {
     return prixNormal;
   }
 
   // ================= JEREMIE =================
-  // 190 €/jour au lieu de 220 €/jour.
+  // 190 â‚¬/jour au lieu de 220 â‚¬/jour.
   return Math.round(prixNormal * (190 / 220) * 100) / 100;
 };
 
@@ -315,10 +315,10 @@ type Dossier = {
   acompte: number;
   reste: number;
 
-  // Montant total encaissé actuellement sur le dossier
+  // Montant total encaissÃ© actuellement sur le dossier
   montantEncaisse?: number;
 
-  // Mémoire séparée de l'acompte réellement reçu
+  // MÃ©moire sÃ©parÃ©e de l'acompte rÃ©ellement reÃ§u
   montantAcompteEncaisse?: number;
 
   pourcentageAcompte?: number;
@@ -348,7 +348,7 @@ type Dossier = {
   // Date du dernier paiement / paiement complet
   datePaiement?: string;
 
-  // Date réelle à laquelle l'acompte a été reçu
+  // Date rÃ©elle Ã  laquelle l'acompte a Ã©tÃ© reÃ§u
   dateAcompte?: string;
 
   // ================= RAPPELS =================
@@ -381,11 +381,11 @@ const getPrestationsByCategorie = (categorie: string) => {
 };
 
 const calculerPrix = (prestation: any, quantite: number) => {
-  if (prestation.unite === "m²") return prestation.prix220 * quantite;
+  if (prestation.unite === "mÂ²") return prestation.prix220 * quantite;
   if (prestation.unite === "ml") return prestation.prix220 * quantite;
   if (prestation.unite === "h") return prestation.prix220 * quantite;
   if (prestation.unite === "u") return prestation.prix220 * quantite;
-  if (prestation.unite === "m³") return prestation.prix220 * quantite;
+  if (prestation.unite === "mÂ³") return prestation.prix220 * quantite;
 
   if (prestation.unite === "forfait") return prestation.prix220;
 
@@ -397,14 +397,14 @@ const calculerTemps = (prestation: any, quantite: number) => {
 };
 
 const typesTravaux = [
-  ["plafond", "Plafond dégât des eaux"],
+  ["plafond", "Plafond dÃ©gÃ¢t des eaux"],
   ["peinture", "Peinture murs / plafonds"],
   ["parquet", "Parquet / sol PVC"],
   ["cuisine", "Cuisine simple"],
   ["wc", "WC / petite plomberie"],
   ["vmc", "VMC simple flux"],
-  ["placo", "Placo / doublage léger"],
-  ["gouttiere", "Gouttière / descente"],
+  ["placo", "Placo / doublage lÃ©ger"],
+  ["gouttiere", "GouttiÃ¨re / descente"],
 ];
 
 const clientsBase = [
@@ -416,7 +416,7 @@ const clientsBase = [
   adresseAgence: "",
   complementAdresse: "",
   notes:
-    "Sous-traitance Jérémie — base 190 €/jour — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
+    "Sous-traitance JÃ©rÃ©mie â€” base 190 â‚¬/jour â€” hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrÃ©tariat: 05 64 72 22 98",
   modeClient: "jeremie",
   agence: "",
 },
@@ -427,7 +427,7 @@ const clientsBase = [
     adresse: "Naves",
     adresseAgence: "",
     complementAdresse: "",
-    notes: "Particulier — ami proche — aime le travail parfait.",
+    notes: "Particulier â€” ami proche â€” aime le travail parfait.",
     modeClient: "normal",
     agence: "",
   },
@@ -439,7 +439,7 @@ const clientsBase = [
   adresseAgence: "PO, 1 Gal du Midi - 31250 Revel",
   complementAdresse: "",
   agence: "Patrimoine Occitan",
-  notes: "05 61 27 72 77 Agence Patrimoine Occitan — devis serrés et rapides.",
+  notes: "05 61 27 72 77 Agence Patrimoine Occitan â€” devis serrÃ©s et rapides.",
   modeClient: "agence",
 },
   {
@@ -450,7 +450,7 @@ const clientsBase = [
     adresseAgence: "34 Bd des docteurs Sicard - 81100 Castres",
     complementAdresse: "",
     agence: "Foncia",
-    notes: "05 63 71 81 31 Agence Foncia — être réactif sur devis et travaux.",
+    notes: "05 63 71 81 31 Agence Foncia â€” Ãªtre rÃ©actif sur devis et travaux.",
     modeClient: "agence",
   },
 ];
@@ -485,9 +485,9 @@ function formatNumero(prefix: string, numero: number) {
   return `${prefix}-2026-${String(numero).padStart(3, "0")}`;
 }
 
-// Numéros de départ validés au 02/09/2026.
-// Math.max empêche une ancienne sauvegarde locale ou cloud de faire reculer
-// les compteurs, tout en conservant automatiquement une valeur plus élevée.
+// NumÃ©ros de dÃ©part validÃ©s au 02/09/2026.
+// Math.max empÃªche une ancienne sauvegarde locale ou cloud de faire reculer
+// les compteurs, tout en conservant automatiquement une valeur plus Ã©levÃ©e.
 const PROCHAIN_NUMERO_DEVIS = 36;
 const PROCHAIN_NUMERO_FACTURE = 17;
 
@@ -510,14 +510,14 @@ function nomTravaux(type: string) {
 }
 
 function champsTravaux(type: string) {
-  if (type === "peinture") return ["Murs m²", "Plafonds m²", "Reprises m²", "Joints ml", "Portes/finitions"];
-  if (type === "plafond") return ["Plafond 1 m²", "Plafond 2 m²", "Tâches m²", "Bande ml", "Placo m²"];
-  if (type === "parquet") return ["Sol m²", "Plinthes ml", "Seuils", "Prépa support", "Dépose m²"];
-  if (type === "cuisine") return ["Éléments", "Plan travail ml", "Découpes", "Électroménager", "Raccords"];
-  if (type === "wc") return ["Intervention", "Support", "Raccords", "Silicone", "Dépose"];
-  if (type === "vmc") return ["Groupe VMC", "Bouches", "Gaines ml", "Électricité", "Test"];
-  if (type === "placo") return ["Placo m²", "Bandes ml", "Isolation m²", "Découpes", "Dépose"];
-  if (type === "gouttiere") return ["Gouttière ml", "Descente ml", "Coudes", "Dépose", "Accès"];
+  if (type === "peinture") return ["Murs mÂ²", "Plafonds mÂ²", "Reprises mÂ²", "Joints ml", "Portes/finitions"];
+  if (type === "plafond") return ["Plafond 1 mÂ²", "Plafond 2 mÂ²", "TÃ¢ches mÂ²", "Bande ml", "Placo mÂ²"];
+  if (type === "parquet") return ["Sol mÂ²", "Plinthes ml", "Seuils", "PrÃ©pa support", "DÃ©pose mÂ²"];
+  if (type === "cuisine") return ["Ã‰lÃ©ments", "Plan travail ml", "DÃ©coupes", "Ã‰lectromÃ©nager", "Raccords"];
+  if (type === "wc") return ["Intervention", "Support", "Raccords", "Silicone", "DÃ©pose"];
+  if (type === "vmc") return ["Groupe VMC", "Bouches", "Gaines ml", "Ã‰lectricitÃ©", "Test"];
+  if (type === "placo") return ["Placo mÂ²", "Bandes ml", "Isolation mÂ²", "DÃ©coupes", "DÃ©pose"];
+  if (type === "gouttiere") return ["GouttiÃ¨re ml", "Descente ml", "Coudes", "DÃ©pose", "AccÃ¨s"];
   return ["Q1", "Q2", "R1", "R2", "Option"];
 }
 function detailsTravaux(ligne: LigneTravaux): string[] {
@@ -544,34 +544,34 @@ function detailsTravaux(ligne: LigneTravaux): string[] {
   const d: string[] = [];
 
   if (ligne.type === "peinture") {
-    if (ligne.q1 > 0) d.push("Préparation et peinture des murs");
-    if (ligne.q2 > 0) d.push("Préparation et peinture des plafonds");
-    if (ligne.r1 > 0) d.push("Reprises localisées et enduits");
-    if (ligne.r2 > 0) d.push("Réalisation des joints acryliques");
-    if (ligne.option > 0) d.push("Finitions complémentaires");
+    if (ligne.q1 > 0) d.push("PrÃ©paration et peinture des murs");
+    if (ligne.q2 > 0) d.push("PrÃ©paration et peinture des plafonds");
+    if (ligne.r1 > 0) d.push("Reprises localisÃ©es et enduits");
+    if (ligne.r2 > 0) d.push("RÃ©alisation des joints acryliques");
+    if (ligne.option > 0) d.push("Finitions complÃ©mentaires");
   }
 
   if (ligne.type === "plafond") {
-    if (ligne.q1 > 0) d.push("Préparation et peinture plafond zone 1");
-    if (ligne.q2 > 0) d.push("Préparation et peinture plafond zone 2");
+    if (ligne.q1 > 0) d.push("PrÃ©paration et peinture plafond zone 1");
+    if (ligne.q2 > 0) d.push("PrÃ©paration et peinture plafond zone 2");
     if (ligne.r1 > 0) d.push("Traitement des taches visibles");
-    if (ligne.r2 > 0) d.push("Reprise de bande à joint");
-    if (ligne.option > 0) d.push("Reprise placo localisée");
+    if (ligne.r2 > 0) d.push("Reprise de bande Ã  joint");
+    if (ligne.option > 0) d.push("Reprise placo localisÃ©e");
   }
 
   if (ligne.type === "parquet") {
-    if (ligne.q1 > 0) d.push("Pose du revêtement de sol prévu");
+    if (ligne.q1 > 0) d.push("Pose du revÃªtement de sol prÃ©vu");
     if (ligne.q2 > 0) d.push("Pose des plinthes");
     if (ligne.r1 > 0) d.push("Pose des seuils");
-    if (ligne.r2 > 0) d.push("Préparation du support");
-    if (ligne.option > 0) d.push("Dépose de l’ancien revêtement");
+    if (ligne.r2 > 0) d.push("PrÃ©paration du support");
+    if (ligne.option > 0) d.push("DÃ©pose de lâ€™ancien revÃªtement");
   }
 
   if (ligne.type === "cuisine") {
-    if (ligne.q1 > 0) d.push("Pose des éléments de cuisine");
+    if (ligne.q1 > 0) d.push("Pose des Ã©lÃ©ments de cuisine");
     if (ligne.q2 > 0) d.push("Pose du plan de travail");
-    if (ligne.r1 > 0) d.push("Découpes techniques prévues");
-    if (ligne.r2 > 0) d.push("Mise en place électroménager");
+    if (ligne.r1 > 0) d.push("DÃ©coupes techniques prÃ©vues");
+    if (ligne.r2 > 0) d.push("Mise en place Ã©lectromÃ©nager");
     if (ligne.option > 0) d.push("Raccordements simples");
   }
 
@@ -580,40 +580,40 @@ function detailsTravaux(ligne: LigneTravaux): string[] {
     if (ligne.q2 > 0) d.push("Reprise du support de fixation");
     if (ligne.r1 > 0) d.push("Raccordements accessibles");
     if (ligne.r2 > 0) d.push("Joint silicone");
-    if (ligne.option > 0) d.push("Dépose ancien équipement");
+    if (ligne.option > 0) d.push("DÃ©pose ancien Ã©quipement");
   }
 
   if (ligne.type === "vmc") {
     if (ligne.q1 > 0) d.push("Pose ou remplacement du groupe VMC");
-    if (ligne.q2 > 0) d.push("Pose des bouches prévues");
+    if (ligne.q2 > 0) d.push("Pose des bouches prÃ©vues");
     if (ligne.r1 > 0) d.push("Passage ou raccordement des gaines");
-    if (ligne.r2 > 0) d.push("Raccordement électrique simple");
+    if (ligne.r2 > 0) d.push("Raccordement Ã©lectrique simple");
     if (ligne.option > 0) d.push("Mise en service et test");
   }
 
   if (ligne.type === "placo") {
     if (ligne.q1 > 0) d.push("Pose ou reprise placo");
     if (ligne.q2 > 0) d.push("Bandes et joints");
-    if (ligne.r1 > 0) d.push("Isolation prévue");
-    if (ligne.r2 > 0) d.push("Découpes et ajustements");
-    if (ligne.option > 0) d.push("Dépose partielle");
+    if (ligne.r1 > 0) d.push("Isolation prÃ©vue");
+    if (ligne.r2 > 0) d.push("DÃ©coupes et ajustements");
+    if (ligne.option > 0) d.push("DÃ©pose partielle");
   }
 
   if (ligne.type === "gouttiere") {
-    if (ligne.q1 > 0) d.push("Pose de gouttière");
+    if (ligne.q1 > 0) d.push("Pose de gouttiÃ¨re");
     if (ligne.q2 > 0) d.push("Pose de descente");
     if (ligne.r1 > 0) d.push("Raccords et coudes");
-    if (ligne.r2 > 0) d.push("Dépose ancienne installation");
-    if (ligne.option > 0) d.push("Accès et travail en hauteur");
+    if (ligne.r2 > 0) d.push("DÃ©pose ancienne installation");
+    if (ligne.option > 0) d.push("AccÃ¨s et travail en hauteur");
   }
 
   if (d.length > 0) return d;
 
   return [
-    "Réalisation de la prestation prévue au devis",
+    "RÃ©alisation de la prestation prÃ©vue au devis",
     "Ajustements simples",
     "Finitions standards",
-    "Nettoyage de fin d’intervention",
+    "Nettoyage de fin dâ€™intervention",
   ];
 }
 function prixLigne(ligne: LigneTravaux, modeClient: string) {
@@ -751,7 +751,7 @@ setTypeRdv(b.typeRdv || "visite");
     setComplementAdresse(b.complementAdresse || "");
   }
 
-  alert("✅ Sauvegarde restaurée");
+  alert("âœ… Sauvegarde restaurÃ©e");
 }; 
   
 const appliquerSauvegardeComplete = (data: any) => {
@@ -854,13 +854,13 @@ const envoyerCloud = async () => {
 
   if (error) {
     console.error("Erreur cloud :", error);
-    alert("❌ Erreur envoi cloud");
+    alert("âŒ Erreur envoi cloud");
     return;
   }
 
   localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(data));
 
-  alert("✅ Données complètes envoyées au cloud");
+  alert("âœ… DonnÃ©es complÃ¨tes envoyÃ©es au cloud");
 };
 
 const recupererCloud = async () => {
@@ -871,13 +871,13 @@ const recupererCloud = async () => {
     .single();
 
   if (error) {
-    console.error("Erreur récupération :", error);
-    alert("❌ Erreur récupération cloud");
+    console.error("Erreur rÃ©cupÃ©ration :", error);
+    alert("âŒ Erreur rÃ©cupÃ©ration cloud");
     return;
   }
 
   if (!data?.data) {
-    alert("Aucune donnée cloud trouvée");
+    alert("Aucune donnÃ©e cloud trouvÃ©e");
     return;
   }
 
@@ -888,7 +888,7 @@ const recupererCloud = async () => {
     JSON.stringify(data.data)
   );
 
-  alert("✅ Données complètes récupérées depuis le cloud");
+  alert("âœ… DonnÃ©es complÃ¨tes rÃ©cupÃ©rÃ©es depuis le cloud");
 };
 
   const importRef = useRef<HTMLInputElement | null>(null);
@@ -930,13 +930,13 @@ const [ribIban, setRibIban] = useState("");
 const [ribBic, setRibBic] = useState("");
 const [ribBanque, setRibBanque] = useState("");
 
-  const [client, setClient] = useState("Jérémie Meurisse");
+  const [client, setClient] = useState("JÃ©rÃ©mie Meurisse");
   const [telephone, setTelephone] = useState("06 50 95 10 89");
   const [email, setEmail] = useState("");
   const [adresse, setAdresse] = useState("Revel");
   const [adresseAgence, setAdresseAgence] = useState("");
   const [complementAdresse, setComplementAdresse] = useState("");
-  const [notes, setNotes] = useState("Sous-traitance Jérémie — base 190 €/jour — hors fournitures.");
+  const [notes, setNotes] = useState("Sous-traitance JÃ©rÃ©mie â€” base 190 â‚¬/jour â€” hors fournitures.");
   const [locataire, setLocataire] = useState("");
 const [telephoneLocataire, setTelephoneLocataire] = useState("");
 const [proprietaire, setProprietaire] = useState("");
@@ -1099,8 +1099,8 @@ setTypeRdv(b.typeRdv || "visite");
     }
   }
 
-  // À chaque nouvelle ouverture de l’application, on conserve l’historique
-  // chargé mais on repart volontairement sur une fiche Nouveau vide.
+  // Ã€ chaque nouvelle ouverture de lâ€™application, on conserve lâ€™historique
+  // chargÃ© mais on repart volontairement sur une fiche Nouveau vide.
   nouveauDossier();
   setSauvegardePrete(true);
 }, []);
@@ -1196,14 +1196,14 @@ ribIban,
 ribBic,
 ribBanque,
 ]);
-// 🔒 BACKUP AUTOMATIQUE (historique sécurisé avec versions)
+// ðŸ”’ BACKUP AUTOMATIQUE (historique sÃ©curisÃ© avec versions)
 
 useEffect(() => {
   if (!sauvegardePrete) return;
 
  const donnees = construireSauvegardeComplete();
 
-  // 🔁 historique des sauvegardes
+  // ðŸ” historique des sauvegardes
   const backupsV25 = localStorage.getItem(CLE_BACKUPS_V25);
   const backupsV24 = localStorage.getItem(CLE_BACKUPS_V24);
   const backups = JSON.parse(backupsV25 || backupsV24 || "[]");
@@ -1216,7 +1216,7 @@ useEffect(() => {
     data: donnees,
   });
 
-  // 🔒 garde seulement les 10 dernières sauvegardes
+  // ðŸ”’ garde seulement les 10 derniÃ¨res sauvegardes
   const backupsLimites = backups.slice(-10);
 
   localStorage.setItem(CLE_BACKUPS_V25, JSON.stringify(backupsLimites));
@@ -1429,23 +1429,23 @@ const margeFournitures =
   const reste = total - acompte;
   const resteReel = total - montantEncaisse;
 
-  let rentabilite = "🟢 Correcte";
-  if (total < 600 && modeClient === "jeremie") rentabilite = "🟠 À surveiller";
-  if (total < 450) rentabilite = "🔴 Trop bas";
+  let rentabilite = "ðŸŸ¢ Correcte";
+  if (total < 600 && modeClient === "jeremie") rentabilite = "ðŸŸ  Ã€ surveiller";
+  if (total < 450) rentabilite = "ðŸ”´ Trop bas";
 
   // ================= ESTIMATION RAPIDE =================
   const chantierARisque = lignesTravaux.some((l) =>
     ["placo", "wc", "vmc", "gouttiere"].includes(l.type) ||
     l.prestationNom?.toLowerCase().includes("fuite") ||
     l.prestationNom?.toLowerCase().includes("depose") ||
-    l.prestationNom?.toLowerCase().includes("dépose") ||
-    l.prestationNom?.toLowerCase().includes("ragréage")
+    l.prestationNom?.toLowerCase().includes("dÃ©pose") ||
+    l.prestationNom?.toLowerCase().includes("ragrÃ©age")
   );
 
   const chantierSimple = lignesTravaux.every((l) =>
     ["peinture", "parquet"].includes(l.type) &&
     !l.prestationNom?.toLowerCase().includes("depose") &&
-    !l.prestationNom?.toLowerCase().includes("dépose") &&
+    !l.prestationNom?.toLowerCase().includes("dÃ©pose") &&
     !l.prestationNom?.toLowerCase().includes("reprise")
   );
 
@@ -1588,12 +1588,12 @@ const supprimerClientEnregistre = (nomClient: string) => {
   );
 
   if (!clientExiste) {
-    alert("Ce client n'est pas enregistré.");
+    alert("Ce client n'est pas enregistrÃ©.");
     return;
   }
 
   const confirmation = window.confirm(
-    `Supprimer le client enregistré "${nomClient}" ?`
+    `Supprimer le client enregistrÃ© "${nomClient}" ?`
   );
 
   if (!confirmation) return;
@@ -1604,7 +1604,7 @@ const supprimerClientEnregistre = (nomClient: string) => {
     )
   );
 
-  alert("Client supprimé des clients enregistrés.");
+  alert("Client supprimÃ© des clients enregistrÃ©s.");
 };
 const ajouterLigne = () => {
   const nouvelleLigne: LigneTravaux = {
@@ -1826,7 +1826,7 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   setFactureSap(false);
   setNumeroSap("");
 
-  // Le RDV est un événement, pas un devis
+  // Le RDV est un Ã©vÃ©nement, pas un devis
   setStatutDevis("rdv");
   setStatutChantier("rdv_client");
   setFacturePayee(false);
@@ -1886,8 +1886,8 @@ const enregistrerDossier = (
 
       montantEncaisse: estEvenementSimple ? 0 : montantEncaisse,
 
-    // On conserve la mémoire de l'acompte déjà enregistré.
-    // Important : ne pas la perdre lorsqu'on réenregistre le dossier.
+    // On conserve la mÃ©moire de l'acompte dÃ©jÃ  enregistrÃ©.
+    // Important : ne pas la perdre lorsqu'on rÃ©enregistre le dossier.
     montantAcompteEncaisse: estEvenementSimple
       ? 0
       : historique.find((d) => d.id === idFinal)?.montantAcompteEncaisse ?? 0,
@@ -1977,7 +1977,7 @@ fraisDeplacementManuel:
   };
 
   // ================= MEMOIRE CLIENT =================
-  // Même un RDV enregistre la fiche client pour pouvoir faire le devis plus tard.
+  // MÃªme un RDV enregistre la fiche client pour pouvoir faire le devis plus tard.
   if (client.trim()) {
     const ficheClient: ClientEnregistre = {
       nom: client.trim(),
@@ -2033,10 +2033,10 @@ fraisDeplacementManuel:
   if (!silencieux) {
     alert(
       estRdv
-        ? "RDV enregistré"
+        ? "RDV enregistrÃ©"
         : estRappel
-        ? "Rappel enregistré"
-        : "Dossier enregistré"
+        ? "Rappel enregistrÃ©"
+        : "Dossier enregistrÃ©"
     );
   }
 };
@@ -2166,8 +2166,8 @@ if (d.typeEvenement === "rdv") {
   setReferenceChantier(d.referenceChantier || "");
   setComplementAdresse(d.complementAdresse || "");
 
-  // La fiche doit d'abord être rendue après setFicheOuverte(true), puis on
-  // remonte précisément sur le bloc client du dossier ouvert.
+  // La fiche doit d'abord Ãªtre rendue aprÃ¨s setFicheOuverte(true), puis on
+  // remonte prÃ©cisÃ©ment sur le bloc client du dossier ouvert.
   setTimeout(() => {
     ficheClientRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -2235,7 +2235,7 @@ const deplacerEvenementCalendrier = (
 
 const ajouterJourChantier = (dossier: Dossier) => {
   const nouvelleDate = window.prompt(
-    "Date à ajouter au planning chantier au format JJ/MM/AAAA :"
+    "Date Ã  ajouter au planning chantier au format JJ/MM/AAAA :"
   );
 
   if (!nouvelleDate) return;
@@ -2247,7 +2247,7 @@ const ajouterJourChantier = (dossier: Dossier) => {
       const planningActuel = d.planningChantier || [];
 
       if (planningActuel.includes(nouvelleDate)) {
-        alert("Cette date est déjà prévue pour ce chantier.");
+        alert("Cette date est dÃ©jÃ  prÃ©vue pour ce chantier.");
         return d;
       }
 
@@ -2279,7 +2279,7 @@ const creerRappelDepuisCalendrier = (date: Date) => {
   const dateFormatee = date.toLocaleDateString("fr-FR");
 
   const texte = window.prompt(
-    "Note / rappel à enregistrer :\nExemple : acheter peinture, rappeler client, commander fournitures..."
+    "Note / rappel Ã  enregistrer :\nExemple : acheter peinture, rappeler client, commander fournitures..."
   );
 
   if (!texte) return;
@@ -2358,7 +2358,7 @@ const creerRappelDepuisCalendrier = (date: Date) => {
 
 const supprimerDossier = (id: number) => {
   const confirmation = window.confirm(
-    "Voulez-vous vraiment supprimer ce dossier ? Cette action est définitive."
+    "Voulez-vous vraiment supprimer ce dossier ? Cette action est dÃ©finitive."
   );
 
   if (!confirmation) return;
@@ -2426,7 +2426,7 @@ const ouvrirGoogleCalendar = ({
   date: string;
 }) => {
   if (!date) {
-    alert("Date manquante pour créer l'événement Google");
+    alert("Date manquante pour crÃ©er l'Ã©vÃ©nement Google");
     return;
   }
 
@@ -2464,11 +2464,11 @@ Veuillez trouver ci-joint le devis ${numeroDevis} concernant votre demande de tr
 
 Ce devis reste valable 30 jours.
 
-Je reste disponible pour toute question ou ajustement si nécessaire.
+Je reste disponible pour toute question ou ajustement si nÃ©cessaire.
 
-Belle journée,
+Belle journÃ©e,
 
-Merci pour la confiance accordée`;
+Merci pour la confiance accordÃ©e`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent(
     sujet
@@ -2483,15 +2483,15 @@ const envoyerFactureMail = () => {
 
   const corps = `Bonjour ${client},
 
-Veuillez trouver ci-joint la facture ${numeroFacture} concernant les travaux réalisés.
+Veuillez trouver ci-joint la facture ${numeroFacture} concernant les travaux rÃ©alisÃ©s.
 
-Le reste à payer est de ${Math.max(0, calcul.total - montantEncaisse)} €.
+Le reste Ã  payer est de ${Math.max(0, calcul.total - montantEncaisse)} â‚¬.
 
 Je reste disponible si besoin.
 
-Belle journée,
+Belle journÃ©e,
 
-Merci pour la confiance accordée`;
+Merci pour la confiance accordÃ©e`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent(
     sujet
@@ -2508,17 +2508,17 @@ const preparerRelance = async (d: Dossier) => {
 
   const corps = `Bonjour ${d.client},
 
-Je me permets de revenir vers vous concernant la facture ${d.numeroFacture}, établie suite au devis signé ${d.numeroDevis}.
+Je me permets de revenir vers vous concernant la facture ${d.numeroFacture}, Ã©tablie suite au devis signÃ© ${d.numeroDevis}.
 
-Le règlement prévu pour un montant restant de ${d.reste} € semble ne pas avoir encore été réceptionné.
+Le rÃ¨glement prÃ©vu pour un montant restant de ${d.reste} â‚¬ semble ne pas avoir encore Ã©tÃ© rÃ©ceptionnÃ©.
 
-Sauf erreur de ma part, pouvez-vous me confirmer la date de règlement prévue ?
+Sauf erreur de ma part, pouvez-vous me confirmer la date de rÃ¨glement prÃ©vue ?
 
 Je reste bien entendu disponible si besoin.
 
-Belle journée,
+Belle journÃ©e,
 
-Merci pour la confiance accordée`;
+Merci pour la confiance accordÃ©e`;
 
   const reponse = await fetch("/api/envoyer-mail", {
     method: "POST",
@@ -2535,11 +2535,11 @@ Merci pour la confiance accordée`;
   });
 
   if (!reponse.ok) {
-    alert("❌ Erreur lors de l’envoi de la relance.");
+    alert("âŒ Erreur lors de lâ€™envoi de la relance.");
     return;
   }
 
-  alert("✅ Relance envoyée avec la facture en pièce jointe.");
+  alert("âœ… Relance envoyÃ©e avec la facture en piÃ¨ce jointe.");
 };
 
 const moisActuel = moisSelectionne;
@@ -2587,13 +2587,13 @@ const tableauMensuel = useMemo(() => {
   const encaissementsUniques = [...facturesDuMois, ...devisDuMoisSansFacture].map(
     (d) => ({
       cle: `${d.numeroFacture || d.numeroDevis}-${d.montantEncaisse}`,
-      numero: d.numeroFacture || d.numeroDevis || "Sans numéro",
+      numero: d.numeroFacture || d.numeroDevis || "Sans numÃ©ro",
       client:
         d.clientFinalNom ||
         d.locataire ||
         d.proprietaire ||
         d.client ||
-        "Client non renseigné",
+        "Client non renseignÃ©",
       chantier:
         d.clientFinalAdresse ||
         d.adresse ||
@@ -2655,8 +2655,8 @@ const tableauMensuel = useMemo(() => {
     onClick={() => setDetailsEncaissementsOuverts(!detailsEncaissementsOuverts)}
     className="flex w-full items-center justify-between text-left font-semibold text-slate-800"
   >
-    <span>Détail des encaissements</span>
-    <span>{detailsEncaissementsOuverts ? "▲ Masquer" : "▼ Afficher"}</span>
+    <span>DÃ©tail des encaissements</span>
+    <span>{detailsEncaissementsOuverts ? "â–² Masquer" : "â–¼ Afficher"}</span>
   </button>
 
   {detailsEncaissementsOuverts && (
@@ -2670,7 +2670,7 @@ const tableauMensuel = useMemo(() => {
             className="rounded-lg border border-slate-200 bg-slate-50 p-2"
           >
             <p className="font-semibold text-slate-900">
-              {e.numero} — {e.montant} €
+              {e.numero} â€” {e.montant} â‚¬
             </p>
             <p className="text-slate-600">{e.client}</p>
             <p className="text-slate-500">{e.chantier}</p>
@@ -2780,14 +2780,14 @@ const donneesGraphique = useMemo(() => {
     const annee = dateMois.getFullYear();
 
     // ============================================================
-    // ENCAISSEMENTS RÉELS DU MOIS
+    // ENCAISSEMENTS RÃ‰ELS DU MOIS
     //
-    // Chaque dossier peut maintenant générer :
+    // Chaque dossier peut maintenant gÃ©nÃ©rer :
     //
-    // 1 - un acompte à sa vraie date
-    // 2 - un solde à sa vraie date
+    // 1 - un acompte Ã  sa vraie date
+    // 2 - un solde Ã  sa vraie date
     //
-    // montantEncaisse reste le TOTAL encaissé sur le dossier.
+    // montantEncaisse reste le TOTAL encaissÃ© sur le dossier.
     // On ne modifie donc pas le fonctionnement actuel.
     // ============================================================
 
@@ -2809,14 +2809,14 @@ const donneesGraphique = useMemo(() => {
         parseDateFr(d.dateAcompte || "");
 
       /*
-       * COMPATIBILITÉ AVEC LES DOSSIERS EXISTANTS :
+       * COMPATIBILITÃ‰ AVEC LES DOSSIERS EXISTANTS :
        *
-       * Si le dossier n'est pas encore totalement payé,
-       * mais possède déjà un montant encaissé et une datePaiement,
-       * il s'agit très probablement de l'acompte enregistré
-       * avec l'ancien système.
+       * Si le dossier n'est pas encore totalement payÃ©,
+       * mais possÃ¨de dÃ©jÃ  un montant encaissÃ© et une datePaiement,
+       * il s'agit trÃ¨s probablement de l'acompte enregistrÃ©
+       * avec l'ancien systÃ¨me.
        *
-       * On peut donc encore le récupérer automatiquement.
+       * On peut donc encore le rÃ©cupÃ©rer automatiquement.
        */
       if (
         montantAcompteReel <= 0 &&
@@ -2831,7 +2831,7 @@ const donneesGraphique = useMemo(() => {
           parseDateFr(d.datePaiement || "");
       }
 
-      // Ajout de l'acompte dans SON mois réel
+      // Ajout de l'acompte dans SON mois rÃ©el
       if (
         montantAcompteReel > 0 &&
         dateAcompteReelle &&
@@ -2850,10 +2850,10 @@ const donneesGraphique = useMemo(() => {
           parseDateFr(d.datePaiement || "");
 
         /*
-         * montantEncaisse contient le total reçu.
+         * montantEncaisse contient le total reÃ§u.
          *
          * Si acompte :
-         * 1500 total encaissé
+         * 1500 total encaissÃ©
          * - 500 acompte
          * = 1000 solde
          *
@@ -2879,7 +2879,7 @@ const donneesGraphique = useMemo(() => {
     });
 
     // ============================================================
-    // DÉPENSES RÉELLES DU MOIS
+    // DÃ‰PENSES RÃ‰ELLES DU MOIS
     // ============================================================
 
     const depensesDuMois = depenses.filter((depense) => {
@@ -2903,7 +2903,7 @@ const donneesGraphique = useMemo(() => {
     );
 
     // ============================================================
-    // RÉSULTAT
+    // RÃ‰SULTAT
     // ============================================================
 
     const resultat =
@@ -3112,10 +3112,10 @@ const ajouterPrestationAuDevis = (
       : DETAILS_PDF_PAR_CATEGORIE[
           prestationTrouvee.categorie
         ] || [
-          "Réalisation de la prestation prévue au devis",
+          "RÃ©alisation de la prestation prÃ©vue au devis",
           "Ajustements simples",
           "Finitions standards",
-          "Nettoyage de fin d’intervention",
+          "Nettoyage de fin dâ€™intervention",
         ];
 
   setLignesTravaux((lignesActuelles) => [
@@ -3228,13 +3228,13 @@ const ajouterPackAuDevis = (idPack: string) => {
 
 const reinitialiserApplicationComplete = () => {
   const confirmation = window.confirm(
-    "⚠️ Voulez-vous vraiment réinitialiser toute l’application ?\n\nCela va supprimer le brouillon actuel, l’historique, les clients enregistrés, les dépenses et les compteurs."
+    "âš ï¸ Voulez-vous vraiment rÃ©initialiser toute lâ€™application ?\n\nCela va supprimer le brouillon actuel, lâ€™historique, les clients enregistrÃ©s, les dÃ©penses et les compteurs."
   );
 
   if (!confirmation) return;
 
   const confirmationFinale = window.confirm(
-    "Dernière confirmation : cette action est définitive si vous n’avez pas exporté de sauvegarde."
+    "DerniÃ¨re confirmation : cette action est dÃ©finitive si vous nâ€™avez pas exportÃ© de sauvegarde."
   );
 
   if (!confirmationFinale) return;
@@ -3307,7 +3307,7 @@ setFraisDeplacementManuel(0);
   setListeBackups([]);
   setSauvegardesOuvertes(false);
 
-  alert("✅ Application réinitialisée");
+  alert("âœ… Application rÃ©initialisÃ©e");
 };
 
   const exporter = () => {
@@ -3424,10 +3424,10 @@ setFraisDeplacementManuel(
 
       event.target.value = "";
 
-      alert("✅ Import réussi : sauvegarde complète restaurée");
+      alert("âœ… Import rÃ©ussi : sauvegarde complÃ¨te restaurÃ©e");
     } catch (error) {
       console.error("Erreur import :", error);
-      alert("❌ Erreur import : le fichier ne semble pas compatible.");
+      alert("âŒ Erreur import : le fichier ne semble pas compatible.");
     }
   };
 
@@ -3448,12 +3448,12 @@ setFraisDeplacementManuel(
 
   const frais = calcul.fraisLogistique || 0;
 
-  // 2. Si pas de travaux → on affiche rien de spécial
+  // 2. Si pas de travaux â†’ on affiche rien de spÃ©cial
   if (totalTravaux === 0) {
     return lignesTravauxPDF.map((l) => [l.designation, l.montant]);
   }
 
-// 1. Séparer lignes travaux / fournitures
+// 1. SÃ©parer lignes travaux / fournitures
 const lignesTravauxSeules = lignesTravauxPDF.filter(
   (l) => !l.designation.toLowerCase().includes("fourniture")
 );
@@ -3463,12 +3463,12 @@ const totalTravauxSansFourniture = lignesTravauxSeules.reduce(
   0
 );
 
-// 2. Répartition uniquement sur travaux
+// 2. RÃ©partition uniquement sur travaux
 const lignesAvecFrais = lignesTravauxPDF.map((l) => {
   const estFourniture = l.designation.toLowerCase().includes("fourniture");
 
   if (estFourniture || totalTravauxSansFourniture === 0) {
-    return l; // pas de répartition
+    return l; // pas de rÃ©partition
   }
 
   const ratio = l.montant / totalTravauxSansFourniture;
@@ -3480,7 +3480,7 @@ const lignesAvecFrais = lignesTravauxPDF.map((l) => {
   };
 });
 
-  // 4. Ajustement pour éviter perte à cause des arrondis
+  // 4. Ajustement pour Ã©viter perte Ã  cause des arrondis
   const totalApres = lignesAvecFrais.reduce((s, l) => s + l.montant, 0);
 
 const totalAttendu =
@@ -3492,7 +3492,7 @@ const ecart = totalAttendu - totalApres;
     lignesAvecFrais[0].montant += ecart;
   }
 
-  // 5. Fournitures (inchangé)
+  // 5. Fournitures (inchangÃ©)
   if (!fournituresClient && calcul.reventeFournitures > 0) {
     lignesAvecFrais.push({
       designation: "Fournitures et approvisionnement",
@@ -3595,14 +3595,14 @@ if (type === "facture") {
 console.log("numeroDevis PDF =", numeroDevis);
 
   doc.text(
-    `Facture établie suite au devis signé n° ${numeroDevis}`,
+    `Facture Ã©tablie suite au devis signÃ© nÂ° ${numeroDevis}`,
     105,
     65,
     { align: "center" }
   );
 
   doc.text(
-    `Échéance de paiement : ${datePaiement || "À réception de facture"}`,
+    `Ã‰chÃ©ance de paiement : ${datePaiement || "Ã€ rÃ©ception de facture"}`,
     105,
     70,
     { align: "center" }
@@ -3615,7 +3615,7 @@ doc.setDrawColor(190, 145, 55);
 doc.line(92, 60, 118, 60);
 
   doc.setFontSize(11);
-  doc.text(`N° ${numero}`, 160, 58);
+  doc.text(`NÂ° ${numero}`, 160, 58);
   doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
 
   // ================= CADRES CLIENT / CHANTIER PREMIUM PRESTIGE =================
@@ -3648,15 +3648,15 @@ const dessinerCadreInfos = (
     (ligne) => ligne.valeur && ligne.valeur.trim() !== ""
   );
 
-  // Dans les champs CLIENT / CHANTIER, au moins deux espaces consécutifs
-  // indiquent volontairement un retour à la ligne dans le PDF.
+  // Dans les champs CLIENT / CHANTIER, au moins deux espaces consÃ©cutifs
+  // indiquent volontairement un retour Ã  la ligne dans le PDF.
   const preparerValeurPDF = (valeur: string) =>
     valeur.replace(/[ \t]{2,}/g, "\n").trim();
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.4);
 
-  // Largeur réellement disponible entre le début des valeurs
+  // Largeur rÃ©ellement disponible entre le dÃ©but des valeurs
   // et la marge droite du cadre.
   const largeurTexte = largeur - decalageValeur - 5;
 
@@ -3668,23 +3668,23 @@ const dessinerCadreInfos = (
     hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.8;
   });
 
-  // 10 mm entre le bandeau et la première ligne, puis 5 mm de marge basse.
+  // 10 mm entre le bandeau et la premiÃ¨re ligne, puis 5 mm de marge basse.
   const hauteurBloc = Math.max(
     48,
     hauteurEnteteCadre + 10 + hauteurTexte + 5
   );
 
-  // Ombre légère
+  // Ombre lÃ©gÃ¨re
   doc.setFillColor(230, 230, 230);
   doc.roundedRect(x + 1.2, yDepart + 1.2, largeur, hauteurBloc, 3, 3, "F");
 
-  // Fond blanc + contour doré
+  // Fond blanc + contour dorÃ©
   doc.setFillColor(255, 255, 255);
   doc.setDrawColor(190, 145, 55);
   doc.setLineWidth(0.35);
   doc.roundedRect(x, yDepart, largeur, hauteurBloc, 3, 3, "FD");
 
-  // Bandeau bleu foncé
+  // Bandeau bleu foncÃ©
   doc.setFillColor(52, 63, 79);
   doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 3, 3, "F");
 
@@ -3708,7 +3708,7 @@ const dessinerCadreInfos = (
     doc.setTextColor(190, 145, 55);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.5);
-    doc.text(ligne.icone || "•", x + 7.5, yTexte - 0.6, { align: "center" });
+    doc.text(ligne.icone || "â€¢", x + 7.5, yTexte - 0.6, { align: "center" });
 
     // Label
     doc.setFont("helvetica", "bold");
@@ -3716,7 +3716,7 @@ const dessinerCadreInfos = (
     doc.setTextColor(25, 35, 48);
     doc.text(`${ligne.label} :`, x + 14, yTexte);
 
-    // Valeur placée après la plus longue étiquette du bloc.
+    // Valeur placÃ©e aprÃ¨s la plus longue Ã©tiquette du bloc.
     const valeurPreparee = preparerValeurPDF(ligne.valeur);
     const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
     const nbLignes = Math.max(1, texteCoupe.length);
@@ -3734,7 +3734,7 @@ const dessinerCadreInfos = (
 
 const lignesClient: LigneBloc[] = [
   { label: "Nom", valeur: client || "", icone: "N" },
-  { label: "Tél.", valeur: telephone || "", icone: "T" },
+  { label: "TÃ©l.", valeur: telephone || "", icone: "T" },
   { label: "Email", valeur: email || "", icone: "@" },
   {
     label: modeClient === "agence" ? "Agence" : "Adresse",
@@ -3748,16 +3748,16 @@ let lignesChantier: LigneBloc[] = [];
 if (modeClient === "jeremie") {
   lignesChantier = [
     { label: "Client", valeur: clientFinalNom || client || "", icone: "C" },
-    { label: "Tél.", valeur: clientFinalTelephone || telephone || "", icone: "T" },
+    { label: "TÃ©l.", valeur: clientFinalTelephone || telephone || "", icone: "T" },
     { label: "Adresse", valeur: clientFinalAdresse || adresse || "", icone: "A" },
   ];
 } else if (modeClient === "agence") {
   lignesChantier = [
-    { label: "Réf.", valeur: referenceChantier || "", icone: "R" },
+    { label: "RÃ©f.", valeur: referenceChantier || "", icone: "R" },
     { label: "Locataire", valeur: locataire || "", icone: "L" },
-    { label: "Tél. loc.", valeur: telephoneLocataire || "", icone: "T" },
+    { label: "TÃ©l. loc.", valeur: telephoneLocataire || "", icone: "T" },
     { label: "Proprio.", valeur: proprietaire || "", icone: "P" },
-    { label: "Tél. prop.", valeur: telephoneProprietaire || "", icone: "T" },
+    { label: "TÃ©l. prop.", valeur: telephoneProprietaire || "", icone: "T" },
     {
       label: "Adresse",
       valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
@@ -3803,11 +3803,11 @@ enteteTableau();
 
 let lignesDevisPDF = lignesPDF();
 
-// 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
+// ðŸ”¥ CAS SPÃ‰CIAL FACTURE JÃ‰RÃ‰MIE / SAS MEURISSE COUVERTURE
 if (modeClient === "jeremie" && type === "facture") {
   lignesDevisPDF = [
     [
-      "Prestation de service Main d'œuvre uniquement\nForfait main d'œuvre global",
+      "Prestation de service Main d'Å“uvre uniquement\nForfait main d'Å“uvre global",
       calcul.total,
     ],
   ];
@@ -3821,11 +3821,11 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const detailsLimites =
   ligneSource
     ? detailsTravaux(ligneSource)
-    : designationBrute.includes("déplacement")
-    ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`]
+    : designationBrute.includes("dÃ©placement")
+    ? [`DÃ©placement aller-retour estimÃ© : ${calcul.kmAR} km`]
     : [];
 
-  const detail = detailsLimites.map((t) => `• ${t}`).join("\n");
+  const detail = detailsLimites.map((t) => `â€¢ ${t}`).join("\n");
 
   const designationCoupe = doc.splitTextToSize(designation, 100);
   const detailCoupe = doc.splitTextToSize(detail, 145);
@@ -3844,10 +3844,10 @@ doc.setFontSize(10);
 doc.setTextColor(0);
 doc.text(designationCoupe, 15, y);
 
-// 👉 PRIX UNIQUE propre
+// ðŸ‘‰ PRIX UNIQUE propre
 doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);
-doc.text(`${montant.toFixed(2)} €`, 190, y, { align: "right" });
+doc.text(`${montant.toFixed(2)} â‚¬`, 190, y, { align: "right" });
 
  y += designationCoupe.length * 3.5;
 
@@ -3874,7 +3874,7 @@ if (y + 38 > 292) {
 }
 
 const formatEuroPDF = (valeur: number) => {
-  return `${(Math.round((valeur || 0) * 100) / 100).toFixed(2)} €`;
+  return `${(Math.round((valeur || 0) * 100) / 100).toFixed(2)} â‚¬`;
 };
 
 const montantTotalPDF = Math.round((calcul.total || 0) * 100) / 100;
@@ -3900,7 +3900,7 @@ doc.setTextColor(0, 0, 0);
 doc.text("Montant total", 103, y + 10);
 doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10, { align: "right" });
 
-doc.text(type === "devis" ? "Acompte demandé" : "Déjà encaissé", 103, y + 19);
+doc.text(type === "devis" ? "Acompte demandÃ©" : "DÃ©jÃ  encaissÃ©", 103, y + 19);
 doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 19, {
   align: "right",
 });
@@ -3909,15 +3909,15 @@ doc.setDrawColor(180);
 doc.line(103, y + 23, 190, y + 23);
 
 doc.setFont("helvetica", "bold");
-doc.text("Reste à payer", 103, y + 31);
+doc.text("Reste Ã  payer", 103, y + 31);
 doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 31, { align: "right" });
 
 y += 42;
 
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
-// Le pied de page de la dernière page commence à 256 mm.
-// On arrête donc tous les blocs de contenu à 250 mm pour garder une marge sûre.
+// Le pied de page de la derniÃ¨re page commence Ã  256 mm.
+// On arrÃªte donc tous les blocs de contenu Ã  250 mm pour garder une marge sÃ»re.
 const limiteBasseContenu = 250;
 
 if (y + 72 > limiteBasseContenu) {
@@ -3941,11 +3941,11 @@ doc.setDrawColor(190, 145, 55);
 doc.line(25, yConditions + 12, 67, yConditions + 12);
 
 const conditions = [
-  "Le présent devis est établi sous réserve de l’état réel des supports existants.",
-  "Toute dégradation cachée, humidité, support friable ou anomalie non visible pourra entraîner un ajustement.",
-  "Les travaux supplémentaires non prévus feront l’objet d’un accord préalable du client.",
-  "Les fournitures non mentionnées au devis ne sont pas incluses.",
-  "Le client reconnaît que les quantités et prix sont basés sur les éléments visibles au moment de l’estimation.",
+  "Le prÃ©sent devis est Ã©tabli sous rÃ©serve de lâ€™Ã©tat rÃ©el des supports existants.",
+  "Toute dÃ©gradation cachÃ©e, humiditÃ©, support friable ou anomalie non visible pourra entraÃ®ner un ajustement.",
+  "Les travaux supplÃ©mentaires non prÃ©vus feront lâ€™objet dâ€™un accord prÃ©alable du client.",
+  "Les fournitures non mentionnÃ©es au devis ne sont pas incluses.",
+  "Le client reconnaÃ®t que les quantitÃ©s et prix sont basÃ©s sur les Ã©lÃ©ments visibles au moment de lâ€™estimation.",
 ];
 
 let cy = yConditions + 19;
@@ -3980,13 +3980,13 @@ doc.setFontSize(8);
 doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 }
 
-// Le cadre conditions mesure réellement 72 mm de haut.
-// On repart après ses 72 mm + 8 mm de marge.
+// Le cadre conditions mesure rÃ©ellement 72 mm de haut.
+// On repart aprÃ¨s ses 72 mm + 8 mm de marge.
 y = yConditions + 72 + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
-  // Préparation des lignes avant de dessiner le cadre afin d'en calculer
+  // PrÃ©paration des lignes avant de dessiner le cadre afin d'en calculer
   // la hauteur exacte, notamment lorsque l'IBAN passe sur deux lignes.
   const ibanCoupe = ribIban ? doc.splitTextToSize(ribIban, 56) : [];
   const nombreLignesRib =
@@ -4019,12 +4019,12 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setFontSize(8);
   doc.setTextColor(60, 60, 60);
 
-  doc.text("Règlement par virement bancaire :", 25, y + 19);
+  doc.text("RÃ¨glement par virement bancaire :", 25, y + 19);
 
   if (type === "devis") {
-    doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
+    doc.text("Paiement selon les modalitÃ©s indiquÃ©es sur le document.", 25, y + 25);
   } else {
-    doc.text("Paiement à réception de facture.", 25, y + 25);
+    doc.text("Paiement Ã  rÃ©ception de facture.", 25, y + 25);
   }
 
   doc.setDrawColor(220);
@@ -4092,14 +4092,14 @@ const totalPages = doc.getNumberOfPages();
 doc.setTextColor(90, 90, 90);
 
 doc.text(
-  "En cas de retard de paiement, des pénalités calculées au taux légal en vigueur seront appliquées,",
+  "En cas de retard de paiement, des pÃ©nalitÃ©s calculÃ©es au taux lÃ©gal en vigueur seront appliquÃ©es,",
   105,
   256,
   { align: "center" }
 );
 
 doc.text(
-  "ainsi qu’une indemnité forfaitaire de 40 € pour frais de recouvrement (article L441-10 du Code de commerce).",
+  "ainsi quâ€™une indemnitÃ© forfaitaire de 40 â‚¬ pour frais de recouvrement (article L441-10 du Code de commerce).",
   105,
   259,
   { align: "center" }
@@ -4127,10 +4127,10 @@ doc.setTextColor(0, 0, 0);
 
   const nomFichier = `${numero}-${client || "client"}.pdf`;
 
-// ✅ garde le téléchargement PDF normal
+// âœ… garde le tÃ©lÃ©chargement PDF normal
 doc.save(nomFichier);
 
-// ✅ crée aussi le PDF pour la pièce jointe mail
+// âœ… crÃ©e aussi le PDF pour la piÃ¨ce jointe mail
 const pdfBlob = doc.output("blob");
 
 return new Promise<string>((resolve) => {
@@ -4156,11 +4156,11 @@ return new Promise<string>((resolve) => {
 });
 };
 
-// 🔥 FERMETURE PROPRE DE LA FONCTION genererPDF
+// ðŸ”¥ FERMETURE PROPRE DE LA FONCTION genererPDF
 
 const genererFicheChantier = () => {
   if (lignesTravaux.length === 0) {
-    alert("Ajoute au moins une prestation avant de générer la fiche chantier.");
+    alert("Ajoute au moins une prestation avant de gÃ©nÃ©rer la fiche chantier.");
     return;
   }
 
@@ -4170,10 +4170,12 @@ const genererFicheChantier = () => {
   const largeurUtile = largeurPage - marge * 2;
   let y = 18;
 
-  const texteChantier = normaliserTexte(
-    lignesTravaux
-      .map((ligne) => `${ligne.prestationNom || ""} ${detailsTravaux(ligne).join(" ")}`)
-      .join(" ")
+  // La dÃ©tection du matÃ©riel et des vigilances repose uniquement sur le nom
+  // des prestations. Les dÃ©tails PDF peuvent contenir des mots gÃ©nÃ©riques
+  // (SPEC, carrelage, douche...) qui dÃ©clenchaient auparavant des conseils
+  // sans rapport avec le chantier rÃ©el.
+  const textePrestations = normaliserTexte(
+    lignesTravaux.map((ligne) => ligne.prestationNom || "").join(" ")
   );
 
   const ajouterPiedDePage = () => {
@@ -4187,7 +4189,7 @@ const genererFicheChantier = () => {
       doc.setFontSize(7.5);
       doc.setTextColor(100, 116, 139);
       doc.text(
-        `Fiche chantier interne - ${numeroDevis || "Devis non numéroté"}`,
+        `Fiche chantier interne - ${numeroDevis || "Devis non numÃ©rotÃ©"}`,
         marge,
         290
       );
@@ -4198,7 +4200,7 @@ const genererFicheChantier = () => {
   };
 
   const nouvellePageSiBesoin = (hauteurNecessaire = 18) => {
-    if (y + hauteurNecessaire <= 278) return;
+    if (y + hauteurNecessaire <= 281) return;
 
     doc.addPage();
     y = 18;
@@ -4212,7 +4214,7 @@ const genererFicheChantier = () => {
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
     doc.text(titre.toUpperCase(), marge + 4, y + 6);
-    y += 14;
+    y += 12;
   };
 
   const ajouterTexte = (
@@ -4222,7 +4224,7 @@ const genererFicheChantier = () => {
     const retrait = options?.retrait || 0;
     const taille = options?.taille || 9;
     const lignes = doc.splitTextToSize(texte || "-", largeurUtile - retrait);
-    const hauteur = lignes.length * 4.5 + 1;
+    const hauteur = lignes.length * 4.1 + 0.7;
 
     nouvellePageSiBesoin(hauteur);
     doc.setFont("helvetica", options?.gras ? "bold" : "normal");
@@ -4233,9 +4235,28 @@ const genererFicheChantier = () => {
     y += hauteur;
   };
 
+  const ajouterTexteAvecCase = (
+    texte: string,
+    options?: { gras?: boolean; taille?: number }
+  ) => {
+    const taille = options?.taille || 8.2;
+    const lignes = doc.splitTextToSize(texte || "-", largeurUtile - 8);
+    const hauteur = Math.max(4.5, lignes.length * 4.1 + 0.7);
+
+    nouvellePageSiBesoin(hauteur);
+    doc.setDrawColor(71, 85, 105);
+    doc.setLineWidth(0.35);
+    doc.rect(marge + 1, y - 3.2, 3.2, 3.2);
+    doc.setFont("helvetica", options?.gras ? "bold" : "normal");
+    doc.setFontSize(taille);
+    doc.setTextColor(30, 41, 59);
+    doc.text(lignes, marge + 7, y);
+    y += hauteur;
+  };
+
   const ajouterListe = (elements: string[]) => {
     elements.filter(Boolean).forEach((element) => {
-      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.5 });
+      ajouterTexteAvecCase(element, { taille: 8.2 });
     });
   };
 
@@ -4248,7 +4269,7 @@ const genererFicheChantier = () => {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text("Adrien et ses mains - Document interne", marge, 22);
-  doc.text(numeroDevis || "Devis non numéroté", largeurPage - marge, 14, {
+  doc.text(numeroDevis || "Devis non numÃ©rotÃ©", largeurPage - marge, 14, {
     align: "right",
   });
   doc.text(new Date().toLocaleDateString("fr-FR"), largeurPage - marge, 22, {
@@ -4257,28 +4278,37 @@ const genererFicheChantier = () => {
   y = 41;
 
   ajouterTitreSection("Identification du chantier");
-  ajouterTexte(`Client / agence : ${client || agence || "Non renseigné"}`, {
+  ajouterTexte(`Client / agence : ${client || agence || "Non renseignÃ©"}`, {
     gras: true,
   });
   if (clientFinalNom) ajouterTexte(`Client final : ${clientFinalNom}`);
-  if (proprietaire) ajouterTexte(`Propriétaire : ${proprietaire}`);
+  if (proprietaire) ajouterTexte(`PropriÃ©taire : ${proprietaire}`);
   if (locataire) ajouterTexte(`Locataire : ${locataire}`);
   if (adresseAgence || adresse) {
     ajouterTexte(`Adresse agence / client : ${adresseAgence || adresse}`);
   }
   ajouterTexte(
-    `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignée"}`
+    `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignÃ©e"}`
   );
-  if (referenceChantier) ajouterTexte(`Référence : ${referenceChantier}`);
-  if (dateChantier) ajouterTexte(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
-  if (telephoneLocataire) ajouterTexte(`Téléphone sur place : ${telephoneLocataire}`);
+  if (referenceChantier) ajouterTexte(`RÃ©fÃ©rence : ${referenceChantier}`);
+  if (dateChantier) ajouterTexte(`Date prÃ©vue : ${dateChantier}${heureChantier ? ` Ã  ${heureChantier}` : ""}`);
+  if (telephoneLocataire) ajouterTexte(`TÃ©lÃ©phone sur place : ${telephoneLocataire}`);
 
-  ajouterTitreSection("Travaux prévus");
+  ajouterTexte(
+    `Trajet : ${Number(kmAller || 0).toFixed(1)} km aller / ${Number(calcul.kmAR || 0).toFixed(1)} km aller-retour   |   DÃ©placement total : ${Number(calcul.fraisLogistique || 0).toFixed(2)} â‚¬`,
+    { gras: true, taille: 8.5 }
+  );
+  ajouterTexte(
+    `Temps prÃ©vu : ${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h   |   DurÃ©e estimÃ©e : ${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}   |   Achat fournitures : ${Number(achatFournitures || 0).toFixed(2)} â‚¬ TTC`,
+    { gras: true, taille: 8.5 }
+  );
+
+  ajouterTitreSection("Travaux prÃ©vus");
   lignesTravaux.forEach((ligne, index) => {
     const quantite = ligne.q1 || 1;
-    ajouterTexte(
-      `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
-      { gras: true, taille: 9.5 }
+    ajouterTexteAvecCase(
+      `${index + 1}. ${ligne.prestationNom || "Prestation personnalisÃ©e"} - ${quantite} ${ligne.unite || "u"}`,
+      { gras: true, taille: 9.2 }
     );
     ajouterListe(
       (ligne.detailsPdfPersonnalises?.length
@@ -4286,80 +4316,111 @@ const genererFicheChantier = () => {
         : detailsTravaux(ligne)
       ).filter((detail) => detail.trim())
     );
-    y += 2;
+    y += 1;
   });
 
   ajouterTitreSection("Fournitures et approvisionnement");
   if (fournituresClient) {
-    ajouterTexte("Fournitures à la charge du client.", { gras: true });
+    ajouterTexte("Fournitures Ã  la charge du client.", { gras: true });
   } else {
-    ajouterTexte(`Budget d’achat prévu : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
+    ajouterTexte(`CoÃ»t dâ€™achat total : ${Number(achatFournitures || 0).toFixed(2)} â‚¬ TTC`, {
       gras: true,
     });
-    ajouterTexte(`Coefficient de revente : x${coefficientFournitures}`);
-    ajouterTexte(
-      detailsFournitures?.trim() ||
-        "Vérifier la liste, les quantités, les références et la disponibilité avant le départ."
-    );
+    const lignesFournitures = (detailsFournitures?.trim() || "")
+      .split(/\r?\n/)
+      .map((ligne) => ligne.trim())
+      .filter(Boolean)
+      .map((ligne) =>
+        ligne
+          .replace(/(\d+)â‚¬(\d{2})\b/g, "$1,$2 â‚¬")
+          .replace(/(\d+(?:[.,]\d+)?)\s*â‚¬/g, "$1 â‚¬")
+      );
+
+    if (lignesFournitures.length > 0) {
+      ajouterListe(lignesFournitures);
+    } else {
+      ajouterTexteAvecCase("VÃ©rifier la liste, les quantitÃ©s, les rÃ©fÃ©rences et la disponibilitÃ© avant le dÃ©part.");
+    }
   }
 
   const outils = new Set<string>([
-    "Protections, bâches, ruban de masquage et sacs à gravats",
-    "Mètre, crayon, niveau et petit outillage à main",
-    "Aspirateur de chantier et matériel de nettoyage",
+    "Protections, bÃ¢ches, ruban de masquage et sacs Ã  gravats",
+    "MÃ¨tre, crayon, niveau et petit outillage Ã  main",
+    "Aspirateur de chantier et matÃ©riel de nettoyage",
   ]);
 
-  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
-    outils.add("Perforateur, burineur et équipements de protection");
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
+    outils.add("Perforateur, burineur et Ã©quipements de protection");
     outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
-    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
+    outils.add("Rouleaux, pinceaux et accessoires dâ€™application du SPEC");
   }
-  if (/plomberie|receveur|vasque|robinet|evacuation/.test(texteChantier)) {
-    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
-    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
+  if (/plomberie|receveur|vasque|robinet|mitigeur|siphon|vidage|evacuation/.test(textePrestations)) {
+    outils.add("ClÃ©s de plomberie, pince multiprise et matÃ©riel de raccordement");
+    outils.add("MatÃ©riel de contrÃ´le dâ€™Ã©coulement et dâ€™Ã©tanchÃ©itÃ©");
   }
-  if (/peinture|enduit|ratissage|poncage/.test(texteChantier)) {
-    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
+  if (/peinture|enduit|ratissage|poncage/.test(textePrestations)) {
+    outils.add("Couteaux Ã  enduire, ponceuse, abrasifs, rouleaux et pinceaux");
   }
-  if (/sol pvc|revetement de sol|plinthe/.test(texteChantier)) {
-    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
+  if (/sol pvc|revetement de sol|plinthe/.test(textePrestations)) {
+    outils.add("Cutter, rÃ¨gle, cale de frappe et outils de dÃ©coupe du revÃªtement");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    outils.add("Scie circulaire, scie sauteuse, trÃ©teaux, serre-joints et guide de coupe");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    outils.add("Perforateur, scie-cloche ou carotteuse adaptÃ©e au support");
+    outils.add("DÃ©tecteur de matÃ©riaux et matÃ©riel de calfeutrement");
   }
 
-  ajouterTitreSection("Outils et matériel à prévoir");
+  ajouterTitreSection("Outils et matÃ©riel Ã  prÃ©voir");
   ajouterListe(Array.from(outils));
 
   const vigilance = new Set<string>([
-    "Photographier les lieux et les équipements avant toute intervention",
-    "Confirmer l’accès, le stationnement et la présence d’eau et d’électricité",
-    "Protéger les circulations et les éléments conservés",
-    "Faire valider toute anomalie ou prestation supplémentaire avant exécution",
+    "Photographier les lieux et les Ã©quipements avant toute intervention",
+    "Confirmer lâ€™accÃ¨s, le stationnement et la prÃ©sence dâ€™eau et dâ€™Ã©lectricitÃ©",
+    "ProtÃ©ger les circulations et les Ã©lÃ©ments conservÃ©s",
+    "Faire valider toute anomalie ou prestation supplÃ©mentaire avant exÃ©cution",
   ]);
 
-  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
-    vigilance.add("Contrôler l’humidité, la solidité et la planéité des supports après dépose");
-    vigilance.add("Respecter les temps de séchage du support, du SPEC, de la colle et des joints");
-    vigilance.add("Soigner les angles, traversées, liaisons avec le receveur et joints sanitaires");
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
+    vigilance.add("ContrÃ´ler lâ€™humiditÃ©, la soliditÃ© et la planÃ©itÃ© des supports aprÃ¨s dÃ©pose");
+    vigilance.add("Respecter les temps de sÃ©chage du support, du SPEC, de la colle et des joints");
+    vigilance.add("Soigner les angles, traversÃ©es, liaisons avec le receveur et joints sanitaires");
   }
-  if (/paroi|cabine/.test(texteChantier)) {
-    vigilance.add("Manipuler les vitrages à deux personnes et contrôler les pièces avant réemploi");
+  if (/paroi|cabine/.test(textePrestations)) {
+    vigilance.add("Manipuler les vitrages Ã  deux personnes et contrÃ´ler les piÃ¨ces avant rÃ©emploi");
   }
-  if (/peinture/.test(texteChantier)) {
-    vigilance.add("Vérifier le fonctionnement de la ventilation avant remise en peinture");
+  if (/peinture/.test(textePrestations)) {
+    vigilance.add("VÃ©rifier le fonctionnement de la ventilation avant remise en peinture");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    vigilance.add("ContrÃ´ler les dimensions, lâ€™Ã©querrage, les dÃ©coupes et la position de lâ€™Ã©vier avant coupe");
+    vigilance.add("ProtÃ©ger et Ã©tancher soigneusement tous les chants dÃ©coupÃ©s");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    vigilance.add("ContrÃ´ler lâ€™absence de rÃ©seau dans la zone avant tout percement");
+    vigilance.add("VÃ©rifier le diamÃ¨tre, la pente vers lâ€™extÃ©rieur et lâ€™Ã©tanchÃ©itÃ© du passage");
   }
 
   ajouterTitreSection("Points de vigilance");
   ajouterListe(Array.from(vigilance));
 
-  ajouterTitreSection("Check-list avant départ");
+  ajouterTitreSection("ContrÃ´les du chantier");
   ajouterListe([
-    "Photos avant travaux réalisées",
-    "Implantation et dimensions contrôlées",
-    "Fournitures et consommables vérifiés",
+    "Photos avant travaux rÃ©alisÃ©es",
+    "Implantation et dimensions contrÃ´lÃ©es",
+    "Fournitures et consommables vÃ©rifiÃ©s",
     "Protections mises en place",
-    "Essais et contrôles de fin d’intervention réalisés",
-    "Photos de fin de chantier réalisées",
-    "Déchets évacués et zone nettoyée",
+    "Essais et contrÃ´les de fin dâ€™intervention rÃ©alisÃ©s",
+    "Photos de fin de chantier rÃ©alisÃ©es",
+    "DÃ©chets Ã©vacuÃ©s et zone nettoyÃ©e",
   ]);
+
+  ajouterTitreSection("Suivi rÃ©el et imprÃ©vus");
+  ajouterTexte(`Heures rÃ©ellement effectuÃ©es : ____________________`, { taille: 8.5 });
+  ajouterTexte(`Travaux supplÃ©mentaires validÃ©s : ______________________________________________`, { taille: 8.5 });
+  ajouterTexte(`ImprÃ©vus / anomalies constatÃ©s : _______________________________________________`, { taille: 8.5 });
+  ajouterTexte(`______________________________________________________________________________`, { taille: 8.5 });
 
   if (notes?.trim()) {
     ajouterTitreSection("Notes du dossier");
@@ -4369,7 +4430,7 @@ const genererFicheChantier = () => {
   ajouterPiedDePage();
 
   const nomClientFichier = (clientFinalNom || locataire || client || "chantier")
-    .replace(/[^a-zA-Z0-9À-ÿ -]/g, "")
+   .replace(/[^\p{L}\p{N} _-]/gu, "")
     .trim();
 
   doc.save(
@@ -4393,11 +4454,11 @@ return (
     <div className="grid grid-cols-6 gap-1">
       {[
         ["Client", resumeExpress.clientEnCours || "-"],
-        ["Total", `${resumeExpress.totalDevis} €`],
-        ["Encaissé", `${resumeExpress.dejaEncaisse} €`],
-        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Total", `${resumeExpress.totalDevis} â‚¬`],
+        ["EncaissÃ©", `${resumeExpress.dejaEncaisse} â‚¬`],
+        ["Reste", `${resumeExpress.resteReel} â‚¬`],
         ["Paiement", resumeExpress.paiementPrevu || "-"],
-        ["Priorité", resumeExpress.prioriteActuelle || "-"],
+        ["PrioritÃ©", resumeExpress.prioriteActuelle || "-"],
       ].map(([titre, valeur]) => (
         <div key={titre} className="rounded-lg border bg-white px-2 py-1">
           <p className="text-[10px] font-semibold text-slate-500">{titre}</p>
@@ -4408,11 +4469,11 @@ return (
 
     <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-1 xl:grid-cols-[repeat(14,minmax(0,1fr))]">
       <button onClick={envoyerCloud} className="btn-blue px-2 py-1 text-[11px]">
-        ☁️ Sauv. cloud
+        â˜ï¸ Sauv. cloud
       </button>
 
       <button onClick={recupererCloud} className="btn-emerald px-2 py-1 text-[11px]">
-        📥 Charger
+        ðŸ“¥ Charger
       </button>
 
       <button
@@ -4424,7 +4485,7 @@ return (
         }}
         className="btn-orange px-2 py-1 text-[11px]"
       >
-        ⚡ Esti.
+        âš¡ Esti.
       </button>
 
       <button onClick={nouveauDossier} className="btn-dark px-2 py-1 text-[11px]">
@@ -4476,14 +4537,14 @@ return (
     </div>
   </div>
 
-  {/* VERSION TÉLÉPHONE */}
+  {/* VERSION TÃ‰LÃ‰PHONE */}
   <div className="space-y-1 md:hidden">
     <div className="grid grid-cols-6 gap-1">
       {[
         ["Client", resumeExpress.clientEnCours || "-"],
-        ["Total", `${resumeExpress.totalDevis} €`],
-        ["Enc.", `${resumeExpress.dejaEncaisse} €`],
-        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Total", `${resumeExpress.totalDevis} â‚¬`],
+        ["Enc.", `${resumeExpress.dejaEncaisse} â‚¬`],
+        ["Reste", `${resumeExpress.resteReel} â‚¬`],
         ["Pay.", resumeExpress.paiementPrevu || "-"],
         ["Prio", resumeExpress.prioriteActuelle || "-"],
       ].map(([titre, valeur]) => (
@@ -4651,8 +4712,8 @@ return (
     }}
     className="flex w-full items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800"
   >
-    🔁 Sauvegardes de sécurité
-    <span>{sauvegardesOuvertes ? "▲" : "▼"}</span>
+    ðŸ” Sauvegardes de sÃ©curitÃ©
+    <span>{sauvegardesOuvertes ? "â–²" : "â–¼"}</span>
   </button>
 
   {sauvegardesOuvertes && (
@@ -4691,10 +4752,10 @@ return (
             Tableau de bord entreprise {VERSION_APPLICATION}
           </h1>
           <p className="mt-1 text-sm text-slate-200">
-          Devis multi-lignes : plusieurs types de travaux dans un même devis.</p>
+          Devis multi-lignes : plusieurs types de travaux dans un mÃªme devis.</p>
         {statutDevis === "estimation_rapide" && (
   <div className="mt-4 inline-block rounded-xl bg-yellow-400 px-4 py-2 font-bold text-slate-900">
-    🟡 MODE ESTIMATION RAPIDE
+    ðŸŸ¡ MODE ESTIMATION RAPIDE
   </div>
 )}
         </section>
@@ -4712,7 +4773,7 @@ return (
       }}
       className="rounded bg-slate-200 px-3 py-1"
     >
-      ←
+      â†
     </button>
 
     <span className="font-semibold">
@@ -4733,23 +4794,23 @@ return (
       }}
       className="rounded bg-slate-200 px-3 py-1"
     >
-      →
+      â†’
     </button>
   </div>
 
   <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5 mt-3">
 
-    <MiniResult titre="Encaisse" valeur={`${tableauMensuel.totalEncaisse} €`} couleur="text-green-700" />
-    <MiniResult titre="Reste" valeur={`${tableauMensuel.resteAEncaisser} €`} couleur="text-orange-600" />
-    <MiniResult titre="Relance" valeur={`${tableauMensuel.totalRelance} €`} couleur="text-red-600" />
-    <MiniResult titre="Dépenses" valeur={`${tableauMensuel.totalDepenses} €`} couleur="text-red-700" />
-<MiniResult titre="Solde réel" valeur={`${tableauMensuel.soldeReel} €`} couleur="text-blue-700" />
-<MiniResult titre="URSSAF" valeur={`${tableauMensuel.estimationUrssaf} €`} />
+    <MiniResult titre="Encaisse" valeur={`${tableauMensuel.totalEncaisse} â‚¬`} couleur="text-green-700" />
+    <MiniResult titre="Reste" valeur={`${tableauMensuel.resteAEncaisser} â‚¬`} couleur="text-orange-600" />
+    <MiniResult titre="Relance" valeur={`${tableauMensuel.totalRelance} â‚¬`} couleur="text-red-600" />
+    <MiniResult titre="DÃ©penses" valeur={`${tableauMensuel.totalDepenses} â‚¬`} couleur="text-red-700" />
+<MiniResult titre="Solde rÃ©el" valeur={`${tableauMensuel.soldeReel} â‚¬`} couleur="text-blue-700" />
+<MiniResult titre="URSSAF" valeur={`${tableauMensuel.estimationUrssaf} â‚¬`} />
   </div>
 
   {tableauMensuel.alerteFaible && (
     <div className="mt-3 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm font-semibold text-orange-700">
-      ⚠ Objectif non atteint — vigilance trésorerie
+      âš  Objectif non atteint â€” vigilance trÃ©sorerie
     </div>
   )}
 
@@ -4759,38 +4820,38 @@ return (
 
 </BlocRepliable>
 
-<Bloc titre="Dépenses entreprise">
+<Bloc titre="DÃ©penses entreprise">
   <div className="grid gap-2 md:grid-cols-3">
     <MiniResult
-      titre="Dépenses du mois"
-      valeur={`${resumeDepenses.totalMois.toFixed(2)} €`}
+      titre="DÃ©penses du mois"
+      valeur={`${resumeDepenses.totalMois.toFixed(2)} â‚¬`}
       couleur="text-red-700"
     />
 
     <MiniResult
-      titre="Dépenses année"
-      valeur={`${resumeDepenses.totalAnnee.toFixed(2)} €`}
+      titre="DÃ©penses annÃ©e"
+      valeur={`${resumeDepenses.totalAnnee.toFixed(2)} â‚¬`}
       couleur="text-orange-700"
     />
 
     <MiniResult
-      titre="Nombre dépenses"
+      titre="Nombre dÃ©penses"
       valeur={`${resumeDepenses.nombreTotal}`}
       couleur="text-slate-900"
     />
   </div>
 
   <div className="grid gap-3 md:grid-cols-5">
-    <DateInput label="Date dépense" value={depenseDate} onChange={setDepenseDate} />
+    <DateInput label="Date dÃ©pense" value={depenseDate} onChange={setDepenseDate} />
 
     <Select
-      label="Catégorie"
+      label="CatÃ©gorie"
       value={depenseCategorie}
       onChange={setDepenseCategorie}
       options={[
         ["Fournitures", "Fournitures"],
         ["Essence", "Essence"],
-        ["Matériel", "Matériel"],
+        ["MatÃ©riel", "MatÃ©riel"],
         ["Assurance", "Assurance"],
         ["Banque", "Banque"],
         ["Sous-traitance", "Sous-traitance"],
@@ -4807,9 +4868,9 @@ return (
       onChange={setDepenseModePaiement}
       options={[
         ["CB", "CB"],
-        ["Espèces", "Espèces"],
+        ["EspÃ¨ces", "EspÃ¨ces"],
         ["Virement", "Virement"],
-        ["Chèque", "Chèque"],
+        ["ChÃ¨que", "ChÃ¨que"],
         ["Autre", "Autre"],
       ]}
     />
@@ -4819,7 +4880,7 @@ return (
     type="button"
     onClick={() => {
       if (!depenseMontant || depenseMontant <= 0) {
-        alert("Indique un montant de dépense.");
+        alert("Indique un montant de dÃ©pense.");
         return;
       }
 
@@ -4840,13 +4901,13 @@ return (
     }}
     className="btn-orange"
   >
-    Ajouter dépense
+    Ajouter dÃ©pense
   </button>
 
-  <BlocRepliable titre={`Historique dépenses (${depenses.length})`} ouvertParDefaut={false}>
+  <BlocRepliable titre={`Historique dÃ©penses (${depenses.length})`} ouvertParDefaut={false}>
     {depensesTriees.length === 0 ? (
       <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-        Aucune dépense enregistrée.
+        Aucune dÃ©pense enregistrÃ©e.
       </p>
     ) : (
       <div className="space-y-2">
@@ -4855,16 +4916,16 @@ return (
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-bold text-slate-800">
-                  {depense.date} — {depense.categorie}
+                  {depense.date} â€” {depense.categorie}
                 </p>
 
                 <p className="text-slate-600">
-                  {depense.description || "Sans description"} · {depense.modePaiement}
+                  {depense.description || "Sans description"} Â· {depense.modePaiement}
                 </p>
               </div>
 
               <p className="font-bold text-red-700">
-                {(depense.montant || 0).toFixed(2)} €
+                {(depense.montant || 0).toFixed(2)} â‚¬
               </p>
             </div>
 
@@ -4872,10 +4933,10 @@ return (
               <button
                 type="button"
                 onClick={() => {
-                  const nouvelleDate = window.prompt("Date de la dépense :", depense.date);
+                  const nouvelleDate = window.prompt("Date de la dÃ©pense :", depense.date);
                   if (nouvelleDate === null) return;
 
-                  const nouvelleCategorie = window.prompt("Catégorie :", depense.categorie);
+                  const nouvelleCategorie = window.prompt("CatÃ©gorie :", depense.categorie);
                   if (nouvelleCategorie === null) return;
 
                   const nouvelleDescription = window.prompt("Description :", depense.description);
@@ -4917,7 +4978,7 @@ return (
               <button
                 type="button"
                 onClick={() => {
-                  const confirmation = window.confirm("Supprimer cette dépense ?");
+                  const confirmation = window.confirm("Supprimer cette dÃ©pense ?");
                   if (!confirmation) return;
 
                   setDepenses((anciennes) => anciennes.filter((d) => d.id !== depense.id));
@@ -4945,26 +5006,26 @@ return (
     {rechercheCalendrier && (
       <div className="space-y-2">
         {resultatsCalendrier.length === 0 ? (
-          <p className="text-sm text-slate-500">Aucun dossier trouvé.</p>
+          <p className="text-sm text-slate-500">Aucun dossier trouvÃ©.</p>
         ) : (
           resultatsCalendrier.map((d) => (
             <div key={d.id} className="rounded-xl border bg-white p-3 space-y-2">
               <p className="font-bold text-slate-800">
   {d.modeClient === "jeremie"
-    ? d.clientFinalNom || d.client || "Client non renseigné"
+    ? d.clientFinalNom || d.client || "Client non renseignÃ©"
     : d.modeClient === "agence"
-    ? d.locataire || d.proprietaire || d.client || "Client non renseigné"
-    : d.client || "Client non renseigné"}
+    ? d.locataire || d.proprietaire || d.client || "Client non renseignÃ©"
+    : d.client || "Client non renseignÃ©"}
 </p>
-              <p className="text-sm text-slate-600">📞 {d.telephone || "Téléphone non renseigné"}</p>
+              <p className="text-sm text-slate-600">ðŸ“ž {d.telephone || "TÃ©lÃ©phone non renseignÃ©"}</p>
               <p className="text-sm text-slate-600">
-  📍{" "}
+  ðŸ“{" "}
   {d.modeClient === "jeremie"
-    ? d.clientFinalAdresse || d.adresse || "Adresse non renseignée"
+    ? d.clientFinalAdresse || d.adresse || "Adresse non renseignÃ©e"
     : d.modeClient === "agence"
     ? `${d.adresse || ""} ${d.complementAdresse || ""}`.trim() ||
-      "Adresse chantier non renseignée"
-    : d.adresse || "Adresse non renseignée"}
+      "Adresse chantier non renseignÃ©e"
+    : d.adresse || "Adresse non renseignÃ©e"}
 </p>
 
               <button
@@ -4995,7 +5056,7 @@ return (
       }}
       className="btn-outline"
     >
-      ←
+      â†
     </button>
 
     <p className="font-bold text-slate-800">
@@ -5016,7 +5077,7 @@ return (
       }}
       className="btn-outline"
     >
-      →
+      â†’
     </button>
   </div>
 
@@ -5074,7 +5135,7 @@ return (
 <section ref={ficheClientRef} className="grid gap-6 lg:grid-cols-2">
   <Bloc titre="Client">
             <Select
-  label="Client enregistré"
+  label="Client enregistrÃ©"
   value={client}
   onChange={(v) => {
     if (v === "") {
@@ -5152,13 +5213,13 @@ return (
   </datalist>
 </div>
             <div>
-  <label className="text-sm font-medium">Téléphone</label>
+  <label className="text-sm font-medium">TÃ©lÃ©phone</label>
 
   <input
     className="mt-2 w-full rounded-xl border p-3"
     value={telephone}
     list="liste-telephones-clients"
-    placeholder="Tape le numéro du client..."
+    placeholder="Tape le numÃ©ro du client..."
     onChange={(e) => {
       const valeurFormatee = formatTelephone(e.target.value);
       setTelephone(valeurFormatee);
@@ -5206,7 +5267,7 @@ return (
  {modeClient === "agence" ? (
   <>
     <Input
-      label="Adresse de l’agence"
+      label="Adresse de lâ€™agence"
       value={adresseAgence}
       onChange={setAdresseAgence}
     />
@@ -5220,7 +5281,7 @@ return (
       onChange={setAdresse}
     />
     <Input
-      label="Complément d’adresse / étage / appartement / bâtiment"
+      label="ComplÃ©ment dâ€™adresse / Ã©tage / appartement / bÃ¢timent"
       value={complementAdresse}
       onChange={setComplementAdresse}
     />
@@ -5231,32 +5292,32 @@ return (
 
           <Bloc titre="Dossier">
             <NumberInput
-  label="Montant déjà encaissé"
+  label="Montant dÃ©jÃ  encaissÃ©"
   value={montantEncaisse}
   onChange={setMontantEncaisse}
 />
-            <Input label="Numéro devis" value={numeroDevis} onChange={setNumeroDevis} />
-            <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
+            <Input label="NumÃ©ro devis" value={numeroDevis} onChange={setNumeroDevis} />
+            <Input label="NumÃ©ro facture" value={numeroFacture} onChange={setNumeroFacture} />
 
    
-            <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
+            <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "JÃ©rÃ©mie"], ["normal", "Particulier"], ["agence", "Agence immobiliÃ¨re"]]} />
 {(modeClient === "agence" || modeClient === "jeremie") && (
   <div className="space-y-4 rounded-2xl border bg-slate-50 p-4">
    {modeClient === "agence" && (
   <>
-    <Input label="Nom de l’agence" value={agence} onChange={setAgence} />
-    <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
+    <Input label="Nom de lâ€™agence" value={agence} onChange={setAgence} />
+    <Input label="RÃ©fÃ©rence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
     <Input label="Adresse chantier / appartement" value={adresse} onChange={setAdresse} />
-    <Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
+    <Input label="ComplÃ©ment dâ€™adresse / Ã©tage / appartement / bÃ¢timent" value={complementAdresse} onChange={setComplementAdresse} />
         <Input label="Locataire" value={locataire} onChange={setLocataire} />
         <Input
-          label="Téléphone locataire"
+          label="TÃ©lÃ©phone locataire"
           value={telephoneLocataire}
           onChange={(v) => setTelephoneLocataire(formatTelephone(v))}
         />
-        <Input label="Propriétaire" value={proprietaire} onChange={setProprietaire} />
+        <Input label="PropriÃ©taire" value={proprietaire} onChange={setProprietaire} />
         <Input
-          label="Téléphone propriétaire"
+          label="TÃ©lÃ©phone propriÃ©taire"
           value={telephoneProprietaire}
           onChange={(v) => setTelephoneProprietaire(formatTelephone(v))}
         />
@@ -5266,13 +5327,13 @@ return (
     {modeClient === "jeremie" && (
       <>
         <Input
-          label="Client final de Jérémie"
+          label="Client final de JÃ©rÃ©mie"
           value={clientFinalNom}
           onChange={setClientFinalNom}
         />
 
         <Input
-          label="Téléphone client final"
+          label="TÃ©lÃ©phone client final"
           value={clientFinalTelephone}
           onChange={(v) => setClientFinalTelephone(formatTelephone(v))}
         />
@@ -5293,13 +5354,13 @@ return (
   options={[
     ["estimation_rapide", "Estimation rapide (client)"],
     ["en_cours", "Devis en cours"],
-    ["envoye", "Devis envoyé"],
-    ["accepte", "Devis accepté"],
-    ["refuse", "Devis refusé"]
+    ["envoye", "Devis envoyÃ©"],
+    ["accepte", "Devis acceptÃ©"],
+    ["refuse", "Devis refusÃ©"]
   ]}
 />
             <DateInput
-  label="Date chantier prévue"
+  label="Date chantier prÃ©vue"
   value={dateChantier}
   onChange={(v) => {
     setDateChantier(v);
@@ -5328,7 +5389,7 @@ return (
 
 <div>
   <label className="text-xs font-semibold text-slate-700">
-    Heure chantier prévue
+    Heure chantier prÃ©vue
   </label>
 
   <input
@@ -5340,7 +5401,7 @@ return (
 </div>
 
 <DateInput
-  label="Date de paiement prévue"
+  label="Date de paiement prÃ©vue"
   value={datePaiement}
   onChange={(v) => {
     const dateChantierObj = parseDateFr(dateChantier);
@@ -5352,7 +5413,7 @@ return (
       datePaiementObj < dateChantierObj
     ) {
       alert(
-        "⚠️ Incohérence : la date de paiement du solde ne peut pas être avant la date du chantier.\n\nSi c’est un acompte, indique-le plutôt dans 'Montant déjà encaissé'."
+        "âš ï¸ IncohÃ©rence : la date de paiement du solde ne peut pas Ãªtre avant la date du chantier.\n\nSi câ€™est un acompte, indique-le plutÃ´t dans 'Montant dÃ©jÃ  encaissÃ©'."
       );
       return;
     }
@@ -5361,13 +5422,13 @@ return (
   }}
 />
           <Select
-  label="Priorité dossier"
+  label="PrioritÃ© dossier"
   value={priorite}
   onChange={setPriorite}
   options={[
     ["normale", "Normale"],
     ["urgente", "Urgente"],
-    ["tres_urgente", "Très urgente"],
+    ["tres_urgente", "TrÃ¨s urgente"],
   ]}
 />
           </Bloc>
@@ -5385,7 +5446,7 @@ return (
 
     <p className="mt-1 text-sm text-slate-500">
       Recherche directement une prestation ou
-      sélectionne une catégorie.
+      sÃ©lectionne une catÃ©gorie.
     </p>
   </div>
 
@@ -5395,7 +5456,7 @@ return (
         Packs de prestations V25
       </p>
       <p className="mt-1 text-xs text-blue-700">
-        Les packs utilisent toujours les tarifs et les détails actuels du catalogue. Adapte les quantités au chantier après l’ajout.
+        Les packs utilisent toujours les tarifs et les dÃ©tails actuels du catalogue. Adapte les quantitÃ©s au chantier aprÃ¨s lâ€™ajout.
       </p>
     </div>
 
@@ -5460,14 +5521,14 @@ return (
     </div>
 
     <Select
-      label="Catégorie"
+      label="CatÃ©gorie"
       value={categorieSelectionnee}
       onChange={(valeur) => {
         setCategorieSelectionnee(valeur);
         setPrestationSelectionnee("");
       }}
       options={[
-        ["", "Toutes les catégories"],
+        ["", "Toutes les catÃ©gories"],
         ...categories.map((categorie) => [
           categorie,
           categorie,
@@ -5491,8 +5552,8 @@ return (
         }`}
       >
         {afficherFavorisSeulement
-          ? "⭐ Favoris affichés"
-          : "☆ Voir mes favoris"}
+          ? "â­ Favoris affichÃ©s"
+          : "â˜† Voir mes favoris"}
       </button>
     </div>
   </div>
@@ -5507,7 +5568,7 @@ return (
           {prestationsFiltrees.length > 1
             ? "s"
             : ""}{" "}
-          trouvée
+          trouvÃ©e
           {prestationsFiltrees.length > 1
             ? "s"
             : ""}
@@ -5529,7 +5590,7 @@ return (
 
       {prestationsFiltrees.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-sm text-slate-500">
-          Aucune prestation ne correspond à
+          Aucune prestation ne correspond Ã 
           cette recherche.
         </div>
       ) : (
@@ -5572,7 +5633,7 @@ return (
                         {Number(
                           prixClient || 0
                         ).toFixed(2)}{" "}
-                        €
+                        â‚¬
                         {prestation.unite !==
                         "forfait"
                           ? ` / ${prestation.unite}`
@@ -5606,7 +5667,7 @@ return (
                           : "Ajouter aux favoris"
                       }
                     >
-                      {favorite ? "★" : "☆"}
+                      {favorite ? "â˜…" : "â˜†"}
                     </button>
                   </div>
 
@@ -5636,9 +5697,9 @@ return (
     !categorieSelectionnee &&
     !afficherFavorisSeulement && (
       <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm text-slate-500">
-        Commence à écrire le nom d’une
-        prestation ou sélectionne une
-        catégorie.
+        Commence Ã  Ã©crire le nom dâ€™une
+        prestation ou sÃ©lectionne une
+        catÃ©gorie.
       </div>
     )}
 </div>
@@ -5663,8 +5724,8 @@ return (
           <div>
   <h3 className="font-semibold text-slate-800">
     {ligne.prestationNom
-      ? `${index + 1} — ${ligne.prestationNom}`
-      : `${index + 1} — Prestation personnalisée`}
+      ? `${index + 1} â€” ${ligne.prestationNom}`
+      : `${index + 1} â€” Prestation personnalisÃ©e`}
   </h3>
 
 </div>
@@ -5685,7 +5746,7 @@ return (
         : "bg-white text-slate-700"
     }`}
   >
-    {ligne.offert ? "Offert ✓" : "Offrir"}
+    {ligne.offert ? "Offert âœ“" : "Offrir"}
   </button>
 
   <button
@@ -5700,7 +5761,7 @@ return (
            {ligne.tarifId ? (
   <div className="space-y-3">
     <NumberInput
-      label={`Quantité (${ligne.unite || "u"})`}
+      label={`QuantitÃ© (${ligne.unite || "u"})`}
       value={ligne.q1}
       onChange={(v) => modifierLigne(ligne.id, "q1", v)}
     />
@@ -5725,7 +5786,7 @@ return (
       }
     />
 <Check
-  label="Personnaliser les détails affichés dans le devis"
+  label="Personnaliser les dÃ©tails affichÃ©s dans le devis"
   checked={ligne.detailsPdfOuvert || false}
   onChange={(checked) =>
     setLignesTravaux(
@@ -5749,10 +5810,10 @@ return (
   <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-3">
     <div>
       <p className="text-sm font-bold text-amber-900">
-        Détails visibles dans le devis
+        DÃ©tails visibles dans le devis
       </p>
       <p className="text-xs text-amber-700">
-        Une ligne par détail. Ces textes apparaîtront sous la prestation dans le PDF.
+        Une ligne par dÃ©tail. Ces textes apparaÃ®tront sous la prestation dans le PDF.
       </p>
     </div>
 
@@ -5780,13 +5841,13 @@ return (
 
     <div className="rounded-xl border bg-white p-3">
       <p className="text-xs font-bold text-slate-600">
-        Aperçu PDF :
+        AperÃ§u PDF :
       </p>
 
       <ul className="mt-2 space-y-1 text-sm text-slate-700">
         {(ligne.detailsPdfPersonnalises || detailsTravaux(ligne)).map(
           (detail, detailIndex) => (
-            <li key={detailIndex}>• {detail}</li>
+            <li key={detailIndex}>â€¢ {detail}</li>
           )
         )}
       </ul>
@@ -5809,13 +5870,13 @@ return (
       }
       className="rounded-xl border bg-white px-3 py-2 text-sm font-semibold text-slate-700"
     >
-      Réinitialiser les détails automatiques
+      RÃ©initialiser les dÃ©tails automatiques
     </button>
   </div>
 )}
     {ligne.prixManuel && (
       <NumberInput
-        label={`Prix unitaire manuel (€ / ${ligne.unite || "u"})`}
+        label={`Prix unitaire manuel (â‚¬ / ${ligne.unite || "u"})`}
         value={ligne.prixUnitaire || 0}
         onChange={(v) =>
           setLignesTravaux(
@@ -5829,7 +5890,7 @@ return (
 
     {!ligne.prixManuel && (
       <p className="text-xs text-slate-500">
-        Prix automatique du tableau : {ligne.prixUnitaireAuto || ligne.prixUnitaire} € / {ligne.unite}
+        Prix automatique du tableau : {ligne.prixUnitaireAuto || ligne.prixUnitaire} â‚¬ / {ligne.unite}
       </p>
     )}
   </div>
@@ -5856,13 +5917,13 @@ return (
           <div className="rounded-xl border bg-white p-4 space-y-2">
             <Card
   titre="Prix ligne"
-  valeur={ligne.offert ? "Offert" : `${montantLigne(ligne, modeClient)} €`}
+  valeur={ligne.offert ? "Offert" : `${montantLigne(ligne, modeClient)} â‚¬`}
 />
 
             {tarifAssocie && (
               <>
                 <Card
-                  titre="Rentabilité"
+                  titre="RentabilitÃ©"
                   valeur={`${tarifAssocie.rentabilite} ${tarifAssocie.action}`}
                 />
 
@@ -5876,7 +5937,7 @@ return (
 
             {ligne.prixUnitaire && ligne.unite && (
               <p className="text-sm text-slate-500">
-                Tarif appliqué : {ligne.prixUnitaire} € / {ligne.unite}
+                Tarif appliquÃ© : {ligne.prixUnitaire} â‚¬ / {ligne.unite}
               </p>
             )}
           </div>
@@ -5887,15 +5948,15 @@ return (
 </BlocRepliable>
 
 
-  <Bloc titre="📈 Résultat devis">
+  <Bloc titre="ðŸ“ˆ RÃ©sultat devis">
   <p className="text-xs text-slate-500">
-    Estimation et analyse en temps réel.
+    Estimation et analyse en temps rÃ©el.
   </p>
 <div className="grid gap-3 md:grid-cols-2">
- {/* Déplacement */}
+ {/* DÃ©placement */}
 <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
   <h3 className="text-sm font-bold text-slate-800">
-    🚚 Déplacement
+    ðŸšš DÃ©placement
   </h3>
 
   <NumberInput
@@ -5915,26 +5976,26 @@ return (
         }
       }}
     />
-    Modifier le prix du déplacement
+    Modifier le prix du dÃ©placement
   </label>
 
   {fraisDeplacementManuelActif && (
     <NumberInput
-      label="Prix déplacement manuel"
+      label="Prix dÃ©placement manuel"
       value={fraisDeplacementManuel}
       onChange={setFraisDeplacementManuel}
     />
   )}
 
   <p className="text-xs text-slate-500">
-    {calcul.kmAR} km A/R → {calcul.fraisLogistique} €
+    {calcul.kmAR} km A/R â†’ {calcul.fraisLogistique} â‚¬
   </p>
 </div>
 
  {/* Fournitures */}
 <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
   <h3 className="text-sm font-bold text-slate-800">
-    📦 Fournitures
+    ðŸ“¦ Fournitures
   </h3>
 
   <label className="flex items-center gap-2 text-sm font-semibold">
@@ -5943,7 +6004,7 @@ return (
       checked={fournituresClient}
       onChange={(e) => setFournituresClient(e.target.checked)}
     />
-    Fournitures à la charge du client
+    Fournitures Ã  la charge du client
   </label>
 
   {!fournituresClient && (
@@ -5985,27 +6046,27 @@ return (
     x1.6
   </button>
   <TextArea
-  label="Détail des fournitures incluses / exclues"
+  label="DÃ©tail des fournitures incluses / exclues"
   value={detailsFournitures}
   onChange={setDetailsFournitures}
 />
 </div>
 
       <div className="grid gap-2 md:grid-cols-3">
-        <MiniResult titre="Achat" valeur={`${achatFournitures} €`} />
-        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures.toFixed(2)} €`} couleur="text-blue-700" />
-        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures.toFixed(2)} €`} couleur="text-green-700" />
+        <MiniResult titre="Achat" valeur={`${achatFournitures} â‚¬`} />
+        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures.toFixed(2)} â‚¬`} couleur="text-blue-700" />
+        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures.toFixed(2)} â‚¬`} couleur="text-green-700" />
       </div>
 
       <p className="text-xs text-slate-500">
-        Minimum conseillé : coefficient 1.22. Idéal selon chantier : jusqu’à 1.6.
+        Minimum conseillÃ© : coefficient 1.22. IdÃ©al selon chantier : jusquâ€™Ã  1.6.
       </p>
     </div>
   )}
 
   {fournituresClient && (
     <p className="text-xs text-slate-500">
-      Les fournitures ne sont pas ajoutées au devis.
+      Les fournitures ne sont pas ajoutÃ©es au devis.
     </p>
   )}
 </div>
@@ -6013,13 +6074,13 @@ return (
   {/* ESTIMATIONS */}
   {statutDevis === "estimation_rapide" && (
     <>
-      <MiniResult titre="Basse" valeur={`${calcul.estimationBasse} €`} couleur="text-green-700" />
-      <MiniResult titre="Haute" valeur={`${calcul.estimationHaute} €`} couleur="text-orange-600" />
+      <MiniResult titre="Basse" valeur={`${calcul.estimationBasse} â‚¬`} couleur="text-green-700" />
+      <MiniResult titre="Haute" valeur={`${calcul.estimationHaute} â‚¬`} couleur="text-orange-600" />
 
       <div className="col-span-2 rounded-lg border border-purple-300 bg-purple-50 px-4 py-2">
-        <p className="text-xs text-purple-600">💬 Prix à annoncer</p>
+        <p className="text-xs text-purple-600">ðŸ’¬ Prix Ã  annoncer</p>
         <p className="text-xl font-bold text-purple-800">
-          {calcul.prixConseille} €
+          {calcul.prixConseille} â‚¬
         </p>
       </div>
     </>
@@ -6033,67 +6094,67 @@ return (
 
       {calcul.estimationBasse < 400 && (
         <p className="text-sm font-semibold text-red-600">
-          🔴 Trop bas : déplacement + temps non rentables.
+          ðŸ”´ Trop bas : dÃ©placement + temps non rentables.
         </p>
       )}
 
       {calcul.estimationBasse >= 400 && calcul.estimationBasse < 800 && (
         <p className="text-sm font-semibold text-orange-600">
-          🟠 Vigilance : marge serrée.
+          ðŸŸ  Vigilance : marge serrÃ©e.
         </p>
       )}
 
       {calcul.estimationBasse >= 800 && (
         <p className="text-sm font-semibold text-green-700">
-          🟢 Estimation cohérente et rentable.
+          ðŸŸ¢ Estimation cohÃ©rente et rentable.
         </p>
       )}
     </div>
   )}
 
   <div className="rounded-lg border bg-white px-3 py-2 space-y-2">
-    <h3 className="text-sm font-bold text-slate-800">🧾 Résumé financier</h3>
+    <h3 className="text-sm font-bold text-slate-800">ðŸ§¾ RÃ©sumÃ© financier</h3>
 
     <div className="grid gap-2 md:grid-cols-4">
-      <MiniResult titre="Travaux" valeur={`${calcul.totalTravaux} €`} />
-      <MiniResult titre="Déplacement" valeur={`${calcul.fraisLogistique} €`} />
+      <MiniResult titre="Travaux" valeur={`${calcul.totalTravaux} â‚¬`} />
+      <MiniResult titre="DÃ©placement" valeur={`${calcul.fraisLogistique} â‚¬`} />
       <MiniResult
   titre="Temps chantier"
   valeur={`${calcul.totalHeuresChantier.toFixed(1)} h`}
 />
 
 <MiniResult
-  titre="Jours calculés"
+  titre="Jours calculÃ©s"
   valeur={`${calcul.nombreJoursChantier} j`}
 />
-      <MiniResult titre="Fournitures" valeur={`${calcul.reventeFournitures} €`} />
-      <MiniResult titre="Total" valeur={`${calcul.total} €`} couleur="text-blue-700" />
+      <MiniResult titre="Fournitures" valeur={`${calcul.reventeFournitures} â‚¬`} />
+      <MiniResult titre="Total" valeur={`${calcul.total} â‚¬`} couleur="text-blue-700" />
     </div>
 
     <div className="rounded-lg bg-slate-50 px-3 py-2 space-y-1 text-xs">
       <div className="flex justify-between">
-        <span>Déplacement ({calcul.kmAR} km)</span>
-        <strong>{calcul.fraisLogistique} €</strong>
+        <span>DÃ©placement ({calcul.kmAR} km)</span>
+        <strong>{calcul.fraisLogistique} â‚¬</strong>
       </div>
 
       <div className="flex justify-between">
         <span>Fournitures</span>
-        <strong>{calcul.reventeFournitures.toFixed(2)} €</strong>
+        <strong>{calcul.reventeFournitures.toFixed(2)} â‚¬</strong>
       </div>
 
       <div className="border-t pt-1 flex justify-between font-bold text-blue-700">
         <span>Total devis</span>
-        <span>{calcul.total} €</span>
+        <span>{calcul.total} â‚¬</span>
       </div>
     </div>
   </div>
 
   <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
     <p className="text-xs font-medium text-blue-800">
-      ℹ️ Estimation indicative selon les éléments visibles lors de la visite.
+      â„¹ï¸ Estimation indicative selon les Ã©lÃ©ments visibles lors de la visite.
     </p>
     <p className="text-xs text-blue-700">
-      Ajustable après étude détaillée et validation technique.
+      Ajustable aprÃ¨s Ã©tude dÃ©taillÃ©e et validation technique.
     </p>
   </div>
 
@@ -6105,7 +6166,7 @@ return (
   value={String(pourcentageAcompte)}
   onChange={(v) => setPourcentageAcompte(Number(v))}
   options={[
-    ["0", "0 % — pas d’acompte"],
+    ["0", "0 % â€” pas dâ€™acompte"],
     ["30", "30 %"],
     ["40", "40 %"],
     ["50", "50 %"],
@@ -6135,11 +6196,11 @@ return (
 </div>
 
 <div className="grid gap-2 md:grid-cols-3">
-  <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
-  <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
+  <MiniResult titre="Acompte" valeur={`${calcul.acompte} â‚¬`} />
+  <MiniResult titre="EncaissÃ©" valeur={`${montantEncaisse} â‚¬`} />
   <MiniResult
     titre="Reste"
-    valeur={`${Math.max(0, calcul.total - montantEncaisse)} €`}
+    valeur={`${Math.max(0, calcul.total - montantEncaisse)} â‚¬`}
     couleur="text-blue-700"
   />
 </div>
@@ -6148,7 +6209,7 @@ return (
 {saisieDateAcompteOuverte && (
   <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
     <label className="block text-sm font-medium text-slate-700">
-      Date réelle de réception de l’acompte
+      Date rÃ©elle de rÃ©ception de lâ€™acompte
     </label>
     <input
       type="date"
@@ -6162,7 +6223,7 @@ return (
 {saisieDatePaiementCompletOuverte && (
   <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
     <label className="block text-sm font-medium text-slate-700">
-      Date réelle du paiement complet
+      Date rÃ©elle du paiement complet
     </label>
     <input
       type="date"
@@ -6174,7 +6235,7 @@ return (
 )}
 
 <div className="flex flex-wrap gap-2">
-  {/* ================= ACOMPTE REÇU ================= */}
+  {/* ================= ACOMPTE REÃ‡U ================= */}
   <button
     onClick={() => {
       setSaisieDatePaiementCompletOuverte(false);
@@ -6185,7 +6246,7 @@ return (
       }
 
       if (!datePaiement) {
-        alert("Sélectionne la date réelle de réception de l’acompte.");
+        alert("SÃ©lectionne la date rÃ©elle de rÃ©ception de lâ€™acompte.");
         return;
       }
 
@@ -6199,7 +6260,7 @@ return (
             ? {
                 ...d,
 
-                // Fonctionnement actuel conservé
+                // Fonctionnement actuel conservÃ©
                 montantEncaisse: montantAcompteRecu,
                 reste: Math.max(
                   0,
@@ -6214,7 +6275,7 @@ return (
                 datePaiement,
 
                 // NOUVEAU :
-                // mémoire indépendante et permanente de l'acompte
+                // mÃ©moire indÃ©pendante et permanente de l'acompte
                 dateAcompte: datePaiement,
                 montantAcompteEncaisse: montantAcompteRecu,
               }
@@ -6228,7 +6289,7 @@ return (
   >
     {saisieDateAcompteOuverte
       ? "Valider acompte"
-      : "Acompte reçu"}
+      : "Acompte reÃ§u"}
   </button>
 
   {/* ================= PAIEMENT COMPLET ================= */}
@@ -6242,7 +6303,7 @@ return (
       }
 
       if (!datePaiement) {
-        alert("Sélectionne la date réelle du paiement complet.");
+        alert("SÃ©lectionne la date rÃ©elle du paiement complet.");
         return;
       }
 
@@ -6257,7 +6318,7 @@ return (
           /*
            * IMPORTANT :
            * dateAcompte et montantAcompteEncaisse ne sont
-           * volontairement PAS modifiés ici.
+           * volontairement PAS modifiÃ©s ici.
            *
            * Le paiement complet ne doit plus effacer
            * l'historique de l'acompte.
@@ -6272,7 +6333,7 @@ return (
             acompte: calcul.acompte,
             facturePayee: true,
 
-            // date réelle du paiement final
+            // date rÃ©elle du paiement final
             datePaiement,
           };
         })
@@ -6287,7 +6348,7 @@ return (
       : "Paiement complet"}
   </button>
 
-  {/* ================= REMISE À ZÉRO ================= */}
+  {/* ================= REMISE Ã€ ZÃ‰RO ================= */}
   <button
     onClick={() => {
       setMontantEncaisse(0);
@@ -6356,8 +6417,8 @@ return (
         const bEstBrouillon =
           !b.numeroFacture && !b.numeroDevis;
 
-        // Les travaux commencés sans numéro restent tout en haut afin d’être
-        // retrouvés immédiatement à la prochaine ouverture de l’application.
+        // Les travaux commencÃ©s sans numÃ©ro restent tout en haut afin dâ€™Ãªtre
+        // retrouvÃ©s immÃ©diatement Ã  la prochaine ouverture de lâ€™application.
         if (aEstBrouillon !== bEstBrouillon) {
           return aEstBrouillon ? -1 : 1;
         }
@@ -6369,13 +6430,13 @@ return (
         const aEstFacture = Boolean(a.numeroFacture);
         const bEstFacture = Boolean(b.numeroFacture);
 
-        // Toutes les factures passent avant les devis non encore facturés.
+        // Toutes les factures passent avant les devis non encore facturÃ©s.
         if (aEstFacture !== bEstFacture) {
           return aEstFacture ? -1 : 1;
         }
 
-        // Dans le groupe des factures, seul le numéro de facture détermine
-        // l’ordre : le numéro de devis peut être présent ou totalement absent.
+        // Dans le groupe des factures, seul le numÃ©ro de facture dÃ©termine
+        // lâ€™ordre : le numÃ©ro de devis peut Ãªtre prÃ©sent ou totalement absent.
         if (aEstFacture && bEstFacture) {
           const numeroFactureA = extraireNumero(a.numeroFacture);
           const numeroFactureB = extraireNumero(b.numeroFacture);
@@ -6385,8 +6446,8 @@ return (
           }
         }
 
-        // Dans le second groupe, les devis non facturés sont classés du plus
-        // récent au plus ancien selon leur propre numéro de devis.
+        // Dans le second groupe, les devis non facturÃ©s sont classÃ©s du plus
+        // rÃ©cent au plus ancien selon leur propre numÃ©ro de devis.
         if (!aEstFacture && !bEstFacture) {
           const numeroDevisA = extraireNumero(a.numeroDevis);
           const numeroDevisB = extraireNumero(b.numeroDevis);
@@ -6396,15 +6457,15 @@ return (
           }
         }
 
-        // Sécurité en cas de numéro identique ou absent : le dernier dossier
-        // enregistré reste affiché en premier.
+        // SÃ©curitÃ© en cas de numÃ©ro identique ou absent : le dernier dossier
+        // enregistrÃ© reste affichÃ© en premier.
         return (b.id || 0) - (a.id || 0);
       });
 
     if (historiqueDocuments.length === 0) {
       return (
         <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-          Aucun devis ou facture enregistré.
+          Aucun devis ou facture enregistrÃ©.
         </p>
       );
     }
@@ -6434,7 +6495,7 @@ return (
           const libelleStatut = estBrouillon
             ? "Brouillon"
             : item.facturePayee
-            ? "Payée"
+            ? "PayÃ©e"
             : factureEnRetard
             ? "Retard"
             : item.numeroFacture
@@ -6445,14 +6506,14 @@ return (
             item.modeClient === "jeremie"
               ? item.clientFinalAdresse ||
                 item.adresse ||
-                "Chantier non renseigné"
+                "Chantier non renseignÃ©"
               : item.modeClient === "agence"
               ? `${item.adresse || ""} ${item.complementAdresse || ""}`.trim() ||
                 item.referenceChantier ||
-                "Chantier non renseigné"
+                "Chantier non renseignÃ©"
               : item.complementAdresse ||
                 item.adresse ||
-                "Chantier non renseigné";
+                "Chantier non renseignÃ©";
 
           return (
             <div
@@ -6468,7 +6529,7 @@ return (
       item.clientFinalNom ? " / " + item.clientFinalNom : ""
     }`
   : item.modeClient === "agence"
-  ? `${item.agence || item.client || "Agence immobilière"}${
+  ? `${item.agence || item.client || "Agence immobiliÃ¨re"}${
       item.locataire
         ? " / " + item.locataire
         : item.proprietaire
@@ -6477,7 +6538,7 @@ return (
         ? " / " + item.clientFinalNom
         : ""
     }`
-  : item.client || "Client non renseigné"}
+  : item.client || "Client non renseignÃ©"}
                   </p>
 
                   <div className="space-y-1 text-sm text-slate-500">
@@ -6499,19 +6560,19 @@ return (
               <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
                 <MiniResult
                   titre="Total"
-                  valeur={`${item.total || 0} €`}
+                  valeur={`${item.total || 0} â‚¬`}
                   couleur="text-slate-900"
                 />
 
                 <MiniResult
                   titre="Acompte"
-                  valeur={`${item.acompte || 0} €`}
+                  valeur={`${item.acompte || 0} â‚¬`}
                   couleur="text-amber-700"
                 />
 
                 <MiniResult
-                  titre="Encaissé"
-                  valeur={`${item.montantEncaisse || 0} €`}
+                  titre="EncaissÃ©"
+                  valeur={`${item.montantEncaisse || 0} â‚¬`}
                   couleur="text-emerald-700"
                 />
 
@@ -6520,14 +6581,14 @@ return (
                   valeur={`${Math.max(
                     0,
                     (item.total || 0) - (item.montantEncaisse || 0)
-                  )} €`}
+                  )} â‚¬`}
                   couleur={factureEnRetard ? "text-red-700" : "text-slate-900"}
                 />
               </div>
 
               <div className="mt-3 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
-                <p>📅 Chantier : {item.dateChantier || "Non planifié"}</p>
-                <p>💳 Paiement : {item.datePaiement || "Non renseigné"}</p>
+                <p>ðŸ“… Chantier : {item.dateChantier || "Non planifiÃ©"}</p>
+                <p>ðŸ’³ Paiement : {item.datePaiement || "Non renseignÃ©"}</p>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -6583,7 +6644,7 @@ return (
   })()}
 </BlocRepliable>
 
-<BlocRepliable titre="Paramètres entreprise / RIB" ouvertParDefaut={false}>
+<BlocRepliable titre="ParamÃ¨tres entreprise / RIB" ouvertParDefaut={false}>
   <div className="grid gap-3 md:grid-cols-2">
     <Input label="Titulaire" value={ribTitulaire} onChange={setRibTitulaire} />
     <Input label="Banque" value={ribBanque} onChange={setRibBanque} />
@@ -6623,7 +6684,7 @@ return (
         if (evenementsJour.length === 0) {
           return (
             <div className="bg-slate-100 rounded-xl p-4 text-slate-500 text-sm">
-              Aucun événement prévu pour cette journée.
+              Aucun Ã©vÃ©nement prÃ©vu pour cette journÃ©e.
             </div>
           );
         }
@@ -6639,14 +6700,14 @@ return (
                 (d.planningChantier || []).includes(dateStr);
 
               const badge = estRappel
-                ? "📝 Rappel"
+                ? "ðŸ“ Rappel"
                 : estRdv
-                ? "📅 RDV client"
+                ? "ðŸ“… RDV client"
                 : estPaiement
-                ? "💳 Paiement / relance"
+                ? "ðŸ’³ Paiement / relance"
                 : estChantier
-                ? "🛠️ Chantier"
-                : "📌 Événement";
+                ? "ðŸ› ï¸ Chantier"
+                : "ðŸ“Œ Ã‰vÃ©nement";
 
               const couleurCarte = estRappel
                 ? "border-amber-200 bg-amber-50"
@@ -6667,7 +6728,7 @@ return (
                     <p className="font-bold text-slate-800">
                       {estRappel
                         ? d.texteRappel || d.notes || "Rappel"
-                        : d.client || "Client non renseigné"}
+                        : d.client || "Client non renseignÃ©"}
                     </p>
 
                     <span className="text-xs rounded-full border bg-white px-2 py-1 text-slate-700">
@@ -6678,16 +6739,16 @@ return (
                   {!estRappel && (
                     <>
                       <p className="text-sm text-slate-600">
-                        📞 {d.telephone || "Non renseigné"}
+                        ðŸ“ž {d.telephone || "Non renseignÃ©"}
                       </p>
 
                       <p className="text-sm text-slate-600">
-                        📍 {d.adresse || "Adresse non renseignée"}
+                        ðŸ“ {d.adresse || "Adresse non renseignÃ©e"}
                       </p>
 
                       {d.email && (
                         <p className="text-sm text-slate-600">
-                          ✉️ {d.email}
+                          âœ‰ï¸ {d.email}
                         </p>
                       )}
                     </>
@@ -6695,7 +6756,7 @@ return (
 
                   <div className="grid grid-cols-2 gap-2 text-sm text-slate-700">
                     <span>
-                      ⏱️{" "}
+                      â±ï¸{" "}
                       {estRdv
                         ? d.heureRdv || "-"
                         : estChantier
@@ -6706,15 +6767,15 @@ return (
                     </span>
 
                     <span>
-                      📄 {d.numeroDevis || "Pas de devis"}
+                      ðŸ“„ {d.numeroDevis || "Pas de devis"}
                     </span>
 
                     <span>
-                      🧾 {d.numeroFacture || "-"}
+                      ðŸ§¾ {d.numeroFacture || "-"}
                     </span>
 
                     <span>
-                      💶 {estPaiement ? `${d.reste || 0} € à suivre` : "-"}
+                      ðŸ’¶ {estPaiement ? `${d.reste || 0} â‚¬ Ã  suivre` : "-"}
                     </span>
                   </div>
 
@@ -6726,15 +6787,15 @@ return (
                       : estChantier
                       ? d.lignesTravaux?.[0]?.prestationNom ||
                         nomTravaux(d.lignesTravaux?.[0]?.type || "") ||
-                        "Chantier planifié"
+                        "Chantier planifiÃ©"
                       : estPaiement
-                      ? "Paiement prévu / retard à surveiller"
+                      ? "Paiement prÃ©vu / retard Ã  surveiller"
                       : d.notes}
                   </p>
 
                   {estChantier && d.planningChantier && d.planningChantier.length > 0 && (
                     <div className="text-xs text-slate-600 bg-white/70 rounded-lg p-2">
-                      <p className="font-semibold mb-1">Jours chantier prévus :</p>
+                      <p className="font-semibold mb-1">Jours chantier prÃ©vus :</p>
 
                       <div className="flex flex-wrap gap-1">
                         {d.planningChantier.map((jour) => (
@@ -6744,7 +6805,7 @@ return (
                             className="rounded-full border px-2 py-1 bg-white hover:bg-red-50"
                             title="Cliquer pour supprimer ce jour"
                           >
-                            {jour} ✕
+                            {jour} âœ•
                           </button>
                         ))}
                       </div>
@@ -6790,7 +6851,7 @@ return (
                         onClick={() => deplacerEvenementCalendrier(d, "rdv")}
                         className="btn-blue"
                       >
-                        Déplacer RDV
+                        DÃ©placer RDV
                       </button>
                     )}
 
@@ -6799,7 +6860,7 @@ return (
                         onClick={() => deplacerEvenementCalendrier(d, "chantier")}
                         className="btn-blue"
                       >
-                        Déplacer chantier
+                        DÃ©placer chantier
                       </button>
                     )}
 
@@ -6808,7 +6869,7 @@ return (
                         onClick={() => deplacerEvenementCalendrier(d, "paiement")}
                         className="btn-orange"
                       >
-                        Déplacer paiement
+                        DÃ©placer paiement
                       </button>
                     )}
 
@@ -6817,7 +6878,7 @@ return (
                         onClick={() => deplacerEvenementCalendrier(d, "rappel")}
                         className="btn-blue"
                       >
-                        Déplacer rappel
+                        DÃ©placer rappel
                       </button>
                     )}
 <button
@@ -6829,7 +6890,7 @@ return (
         ? `RDV client - ${d.client}`
         : estChantier
         ? `Chantier - ${d.client} - ${d.numeroDevis || ""}`
-        : `Événement - ${d.client}`,
+        : `Ã‰vÃ©nement - ${d.client}`,
 
       lieu: d.adresse || "",
 
@@ -6843,7 +6904,7 @@ return (
       description: estRappel
         ? d.texteRappel || ""
         : `Client : ${d.client}
-Téléphone : ${d.telephone}
+TÃ©lÃ©phone : ${d.telephone}
 Email : ${d.email}
 
 ${d.notes || ""}`,
@@ -6851,11 +6912,11 @@ ${d.notes || ""}`,
   }}
   className="btn-purple"
 >
-  📅 Google
+  ðŸ“… Google
 </button>
                     <button
                       onClick={() => {
-                        if (confirm("Supprimer cet événement du calendrier ?")) {
+                        if (confirm("Supprimer cet Ã©vÃ©nement du calendrier ?")) {
                           setHistorique((prev) =>
                             prev.map((item) =>
                               item.id === d.id
@@ -6898,7 +6959,7 @@ ${d.notes || ""}`,
     const nom = window.prompt("Nom du client :");
     if (!nom) return;
 
-    const tel = window.prompt("Téléphone :") || "";
+    const tel = window.prompt("TÃ©lÃ©phone :") || "";
     const adresseRdv = window.prompt("Adresse du RDV :") || "";
     const mail = window.prompt("Email :") || "";
     const observation = window.prompt("Observation / note du RDV :") || "";
@@ -7003,11 +7064,11 @@ const ficheClient: ClientEnregistre = {
     });
 
     setShowPopupCalendrier(false);
-    alert("RDV client enregistré");
+    alert("RDV client enregistrÃ©");
   }}
   className="btn-green"
 >
-  ➕ Créer RDV client
+  âž• CrÃ©er RDV client
 </button>
 
         <button
@@ -7016,7 +7077,7 @@ const ficheClient: ClientEnregistre = {
           }}
           className="btn-amber"
         >
-          📝 Créer rappel / note
+          ðŸ“ CrÃ©er rappel / note
         </button>
 
         
@@ -7107,7 +7168,7 @@ function BlocRepliable({
       >
         <h2 className="text-base font-bold text-slate-900">{titre}</h2>
         <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
-          {ouvert ? "▲ Masquer" : "▼ Afficher"}
+          {ouvert ? "â–² Masquer" : "â–¼ Afficher"}
         </span>
       </button>
 
@@ -7173,7 +7234,7 @@ function DateInput({
 
       {value && (
         <p className="mt-1 text-xs text-slate-500">
-          Date sélectionnée : {value}
+          Date sÃ©lectionnÃ©e : {value}
         </p>
       )}
     </div>
@@ -7452,7 +7513,7 @@ function GraphiqueCourbe({
   const formaterMontant = (montant: number) => {
     return `${new Intl.NumberFormat("fr-FR", {
       maximumFractionDigits: 0,
-    }).format(montant)} €`;
+    }).format(montant)} â‚¬`;
   };
 
   const graduations = Array.from(
@@ -7474,12 +7535,12 @@ function GraphiqueCourbe({
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h3 className="text-lg font-bold text-slate-800">
-            Activité financière sur 12 mois
+            ActivitÃ© financiÃ¨re sur 12 mois
           </h3>
 
           <p className="mt-1 text-sm text-slate-500">
-            Comparaison des encaissements, des dépenses
-            payées et du résultat réel.
+            Comparaison des encaissements, des dÃ©penses
+            payÃ©es et du rÃ©sultat rÃ©el.
           </p>
         </div>
 
@@ -7491,12 +7552,12 @@ function GraphiqueCourbe({
 
           <div className="flex items-center gap-2 text-red-700">
             <span className="h-3 w-3 rounded-full bg-red-600" />
-            Dépenses
+            DÃ©penses
           </div>
 
           <div className="flex items-center gap-2 text-emerald-700">
             <span className="h-3 w-3 rounded-full bg-emerald-600" />
-            Résultat
+            RÃ©sultat
           </div>
         </div>
       </div>
@@ -7506,7 +7567,7 @@ function GraphiqueCourbe({
           viewBox={`0 0 ${largeur} ${hauteur}`}
           className="min-w-[900px]"
           role="img"
-          aria-label="Graphique des encaissements, dépenses et résultats sur douze mois"
+          aria-label="Graphique des encaissements, dÃ©penses et rÃ©sultats sur douze mois"
         >
           {/* ================= GRILLE HORIZONTALE ================= */}
 
@@ -7545,7 +7606,7 @@ function GraphiqueCourbe({
             strokeWidth="2"
           />
 
-          {/* ================= LIGNE ZÉRO ================= */}
+          {/* ================= LIGNE ZÃ‰RO ================= */}
 
           <line
             x1={margeGauche}
@@ -7567,7 +7628,7 @@ function GraphiqueCourbe({
             strokeLinejoin="round"
           />
 
-          {/* ================= COURBE DÉPENSES ================= */}
+          {/* ================= COURBE DÃ‰PENSES ================= */}
 
           <path
             d={cheminDepenses}
@@ -7578,7 +7639,7 @@ function GraphiqueCourbe({
             strokeLinejoin="round"
           />
 
-          {/* ================= COURBE RÉSULTAT ================= */}
+          {/* ================= COURBE RÃ‰SULTAT ================= */}
 
           <path
             d={cheminResultat}
@@ -7589,7 +7650,7 @@ function GraphiqueCourbe({
             strokeLinejoin="round"
           />
 
-          {/* ================= POINTS ET LIBELLÉS ================= */}
+          {/* ================= POINTS ET LIBELLÃ‰S ================= */}
 
           {donnees.map((donnee, index) => {
             const x = positionX(index);
@@ -7615,7 +7676,7 @@ function GraphiqueCourbe({
                   fill="#2563EB"
                 >
                   <title>
-                    {`${donnee.label} — Encaissements : ${formaterMontant(
+                    {`${donnee.label} â€” Encaissements : ${formaterMontant(
                       donnee.encaissements
                     )}`}
                   </title>
@@ -7628,7 +7689,7 @@ function GraphiqueCourbe({
                   fill="#DC2626"
                 >
                   <title>
-                    {`${donnee.label} — Dépenses : ${formaterMontant(
+                    {`${donnee.label} â€” DÃ©penses : ${formaterMontant(
                       donnee.depenses
                     )}`}
                   </title>
@@ -7641,7 +7702,7 @@ function GraphiqueCourbe({
                   fill="#059669"
                 >
                   <title>
-                    {`${donnee.label} — Résultat : ${formaterMontant(
+                    {`${donnee.label} â€” RÃ©sultat : ${formaterMontant(
                       donnee.resultat
                     )}`}
                   </title>
@@ -7669,33 +7730,32 @@ function GraphiqueCourbe({
           </div>
 
           <div className="mt-1 text-xs text-blue-700">
-            Sommes réellement reçues.
+            Sommes rÃ©ellement reÃ§ues.
           </div>
         </div>
 
         <div className="rounded-xl border border-red-200 bg-red-50 p-3">
           <div className="font-semibold text-red-800">
-            Dépenses
+            DÃ©penses
           </div>
 
           <div className="mt-1 text-xs text-red-700">
-            Achats payés pendant le mois, y compris le
-            stock utilisé sur plusieurs chantiers.
+            Achats payÃ©s pendant le mois, y compris le
+            stock utilisÃ© sur plusieurs chantiers.
           </div>
         </div>
 
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
           <div className="font-semibold text-emerald-800">
-            Résultat réel
+            RÃ©sultat rÃ©el
           </div>
 
           <div className="mt-1 text-xs text-emerald-700">
-            Encaissements moins dépenses.
+            Encaissements moins dÃ©penses.
           </div>
         </div>
       </div>
     </div>
   );
 }
-
 
