@@ -3812,7 +3812,7 @@ const dessinerCadreInfos = (
   yDepart: number,
   largeur: number,
   lignes: LigneBloc[],
-  largeurTexte: number
+  decalageValeur: number
 ) => {
   const lignesFiltrees = lignes.filter(
     (ligne) => ligne.valeur && ligne.valeur.trim() !== ""
@@ -3821,14 +3821,22 @@ const dessinerCadreInfos = (
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.4);
 
+  // Largeur réellement disponible entre le début des valeurs
+  // et la marge droite du cadre.
+  const largeurTexte = largeur - decalageValeur - 5;
+
   let hauteurTexte = 0;
 
   lignesFiltrees.forEach((ligne) => {
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.8;
   });
 
-  const hauteurBloc = Math.max(48, hauteurEnteteCadre + hauteurTexte + 10);
+  // 10 mm entre le bandeau et la première ligne, puis 5 mm de marge basse.
+  const hauteurBloc = Math.max(
+    48,
+    hauteurEnteteCadre + 10 + hauteurTexte + 5
+  );
 
   // Ombre légère
   doc.setFillColor(230, 230, 230);
@@ -3872,14 +3880,14 @@ const dessinerCadreInfos = (
     doc.setTextColor(25, 35, 48);
     doc.text(`${ligne.label} :`, x + 14, yTexte);
 
-    // Valeur rapprochée
+    // Valeur placée après la plus longue étiquette du bloc.
     const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
     const nbLignes = Math.max(1, texteCoupe.length);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.6);
     doc.setTextColor(35, 35, 35);
-    doc.text(texteCoupe, x + 29, yTexte);
+    doc.text(texteCoupe, x + decalageValeur, yTexte);
 
     yTexte += nbLignes * interligne + 1.8;
   });
@@ -3935,7 +3943,7 @@ const hauteurClientAuto = dessinerCadreInfos(
   yCadres,
   largeurClient,
   lignesClient,
-  50
+  31
 );
 
 const hauteurChantierAuto = dessinerCadreInfos(
@@ -3944,7 +3952,7 @@ const hauteurChantierAuto = dessinerCadreInfos(
   yCadres,
   largeurChantier,
   lignesChantier,
-  modeClient === "agence" ? 52 : 55
+  modeClient === "agence" ? 35 : 31
 );
 
 doc.setFont("helvetica", "normal");
