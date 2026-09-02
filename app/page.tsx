@@ -7758,5 +7758,3 @@ function GraphiqueCourbe({
     </div>
   );
 }
-
-
