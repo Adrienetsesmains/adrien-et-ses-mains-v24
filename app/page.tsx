@@ -4178,6 +4178,45 @@ const genererFicheChantier = () => {
     lignesTravaux.map((ligne) => ligne.prestationNom || "").join(" ")
   );
 
+  const outils = new Set<string>([
+    "Protections, bâches, ruban de masquage et sacs à gravats",
+    "Mètre, crayon, niveau et petit outillage à main",
+    "Aspirateur de chantier et matériel de nettoyage",
+  ]);
+
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
+    outils.add("Perforateur, burineur et équipements de protection");
+    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
+    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
+  }
+  if (/plomberie|receveur|vasque|robinet|mitigeur|siphon|vidage|evacuation/.test(textePrestations)) {
+    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
+    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
+  }
+  if (/peinture|enduit|ratissage|poncage/.test(textePrestations)) {
+    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
+  }
+  if (/sol pvc|revetement de sol|plinthe/.test(textePrestations)) {
+    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    outils.add("Scie circulaire, scie sauteuse, tréteaux, serre-joints et guide de coupe");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    outils.add("Perforateur, scie-cloche ou carotteuse adaptée au support");
+    outils.add("Détecteur de matériaux et matériel de calfeutrement");
+  }
+
+  const lignesFournitures = (detailsFournitures?.trim() || "")
+    .split(/\r?\n/)
+    .map((ligne) => ligne.trim())
+    .filter(Boolean)
+    .map((ligne) =>
+      ligne
+        .replace(/(\d+)€(\d{2})\b/g, "$1,$2 €")
+        .replace(/(\d+(?:[.,]\d+)?)\s*€/g, "$1 €")
+    );
+
   const ajouterPiedDePage = () => {
     const totalPages = doc.getNumberOfPages();
 
@@ -4207,14 +4246,14 @@ const genererFicheChantier = () => {
   };
 
   const ajouterTitreSection = (titre: string) => {
-    nouvellePageSiBesoin(16);
+    nouvellePageSiBesoin(13);
     doc.setFillColor(52, 63, 79);
-    doc.roundedRect(marge, y, largeurUtile, 9, 2, 2, "F");
+    doc.roundedRect(marge, y, largeurUtile, 7.5, 2, 2, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(255, 255, 255);
-    doc.text(titre.toUpperCase(), marge + 4, y + 6);
-    y += 12;
+    doc.text(titre.toUpperCase(), marge + 4, y + 5.2);
+    y += 10;
   };
 
   const ajouterTexte = (
@@ -4224,7 +4263,7 @@ const genererFicheChantier = () => {
     const retrait = options?.retrait || 0;
     const taille = options?.taille || 9;
     const lignes = doc.splitTextToSize(texte || "-", largeurUtile - retrait);
-    const hauteur = lignes.length * 4.1 + 0.7;
+    const hauteur = lignes.length * 3.6 + 0.5;
 
     nouvellePageSiBesoin(hauteur);
     doc.setFont("helvetica", options?.gras ? "bold" : "normal");
@@ -4237,7 +4276,7 @@ const genererFicheChantier = () => {
 
   const ajouterListe = (elements: string[]) => {
     elements.filter(Boolean).forEach((element) => {
-      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.2 });
+      ajouterTexte(`- ${element}`, { retrait: 3, taille: 7.7 });
     });
   };
 
@@ -4323,12 +4362,109 @@ const genererFicheChantier = () => {
 
   y = Math.max(yGauche, yIdentification - 3.5 + hauteurEncadre) + 4;
 
-  ajouterTitreSection("Travaux prévus");
-  lignesTravaux.forEach((ligne, index) => {
+  const largeurBloc = (largeurUtile - 5) / 2;
+  const xBlocDroit = marge + largeurBloc + 5;
+  const outilsListe = Array.from(outils);
+  const fournituresListe = fournituresClient
+    ? ["Fournitures à la charge du client"]
+    : lignesFournitures.filter((ligne) => !/^total\b/i.test(normaliserTexte(ligne)));
+
+  const hauteurListeCompacte = (elements: string[], largeur: number) =>
+    elements.reduce((total, element) => {
+      const lignes = doc.splitTextToSize(`- ${element}`, largeur - 6);
+      return total + Math.max(3.6, lignes.length * 3.35);
+    }, 0);
+
+  const hauteurOutils = 11 + hauteurListeCompacte(outilsListe, largeurBloc);
+  const hauteurFournitures =
+    16 + hauteurListeCompacte(
+      fournituresListe.length > 0
+        ? fournituresListe
+        : ["Vérifier la liste, les quantités, les références et la disponibilité"],
+      largeurBloc
+    );
+  const hauteurBlocs = Math.max(hauteurOutils, hauteurFournitures);
+  nouvellePageSiBesoin(hauteurBlocs + 5);
+  const yBlocs = y;
+
+  const dessinerBlocCompact = (
+    titre: string,
+    elements: string[],
+    x: number,
+    largeur: number,
+    sousTitre?: string
+  ) => {
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, yBlocs, largeur, hauteurBlocs, 2, 2, "FD");
+    doc.setFillColor(71, 85, 105);
+    doc.roundedRect(x, yBlocs, largeur, 7.5, 2, 2, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.4);
+    doc.setTextColor(255, 255, 255);
+    doc.text(titre.toUpperCase(), x + 3, yBlocs + 5.1);
+
+    let yLigne = yBlocs + 11;
+    if (sousTitre) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.7);
+      doc.setTextColor(15, 23, 42);
+      doc.text(sousTitre, x + 3, yLigne);
+      yLigne += 4.5;
+    }
+
+    elements.forEach((element) => {
+      const lignes = doc.splitTextToSize(`- ${element}`, largeur - 6);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.1);
+      doc.setTextColor(30, 41, 59);
+      doc.text(lignes, x + 3, yLigne);
+      yLigne += Math.max(3.6, lignes.length * 3.35);
+    });
+  };
+
+  dessinerBlocCompact("Outils à prendre", outilsListe, marge, largeurBloc);
+  dessinerBlocCompact(
+    "Fournitures",
+    fournituresListe.length > 0
+      ? fournituresListe
+      : ["Vérifier la liste, les quantités, les références et la disponibilité"],
+    xBlocDroit,
+    largeurBloc,
+    fournituresClient
+      ? undefined
+      : `Coût matériaux : ${Number(achatFournitures || 0).toFixed(2)} € TTC`
+  );
+  y = yBlocs + hauteurBlocs + 5;
+
+  const prioriteChantier = (nom: string) => {
+    const texte = normaliserTexte(nom);
+    if (/protection|preparation|reperage|depose|demolition/.test(texte)) return 10;
+    if (/ouverture|percement|traversee|ventilation|entree d air|grille exterieure/.test(texte)) return 20;
+    if (/plan de travail/.test(texte)) return 30;
+    if (/meuble|vasque/.test(texte)) return 40;
+    if (/robinet|mitigeur|siphon|vidage|douche|plomberie/.test(texte)) return 50;
+    if (/peinture|enduit|carrelage|faience|sol pvc|plinthe|finition/.test(texte)) return 70;
+    if (/evacuation|decheterie|gravats/.test(texte)) return 90;
+    if (/nettoyage|remise en etat/.test(texte)) return 100;
+    return 60;
+  };
+
+  const travauxOrdonnes = lignesTravaux
+    .map((ligne, index) => ({ ligne, index }))
+    .sort((a, b) =>
+      prioriteChantier(a.ligne.prestationNom || "") -
+        prioriteChantier(b.ligne.prestationNom || "") ||
+      a.index - b.index
+    );
+
+  ajouterTitreSection("Déroulement logique du chantier");
+  travauxOrdonnes.forEach(({ ligne }, index) => {
     const quantite = ligne.q1 || 1;
     ajouterTexte(
-      `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
-      { gras: true, taille: 9.2 }
+      `Étape ${index + 1} - ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
+      { gras: true, taille: 8.5 }
     );
     ajouterListe(
       (ligne.detailsPdfPersonnalises?.length
@@ -4336,64 +4472,8 @@ const genererFicheChantier = () => {
         : detailsTravaux(ligne)
       ).filter((detail) => detail.trim())
     );
-    y += 1;
+    y += 0.5;
   });
-
-  ajouterTitreSection("Fournitures et approvisionnement");
-  if (fournituresClient) {
-    ajouterTexte("Fournitures à la charge du client.", { gras: true });
-  } else {
-    ajouterTexte(`Coût d’achat total : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
-      gras: true,
-    });
-    const lignesFournitures = (detailsFournitures?.trim() || "")
-      .split(/\r?\n/)
-      .map((ligne) => ligne.trim())
-      .filter(Boolean)
-      .map((ligne) =>
-        ligne
-          .replace(/(\d+)€(\d{2})\b/g, "$1,$2 €")
-          .replace(/(\d+(?:[.,]\d+)?)\s*€/g, "$1 €")
-      );
-
-    if (lignesFournitures.length > 0) {
-      ajouterListe(lignesFournitures);
-    } else {
-      ajouterTexte("Vérifier la liste, les quantités, les références et la disponibilité avant le départ.");
-    }
-  }
-
-  const outils = new Set<string>([
-    "Protections, bâches, ruban de masquage et sacs à gravats",
-    "Mètre, crayon, niveau et petit outillage à main",
-    "Aspirateur de chantier et matériel de nettoyage",
-  ]);
-
-  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
-    outils.add("Perforateur, burineur et équipements de protection");
-    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
-    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
-  }
-  if (/plomberie|receveur|vasque|robinet|mitigeur|siphon|vidage|evacuation/.test(textePrestations)) {
-    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
-    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
-  }
-  if (/peinture|enduit|ratissage|poncage/.test(textePrestations)) {
-    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
-  }
-  if (/sol pvc|revetement de sol|plinthe/.test(textePrestations)) {
-    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
-  }
-  if (/plan de travail/.test(textePrestations)) {
-    outils.add("Scie circulaire, scie sauteuse, tréteaux, serre-joints et guide de coupe");
-  }
-  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
-    outils.add("Perforateur, scie-cloche ou carotteuse adaptée au support");
-    outils.add("Détecteur de matériaux et matériel de calfeutrement");
-  }
-
-  ajouterTitreSection("Outils et matériel à prévoir");
-  ajouterListe(Array.from(outils));
 
   const vigilance = new Set<string>([
     "Photographier les lieux et les équipements avant toute intervention",
