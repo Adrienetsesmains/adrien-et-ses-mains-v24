@@ -766,6 +766,26 @@ function formatNumero(prefix: string, numero: number) {
   return `${prefix}-2026-${String(numero).padStart(3, "0")}`;
 }
 
+// Numéros de départ validés au 02/09/2026.
+// Math.max empêche une ancienne sauvegarde locale ou cloud de faire reculer
+// les compteurs, tout en conservant automatiquement une valeur plus élevée.
+const PROCHAIN_NUMERO_DEVIS = 36;
+const PROCHAIN_NUMERO_FACTURE = 17;
+
+function compteurDevisValide(valeur: unknown) {
+  const numero = Number(valeur);
+  return Number.isFinite(numero)
+    ? Math.max(PROCHAIN_NUMERO_DEVIS, Math.trunc(numero))
+    : PROCHAIN_NUMERO_DEVIS;
+}
+
+function compteurFactureValide(valeur: unknown) {
+  const numero = Number(valeur);
+  return Number.isFinite(numero)
+    ? Math.max(PROCHAIN_NUMERO_FACTURE, Math.trunc(numero))
+    : PROCHAIN_NUMERO_FACTURE;
+}
+
 function nomTravaux(type: string) {
   return typesTravaux.find((t) => t[0] === type)?.[1] || "Travaux";
 }
@@ -941,8 +961,8 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
   setHistorique(d.historique || []);
   setDepenses(d.depenses || []);
   setClientsEnregistres(d.clientsEnregistres || clientsBase);
-  setCompteurDevis(d.compteurDevis ?? 1);
-  setCompteurFacture(d.compteurFacture ?? 1);
+  setCompteurDevis(compteurDevisValide(d.compteurDevis));
+  setCompteurFacture(compteurFactureValide(d.compteurFacture));
   setNumeroDevis(d.numeroDevis || "");
 setNumeroFacture(d.numeroFacture || "");
 
@@ -1022,8 +1042,8 @@ const appliquerSauvegardeComplete = (data: any) => {
   setDepenses(data.depenses || []);
   setClientsEnregistres(data.clientsEnregistres || clientsBase);
 
-  setCompteurDevis(data.compteurDevis ?? 1);
-  setCompteurFacture(data.compteurFacture ?? 1);
+  setCompteurDevis(compteurDevisValide(data.compteurDevis));
+  setCompteurFacture(compteurFactureValide(data.compteurFacture));
 
   setNumeroDevis(data.numeroDevis || "");
   setNumeroFacture(data.numeroFacture || "");
@@ -1178,8 +1198,8 @@ const [ajoutRdvOuvert, setAjoutRdvOuvert] = useState(false);
   const [rechercheHistorique, setRechercheHistorique] = useState("");
   const [rechercheCalendrier, setRechercheCalendrier] = useState("");
 const [clientsEnregistres, setClientsEnregistres] = useState<ClientEnregistre[]>(clientsBase);
-  const [compteurDevis, setCompteurDevis] = useState(1);
-  const [compteurFacture, setCompteurFacture] = useState(1);
+  const [compteurDevis, setCompteurDevis] = useState(PROCHAIN_NUMERO_DEVIS);
+  const [compteurFacture, setCompteurFacture] = useState(PROCHAIN_NUMERO_FACTURE);
 
   const [factureSap, setFactureSap] = useState(false);
 const [numeroSap, setNumeroSap] = useState("");
@@ -1298,8 +1318,8 @@ setRibBanque(d.ribBanque || "");
       setHistorique(d.historique || []);
       setDepenses(d.depenses || []);
 setClientsEnregistres(d.clientsEnregistres || clientsBase);
-      setCompteurDevis(d.compteurDevis ?? 1);
-      setCompteurFacture(d.compteurFacture ?? 1);
+      setCompteurDevis(compteurDevisValide(d.compteurDevis));
+      setCompteurFacture(compteurFactureValide(d.compteurFacture));
       setNumeroDevis(d.numeroDevis || "");
 setNumeroFacture(d.numeroFacture || "");
 
@@ -3418,8 +3438,8 @@ const reinitialiserApplicationComplete = () => {
   setDepenses([]);
   setClientsEnregistres(clientsBase);
 
-  setCompteurDevis(1);
-  setCompteurFacture(1);
+  setCompteurDevis(PROCHAIN_NUMERO_DEVIS);
+  setCompteurFacture(PROCHAIN_NUMERO_FACTURE);
   setNumeroDevis("");
   setNumeroFacture("");
 
@@ -3515,8 +3535,8 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
       setDepenses(data.depenses || []);
       setClientsEnregistres(data.clientsEnregistres || clientsBase);
 
-      setCompteurDevis(data.compteurDevis ?? 1);
-      setCompteurFacture(data.compteurFacture ?? 1);
+      setCompteurDevis(compteurDevisValide(data.compteurDevis));
+      setCompteurFacture(compteurFactureValide(data.compteurFacture));
 
       setNumeroDevis(data.numeroDevis || "");
       setNumeroFacture(data.numeroFacture || "");
