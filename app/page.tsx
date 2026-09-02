@@ -4235,28 +4235,9 @@ const genererFicheChantier = () => {
     y += hauteur;
   };
 
-  const ajouterTexteAvecCase = (
-    texte: string,
-    options?: { gras?: boolean; taille?: number }
-  ) => {
-    const taille = options?.taille || 8.2;
-    const lignes = doc.splitTextToSize(texte || "-", largeurUtile - 8);
-    const hauteur = Math.max(4.5, lignes.length * 4.1 + 0.7);
-
-    nouvellePageSiBesoin(hauteur);
-    doc.setDrawColor(71, 85, 105);
-    doc.setLineWidth(0.35);
-    doc.rect(marge + 1, y - 3.2, 3.2, 3.2);
-    doc.setFont("helvetica", options?.gras ? "bold" : "normal");
-    doc.setFontSize(taille);
-    doc.setTextColor(30, 41, 59);
-    doc.text(lignes, marge + 7, y);
-    y += hauteur;
-  };
-
   const ajouterListe = (elements: string[]) => {
     elements.filter(Boolean).forEach((element) => {
-      ajouterTexteAvecCase(element, { taille: 8.2 });
+      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.2 });
     });
   };
 
@@ -4278,35 +4259,74 @@ const genererFicheChantier = () => {
   y = 41;
 
   ajouterTitreSection("Identification du chantier");
-  ajouterTexte(`Client / agence : ${client || agence || "Non renseigné"}`, {
-    gras: true,
-  });
-  if (clientFinalNom) ajouterTexte(`Client final : ${clientFinalNom}`);
-  if (proprietaire) ajouterTexte(`Propriétaire : ${proprietaire}`);
-  if (locataire) ajouterTexte(`Locataire : ${locataire}`);
+  const yIdentification = y;
+  const largeurColonneGauche = 108;
+  const xEncadre = marge + largeurColonneGauche + 5;
+  const largeurEncadre = largeurUtile - largeurColonneGauche - 5;
+  let yGauche = yIdentification;
+
+  const ajouterInfoGauche = (texte: string, gras = false) => {
+    doc.setFont("helvetica", gras ? "bold" : "normal");
+    doc.setFontSize(8.4);
+    doc.setTextColor(30, 41, 59);
+    const lignes = doc.splitTextToSize(texte, largeurColonneGauche);
+    doc.text(lignes, marge, yGauche);
+    yGauche += lignes.length * 4.1 + 0.8;
+  };
+
+  ajouterInfoGauche(`Client / agence : ${client || agence || "Non renseigné"}`, true);
+  if (clientFinalNom) ajouterInfoGauche(`Client final : ${clientFinalNom}`);
+  if (proprietaire) ajouterInfoGauche(`Propriétaire : ${proprietaire}`);
+  if (locataire) ajouterInfoGauche(`Locataire : ${locataire}`);
   if (adresseAgence || adresse) {
-    ajouterTexte(`Adresse agence / client : ${adresseAgence || adresse}`);
+    ajouterInfoGauche(`Adresse agence / client : ${adresseAgence || adresse}`);
   }
-  ajouterTexte(
+  ajouterInfoGauche(
     `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignée"}`
   );
-  if (referenceChantier) ajouterTexte(`Référence : ${referenceChantier}`);
-  if (dateChantier) ajouterTexte(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
-  if (telephoneLocataire) ajouterTexte(`Téléphone sur place : ${telephoneLocataire}`);
+  if (referenceChantier) ajouterInfoGauche(`Référence : ${referenceChantier}`);
+  if (dateChantier) {
+    ajouterInfoGauche(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
+  }
+  if (telephoneLocataire) ajouterInfoGauche(`Téléphone sur place : ${telephoneLocataire}`);
 
-  ajouterTexte(
-    `Trajet : ${Number(kmAller || 0).toFixed(1)} km aller / ${Number(calcul.kmAR || 0).toFixed(1)} km aller-retour   |   Déplacement total : ${Number(calcul.fraisLogistique || 0).toFixed(2)} €`,
-    { gras: true, taille: 8.5 }
-  );
-  ajouterTexte(
-    `Temps prévu : ${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h   |   Durée estimée : ${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}   |   Achat fournitures : ${Number(achatFournitures || 0).toFixed(2)} € TTC`,
-    { gras: true, taille: 8.5 }
-  );
+  const infosPratiques = [
+    ["Trajet", `${Number(kmAller || 0).toFixed(1)} km aller`],
+    ["Aller-retour", `${Number(calcul.kmAR || 0).toFixed(1)} km`],
+    ["Déplacement", `${Number(calcul.fraisLogistique || 0).toFixed(2)} €`],
+    ["Temps prévu", `${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h`],
+    ["Durée estimée", `${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}`],
+    ["Achat fournitures", `${Number(achatFournitures || 0).toFixed(2)} € TTC`],
+  ];
+  const hauteurEncadre = 9 + infosPratiques.length * 5.2;
+
+  doc.setFillColor(241, 245, 249);
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(xEncadre, yIdentification - 3.5, largeurEncadre, hauteurEncadre, 2, 2, "FD");
+  doc.setFillColor(71, 85, 105);
+  doc.roundedRect(xEncadre, yIdentification - 3.5, largeurEncadre, 7.5, 2, 2, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text("INFOS PRATIQUES", xEncadre + 3, yIdentification + 1.5);
+
+  infosPratiques.forEach(([libelle, valeur], index) => {
+    const yInfo = yIdentification + 7 + index * 5.2;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.8);
+    doc.setTextColor(71, 85, 105);
+    doc.text(`${libelle} :`, xEncadre + 3, yInfo);
+    doc.setTextColor(15, 23, 42);
+    doc.text(valeur, xEncadre + largeurEncadre - 3, yInfo, { align: "right" });
+  });
+
+  y = Math.max(yGauche, yIdentification - 3.5 + hauteurEncadre) + 4;
 
   ajouterTitreSection("Travaux prévus");
   lignesTravaux.forEach((ligne, index) => {
     const quantite = ligne.q1 || 1;
-    ajouterTexteAvecCase(
+    ajouterTexte(
       `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
       { gras: true, taille: 9.2 }
     );
@@ -4339,7 +4359,7 @@ const genererFicheChantier = () => {
     if (lignesFournitures.length > 0) {
       ajouterListe(lignesFournitures);
     } else {
-      ajouterTexteAvecCase("Vérifier la liste, les quantités, les références et la disponibilité avant le départ.");
+      ajouterTexte("Vérifier la liste, les quantités, les références et la disponibilité avant le départ.");
     }
   }
 
