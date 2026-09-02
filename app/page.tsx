@@ -2369,7 +2369,14 @@ if (d.typeEvenement === "rdv") {
   setReferenceChantier(d.referenceChantier || "");
   setComplementAdresse(d.complementAdresse || "");
 
-  actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  // La fiche doit d'abord être rendue après setFicheOuverte(true), puis on
+  // remonte précisément sur le bloc client du dossier ouvert.
+  setTimeout(() => {
+    ficheClientRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 100);
 };
 
 const transformerRdvEnDevis = (d: Dossier) => {
@@ -7814,4 +7821,5 @@ function GraphiqueCourbe({
     </div>
   );
 }
+
 
