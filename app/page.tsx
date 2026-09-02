@@ -6268,12 +6268,41 @@ return (
           item.typeEvenement !== "rappel" &&
           (item.numeroDevis || item.numeroFacture)
       )
-  .sort((a, b) => {
-  const numeroA = extraireNumero(a.numeroDevis || a.numeroFacture);
-  const numeroB = extraireNumero(b.numeroDevis || b.numeroFacture);
+      .sort((a, b) => {
+        const aEstFacture = Boolean(a.numeroFacture);
+        const bEstFacture = Boolean(b.numeroFacture);
 
-  return numeroB - numeroA;
-});
+        // Toutes les factures passent avant les devis non encore facturés.
+        if (aEstFacture !== bEstFacture) {
+          return aEstFacture ? -1 : 1;
+        }
+
+        // Dans le groupe des factures, seul le numéro de facture détermine
+        // l’ordre : le numéro de devis peut être présent ou totalement absent.
+        if (aEstFacture && bEstFacture) {
+          const numeroFactureA = extraireNumero(a.numeroFacture);
+          const numeroFactureB = extraireNumero(b.numeroFacture);
+
+          if (numeroFactureA !== numeroFactureB) {
+            return numeroFactureB - numeroFactureA;
+          }
+        }
+
+        // Dans le second groupe, les devis non facturés sont classés du plus
+        // récent au plus ancien selon leur propre numéro de devis.
+        if (!aEstFacture && !bEstFacture) {
+          const numeroDevisA = extraireNumero(a.numeroDevis);
+          const numeroDevisB = extraireNumero(b.numeroDevis);
+
+          if (numeroDevisA !== numeroDevisB) {
+            return numeroDevisB - numeroDevisA;
+          }
+        }
+
+        // Sécurité en cas de numéro identique ou absent : le dernier dossier
+        // enregistré reste affiché en premier.
+        return (b.id || 0) - (a.id || 0);
+      });
 
     if (historiqueDocuments.length === 0) {
       return (
@@ -7564,5 +7593,6 @@ function GraphiqueCourbe({
     </div>
   );
 }
+
 
 
