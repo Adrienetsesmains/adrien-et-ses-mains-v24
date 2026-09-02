@@ -3129,13 +3129,19 @@ const ajouterPackAuDevis = (idPack: string) => {
     })
     .filter(Boolean) as LigneTravaux[];
 
+  const premiereNouvelleLigneId = nouvellesLignes[0]?.id;
+
+  if (!premiereNouvelleLigneId) return;
+
   setLignesTravaux((lignesActuelles) => [
     ...lignesActuelles,
     ...nouvellesLignes,
   ]);
 
   setTimeout(() => {
-    derniereLigneRef.current?.scrollIntoView({
+    document
+      .getElementById(`ligne-travaux-${premiereNouvelleLigneId}`)
+      ?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
@@ -5571,6 +5577,7 @@ return (
   return (
     <div
       key={ligne.id}
+      id={`ligne-travaux-${ligne.id}`}
       ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
       className="rounded-2xl border bg-slate-50 p-5 space-y-4"
     >
