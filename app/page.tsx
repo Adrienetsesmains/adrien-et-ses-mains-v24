@@ -4170,10 +4170,12 @@ const genererFicheChantier = () => {
   const largeurUtile = largeurPage - marge * 2;
   let y = 18;
 
-  const texteChantier = normaliserTexte(
-    lignesTravaux
-      .map((ligne) => `${ligne.prestationNom || ""} ${detailsTravaux(ligne).join(" ")}`)
-      .join(" ")
+  // La détection du matériel et des vigilances repose uniquement sur le nom
+  // des prestations. Les détails PDF peuvent contenir des mots génériques
+  // (SPEC, carrelage, douche...) qui déclenchaient auparavant des conseils
+  // sans rapport avec le chantier réel.
+  const textePrestations = normaliserTexte(
+    lignesTravaux.map((ligne) => ligne.prestationNom || "").join(" ")
   );
 
   const ajouterPiedDePage = () => {
@@ -4198,7 +4200,7 @@ const genererFicheChantier = () => {
   };
 
   const nouvellePageSiBesoin = (hauteurNecessaire = 18) => {
-    if (y + hauteurNecessaire <= 278) return;
+    if (y + hauteurNecessaire <= 281) return;
 
     doc.addPage();
     y = 18;
@@ -4212,7 +4214,7 @@ const genererFicheChantier = () => {
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
     doc.text(titre.toUpperCase(), marge + 4, y + 6);
-    y += 14;
+    y += 12;
   };
 
   const ajouterTexte = (
@@ -4222,7 +4224,7 @@ const genererFicheChantier = () => {
     const retrait = options?.retrait || 0;
     const taille = options?.taille || 9;
     const lignes = doc.splitTextToSize(texte || "-", largeurUtile - retrait);
-    const hauteur = lignes.length * 4.5 + 1;
+    const hauteur = lignes.length * 4.1 + 0.7;
 
     nouvellePageSiBesoin(hauteur);
     doc.setFont("helvetica", options?.gras ? "bold" : "normal");
@@ -4233,9 +4235,28 @@ const genererFicheChantier = () => {
     y += hauteur;
   };
 
+  const ajouterTexteAvecCase = (
+    texte: string,
+    options?: { gras?: boolean; taille?: number }
+  ) => {
+    const taille = options?.taille || 8.2;
+    const lignes = doc.splitTextToSize(texte || "-", largeurUtile - 8);
+    const hauteur = Math.max(4.5, lignes.length * 4.1 + 0.7);
+
+    nouvellePageSiBesoin(hauteur);
+    doc.setDrawColor(71, 85, 105);
+    doc.setLineWidth(0.35);
+    doc.rect(marge + 1, y - 3.2, 3.2, 3.2);
+    doc.setFont("helvetica", options?.gras ? "bold" : "normal");
+    doc.setFontSize(taille);
+    doc.setTextColor(30, 41, 59);
+    doc.text(lignes, marge + 7, y);
+    y += hauteur;
+  };
+
   const ajouterListe = (elements: string[]) => {
     elements.filter(Boolean).forEach((element) => {
-      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.5 });
+      ajouterTexteAvecCase(element, { taille: 8.2 });
     });
   };
 
@@ -4273,12 +4294,21 @@ const genererFicheChantier = () => {
   if (dateChantier) ajouterTexte(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
   if (telephoneLocataire) ajouterTexte(`Téléphone sur place : ${telephoneLocataire}`);
 
+  ajouterTexte(
+    `Trajet : ${Number(kmAller || 0).toFixed(1)} km aller / ${Number(calcul.kmAR || 0).toFixed(1)} km aller-retour   |   Déplacement total : ${Number(calcul.fraisLogistique || 0).toFixed(2)} €`,
+    { gras: true, taille: 8.5 }
+  );
+  ajouterTexte(
+    `Temps prévu : ${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h   |   Durée estimée : ${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}   |   Achat fournitures : ${Number(achatFournitures || 0).toFixed(2)} € TTC`,
+    { gras: true, taille: 8.5 }
+  );
+
   ajouterTitreSection("Travaux prévus");
   lignesTravaux.forEach((ligne, index) => {
     const quantite = ligne.q1 || 1;
-    ajouterTexte(
+    ajouterTexteAvecCase(
       `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
-      { gras: true, taille: 9.5 }
+      { gras: true, taille: 9.2 }
     );
     ajouterListe(
       (ligne.detailsPdfPersonnalises?.length
@@ -4286,21 +4316,31 @@ const genererFicheChantier = () => {
         : detailsTravaux(ligne)
       ).filter((detail) => detail.trim())
     );
-    y += 2;
+    y += 1;
   });
 
   ajouterTitreSection("Fournitures et approvisionnement");
   if (fournituresClient) {
     ajouterTexte("Fournitures à la charge du client.", { gras: true });
   } else {
-    ajouterTexte(`Budget d’achat prévu : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
+    ajouterTexte(`Coût d’achat total : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
       gras: true,
     });
-    ajouterTexte(`Coefficient de revente : x${coefficientFournitures}`);
-    ajouterTexte(
-      detailsFournitures?.trim() ||
-        "Vérifier la liste, les quantités, les références et la disponibilité avant le départ."
-    );
+    const lignesFournitures = (detailsFournitures?.trim() || "")
+      .split(/\r?\n/)
+      .map((ligne) => ligne.trim())
+      .filter(Boolean)
+      .map((ligne) =>
+        ligne
+          .replace(/(\d+)€(\d{2})\b/g, "$1,$2 €")
+          .replace(/(\d+(?:[.,]\d+)?)\s*€/g, "$1 €")
+      );
+
+    if (lignesFournitures.length > 0) {
+      ajouterListe(lignesFournitures);
+    } else {
+      ajouterTexteAvecCase("Vérifier la liste, les quantités, les références et la disponibilité avant le départ.");
+    }
   }
 
   const outils = new Set<string>([
@@ -4309,20 +4349,27 @@ const genererFicheChantier = () => {
     "Aspirateur de chantier et matériel de nettoyage",
   ]);
 
-  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
     outils.add("Perforateur, burineur et équipements de protection");
     outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
     outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
   }
-  if (/plomberie|receveur|vasque|robinet|evacuation/.test(texteChantier)) {
+  if (/plomberie|receveur|vasque|robinet|mitigeur|siphon|vidage|evacuation/.test(textePrestations)) {
     outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
     outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
   }
-  if (/peinture|enduit|ratissage|poncage/.test(texteChantier)) {
+  if (/peinture|enduit|ratissage|poncage/.test(textePrestations)) {
     outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
   }
-  if (/sol pvc|revetement de sol|plinthe/.test(texteChantier)) {
+  if (/sol pvc|revetement de sol|plinthe/.test(textePrestations)) {
     outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    outils.add("Scie circulaire, scie sauteuse, tréteaux, serre-joints et guide de coupe");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    outils.add("Perforateur, scie-cloche ou carotteuse adaptée au support");
+    outils.add("Détecteur de matériaux et matériel de calfeutrement");
   }
 
   ajouterTitreSection("Outils et matériel à prévoir");
@@ -4335,22 +4382,30 @@ const genererFicheChantier = () => {
     "Faire valider toute anomalie ou prestation supplémentaire avant exécution",
   ]);
 
-  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
     vigilance.add("Contrôler l’humidité, la solidité et la planéité des supports après dépose");
     vigilance.add("Respecter les temps de séchage du support, du SPEC, de la colle et des joints");
     vigilance.add("Soigner les angles, traversées, liaisons avec le receveur et joints sanitaires");
   }
-  if (/paroi|cabine/.test(texteChantier)) {
+  if (/paroi|cabine/.test(textePrestations)) {
     vigilance.add("Manipuler les vitrages à deux personnes et contrôler les pièces avant réemploi");
   }
-  if (/peinture/.test(texteChantier)) {
+  if (/peinture/.test(textePrestations)) {
     vigilance.add("Vérifier le fonctionnement de la ventilation avant remise en peinture");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    vigilance.add("Contrôler les dimensions, l’équerrage, les découpes et la position de l’évier avant coupe");
+    vigilance.add("Protéger et étancher soigneusement tous les chants découpés");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    vigilance.add("Contrôler l’absence de réseau dans la zone avant tout percement");
+    vigilance.add("Vérifier le diamètre, la pente vers l’extérieur et l’étanchéité du passage");
   }
 
   ajouterTitreSection("Points de vigilance");
   ajouterListe(Array.from(vigilance));
 
-  ajouterTitreSection("Check-list avant départ");
+  ajouterTitreSection("Contrôles du chantier");
   ajouterListe([
     "Photos avant travaux réalisées",
     "Implantation et dimensions contrôlées",
@@ -4360,6 +4415,12 @@ const genererFicheChantier = () => {
     "Photos de fin de chantier réalisées",
     "Déchets évacués et zone nettoyée",
   ]);
+
+  ajouterTitreSection("Suivi réel et imprévus");
+  ajouterTexte(`Heures réellement effectuées : ____________________`, { taille: 8.5 });
+  ajouterTexte(`Travaux supplémentaires validés : ______________________________________________`, { taille: 8.5 });
+  ajouterTexte(`Imprévus / anomalies constatés : _______________________________________________`, { taille: 8.5 });
+  ajouterTexte(`______________________________________________________________________________`, { taille: 8.5 });
 
   if (notes?.trim()) {
     ajouterTitreSection("Notes du dossier");
