@@ -1,7 +1,4 @@
-export
-type
-PrestationTarif
-= {
+export type PrestationTarif = {
 
 id:
 string;
@@ -167,10 +164,7 @@ options.tags
 
 };
 
-export
-const DETAILS_PDF_PAR_CATEGORIE:
-Record<string,
-string[]> = {
+export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
 Nettoyage:
 [
@@ -400,9 +394,7 @@ Jardin:
 
 };
 
-export
-const TARIFS_PRESTATIONS:
-PrestationTarif[] = [
+export const TARIFS_PRESTATIONS: PrestationTarif[] = [
 // ================= NETTOYAGE =================
 p("NET-FIN-CHANTIER",
 "Nettoyage",
@@ -3753,4 +3745,3 @@ tags:
 }),
 
 ];
-
