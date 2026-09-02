@@ -3818,6 +3818,11 @@ const dessinerCadreInfos = (
     (ligne) => ligne.valeur && ligne.valeur.trim() !== ""
   );
 
+  // Dans les champs CLIENT / CHANTIER, au moins deux espaces consécutifs
+  // indiquent volontairement un retour à la ligne dans le PDF.
+  const preparerValeurPDF = (valeur: string) =>
+    valeur.replace(/[ \t]{2,}/g, "\n").trim();
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.4);
 
@@ -3828,7 +3833,8 @@ const dessinerCadreInfos = (
   let hauteurTexte = 0;
 
   lignesFiltrees.forEach((ligne) => {
-    const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
+    const valeurPreparee = preparerValeurPDF(ligne.valeur);
+    const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
     hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.8;
   });
 
@@ -3881,7 +3887,8 @@ const dessinerCadreInfos = (
     doc.text(`${ligne.label} :`, x + 14, yTexte);
 
     // Valeur placée après la plus longue étiquette du bloc.
-    const texteCoupe = doc.splitTextToSize(ligne.valeur, largeurTexte);
+    const valeurPreparee = preparerValeurPDF(ligne.valeur);
+    const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
     const nbLignes = Math.max(1, texteCoupe.length);
 
     doc.setFont("helvetica", "normal");
