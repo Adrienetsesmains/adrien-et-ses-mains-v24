@@ -4438,29 +4438,8 @@ const genererFicheChantier = () => {
   );
   y = yBlocs + hauteurBlocs + 5;
 
-  const prioriteChantier = (nom: string) => {
-    const texte = normaliserTexte(nom);
-    if (/protection|preparation|reperage|depose|demolition/.test(texte)) return 10;
-    if (/ouverture|percement|traversee|ventilation|entree d air|grille exterieure/.test(texte)) return 20;
-    if (/plan de travail/.test(texte)) return 30;
-    if (/meuble|vasque/.test(texte)) return 40;
-    if (/robinet|mitigeur|siphon|vidage|douche|plomberie/.test(texte)) return 50;
-    if (/peinture|enduit|carrelage|faience|sol pvc|plinthe|finition/.test(texte)) return 70;
-    if (/evacuation|decheterie|gravats/.test(texte)) return 90;
-    if (/nettoyage|remise en etat/.test(texte)) return 100;
-    return 60;
-  };
-
-  const travauxOrdonnes = lignesTravaux
-    .map((ligne, index) => ({ ligne, index }))
-    .sort((a, b) =>
-      prioriteChantier(a.ligne.prestationNom || "") -
-        prioriteChantier(b.ligne.prestationNom || "") ||
-      a.index - b.index
-    );
-
-  ajouterTitreSection("Déroulement logique du chantier");
-  travauxOrdonnes.forEach(({ ligne }, index) => {
+  ajouterTitreSection("Prestations dans l’ordre du devis");
+  lignesTravaux.forEach((ligne, index) => {
     const quantite = ligne.q1 || 1;
     ajouterTexte(
       `Étape ${index + 1} - ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
@@ -7858,3 +7837,4 @@ function GraphiqueCourbe({
     </div>
   );
 }
+
