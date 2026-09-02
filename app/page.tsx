@@ -4313,21 +4313,43 @@ const genererFicheChantier = () => {
     yGauche += lignes.length * 4.1 + 0.8;
   };
 
-  ajouterInfoGauche(`Client / agence : ${client || agence || "Non renseigné"}`, true);
-  if (clientFinalNom) ajouterInfoGauche(`Client final : ${clientFinalNom}`);
-  if (proprietaire) ajouterInfoGauche(`Propriétaire : ${proprietaire}`);
-  if (locataire) ajouterInfoGauche(`Locataire : ${locataire}`);
-  if (adresseAgence || adresse) {
-    ajouterInfoGauche(`Adresse agence / client : ${adresseAgence || adresse}`);
+  if (modeClient === "agence") {
+    ajouterInfoGauche(`Agence : ${agence || client || "Non renseignée"}`, true);
+    ajouterInfoGauche(
+      `Adresse chantier : ${`${adresse || ""} ${complementAdresse || ""}`.trim() || "Non renseignée"}`
+    );
+    if (referenceChantier) ajouterInfoGauche(`Référence : ${referenceChantier}`);
+    if (locataire) {
+      ajouterInfoGauche(
+        `Locataire / contact : ${locataire}${telephoneLocataire ? ` - ${telephoneLocataire}` : ""}`
+      );
+    } else if (telephoneLocataire) {
+      ajouterInfoGauche(`Téléphone locataire : ${telephoneLocataire}`);
+    }
+    if (proprietaire) {
+      ajouterInfoGauche(
+        `Propriétaire : ${proprietaire}${telephoneProprietaire ? ` - ${telephoneProprietaire}` : ""}`
+      );
+    } else if (telephoneProprietaire) {
+      ajouterInfoGauche(`Téléphone propriétaire : ${telephoneProprietaire}`);
+    }
+  } else if (modeClient === "jeremie") {
+    ajouterInfoGauche(`Donneur d’ordre : ${client || "Jérémie Meurisse"}`, true);
+    ajouterInfoGauche(`Client chantier : ${clientFinalNom || "Non renseigné"}`);
+    ajouterInfoGauche(`Adresse chantier : ${clientFinalAdresse || "Non renseignée"}`);
+    if (clientFinalTelephone) ajouterInfoGauche(`Téléphone client : ${clientFinalTelephone}`);
+  } else {
+    ajouterInfoGauche(`Client : ${client || "Non renseigné"}`, true);
+    ajouterInfoGauche(
+      `Adresse : ${`${adresse || ""} ${complementAdresse || ""}`.trim() || "Non renseignée"}`
+    );
+    if (telephone) ajouterInfoGauche(`Téléphone : ${telephone}`);
+    if (email) ajouterInfoGauche(`Email : ${email}`);
   }
-  ajouterInfoGauche(
-    `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignée"}`
-  );
-  if (referenceChantier) ajouterInfoGauche(`Référence : ${referenceChantier}`);
+
   if (dateChantier) {
     ajouterInfoGauche(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
   }
-  if (telephoneLocataire) ajouterInfoGauche(`Téléphone sur place : ${telephoneLocataire}`);
 
   const infosPratiques = [
     ["Trajet", `${Number(kmAller || 0).toFixed(1)} km aller`],
@@ -7837,4 +7859,3 @@ function GraphiqueCourbe({
     </div>
   );
 }
-
