@@ -17,423 +17,141 @@ const CLE_SAUVEGARDE_V24 = "tableauDeBordEntrepriseV24";
 const CLE_BACKUPS_V25 = "backupHistoriqueV25";
 const CLE_BACKUPS_V24 = "backupHistoriqueV24";
 
-// Prestations volontairement générales : les dimensions, modèles, couleurs et
-// contraintes propres au chantier restent personnalisables dans chaque devis.
-const PRESTATIONS_SALLE_DE_BAIN_V25 = [
-  {
-    id: "SDB-PROT",
-    categorie: "Salle de bain",
-    prestation: "Protection et préparation de la zone d’intervention",
-    unite: "forfait",
-    prix220: 44,
-    heuresUnite: 1.6,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Protection courante des accès, sols et équipements conservés.",
-    tags: ["protection", "préparation", "salle de bain"],
-    detailsPdf: [
-      "Protection des accès et des éléments conservés",
-      "Préparation de la zone d’intervention",
-    ],
-  },
-  {
-    id: "SDB-DEM",
-    categorie: "Salle de bain",
-    prestation: "Dépose d’équipements et de revêtements existants",
-    unite: "forfait",
-    prix220: 220,
-      heuresUnite: 8,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Hors désamiantage et dégradations cachées importantes.",
-    tags: ["dépose", "démolition", "sanitaire", "revêtement"],
-    detailsPdf: [
-      "Dépose des équipements sanitaires prévus au devis",
-      "Dépose des revêtements concernés",
-      "Tri et mise en sacs des déchets",
-    ],
-  },
-  {
-    id: "SDB-EVAC",
-    categorie: "Salle de bain",
-    prestation: "Évacuation des déchets et gravats",
-    unite: "forfait",
-    prix220: 88,
-    heuresUnite: 3.2,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Pour un volume courant de rénovation intérieure.",
-    tags: ["gravats", "déchets", "évacuation", "déchetterie"],
-    detailsPdf: [
-      "Manutention et chargement des déchets",
-      "Évacuation vers une filière adaptée",
-    ],
-  },
-  {
-    id: "SDB-SUP-REP",
-    categorie: "Salle de bain",
-    prestation: "Préparation et reprise des supports",
-    unite: "m²",
-    prix220: 30,
-    heuresUnite: 1.1,
-    rentabilite: "À surveiller",
-    action: "Contrôler le support après dépose",
-    conditions: "Hors remplacement complet d’une cloison ou traitement d’une infiltration active.",
-    tags: ["mur", "support", "enduit", "ratissage", "rebouchage"],
-    detailsPdf: [
-      "Grattage des parties non adhérentes",
-      "Rebouchage et reprise des défauts du support",
-      "Dressage, ponçage et dépoussiérage avant finition",
-    ],
-  },
-  {
-    id: "SDB-PLOMB-ADP",
-    categorie: "Salle de bain",
-    prestation: "Adaptation des alimentations et évacuations existantes",
-    unite: "forfait",
-    prix220: 220,
-    heuresUnite: 8,
-    rentabilite: "À vérifier",
-    action: "Contrôler l’implantation",
-    conditions: "Adaptations simples et accessibles, sans création complète de réseau encastré.",
-    tags: ["plomberie", "évacuation", "alimentation", "raccordement"],
-    detailsPdf: [
-      "Adaptation des raccordements existants à la nouvelle implantation",
-      "Essais d’écoulement et contrôle d’étanchéité",
-    ],
-  },
-  {
-    id: "SDB-REC-POS",
-    categorie: "Salle de bain",
-    prestation: "Pose d’un receveur de douche",
-    unite: "forfait",
-    prix220: 220,
-    heuresUnite: 8,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Dimensions et modèle à préciser dans le devis.",
-    tags: ["receveur", "bac", "douche", "bonde"],
-    detailsPdf: [
-      "Préparation et mise à niveau de l’emplacement",
-      "Pose et calage du receveur",
-      "Pose de la bonde et raccordement à l’évacuation existante",
-      "Contrôle de l’écoulement et réalisation des finitions sanitaires",
-    ],
-  },
-  {
-    id: "SDB-ETANCH",
-    categorie: "Salle de bain",
-    prestation: "Protection à l’eau sous carrelage",
-    unite: "m²",
-    prix220: 25,
-    heuresUnite: 0.9,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Application suivant les prescriptions du système retenu et les temps de séchage.",
-    tags: ["SPEC", "étanchéité", "douche", "sous carrelage"],
-    detailsPdf: [
-      "Application du primaire adapté au support",
-      "Pose des bandes d’étanchéité dans les angles et points singuliers",
-      "Application du système de protection à l’eau sous carrelage",
-    ],
-  },
-  {
-    id: "SDB-FAI-DEP",
-    categorie: "Salle de bain",
-    prestation: "Dépose de faïence murale",
-    unite: "m²",
-    prix220: 25,
-    heuresUnite: 0.9,
-    rentabilite: "À surveiller",
-    action: "Contrôler le support après dépose",
-    conditions: "Hors remplacement du support découvert après dépose.",
-    tags: ["faïence", "carrelage", "dépose", "démolition"],
-    detailsPdf: [
-      "Dépose de la faïence murale existante",
-      "Grattage des résidus de colle non adhérents",
-    ],
-  },
-  {
-    id: "SDB-FAI-POS",
-    categorie: "Salle de bain",
-    prestation: "Pose de faïence murale",
-    unite: "m²",
-    prix220: 45,
-    heuresUnite: 1.65,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Format, calepinage et hauteur à préciser dans le devis.",
-    tags: ["faïence", "carrelage", "mur", "douche", "vasque"],
-    detailsPdf: [
-      "Implantation et calepinage du revêtement",
-      "Pose collée de la faïence murale",
-      "Réalisation des découpes et finitions courantes",
-    ],
-  },
-  {
-    id: "SDB-JOINT",
-    categorie: "Salle de bain",
-    prestation: "Joints et finitions sanitaires",
-    unite: "forfait",
-    prix220: 66,
-    heuresUnite: 2.4,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Pour une zone sanitaire courante.",
-    tags: ["joint", "silicone", "hydrofuge", "finition"],
-    detailsPdf: [
-      "Réalisation des joints de carrelage hydrofuges",
-      "Réalisation des joints sanitaires en silicone",
-      "Nettoyage des parements après finition",
-    ],
-  },
-  {
-    id: "SDB-PAROI-DEP",
-    categorie: "Salle de bain",
-    prestation: "Dépose d’une paroi ou cabine de douche",
-    unite: "forfait",
-    prix220: 66,
-    heuresUnite: 2.4,
-    rentabilite: "À surveiller",
-    action: "Prévoir une réserve en cas de réemploi",
-    conditions: "Dépose soigneuse, sans garantie sur les éléments vétustes réutilisés.",
-    tags: ["paroi", "cabine", "douche", "dépose", "verre"],
-    detailsPdf: [
-      "Dépose soigneuse de la paroi ou cabine existante",
-      "Stockage sur place des éléments destinés à être conservés",
-    ],
-  },
-  {
-    id: "SDB-PAROI-POS",
-    categorie: "Salle de bain",
-    prestation: "Pose d’une paroi ou cabine de douche",
-    unite: "forfait",
-    prix220: 110,
-    heuresUnite: 4,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Modèle, dimensions et état des supports à préciser.",
-    tags: ["paroi", "cabine", "douche", "pose", "verre"],
-    detailsPdf: [
-      "Implantation et fixation de la paroi ou cabine",
-      "Réglage des ouvrants et profilés",
-      "Réalisation des joints sanitaires périphériques",
-    ],
-  },
-  {
-    id: "SDB-SOL-PREP",
-    categorie: "Salle de bain",
-    prestation: "Préparation du support de sol",
-    unite: "m²",
-    prix220: 20,
-    heuresUnite: 0.75,
-    rentabilite: "À surveiller",
-    action: "Contrôler la planéité",
-    conditions: "Hors reprise structurelle ou ragréage de forte épaisseur.",
-    tags: ["sol", "préparation", "ragréage", "planéité"],
-    detailsPdf: [
-      "Nettoyage et préparation du support",
-      "Reprises localisées nécessaires à la pose du revêtement",
-    ],
-  },
-  {
-    id: "SDB-SOL-PVC",
-    categorie: "Salle de bain",
-    prestation: "Pose d’un revêtement de sol PVC",
-    unite: "m²",
-    prix220: 28,
-    heuresUnite: 1,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Revêtement et système de pose à préciser dans le devis.",
-    tags: ["sol", "PVC", "clipsable", "vinyle"],
-    detailsPdf: [
-      "Pose du revêtement de sol PVC",
-      "Réalisation des découpes et ajustements périphériques",
-      "Finitions au droit des passages et équipements",
-    ],
-  },
-  {
-    id: "SDB-PLINTHE",
-    categorie: "Salle de bain",
-    prestation: "Pose de plinthes de finition",
-    unite: "ml",
-    prix220: 8,
-    heuresUnite: 0.3,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Type, dimensions et coloris à définir selon le chantier.",
-    tags: ["plinthe", "finition", "recouvrement", "PVC", "blanche"],
-    detailsPdf: [
-      "Découpe et pose des plinthes de finition",
-      "Réalisation des raccords et finitions périphériques",
-    ],
-  },
-  {
-    id: "SDB-PEINT-PREP",
-    categorie: "Salle de bain",
-    prestation: "Préparation des murs et plafonds avant peinture",
-    unite: "m²",
-    prix220: 10,
-    heuresUnite: 0.36,
-    rentabilite: "À surveiller",
-    action: "Adapter à l’état du support",
-    conditions: "Comprend les préparations courantes, hors traitement d’une infiltration active.",
-    tags: ["peinture", "mur", "plafond", "enduit", "ponçage"],
-    detailsPdf: [
-      "Grattage des parties cloquées ou non adhérentes",
-      "Rebouchage, ponçage et dépoussiérage des supports",
-      "Application d’une impression sur les zones reprises",
-    ],
-  },
-  {
-    id: "SDB-PEINT",
-    categorie: "Salle de bain",
-    prestation: "Mise en peinture spéciale pièce humide",
-    unite: "m²",
-    prix220: 12,
-    heuresUnite: 0.44,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Sur supports préparés, murs ou plafonds.",
-    tags: ["peinture", "humide", "salle de bain", "mur", "plafond"],
-    detailsPdf: [
-      "Application de deux couches de peinture adaptée aux pièces humides",
-      "Réalisation des réchampis et finitions courantes",
-    ],
-  },
-  {
-    id: "SDB-MEUBLE-DEP",
-    categorie: "Salle de bain",
-    prestation: "Dépose d’un équipement sanitaire existant",
-    unite: "forfait",
-    prix220: 55,
-    heuresUnite: 2,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Pour un lavabo, meuble vasque ou équipement similaire accessible.",
-    tags: ["lavabo", "vasque", "meuble", "dépose"],
-    detailsPdf: [
-      "Déconnexion et dépose de l’équipement existant",
-      "Mise en sécurité provisoire des raccordements",
-    ],
-  },
-  {
-    id: "SDB-MEUBLE-POS",
-    categorie: "Salle de bain",
-    prestation: "Pose d’un meuble vasque",
-    unite: "forfait",
-    prix220: 132,
-    heuresUnite: 4.8,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Meuble, vasque et implantation à préciser dans le devis.",
-    tags: ["meuble", "vasque", "lavabo", "pose"],
-    detailsPdf: [
-      "Montage, implantation et fixation du meuble vasque",
-      "Pose de la vasque et réalisation des finitions périphériques",
-    ],
-  },
-  {
-    id: "SDB-ROBINET",
-    categorie: "Salle de bain",
-    prestation: "Pose et raccordement d’une robinetterie",
-    unite: "forfait",
-    prix220: 66,
-    heuresUnite: 2.4,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Sur alimentations et évacuation existantes accessibles.",
-    tags: ["robinet", "mitigeur", "vasque", "raccordement"],
-    detailsPdf: [
-      "Pose de la robinetterie et des raccordements accessibles",
-      "Contrôle de l’étanchéité et du bon fonctionnement",
-    ],
-  },
-  {
-    id: "SDB-ACCESS",
-    categorie: "Salle de bain",
-    prestation: "Pose d’accessoires de salle de bain",
-    unite: "forfait",
-    prix220: 44,
-    heuresUnite: 1.6,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Quantité et accessoires à préciser dans le devis.",
-    tags: ["accessoire", "miroir", "barre", "patère", "étagère"],
-    detailsPdf: ["Implantation et pose des accessoires prévus au devis"],
-  },
-  {
-    id: "SDB-NET",
-    categorie: "Salle de bain",
-    prestation: "Nettoyage de fin d’intervention",
-    unite: "forfait",
-    prix220: 44,
-    heuresUnite: 1.6,
-    rentabilite: "Correcte",
-    action: "Conserver",
-    conditions: "Nettoyage courant après intervention, hors remise en état générale du logement.",
-    tags: ["nettoyage", "fin de chantier", "finitions"],
-    detailsPdf: [
-      "Nettoyage de la zone d’intervention",
-      "Enlèvement des protections et remise en ordre",
-    ],
-  },
-];
-
-const TARIFS_PRESTATIONS = [
-  ...TARIFS_PRESTATIONS_BASE.filter(
-    (prestation: any) =>
-      !PRESTATIONS_SALLE_DE_BAIN_V25.some(
-        (nouvellePrestation) =>
-          nouvellePrestation.id === prestation.id
-      )
-  ),
-  ...PRESTATIONS_SALLE_DE_BAIN_V25,
-];
+// Le catalogue officiel est l’unique source des temps, tarifs, unités et détails PDF.
+// Les packs ne conservent que des identifiants et des quantités de départ.
+// Toute modification d’une prestation du catalogue actualise donc automatiquement les packs.
+const TARIFS_PRESTATIONS = TARIFS_PRESTATIONS_BASE;
 
 const PACKS_PRESTATIONS_V25 = [
   {
     id: "PACK-SDB-DOUCHE",
     nom: "Réfection d’un espace douche",
-    description: "Dépose, reprise du support, protection à l’eau, faïence et repose de la paroi.",
+    description:
+      "Dépose de la paroi et de la faïence, reprise du support, protection à l’eau, faïence et finitions.",
     lignes: [
-      ["SDB-PROT", 1],
-      ["SDB-PAROI-DEP", 1],
-      ["SDB-FAI-DEP", 3],
-      ["SDB-SUP-REP", 3],
-      ["SDB-ETANCH", 3],
-      ["SDB-FAI-POS", 3],
-      ["SDB-JOINT", 1],
-      ["SDB-PAROI-POS", 1],
-      ["SDB-EVAC", 1],
-      ["SDB-NET", 1],
+      ["PEINT-PROT", 1],
+      ["PLOMB-PAROI-DEP", 1],
+      ["CAR-DEPOSE", 1],
+      ["CAR-PREP", 1],
+      ["CAR-ETANCH", 1],
+      ["CAR-FAIENCE", 1],
+      ["CAR-JOINT", 1],
+      ["CAR-SILICONE", 1],
+      ["PLOMB-PAROI-POS", 1],
+      ["DEB-DECHETTERIE", 1],
+      ["NET-FIN-CHANTIER", 1],
     ] as [string, number][],
   },
   {
     id: "PACK-SDB-RENOVATION",
     nom: "Rénovation complète d’une salle de bain",
-    description: "Base complète et modifiable : déposes, douche, faïence, sol, peinture et meuble vasque.",
+    description:
+      "Base complète : déposes, douche, faïence, sol PVC, peintures, meuble vasque et finitions.",
     lignes: [
-      ["SDB-PROT", 1],
-      ["SDB-PAROI-DEP", 1],
-      ["SDB-DEM", 1],
-      ["SDB-EVAC", 1],
-      ["SDB-SUP-REP", 10],
-      ["SDB-PLOMB-ADP", 1],
-      ["SDB-REC-POS", 1],
-      ["SDB-ETANCH", 5],
-      ["SDB-FAI-POS", 7],
-      ["SDB-JOINT", 1],
-      ["SDB-SOL-PREP", 2],
-      ["SDB-SOL-PVC", 2],
-      ["SDB-PLINTHE", 4],
-      ["SDB-PEINT-PREP", 10],
-      ["SDB-PEINT", 10],
-      ["SDB-MEUBLE-POS", 1],
-      ["SDB-ROBINET", 1],
-      ["SDB-PAROI-POS", 1],
-      ["SDB-NET", 1],
+      ["PEINT-PROT", 1],
+      ["PLOMB-PAROI-DEP", 1],
+      ["PLOMB-DEPOSE-EQP", 1],
+      ["CAR-DEPOSE", 1],
+      ["DEB-DECHETTERIE", 1],
+      ["CAR-PREP", 1],
+      ["PLOMB-REC-DCH", 1],
+      ["CAR-ETANCH", 1],
+      ["CAR-FAIENCE", 1],
+      ["CAR-JOINT", 1],
+      ["CAR-SILICONE", 1],
+      ["SOL-PREP-MECA", 1],
+      ["SOL-PVC-CLIP", 1],
+      ["SOL-PLINTHE-BOIS", 1],
+      ["PEINT-PREP-RENF", 1],
+      ["PEINT-MURS-2C", 1],
+      ["PEINT-PLAFOND-2C", 1],
+      ["PLOMB-MEUBLE-VASQUE", 1],
+      ["PLOMB-ROBINET", 1],
+      ["PLOMB-PAROI-POS", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-PEINT-PIECE",
+    nom: "Remise en peinture complète d’une pièce",
+    description:
+      "Protection, préparation légère, deux couches sur murs et plafond, joints acryliques et nettoyage.",
+    lignes: [
+      ["PEINT-PROT", 1],
+      ["PEINT-PREP-LEG", 1],
+      ["PEINT-MURS-2C", 1],
+      ["PEINT-PLAFOND-2C", 1],
+      ["PEINT-ACRYLIQUE", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-SOL-PVC",
+    nom: "Pose complète d’un sol PVC clipsable",
+    description:
+      "Dépose éventuelle, préparation du support, sous-couche, sol PVC, plinthes et nettoyage.",
+    lignes: [
+      ["SOL-DEPOSE", 1],
+      ["SOL-PREP-MECA", 1],
+      ["SOL-SOUS-COUCHE", 1],
+      ["SOL-PVC-CLIP", 1],
+      ["SOL-PLINTHE-BOIS", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-BOITES-LETTRES",
+    nom: "Remplacement d’un bloc de boîtes aux lettres",
+    description:
+      "Dépose du bloc, préparation de la réservation, pose des boîtes, scellement et évacuation.",
+    lignes: [
+      ["BRI-BAL-DEPOSE-BLOC", 1],
+      ["BRI-BAL-PREP", 1],
+      ["BRI-BAL-POSE", 1],
+      ["BRI-BAL-FIN-MAC", 1],
+      ["DEB-DECHETTERIE", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-SOUS-FACE-PVC",
+    nom: "Remplacement d’une sous-face par du lambris PVC",
+    description:
+      "Dépose complète de l’habillage existant, pose du PVC, évacuation et nettoyage.",
+    lignes: [
+      ["TOIT-HAB-DEPOSE-COMP", 1],
+      ["TOIT-HAB-PVC", 1],
+      ["DEB-DECHETTERIE", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-JARDIN-REMISE-ETAT",
+    nom: "Remise en état d’un jardin",
+    description:
+      "Entretien global d’un espace vert laissé sans entretien, avec nettoyage et évacuation.",
+    lignes: [
+      ["JAR-REMISE-ETAT", 1],
+      ["JAR-EVAC", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-LOGEMENT-RELOCATION",
+    nom: "Remise en état d’un logement avant relocation",
+    description:
+      "Base adaptable : débarras, peinture, rénovation du sol et nettoyage général du logement.",
+    lignes: [
+      ["DEB-ENCOMBRANTS", 1],
+      ["DEB-DECHETTERIE", 1],
+      ["PEINT-PROT", 1],
+      ["PEINT-PREP-LEG", 1],
+      ["PEINT-MURS-2C", 1],
+      ["PEINT-PLAFOND-2C", 1],
+      ["SOL-DEPOSE", 1],
+      ["SOL-PREP-MECA", 1],
+      ["SOL-PVC-CLIP", 1],
+      ["SOL-PLINTHE-BOIS", 1],
+      ["NET-LOGEMENT", 1],
     ] as [string, number][],
   },
 ];
@@ -1240,6 +958,7 @@ const [prestationSelectionnee, setPrestationSelectionnee] = useState("");
 const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
 
 const [recherchePrestation, setRecherchePrestation] = useState("");
+const [packSelectionne, setPackSelectionne] = useState("");
 
 const [afficherFavorisSeulement, setAfficherFavorisSeulement] =
   useState(false);
@@ -5592,30 +5311,47 @@ return (
         Packs de prestations V25
       </p>
       <p className="mt-1 text-xs text-blue-700">
-        Ajoute une base complète puis adapte les quantités, les prix et les détails au chantier.
+        Les packs utilisent toujours les tarifs et les détails actuels du catalogue. Adapte les quantités au chantier après l’ajout.
       </p>
     </div>
 
-    <div className="grid gap-3 md:grid-cols-2">
-      {PACKS_PRESTATIONS_V25.map((pack) => (
-        <div
-          key={pack.id}
-          className="rounded-xl border border-blue-200 bg-white p-3"
-        >
-          <p className="font-bold text-slate-800">{pack.nom}</p>
-          <p className="mt-1 text-xs text-slate-600">
-            {pack.description}
-          </p>
-          <button
-            type="button"
-            onClick={() => ajouterPackAuDevis(pack.id)}
-            className="mt-3 rounded-lg bg-blue-700 px-3 py-2 text-xs font-bold text-white hover:bg-blue-800"
-          >
-            + Ajouter le pack
-          </button>
-        </div>
-      ))}
+    <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+      <select
+        value={packSelectionne}
+        onChange={(event) => setPackSelectionne(event.target.value)}
+        className="w-full rounded-xl border border-blue-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800"
+      >
+        <option value="">Choisir un pack de prestations</option>
+        {PACKS_PRESTATIONS_V25.map((pack) => (
+          <option key={pack.id} value={pack.id}>
+            {pack.nom}
+          </option>
+        ))}
+      </select>
+
+      <button
+        type="button"
+        disabled={!packSelectionne}
+        onClick={() => {
+          if (!packSelectionne) return;
+          ajouterPackAuDevis(packSelectionne);
+          setPackSelectionne("");
+        }}
+        className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+      >
+        + Ajouter le pack
+      </button>
     </div>
+
+    {packSelectionne && (
+      <p className="mt-3 text-xs text-slate-600">
+        {
+          PACKS_PRESTATIONS_V25.find(
+            (pack) => pack.id === packSelectionne
+          )?.description
+        }
+      </p>
+    )}
   </div>
 
   <div className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
