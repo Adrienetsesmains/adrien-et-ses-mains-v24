@@ -310,6 +310,7 @@ type Dossier = {
   lignesTravaux: LigneTravaux[];
   numeroDevis: string;
   numeroFacture: string;
+  estBrouillonAuto?: boolean;
   total: number;
   acompte: number;
   reste: number;
@@ -1097,6 +1098,10 @@ setTypeRdv(b.typeRdv || "visite");
       console.error("Erreur chargement sauvegarde :", error);
     }
   }
+
+  // À chaque nouvelle ouverture de l’application, on conserve l’historique
+  // chargé mais on repart volontairement sur une fiche Nouveau vide.
+  nouveauDossier();
   setSauvegardePrete(true);
 }, []);
 
@@ -1764,6 +1769,12 @@ setNumeroSap("");
   setPriorite("normale");
   setDatePaiement("");
   setDateChantier("");
+  setHeureChantier("");
+  setDateRdv("");
+  setHeureRdv("");
+  setMotifRdv("");
+  setTypeRdv("visite");
+  setPackSelectionne("");
 
   setTimeout(() => {
   inputClientRef.current?.scrollIntoView({
@@ -1841,7 +1852,10 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   }, 150);
 };
 
-const enregistrer = () => {
+const enregistrerDossier = (
+  silencieux = false,
+  persisterImmediatement = false
+) => {
   const numeroDevisFinal = numeroDevis;
   const numeroFactureFinal = numeroFacture;
   const idFinal = idDossierActuel ?? Date.now();
@@ -1938,6 +1952,10 @@ fraisDeplacementManuel:
 
     numeroDevis: estEvenementSimple ? "" : numeroDevisFinal,
     numeroFacture: estEvenementSimple ? "" : numeroFactureFinal,
+    estBrouillonAuto:
+      !estEvenementSimple &&
+      !numeroDevisFinal &&
+      !numeroFactureFinal,
 
     total: estEvenementSimple ? 0 : calcul.total,
     acompte: estEvenementSimple ? 0 : calcul.acompte,
@@ -1990,20 +2008,80 @@ fraisDeplacementManuel:
     });
   }
 
-  setHistorique((ancien) => {
-    const existeDeja = ancien.some((d) => d.id === idFinal);
+  const existeDeja = historique.some((d) => d.id === idFinal);
+  const historiqueMisAJour = existeDeja
+    ? historique.map((d) => (d.id === idFinal ? item : d))
+    : [item, ...historique];
 
-    if (existeDeja) {
-      return ancien.map((d) => (d.id === idFinal ? item : d));
-    }
-
-    return [item, ...ancien];
-  });
+  setHistorique(historiqueMisAJour);
 
   setIdDossierActuel(idFinal);
 
-  alert(estRdv ? "RDV enregistré" : estRappel ? "Rappel enregistré" : "Dossier enregistré");
+  if (persisterImmediatement) {
+    const donnees = construireSauvegardeComplete();
+
+    localStorage.setItem(
+      CLE_SAUVEGARDE_V25,
+      JSON.stringify({
+        ...donnees,
+        historique: historiqueMisAJour,
+        brouillon: null,
+      })
+    );
+  }
+
+  if (!silencieux) {
+    alert(
+      estRdv
+        ? "RDV enregistré"
+        : estRappel
+        ? "Rappel enregistré"
+        : "Dossier enregistré"
+    );
+  }
 };
+
+const enregistrer = () => {
+  enregistrerDossier(false, false);
+};
+
+useEffect(() => {
+  const sauvegarderAvantFermeture = () => {
+    if (!sauvegardePrete) return;
+
+    const dossierCommence = Boolean(
+      client.trim() ||
+      numeroDevis ||
+      numeroFacture ||
+      lignesTravaux.length > 0 ||
+      notes.trim() ||
+      dateRdv ||
+      dateChantier
+    );
+
+    if (!dossierCommence) {
+      const donnees = construireSauvegardeComplete();
+
+      localStorage.setItem(
+        CLE_SAUVEGARDE_V25,
+        JSON.stringify({
+          ...donnees,
+          brouillon: null,
+        })
+      );
+
+      return;
+    }
+
+    enregistrerDossier(true, true);
+  };
+
+  window.addEventListener("pagehide", sauvegarderAvantFermeture);
+
+  return () => {
+    window.removeEventListener("pagehide", sauvegarderAvantFermeture);
+  };
+});
 
 const rechargerDossier = (d: Dossier) => {
  
@@ -6266,9 +6344,28 @@ return (
         (item) =>
           item.typeEvenement !== "rdv" &&
           item.typeEvenement !== "rappel" &&
-          (item.numeroDevis || item.numeroFacture)
+          (
+            item.numeroDevis ||
+            item.numeroFacture ||
+            item.estBrouillonAuto
+          )
       )
       .sort((a, b) => {
+        const aEstBrouillon =
+          !a.numeroFacture && !a.numeroDevis;
+        const bEstBrouillon =
+          !b.numeroFacture && !b.numeroDevis;
+
+        // Les travaux commencés sans numéro restent tout en haut afin d’être
+        // retrouvés immédiatement à la prochaine ouverture de l’application.
+        if (aEstBrouillon !== bEstBrouillon) {
+          return aEstBrouillon ? -1 : 1;
+        }
+
+        if (aEstBrouillon && bEstBrouillon) {
+          return (b.id || 0) - (a.id || 0);
+        }
+
         const aEstFacture = Boolean(a.numeroFacture);
         const bEstFacture = Boolean(b.numeroFacture);
 
@@ -6321,7 +6418,12 @@ return (
             parseDateFr(item.datePaiement) &&
             parseDateFr(item.datePaiement)! < new Date();
 
-          const badgePastel = item.facturePayee
+          const estBrouillon =
+            !item.numeroFacture && !item.numeroDevis;
+
+          const badgePastel = estBrouillon
+            ? "bg-slate-100 text-slate-700 border-slate-300"
+            : item.facturePayee
             ? "bg-emerald-100 text-emerald-800 border-emerald-200"
             : factureEnRetard
             ? "bg-red-100 text-red-800 border-red-200"
@@ -6329,7 +6431,9 @@ return (
             ? "bg-blue-100 text-blue-800 border-blue-200"
             : "bg-amber-100 text-amber-800 border-amber-200";
 
-          const libelleStatut = item.facturePayee
+          const libelleStatut = estBrouillon
+            ? "Brouillon"
+            : item.facturePayee
             ? "Payée"
             : factureEnRetard
             ? "Retard"
@@ -7593,6 +7697,5 @@ function GraphiqueCourbe({
     </div>
   );
 }
-
 
 
