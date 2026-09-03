@@ -1398,6 +1398,182 @@ p(
 
 p(
 
+ "PEINT-TOILE-PLAFOND-POS", "Peinture", "Pose d’une toile de rénovation au plafond", "m²", 0.45, [
+
+   "Contrôle et préparation courante du support prêt à recevoir la toile",
+
+   "Encollage régulier du plafond",
+
+   "Pose, marouflage et ajustement de la toile de rénovation",
+
+   "Réalisation des découpes et raccords courants",
+
+   "Contrôle de l’adhérence et nettoyage de fin d’intervention",
+
+ ],
+
+ {
+
+   conditions:
+
+     "Support sain, stable et accessible. Protection générale, dépose d’un ancien revêtement, préparation renforcée, traitement d’une infiltration, peinture de finition et travail en grande hauteur comptés séparément.",
+
+   tags: [
+
+     "peinture",
+
+     "toile de rénovation",
+
+     "toile tissée",
+
+     "plafond",
+
+     "pose",
+
+   ],
+
+ }
+
+),
+
+p(
+
+ "PEINT-VOLET-BOIS-RENOV-2C", "Peinture", "Rénovation et mise en peinture d’un volet bois - 2 couches", "u", 3.5, [
+
+   "Dépose du volet et installation sur une zone de travail adaptée",
+
+   "Grattage et ponçage des parties non adhérentes",
+
+   "Nettoyage et dépoussiérage du support",
+
+   "Application d’un primaire sur les parties mises à nu si nécessaire",
+
+   "Application de deux couches de peinture extérieure sur les deux faces et les chants",
+
+   "Repose du volet et contrôle de son fonctionnement",
+
+ ],
+
+ {
+
+   conditions:
+
+     "Pour volet bois courant pouvant être déposé sans réparation de ses fixations. Hors décapage intégral, remplacement de lame ou ferrure, réparation importante du bois, fourniture de peinture et moyen d’accès spécifique.",
+
+   rentabilite: "🟠 À contrôler",
+
+   tags: [
+
+     "peinture",
+
+     "volet bois",
+
+     "rénovation",
+
+     "extérieur",
+
+     "2 couches",
+
+     "dépose repose",
+
+   ],
+
+ }
+
+),
+
+p(
+
+ "MAC-ENCADREMENT-OUVERTURE-REP", "Maçonnerie légère", "Reprise maçonnée d’un encadrement d’ouverture", "ml", 1.15, [
+
+   "Piquage et retrait des parties non adhérentes strictement nécessaires",
+
+   "Dépoussiérage et préparation du support",
+
+   "Rebouchage et reprise de l’encadrement au mortier adapté",
+
+   "Dressage des arêtes et raccord avec le support existant",
+
+   "Finition courante avant mise en peinture",
+
+ ],
+
+ {
+
+   conditions:
+
+     "Pour reprise localisée autour d’une porte ou d’une fenêtre sur support maçonné sain. Hors reprise structurelle, linteau, infiltration active, ravalement complet, peinture de finition et moyen d’accès spécifique.",
+
+   rentabilite: "🟠 À contrôler",
+
+   tags: [
+
+     "maçonnerie",
+
+     "encadrement",
+
+     "tableau extérieur",
+
+     "fenêtre",
+
+     "porte",
+
+     "mortier",
+
+     "façade",
+
+   ],
+
+ }
+
+),
+
+p(
+
+ "PEINT-ENCADREMENT-EXT-2C", "Peinture", "Mise en peinture d’un encadrement extérieur - 2 couches", "ml", 0.45, [
+
+   "Préparation légère et dépoussiérage de l’encadrement",
+
+   "Application d’une première couche de peinture extérieure adaptée",
+
+   "Respect du temps de séchage nécessaire",
+
+   "Application d’une deuxième couche de peinture",
+
+   "Réalisation des réchampis et finitions courantes",
+
+ ],
+
+ {
+
+   conditions:
+
+     "Support sec, stabilisé et prêt à peindre. Protection générale, réparation du support, primaire spécifique, traitement d’une infiltration, ravalement complet et moyen d’accès spécifique comptés séparément.",
+
+   tags: [
+
+     "peinture",
+
+     "extérieur",
+
+     "encadrement",
+
+     "fenêtre",
+
+     "porte",
+
+     "façade",
+
+     "2 couches",
+
+   ],
+
+ }
+
+),
+
+p(
+
  "PEINT-BOIS-SURF", "Peinture", "Mise en peinture d’un support bois - 1 couche", "m²", 0.35,
 [
 
