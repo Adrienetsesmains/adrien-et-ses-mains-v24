@@ -3209,6 +3209,62 @@ tags:
 "scellement",
 "ensemble"]
 }),
+
+p("BRI-BAL-BARILLET",
+"Bricolage / Menuiserie légère",
+"Remplacement d’un barillet de boîte aux lettres",
+"u",
+0.5,
+[
+
+  "Dépose du barillet existant",
+
+  "Pose d’un barillet standard compatible",
+
+  "Réglage du verrouillage",
+
+  "Contrôle de la fermeture et essai avec les clés",
+
+],
+{ conditions:
+"Barillet et clés fournis séparément. Pour boîte aux lettres existante accessible et porte conservée. Hors perçage d’un barillet bloqué, modification importante de la porte ou remplacement complet de la boîte aux lettres.",
+tags:
+["boîte aux lettres",
+"barillet",
+"serrure",
+"clé",
+"remplacement"]
+}),
+
+p("BRI-BAL-PORTE-REG",
+"Bricolage / Menuiserie légère",
+"Redressage et réglage d’une porte de boîte aux lettres",
+"u",
+0.75,
+[
+
+  "Contrôle de la porte, des jeux et de la fermeture",
+
+  "Dépose partielle si nécessaire",
+
+  "Redressage localisé de la porte métallique",
+
+  "Réglage de l’alignement et de la fermeture",
+
+  "Repose et essai de fonctionnement",
+
+],
+{ conditions:
+"Pour déformation légère à modérée permettant la conservation de la porte, du caisson et des charnières. Hors remplacement de porte, remise en peinture ou remplacement complet de la boîte aux lettres.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["boîte aux lettres",
+"porte",
+"redressage",
+"réglage",
+"réparation"]
+}),
 // ================= FIXATIONS / MAINS COURANTES =================
 p("BRI-MAIN-COURANTE-REP",
 "Bricolage / Menuiserie légère",
