@@ -3507,7 +3507,6 @@ const genererPDF = async (type: "devis" | "facture") => {
   const doc = new jsPDF();
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
-  const estFactureMeurisse = modeClient === "jeremie" && type === "facture";
 
 let numero = type === "devis" ? numeroDevis : numeroFacture;
 
@@ -3625,7 +3624,7 @@ const xClient = 15;
 const xChantier = 105;
 const yCadres = 80;
 
-const largeurClient = estFactureMeurisse ? 180 : 85;
+const largeurClient = 85;
 const largeurChantier = 90;
 
 const hauteurEnteteCadre = 12;
@@ -3784,16 +3783,14 @@ const hauteurClientAuto = dessinerCadreInfos(
   31
 );
 
-const hauteurChantierAuto = estFactureMeurisse
-  ? 0
-  : dessinerCadreInfos(
-      "CHANTIER",
-      xChantier,
-      yCadres,
-      largeurChantier,
-      lignesChantier,
-      modeClient === "agence" ? 35 : 31
-    );
+const hauteurChantierAuto = dessinerCadreInfos(
+  "CHANTIER",
+  xChantier,
+  yCadres,
+  largeurChantier,
+  lignesChantier,
+  modeClient === "agence" ? 35 : 31
+);
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
@@ -3807,9 +3804,12 @@ enteteTableau();
 let lignesDevisPDF = lignesPDF();
 
 // 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
-if (estFactureMeurisse) {
+if (modeClient === "jeremie" && type === "facture") {
   lignesDevisPDF = [
-    ["Main d'œuvre sous-traitance", calcul.total],
+    [
+      "Prestation de service Main d'œuvre uniquement\nForfait main d'œuvre global",
+      calcul.total,
+    ],
   ];
 }
 
@@ -3819,9 +3819,7 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const designation = designationBrute;
 
   const detailsLimites =
-  estFactureMeurisse
-    ? []
-    : ligneSource
+  ligneSource
     ? detailsTravaux(ligneSource)
     : designationBrute.includes("déplacement")
     ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`]
@@ -4172,52 +4170,11 @@ const genererFicheChantier = () => {
   const largeurUtile = largeurPage - marge * 2;
   let y = 18;
 
-  // La détection du matériel et des vigilances repose uniquement sur le nom
-  // des prestations. Les détails PDF peuvent contenir des mots génériques
-  // (SPEC, carrelage, douche...) qui déclenchaient auparavant des conseils
-  // sans rapport avec le chantier réel.
-  const textePrestations = normaliserTexte(
-    lignesTravaux.map((ligne) => ligne.prestationNom || "").join(" ")
+  const texteChantier = normaliserTexte(
+    lignesTravaux
+      .map((ligne) => `${ligne.prestationNom || ""} ${detailsTravaux(ligne).join(" ")}`)
+      .join(" ")
   );
-
-  const outils = new Set<string>([
-    "Protections, bâches, ruban de masquage et sacs à gravats",
-    "Mètre, crayon, niveau et petit outillage à main",
-    "Aspirateur de chantier et matériel de nettoyage",
-  ]);
-
-  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
-    outils.add("Perforateur, burineur et équipements de protection");
-    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
-    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
-  }
-  if (/plomberie|receveur|vasque|robinet|mitigeur|siphon|vidage|evacuation/.test(textePrestations)) {
-    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
-    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
-  }
-  if (/peinture|enduit|ratissage|poncage/.test(textePrestations)) {
-    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
-  }
-  if (/sol pvc|revetement de sol|plinthe/.test(textePrestations)) {
-    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
-  }
-  if (/plan de travail/.test(textePrestations)) {
-    outils.add("Scie circulaire, scie sauteuse, tréteaux, serre-joints et guide de coupe");
-  }
-  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
-    outils.add("Perforateur, scie-cloche ou carotteuse adaptée au support");
-    outils.add("Détecteur de matériaux et matériel de calfeutrement");
-  }
-
-  const lignesFournitures = (detailsFournitures?.trim() || "")
-    .split(/\r?\n/)
-    .map((ligne) => ligne.trim())
-    .filter(Boolean)
-    .map((ligne) =>
-      ligne
-        .replace(/(\d+)€(\d{2})\b/g, "$1,$2 €")
-        .replace(/(\d+(?:[.,]\d+)?)\s*€/g, "$1 €")
-    );
 
   const ajouterPiedDePage = () => {
     const totalPages = doc.getNumberOfPages();
@@ -4241,21 +4198,21 @@ const genererFicheChantier = () => {
   };
 
   const nouvellePageSiBesoin = (hauteurNecessaire = 18) => {
-    if (y + hauteurNecessaire <= 281) return;
+    if (y + hauteurNecessaire <= 278) return;
 
     doc.addPage();
     y = 18;
   };
 
   const ajouterTitreSection = (titre: string) => {
-    nouvellePageSiBesoin(13);
+    nouvellePageSiBesoin(16);
     doc.setFillColor(52, 63, 79);
-    doc.roundedRect(marge, y, largeurUtile, 7.5, 2, 2, "F");
+    doc.roundedRect(marge, y, largeurUtile, 9, 2, 2, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
+    doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
-    doc.text(titre.toUpperCase(), marge + 4, y + 5.2);
-    y += 10;
+    doc.text(titre.toUpperCase(), marge + 4, y + 6);
+    y += 14;
   };
 
   const ajouterTexte = (
@@ -4265,7 +4222,7 @@ const genererFicheChantier = () => {
     const retrait = options?.retrait || 0;
     const taille = options?.taille || 9;
     const lignes = doc.splitTextToSize(texte || "-", largeurUtile - retrait);
-    const hauteur = lignes.length * 3.6 + 0.5;
+    const hauteur = lignes.length * 4.5 + 1;
 
     nouvellePageSiBesoin(hauteur);
     doc.setFont("helvetica", options?.gras ? "bold" : "normal");
@@ -4278,7 +4235,7 @@ const genererFicheChantier = () => {
 
   const ajouterListe = (elements: string[]) => {
     elements.filter(Boolean).forEach((element) => {
-      ajouterTexte(`- ${element}`, { retrait: 3, taille: 7.7 });
+      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.5 });
     });
   };
 
@@ -4300,174 +4257,28 @@ const genererFicheChantier = () => {
   y = 41;
 
   ajouterTitreSection("Identification du chantier");
-  const yIdentification = y;
-  const largeurColonneGauche = 108;
-  const xEncadre = marge + largeurColonneGauche + 5;
-  const largeurEncadre = largeurUtile - largeurColonneGauche - 5;
-  let yGauche = yIdentification;
-
-  const ajouterInfoGauche = (texte: string, gras = false) => {
-    doc.setFont("helvetica", gras ? "bold" : "normal");
-    doc.setFontSize(8.4);
-    doc.setTextColor(30, 41, 59);
-    const lignes = doc.splitTextToSize(texte, largeurColonneGauche);
-    doc.text(lignes, marge, yGauche);
-    yGauche += lignes.length * 4.1 + 0.8;
-  };
-
-  if (modeClient === "agence") {
-    ajouterInfoGauche(`Agence : ${agence || client || "Non renseignée"}`, true);
-    ajouterInfoGauche(
-      `Adresse chantier : ${`${adresse || ""} ${complementAdresse || ""}`.trim() || "Non renseignée"}`
-    );
-    if (referenceChantier) ajouterInfoGauche(`Référence : ${referenceChantier}`);
-    if (locataire) {
-      ajouterInfoGauche(
-        `Locataire / contact : ${locataire}${telephoneLocataire ? ` - ${telephoneLocataire}` : ""}`
-      );
-    } else if (telephoneLocataire) {
-      ajouterInfoGauche(`Téléphone locataire : ${telephoneLocataire}`);
-    }
-    if (proprietaire) {
-      ajouterInfoGauche(
-        `Propriétaire : ${proprietaire}${telephoneProprietaire ? ` - ${telephoneProprietaire}` : ""}`
-      );
-    } else if (telephoneProprietaire) {
-      ajouterInfoGauche(`Téléphone propriétaire : ${telephoneProprietaire}`);
-    }
-  } else if (modeClient === "jeremie") {
-    ajouterInfoGauche(`Donneur d’ordre : ${client || "Jérémie Meurisse"}`, true);
-    ajouterInfoGauche(`Client chantier : ${clientFinalNom || "Non renseigné"}`);
-    ajouterInfoGauche(`Adresse chantier : ${clientFinalAdresse || "Non renseignée"}`);
-    if (clientFinalTelephone) ajouterInfoGauche(`Téléphone client : ${clientFinalTelephone}`);
-  } else {
-    ajouterInfoGauche(`Client : ${client || "Non renseigné"}`, true);
-    ajouterInfoGauche(
-      `Adresse : ${`${adresse || ""} ${complementAdresse || ""}`.trim() || "Non renseignée"}`
-    );
-    if (telephone) ajouterInfoGauche(`Téléphone : ${telephone}`);
-    if (email) ajouterInfoGauche(`Email : ${email}`);
-  }
-
-  if (dateChantier) {
-    ajouterInfoGauche(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
-  }
-
-  const infosPratiques = [
-    ["Trajet", `${Number(kmAller || 0).toFixed(1)} km aller`],
-    ["Aller-retour", `${Number(calcul.kmAR || 0).toFixed(1)} km`],
-    ["Déplacement", `${Number(calcul.fraisLogistique || 0).toFixed(2)} €`],
-    ["Temps prévu", `${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h`],
-    ["Durée estimée", `${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}`],
-    ["Achat fournitures", `${Number(achatFournitures || 0).toFixed(2)} € TTC`],
-  ];
-  const hauteurEncadre = 9 + infosPratiques.length * 5.2;
-
-  doc.setFillColor(241, 245, 249);
-  doc.setDrawColor(148, 163, 184);
-  doc.setLineWidth(0.35);
-  doc.roundedRect(xEncadre, yIdentification - 3.5, largeurEncadre, hauteurEncadre, 2, 2, "FD");
-  doc.setFillColor(71, 85, 105);
-  doc.roundedRect(xEncadre, yIdentification - 3.5, largeurEncadre, 7.5, 2, 2, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  doc.setTextColor(255, 255, 255);
-  doc.text("INFOS PRATIQUES", xEncadre + 3, yIdentification + 1.5);
-
-  infosPratiques.forEach(([libelle, valeur], index) => {
-    const yInfo = yIdentification + 7 + index * 5.2;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.8);
-    doc.setTextColor(71, 85, 105);
-    doc.text(`${libelle} :`, xEncadre + 3, yInfo);
-    doc.setTextColor(15, 23, 42);
-    doc.text(valeur, xEncadre + largeurEncadre - 3, yInfo, { align: "right" });
+  ajouterTexte(`Client / agence : ${client || agence || "Non renseigné"}`, {
+    gras: true,
   });
-
-  y = Math.max(yGauche, yIdentification - 3.5 + hauteurEncadre) + 4;
-
-  const largeurBloc = (largeurUtile - 5) / 2;
-  const xBlocDroit = marge + largeurBloc + 5;
-  const outilsListe = Array.from(outils);
-  const fournituresListe = fournituresClient
-    ? ["Fournitures à la charge du client"]
-    : lignesFournitures.filter((ligne) => !/^total\b/i.test(normaliserTexte(ligne)));
-
-  const hauteurListeCompacte = (elements: string[], largeur: number) =>
-    elements.reduce((total, element) => {
-      const lignes = doc.splitTextToSize(`- ${element}`, largeur - 6);
-      return total + Math.max(3.6, lignes.length * 3.35);
-    }, 0);
-
-  const hauteurOutils = 11 + hauteurListeCompacte(outilsListe, largeurBloc);
-  const hauteurFournitures =
-    16 + hauteurListeCompacte(
-      fournituresListe.length > 0
-        ? fournituresListe
-        : ["Vérifier la liste, les quantités, les références et la disponibilité"],
-      largeurBloc
-    );
-  const hauteurBlocs = Math.max(hauteurOutils, hauteurFournitures);
-  nouvellePageSiBesoin(hauteurBlocs + 5);
-  const yBlocs = y;
-
-  const dessinerBlocCompact = (
-    titre: string,
-    elements: string[],
-    x: number,
-    largeur: number,
-    sousTitre?: string
-  ) => {
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(x, yBlocs, largeur, hauteurBlocs, 2, 2, "FD");
-    doc.setFillColor(71, 85, 105);
-    doc.roundedRect(x, yBlocs, largeur, 7.5, 2, 2, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.4);
-    doc.setTextColor(255, 255, 255);
-    doc.text(titre.toUpperCase(), x + 3, yBlocs + 5.1);
-
-    let yLigne = yBlocs + 11;
-    if (sousTitre) {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.7);
-      doc.setTextColor(15, 23, 42);
-      doc.text(sousTitre, x + 3, yLigne);
-      yLigne += 4.5;
-    }
-
-    elements.forEach((element) => {
-      const lignes = doc.splitTextToSize(`- ${element}`, largeur - 6);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.1);
-      doc.setTextColor(30, 41, 59);
-      doc.text(lignes, x + 3, yLigne);
-      yLigne += Math.max(3.6, lignes.length * 3.35);
-    });
-  };
-
-  dessinerBlocCompact("Outils à prendre", outilsListe, marge, largeurBloc);
-  dessinerBlocCompact(
-    "Fournitures",
-    fournituresListe.length > 0
-      ? fournituresListe
-      : ["Vérifier la liste, les quantités, les références et la disponibilité"],
-    xBlocDroit,
-    largeurBloc,
-    fournituresClient
-      ? undefined
-      : `Coût matériaux : ${Number(achatFournitures || 0).toFixed(2)} € TTC`
+  if (clientFinalNom) ajouterTexte(`Client final : ${clientFinalNom}`);
+  if (proprietaire) ajouterTexte(`Propriétaire : ${proprietaire}`);
+  if (locataire) ajouterTexte(`Locataire : ${locataire}`);
+  if (adresseAgence || adresse) {
+    ajouterTexte(`Adresse agence / client : ${adresseAgence || adresse}`);
+  }
+  ajouterTexte(
+    `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignée"}`
   );
-  y = yBlocs + hauteurBlocs + 5;
+  if (referenceChantier) ajouterTexte(`Référence : ${referenceChantier}`);
+  if (dateChantier) ajouterTexte(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
+  if (telephoneLocataire) ajouterTexte(`Téléphone sur place : ${telephoneLocataire}`);
 
-  ajouterTitreSection("Prestations dans l’ordre du devis");
+  ajouterTitreSection("Travaux prévus");
   lignesTravaux.forEach((ligne, index) => {
     const quantite = ligne.q1 || 1;
     ajouterTexte(
-      `Étape ${index + 1} - ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
-      { gras: true, taille: 8.5 }
+      `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
+      { gras: true, taille: 9.5 }
     );
     ajouterListe(
       (ligne.detailsPdfPersonnalises?.length
@@ -4475,8 +4286,47 @@ const genererFicheChantier = () => {
         : detailsTravaux(ligne)
       ).filter((detail) => detail.trim())
     );
-    y += 0.5;
+    y += 2;
   });
+
+  ajouterTitreSection("Fournitures et approvisionnement");
+  if (fournituresClient) {
+    ajouterTexte("Fournitures à la charge du client.", { gras: true });
+  } else {
+    ajouterTexte(`Budget d’achat prévu : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
+      gras: true,
+    });
+    ajouterTexte(`Coefficient de revente : x${coefficientFournitures}`);
+    ajouterTexte(
+      detailsFournitures?.trim() ||
+        "Vérifier la liste, les quantités, les références et la disponibilité avant le départ."
+    );
+  }
+
+  const outils = new Set<string>([
+    "Protections, bâches, ruban de masquage et sacs à gravats",
+    "Mètre, crayon, niveau et petit outillage à main",
+    "Aspirateur de chantier et matériel de nettoyage",
+  ]);
+
+  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
+    outils.add("Perforateur, burineur et équipements de protection");
+    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
+    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
+  }
+  if (/plomberie|receveur|vasque|robinet|evacuation/.test(texteChantier)) {
+    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
+    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
+  }
+  if (/peinture|enduit|ratissage|poncage/.test(texteChantier)) {
+    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
+  }
+  if (/sol pvc|revetement de sol|plinthe/.test(texteChantier)) {
+    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
+  }
+
+  ajouterTitreSection("Outils et matériel à prévoir");
+  ajouterListe(Array.from(outils));
 
   const vigilance = new Set<string>([
     "Photographier les lieux et les équipements avant toute intervention",
@@ -4485,30 +4335,22 @@ const genererFicheChantier = () => {
     "Faire valider toute anomalie ou prestation supplémentaire avant exécution",
   ]);
 
-  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
+  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
     vigilance.add("Contrôler l’humidité, la solidité et la planéité des supports après dépose");
     vigilance.add("Respecter les temps de séchage du support, du SPEC, de la colle et des joints");
     vigilance.add("Soigner les angles, traversées, liaisons avec le receveur et joints sanitaires");
   }
-  if (/paroi|cabine/.test(textePrestations)) {
+  if (/paroi|cabine/.test(texteChantier)) {
     vigilance.add("Manipuler les vitrages à deux personnes et contrôler les pièces avant réemploi");
   }
-  if (/peinture/.test(textePrestations)) {
+  if (/peinture/.test(texteChantier)) {
     vigilance.add("Vérifier le fonctionnement de la ventilation avant remise en peinture");
-  }
-  if (/plan de travail/.test(textePrestations)) {
-    vigilance.add("Contrôler les dimensions, l’équerrage, les découpes et la position de l’évier avant coupe");
-    vigilance.add("Protéger et étancher soigneusement tous les chants découpés");
-  }
-  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
-    vigilance.add("Contrôler l’absence de réseau dans la zone avant tout percement");
-    vigilance.add("Vérifier le diamètre, la pente vers l’extérieur et l’étanchéité du passage");
   }
 
   ajouterTitreSection("Points de vigilance");
   ajouterListe(Array.from(vigilance));
 
-  ajouterTitreSection("Contrôles du chantier");
+  ajouterTitreSection("Check-list avant départ");
   ajouterListe([
     "Photos avant travaux réalisées",
     "Implantation et dimensions contrôlées",
@@ -4518,12 +4360,6 @@ const genererFicheChantier = () => {
     "Photos de fin de chantier réalisées",
     "Déchets évacués et zone nettoyée",
   ]);
-
-  ajouterTitreSection("Suivi réel et imprévus");
-  ajouterTexte(`Heures réellement effectuées : ____________________`, { taille: 8.5 });
-  ajouterTexte(`Travaux supplémentaires validés : ______________________________________________`, { taille: 8.5 });
-  ajouterTexte(`Imprévus / anomalies constatés : _______________________________________________`, { taille: 8.5 });
-  ajouterTexte(`______________________________________________________________________________`, { taille: 8.5 });
 
   if (notes?.trim()) {
     ajouterTitreSection("Notes du dossier");
@@ -7861,3 +7697,5 @@ function GraphiqueCourbe({
     </div>
   );
 }
+
+
