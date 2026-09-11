@@ -1070,13 +1070,15 @@ p("CAR-SILICONE",
 p(
   "PLAC-FAUX-PLAFOND-DEPOSE",
   "Placo",
-  "Dépose d’une dalle de faux plafond démontable",
+  "Dépose de dalles de faux plafond démontables",
   "u",
   0.15,
-  [
-    "Mise en place d’un accès adapté à la hauteur du plafond",
-    "Dépose soigneuse de la dalle existante",
-    "Regroupement de la dalle déposée sans détérioration de l’ossature",
+
+    [
+  "Mise en place d’un accès adapté à la hauteur du plafond",
+  "Dépose soigneuse des dalles existantes",
+  "Regroupement des dalles déposées sans détérioration de l’ossature",
+
   ],
   {
     conditions:
@@ -1088,14 +1090,14 @@ p(
 p(
   "PLAC-FAUX-PLAFOND-POSE",
   "Placo",
-  "Pose d’une dalle de faux plafond sur ossature existante",
+  "Pose de dalles de faux plafond sur ossature existante",
   "u",
   0.225,
-  [
-    "Contrôle visuel de l’ossature et de l’emplacement",
-    "Présentation et mise en place de la dalle neuve",
-    "Ajustement et contrôle de l’alignement avec les dalles conservées",
-  ],
+ [
+  "Contrôle visuel de l’ossature et des emplacements",
+  "Présentation et mise en place des dalles neuves",
+  "Ajustement et contrôle de l’alignement avec les dalles conservées",
+],
   {
     conditions:
       "Pour dalle standard à bord droit posée sur ossature apparente existante en bon état. Hors fourniture, reprise d’ossature et découpe pour équipement encastré.",
@@ -1112,15 +1114,15 @@ p(
 p(
   "PLAC-FAUX-PLAFOND-SPOT",
   "Placo",
-  "Découpe d’une dalle de faux plafond pour spot encastré",
+  "Découpes de dalles de faux plafond pour spots encastrés",
   "u",
   0.45,
   [
-    "Repérage et traçage de l’emplacement du spot existant",
-    "Réalisation de la découpe circulaire dans la dalle neuve",
-    "Dépose et repose du spot encastré existant",
-    "Contrôle de sa bonne tenue après remise en place",
-  ],
+  "Repérage et traçage des emplacements des spots existants",
+  "Réalisation des découpes circulaires dans les dalles neuves",
+  "Dépose et repose des spots encastrés existants",
+  "Contrôle de leur bonne tenue après remise en place",
+],
   {
     conditions:
       "Pour repose du spot existant sur alimentation existante, sans création de point lumineux, modification du câblage ni remplacement du luminaire.",
