@@ -490,6 +490,7 @@ function formatNumero(prefix: string, numero: number) {
 // les compteurs, tout en conservant automatiquement une valeur plus élevée.
 const PROCHAIN_NUMERO_DEVIS = 36;
 const PROCHAIN_NUMERO_FACTURE = 17;
+const CLE_RATTRAPAGE_FACTURE_017 = "rattrapageFacture017EffectueV25";
 
 function compteurDevisValide(valeur: unknown) {
   const numero = Number(valeur);
@@ -3538,9 +3539,23 @@ if (type === "devis") {
   }
 }
 if (type === "facture" && !numeroFacture) {
-  numero = formatNumero("F", compteurFacture);
+  // Rattrapage demandé le 11/09/2026 : les numéros 017 et 018 ont été sautés
+  // par le compteur alors qu'aucune facture correspondante n'existe.
+  // La première nouvelle facture après cette mise à jour prend donc 017,
+  // une seule fois, puis la numérotation reprend normalement à 018.
+  const rattrapageFacture017DejaEffectue =
+    localStorage.getItem(CLE_RATTRAPAGE_FACTURE_017) === "oui";
+  const numeroFactureAUtiliser = rattrapageFacture017DejaEffectue
+    ? compteurFacture
+    : PROCHAIN_NUMERO_FACTURE;
+
+  numero = formatNumero("F", numeroFactureAUtiliser);
   setNumeroFacture(numero);
-  setCompteurFacture((ancien) => ancien + 1);
+  setCompteurFacture(numeroFactureAUtiliser + 1);
+
+  if (!rattrapageFacture017DejaEffectue) {
+    localStorage.setItem(CLE_RATTRAPAGE_FACTURE_017, "oui");
+  }
 
   if (idDossierActuel !== null) {
     setHistorique((ancien) =>
