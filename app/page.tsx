@@ -326,6 +326,9 @@ type Dossier = {
   lignesTravaux: LigneTravaux[];
   numeroDevis: string;
   numeroFacture: string;
+  conditionsGeneralesDevis?: string;
+  conditionsChantier?: string;
+  commentaireFournitures?: string;
   estBrouillonAuto?: boolean;
   total: number;
   acompte: number;
@@ -507,6 +510,14 @@ function formatNumero(prefix: string, numero: number) {
 const PROCHAIN_NUMERO_DEVIS = 36;
 const PROCHAIN_NUMERO_FACTURE = 17;
 const CLE_RATTRAPAGE_FACTURE_017 = "rattrapageFacture017EffectueV25";
+
+const CONDITIONS_GENERALES_DEVIS_DEFAUT = [
+  "Le présent devis est établi sous réserve de l’état réel des supports existants.",
+  "Toute dégradation cachée, humidité, support friable ou anomalie non visible pourra entraîner un ajustement.",
+  "Les travaux supplémentaires non prévus feront l’objet d’un accord préalable du client.",
+  "Les fournitures non mentionnées au devis ne sont pas incluses.",
+  "Le client reconnaît que les quantités et prix sont basés sur les éléments visibles au moment de l’estimation.",
+].join("\n");
 
 function compteurDevisValide(valeur: unknown) {
   const numero = Number(valeur);
@@ -732,6 +743,11 @@ setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
 setDetailsFournitures(b.detailsFournitures || "");
+setConditionsGeneralesDevis(
+  b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+);
+setConditionsChantier(b.conditionsChantier || "");
+setCommentaireFournitures(b.commentaireFournitures || "");
     setLignesTravaux(b.lignesTravaux || []);
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
@@ -824,6 +840,11 @@ const appliquerSauvegardeComplete = (data: any) => {
     setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
     setFournituresClient(b.fournituresClient ?? true);
     setDetailsFournitures(b.detailsFournitures || "");
+    setConditionsGeneralesDevis(
+      b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+    );
+    setConditionsChantier(b.conditionsChantier || "");
+    setCommentaireFournitures(b.commentaireFournitures || "");
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
     setPourcentageAcompte(b.pourcentageAcompte ?? 30);
@@ -998,6 +1019,11 @@ const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
   const [coefficientFournitures, setCoefficientFournitures] = useState(1.22);
   const [fournituresClient, setFournituresClient] = useState(true);
   const [detailsFournitures, setDetailsFournitures] = useState("");
+  const [conditionsGeneralesDevis, setConditionsGeneralesDevis] = useState(
+    CONDITIONS_GENERALES_DEVIS_DEFAUT
+  );
+  const [conditionsChantier, setConditionsChantier] = useState("");
+  const [commentaireFournitures, setCommentaireFournitures] = useState("");
 
   const [statutDevis, setStatutDevis] = useState("envoye");
   const [pourcentageAcompte, setPourcentageAcompte] = useState(30);
@@ -1086,6 +1112,11 @@ setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
 setDetailsFournitures(b.detailsFournitures || "");
+setConditionsGeneralesDevis(
+  b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+);
+setConditionsChantier(b.conditionsChantier || "");
+setCommentaireFournitures(b.commentaireFournitures || "");
         setLignesTravaux(b.lignesTravaux || [
           { id: Date.now(), type: "plafond", q1: 0, q2: 0, r1: 0, r2: 0, option: 0 },
         ]);
@@ -1208,6 +1239,9 @@ achatFournitures,
 coefficientFournitures,
 fournituresClient,
 detailsFournitures,
+conditionsGeneralesDevis,
+conditionsChantier,
+commentaireFournitures,
 ribTitulaire,
 ribIban,
 ribBic,
@@ -1270,6 +1304,9 @@ useEffect(() => {
   agence,
   referenceChantier,
   complementAdresse,
+  conditionsGeneralesDevis,
+  conditionsChantier,
+  commentaireFournitures,
   ribTitulaire,
 ribIban,
 ribBic,
@@ -1325,6 +1362,9 @@ achatFournitures,
       coefficientFournitures,
       fournituresClient,
       detailsFournitures,
+      conditionsGeneralesDevis,
+      conditionsChantier,
+      commentaireFournitures,
 
      montantEncaisse,
 pourcentageAcompte,
@@ -1768,6 +1808,9 @@ setFraisDeplacementManuel(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
   setDetailsFournitures("");
+  setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
+  setConditionsChantier("");
+  setCommentaireFournitures("");
 
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
@@ -1839,6 +1882,9 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   setFournituresClient(true);
   setCoefficientFournitures(1.22);
   setDetailsFournitures("");
+  setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
+  setConditionsChantier("");
+  setCommentaireFournitures("");
 
   setFactureSap(false);
   setNumeroSap("");
@@ -1925,6 +1971,9 @@ fraisDeplacementManuel:
     coefficientFournitures,
     fournituresClient,
     detailsFournitures: estEvenementSimple ? "" : detailsFournitures,
+    conditionsGeneralesDevis: estEvenementSimple ? "" : conditionsGeneralesDevis,
+    conditionsChantier: estEvenementSimple ? "" : conditionsChantier,
+    commentaireFournitures: estEvenementSimple ? "" : commentaireFournitures,
     reventeFournitures: estEvenementSimple ? 0 : calcul.reventeFournitures,
     margeFournitures: estEvenementSimple ? 0 : calcul.margeFournitures,
 
@@ -2072,6 +2121,8 @@ useEffect(() => {
       numeroFacture ||
       lignesTravaux.length > 0 ||
       notes.trim() ||
+      conditionsChantier.trim() ||
+      commentaireFournitures.trim() ||
       dateRdv ||
       dateChantier
     );
@@ -2162,6 +2213,11 @@ setAchatFournitures(d.achatFournitures ?? 0);
 setCoefficientFournitures(d.coefficientFournitures ?? 1.22);
 setFournituresClient(d.fournituresClient ?? true);
 setDetailsFournitures(d.detailsFournitures || "");
+setConditionsGeneralesDevis(
+  d.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+);
+setConditionsChantier(d.conditionsChantier || "");
+setCommentaireFournitures(d.commentaireFournitures || "");
   setDateChantier(d.dateChantier || "");
   setHeureChantier(d.heureChantier || "");
   setDatePaiement(d.datePaiement || "");
@@ -2364,6 +2420,9 @@ const creerRappelDepuisCalendrier = (date: Date) => {
     coefficientFournitures: 1.22,
     fournituresClient: true,
     detailsFournitures: "",
+    conditionsGeneralesDevis: "",
+    conditionsChantier: "",
+    commentaireFournitures: "",
     reventeFournitures: 0,
     margeFournitures: 0,
 
@@ -3300,6 +3359,9 @@ setFraisDeplacementManuel(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
   setDetailsFournitures("");
+  setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
+  setConditionsChantier("");
+  setCommentaireFournitures("");
 
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
@@ -3409,6 +3471,11 @@ setFraisDeplacementManuel(
         setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
         setFournituresClient(b.fournituresClient ?? true);
         setDetailsFournitures(b.detailsFournitures || "");
+        setConditionsGeneralesDevis(
+          b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+        );
+        setConditionsChantier(b.conditionsChantier || "");
+        setCommentaireFournitures(b.commentaireFournitures || "");
 
         setMontantEncaisse(b.montantEncaisse ?? 0);
         setPourcentageAcompte(b.pourcentageAcompte ?? 30);
@@ -3612,7 +3679,9 @@ let y = modeClient === "agence" || modeClient === "jeremie" ? 160 : 138;
   };
 
   try {
-    doc.addImage("/Logo banderole.png", "PNG", 0, 0, 210, 42);
+    // Marge de sécurité pour les imprimantes qui ne peuvent pas imprimer à bord perdu.
+    // Le bandeau reste centré et conserve ses proportions sans rogner le SIRET ni le QR code.
+    doc.addImage("/Logo banderole.png", "PNG", 6, 5, 198, 39.6);
   } catch {
     doc.setFontSize(18);
     doc.text("Adrien et ses mains", 20, 20);
@@ -3899,8 +3968,9 @@ y += detailCoupe.length * 3.5;
   y += 2;
 });
 
-// ================= BLOC TOTAL COMPACT =================
-if (y + 38 > 292) {
+// ================= BLOC TOTAL MIS EN VALEUR =================
+// On garde aussi une marge basse imprimable pour éviter tout chevauchement.
+if (y + 52 > 250) {
   doc.addPage();
   page += 1;
   y = 35;
@@ -3922,38 +3992,146 @@ const resteAPayerPDF = Math.max(
   Math.round((montantTotalPDF - montantAcompteOuEncaissePDF) * 100) / 100
 );
 
+const xBlocTotal = 80;
+const largeurBlocTotal = 115;
+const hauteurBlocTotal = 44;
+
 doc.setFillColor(248, 244, 236);
 doc.setDrawColor(190, 145, 55);
-doc.roundedRect(95, y, 100, 34, 3, 3, "FD");
+doc.roundedRect(
+  xBlocTotal,
+  y,
+  largeurBlocTotal,
+  hauteurBlocTotal,
+  3,
+  3,
+  "FD"
+);
+
+// Bandeau principal : le montant total est volontairement le plus visible.
+doc.setFillColor(52, 63, 79);
+doc.roundedRect(xBlocTotal, y, largeurBlocTotal, 15, 3, 3, "F");
+doc.rect(xBlocTotal, y + 10, largeurBlocTotal, 5, "F");
+
+doc.setFont("helvetica", "bold");
+doc.setFontSize(9.5);
+doc.setTextColor(255, 255, 255);
+doc.text(
+  type === "devis" ? "MONTANT TOTAL DU DEVIS" : "TOTAL DE LA FACTURE",
+  xBlocTotal + 7,
+  y + 10
+);
+
+doc.setFontSize(13.5);
+doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10.5, { align: "right" });
 
 doc.setFont("helvetica", "normal");
-doc.setFontSize(10);
+doc.setFontSize(9.5);
 doc.setTextColor(0, 0, 0);
-
-doc.text("Montant total", 103, y + 10);
-doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10, { align: "right" });
-
-doc.text(type === "devis" ? "Acompte demandé" : "Déjà encaissé", 103, y + 19);
-doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 19, {
+doc.text(
+  type === "devis" ? "Acompte demandé" : "Déjà encaissé",
+  xBlocTotal + 8,
+  y + 25
+);
+doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 25, {
   align: "right",
 });
 
-doc.setDrawColor(180);
-doc.line(103, y + 23, 190, y + 23);
+doc.setDrawColor(200);
+doc.line(xBlocTotal + 8, y + 30, 188, y + 30);
 
 doc.setFont("helvetica", "bold");
-doc.text("Reste à payer", 103, y + 31);
-doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 31, { align: "right" });
+doc.setFontSize(10);
+doc.setTextColor(0, 0, 0);
+doc.text(
+  type === "devis" ? "Solde après acompte" : "RESTE À PAYER",
+  xBlocTotal + 8,
+  y + 39
+);
+doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 39, { align: "right" });
 
-y += 42;
+y += hauteurBlocTotal + 8;
 
-
-// ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
+// ================= FOURNITURES + CONDITIONS MODIFIABLES =================
 // Le pied de page de la dernière page commence à 256 mm.
 // On arrête donc tous les blocs de contenu à 250 mm pour garder une marge sûre.
 const limiteBasseContenu = 250;
 
-if (y + 72 > limiteBasseContenu) {
+const preparerListePDF = (texte: string) =>
+  texte
+    .split(/\r?\n/)
+    .map((ligne) => ligne.trim())
+    .filter(Boolean);
+
+const commentaireFournituresPDF = commentaireFournitures.trim();
+
+if (type === "devis" && commentaireFournituresPDF) {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+
+  const lignesFournituresCommentaire = commentaireFournituresPDF
+    .split(/\r?\n/)
+    .flatMap((paragraphe) => {
+      const texte = paragraphe.trim();
+      return texte ? doc.splitTextToSize(texte, 164) : [""];
+    });
+
+  const hauteurCommentaireFournitures = Math.max(
+    25,
+    18 + Math.max(1, lignesFournituresCommentaire.length) * 4.2
+  );
+
+  if (y + hauteurCommentaireFournitures > limiteBasseContenu) {
+    doc.addPage();
+    page += 1;
+    y = 35;
+  }
+
+  doc.setFillColor(248, 244, 236);
+  doc.setDrawColor(190, 145, 55);
+  doc.roundedRect(15, y, 180, hauteurCommentaireFournitures, 3, 3, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(52, 63, 79);
+  doc.text("INFORMATION FOURNITURES", 23, y + 8);
+
+  doc.setDrawColor(190, 145, 55);
+  doc.line(23, y + 11, 64, y + 11);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(45, 45, 45);
+  doc.text(lignesFournituresCommentaire, 23, y + 18);
+
+  y += hauteurCommentaireFournitures + 8;
+}
+
+// ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
+doc.setFont("helvetica", "normal");
+doc.setFontSize(8.2);
+
+const conditions = preparerListePDF(conditionsGeneralesDevis);
+const conditionsPropresChantier = preparerListePDF(conditionsChantier);
+
+const hauteurListeConditions = (liste: string[]) =>
+  liste.reduce((hauteur, ligne) => {
+    const coupe = doc.splitTextToSize(ligne, 105);
+    return hauteur + coupe.length * 3.7 + 2;
+  }, 0);
+
+// Le cadre conserve toujours sa hauteur d'origine de 72 mm.
+// Il grandit uniquement si les textes ajoutés ont besoin de plus de place.
+const hauteurConditions = Math.max(
+  72,
+  27 +
+    hauteurListeConditions(conditions) +
+    (conditionsPropresChantier.length > 0
+      ? 7 + hauteurListeConditions(conditionsPropresChantier)
+      : 0)
+);
+
+if (y + hauteurConditions > limiteBasseContenu) {
   doc.addPage();
   page += 1;
   y = 35;
@@ -3963,7 +4141,7 @@ if (y + 72 > limiteBasseContenu) {
 const yConditions = y;
 
 doc.setDrawColor(60);
-doc.roundedRect(15, yConditions, 180, 72, 2, 2);
+doc.roundedRect(15, yConditions, 180, hauteurConditions, 2, 2);
 
 doc.setFont("helvetica", "bold");
 doc.setFontSize(11);
@@ -3972,14 +4150,6 @@ doc.text("CONDITIONS PARTICULIERES ET PROTECTIONS CHANTIER", 25, yConditions + 8
 
 doc.setDrawColor(190, 145, 55);
 doc.line(25, yConditions + 12, 67, yConditions + 12);
-
-const conditions = [
-  "Le présent devis est établi sous réserve de l’état réel des supports existants.",
-  "Toute dégradation cachée, humidité, support friable ou anomalie non visible pourra entraîner un ajustement.",
-  "Les travaux supplémentaires non prévus feront l’objet d’un accord préalable du client.",
-  "Les fournitures non mentionnées au devis ne sont pas incluses.",
-  "Le client reconnaît que les quantités et prix sont basés sur les éléments visibles au moment de l’estimation.",
-];
 
 let cy = yConditions + 19;
 doc.setFont("helvetica", "normal");
@@ -3997,9 +4167,38 @@ conditions.forEach((ligne) => {
   cy += coupe.length * 3.7 + 2;
 });
 
+if (conditionsPropresChantier.length > 0) {
+  cy += 1;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.4);
+  doc.setTextColor(52, 63, 79);
+  doc.text("CONDITIONS PROPRES A CE CHANTIER", 28, cy);
+  cy += 6;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.2);
+  doc.setTextColor(50, 50, 50);
+
+  conditionsPropresChantier.forEach((ligne) => {
+    doc.setDrawColor(190, 145, 55);
+    doc.circle(22, cy - 1.5, 1.8);
+    doc.line(21.2, cy - 1.5, 22, cy - 0.3);
+    doc.line(22, cy - 0.3, 23.3, cy - 3);
+
+    const coupe = doc.splitTextToSize(ligne, 105);
+    doc.text(coupe, 28, cy);
+    cy += coupe.length * 3.7 + 2;
+  });
+}
+
 if (type === "devis" || type === "facture") {
   doc.setDrawColor(80);
-  doc.line(140, yConditions + 15, 140, yConditions + 52);
+  doc.line(
+    140,
+    yConditions + 15,
+    140,
+    yConditions + hauteurConditions - 20
+  );
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -4013,9 +4212,8 @@ doc.setFontSize(8);
 doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 }
 
-// Le cadre conditions mesure réellement 72 mm de haut.
-// On repart après ses 72 mm + 8 mm de marge.
-y = yConditions + 72 + 8;
+// On repart après la hauteur réellement utilisée + 8 mm de marge.
+y = yConditions + hauteurConditions + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
@@ -6205,6 +6403,102 @@ return (
   )}
 </div>
 
+{/* Commentaire spécifique aux fournitures */}
+<div className="md:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 space-y-2">
+  <h3 className="text-sm font-bold text-slate-800">
+    📦 Commentaire à afficher sur les fournitures
+  </h3>
+
+  <div className="flex gap-2 flex-wrap">
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "La fourniture est encore à définir : à la charge du client ou fournie par l’entreprise.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Charge à définir
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "Le prix des fournitures est estimé entre ... € et ... €.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Prix estimé
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setCommentaireFournitures("")}
+      className="px-3 py-1 rounded-lg bg-white text-slate-600 border text-xs font-semibold"
+    >
+      Effacer
+    </button>
+  </div>
+
+  <TextArea
+    label="Information fournitures propre à ce devis"
+    value={commentaireFournitures}
+    onChange={setCommentaireFournitures}
+  />
+
+  <p className="text-xs text-slate-500">
+    Facultatif : un encadré « Information fournitures » est ajouté au PDF uniquement si cette zone est remplie.
+  </p>
+</div>
+
+{/* Conditions générales et conditions propres au chantier */}
+<div className="md:col-span-2 rounded-lg border bg-slate-50 px-3 py-2 space-y-3">
+  <div className="flex items-center justify-between gap-2 flex-wrap">
+    <h3 className="text-sm font-bold text-slate-800">
+      📝 Conditions du devis
+    </h3>
+
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT)
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Remettre les phrases générales
+    </button>
+  </div>
+
+  <div className="grid gap-3 md:grid-cols-2">
+    <TextArea
+      label="Phrases générales — modifiables pour ce devis"
+      value={conditionsGeneralesDevis}
+      onChange={setConditionsGeneralesDevis}
+    />
+
+    <TextArea
+      label="Conditions propres à ce chantier"
+      value={conditionsChantier}
+      onChange={setConditionsChantier}
+    />
+  </div>
+
+  <p className="text-xs text-slate-500">
+    Une phrase par ligne. Le cadre du PDF garde sa taille minimale actuelle et s’agrandit automatiquement si nécessaire, sans déplacer la zone date et signature à l’intérieur du cadre.
+  </p>
+</div>
+
   {/* ESTIMATIONS */}
   {statutDevis === "estimation_rapide" && (
     <>
@@ -7163,6 +7457,9 @@ ${d.notes || ""}`,
       coefficientFournitures: 1.22,
       fournituresClient: true,
       detailsFournitures: "",
+      conditionsGeneralesDevis: "",
+      conditionsChantier: "",
+      commentaireFournitures: "",
       reventeFournitures: 0,
       margeFournitures: 0,
 
