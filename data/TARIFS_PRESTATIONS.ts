@@ -3893,6 +3893,35 @@ tags:
 "sous toiture"]
 }),
 
+p(
+  "TOIT-HAB-REPOSE",
+  "Toiture légère",
+  "Repose d’un habillage de sous-face existant",
+  "m²",
+  0.45,
+  [
+    "Contrôle visuel des éléments déposés et du support accessible",
+    "Remise en place de l’habillage existant conservé",
+    "Remplacement ou complément des fixations courantes si nécessaire",
+    "Ajustements et finitions périphériques courantes",
+    "Contrôle visuel de la bonne tenue de l’ensemble",
+  ],
+  {
+    conditions:
+      "Repose sous réserve de l’état des éléments existants et du support après dépose. Les éléments détériorés, déformés ou ne permettant pas une repose correcte ne sont pas compris et feront l’objet d’un accord complémentaire. Hors réparation de charpente, structure ou infiltration.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "lambris",
+      "sous-face",
+      "sous toiture",
+      "habillage",
+      "repose",
+      "réemploi",
+      "existant",
+    ],
+  }
+),
+
 p("TOIT-HAB-PVC",
 "Toiture légère",
 "Pose d’un habillage PVC de sous-face",
