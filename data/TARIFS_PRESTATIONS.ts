@@ -1067,6 +1067,98 @@ p("CAR-SILICONE",
 
 // ================= PLACO =================
 
+p(
+  "PLAC-FAUX-PLAFOND-DEPOSE",
+  "Placo",
+  "Dépose d’une dalle de faux plafond démontable",
+  "u",
+  0.15,
+  [
+    "Mise en place d’un accès adapté à la hauteur du plafond",
+    "Dépose soigneuse de la dalle existante",
+    "Regroupement de la dalle déposée sans détérioration de l’ossature",
+  ],
+  {
+    conditions:
+      "Pour dalle démontable sur ossature apparente existante et conservée. Hors intervention sur l’ossature, l’isolation, les réseaux ou les équipements présents dans le plénum.",
+    tags: ["faux plafond", "plafond démontable", "dalle", "dépose"],
+  }
+),
+
+p(
+  "PLAC-FAUX-PLAFOND-POSE",
+  "Placo",
+  "Pose d’une dalle de faux plafond sur ossature existante",
+  "u",
+  0.225,
+  [
+    "Contrôle visuel de l’ossature et de l’emplacement",
+    "Présentation et mise en place de la dalle neuve",
+    "Ajustement et contrôle de l’alignement avec les dalles conservées",
+  ],
+  {
+    conditions:
+      "Pour dalle standard à bord droit posée sur ossature apparente existante en bon état. Hors fourniture, reprise d’ossature et découpe pour équipement encastré.",
+    tags: [
+      "faux plafond",
+      "plafond démontable",
+      "dalle",
+      "pose",
+      "remplacement",
+    ],
+  }
+),
+
+p(
+  "PLAC-FAUX-PLAFOND-SPOT",
+  "Placo",
+  "Découpe d’une dalle de faux plafond pour spot encastré",
+  "u",
+  0.45,
+  [
+    "Repérage et traçage de l’emplacement du spot existant",
+    "Réalisation de la découpe circulaire dans la dalle neuve",
+    "Dépose et repose du spot encastré existant",
+    "Contrôle de sa bonne tenue après remise en place",
+  ],
+  {
+    conditions:
+      "Pour repose du spot existant sur alimentation existante, sans création de point lumineux, modification du câblage ni remplacement du luminaire.",
+    tags: [
+      "faux plafond",
+      "dalle",
+      "découpe",
+      "spot",
+      "luminaire encastré",
+    ],
+  }
+),
+
+p(
+  "PLAC-FAUX-PLAFOND-EVAC",
+  "Placo",
+  "Conditionnement et évacuation légère de dalles de faux plafond",
+  "forfait",
+  0.45,
+  [
+    "Conditionnement des dalles déposées",
+    "Chargement et évacuation d’une petite quantité de déchets",
+    "Nettoyage courant de la zone d’intervention",
+  ],
+  {
+    conditions:
+      "Forfait réservé à une petite quantité de dalles légères pouvant être évacuée sans trajet spécifique. Pour un volume important ou une déchèterie dédiée, utiliser la prestation d’évacuation adaptée.",
+    rentabilite: "🟠 À adapter",
+    tags: [
+      "faux plafond",
+      "dalle",
+      "déchets",
+      "évacuation",
+      "nettoyage",
+    ],
+  }
+),
+
 p("PLAC-OSSATURE",
 "Placo",
 "Pose d’une ossature métallique légère",
