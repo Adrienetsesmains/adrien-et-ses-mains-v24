@@ -126,6 +126,22 @@ const PACKS_PRESTATIONS_V25 = [
     ] as [string, number][],
   },
   {
+    id: "PACK-TERRASSE-BOIS",
+    nom: "Rénovation d’une terrasse en bois",
+    description:
+      "Dépose des lames existantes, contrôle du support, pose des nouvelles lames, finitions et évacuation. Le saturateur reste une prestation optionnelle à ajouter séparément.",
+    lignes: [
+      ["TERR-PROT-CHEMINEMENT", 1],
+      ["TERR-DEPOSE-LAMES", 1],
+      ["TERR-MANUT-ACCES", 1],
+      ["TERR-CONTROLE-SUPPORT", 1],
+      ["TERR-POSE-LAMES-BOIS", 1],
+      ["TERR-COUPES-FINITIONS", 1],
+      ["TERR-TRI-EVAC", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
     id: "PACK-JARDIN-REMISE-ETAT",
     nom: "Remise en état d’un jardin",
     description:

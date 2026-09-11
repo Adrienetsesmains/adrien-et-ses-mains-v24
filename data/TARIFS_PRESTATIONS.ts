@@ -331,6 +331,21 @@ Cuisine:
 
 ],
 
+"Terrasse bois":
+[
+
+  "Protection et préparation de la zone d’intervention",
+
+  "Dépose des éléments prévus au devis",
+
+  "Contrôle du support et de la structure existante",
+
+  "Pose, découpes et ajustements des lames",
+
+  "Finitions périphériques prévues au devis",
+
+],
+
 Équipement:
 [
 
@@ -3378,6 +3393,220 @@ p("EXT-METAL-PEINT",
 tags:
 ["métal",
 "peinture"]
+}),
+// ================= TERRASSE BOIS =================
+p("TERR-PROT-CHEMINEMENT",
+"Terrasse bois",
+"Protection du cheminement intérieur pour accès au chantier",
+"h",
+1,
+[
+
+  "Protection des sols et des zones de passage concernées",
+
+  "Mise en place d’un cheminement adapté aux manutentions",
+
+  "Dépose des protections en fin d’intervention",
+
+],
+{ conditions:
+"À quantifier selon le nombre de pièces, les étages, la longueur du cheminement et la fragilité des surfaces.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"protection",
+"intérieur",
+"cheminement",
+"accès"]
+}),
+
+p("TERR-DEPOSE-LAMES",
+"Terrasse bois",
+"Dépose de lames de terrasse existantes",
+"m²",
+0.25,
+[
+
+  "Dépose méthodique des lames et de leurs fixations accessibles",
+
+  "Regroupement des éléments déposés en vue de leur évacuation",
+
+  "Préservation de la structure porteuse destinée à être conservée",
+
+],
+{ conditions:
+"Pour des lames démontables sur une structure accessible. Hors dépose ou remplacement des lambourdes, évacuation et frais de traitement.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"dépose",
+"lames",
+"bois",
+"composite"]
+}),
+
+p("TERR-MANUT-ACCES",
+"Terrasse bois",
+"Manutention en accès difficile",
+"h",
+1,
+[
+
+  "Acheminement manuel des matériaux et de l’outillage",
+
+  "Manutention fractionnée adaptée aux contraintes d’accès",
+
+  "Transport manuel des éléments déposés vers la zone de chargement",
+
+],
+{ conditions:
+"À quantifier selon les étages, passages intérieurs, longueurs transportables, poids des matériaux et contraintes réelles d’accès. Hors moyen de levage, échafaudage et circulation sur une verrière.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"manutention",
+"accès difficile",
+"étage",
+"transport manuel"]
+}),
+
+p("TERR-CONTROLE-SUPPORT",
+"Terrasse bois",
+"Contrôle et préparation de la structure porteuse existante",
+"m²",
+0.2,
+[
+
+  "Contrôle visuel de la structure accessible après dépose",
+
+  "Nettoyage des appuis et retrait des fixations résiduelles",
+
+  "Petits réglages nécessaires avant la pose des nouvelles lames",
+
+],
+{ conditions:
+"Chiffrage établi pour une structure existante saine, stable et compatible avec les nouvelles lames. Toute réparation importante ou tout remplacement de lambourdes est compté séparément.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"support",
+"structure",
+"lambourdes",
+"préparation"]
+}),
+
+p("TERR-POSE-LAMES-BOIS",
+"Terrasse bois",
+"Pose de lames de terrasse en bois sur structure existante",
+"m²",
+0.75,
+[
+
+  "Implantation et calepinage courant des lames",
+
+  "Pose des lames avec fixations adaptées au bois retenu",
+
+  "Respect des jeux de dilatation et des espacements nécessaires",
+
+  "Contrôle de l’alignement et de la stabilité de l’ensemble",
+
+],
+{ conditions:
+"Sur structure existante saine, plane, stable et compatible. Hors fourniture des lames et fixations, coupes complexes, finitions de rives, reprise de structure et traitement de finition.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"bois",
+"lames",
+"pose",
+"cumaru",
+"bois exotique"]
+}),
+
+p("TERR-COUPES-FINITIONS",
+"Terrasse bois",
+"Coupes complexes et finitions de terrasse",
+"h",
+1,
+[
+
+  "Traçage et réalisation des coupes biaises ou particulières",
+
+  "Ajustement autour des angles et décrochements",
+
+  "Réalisation des finitions de rives prévues au devis",
+
+],
+{ conditions:
+"Prestation facturée selon le temps nécessaire. Les coupes droites courantes restent comprises dans la pose des lames.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"coupe biaise",
+"découpe",
+"rive",
+"finition"]
+}),
+
+p("TERR-TRI-EVAC",
+"Terrasse bois",
+"Tri, chargement et évacuation des éléments déposés",
+"h",
+1,
+[
+
+  "Tri et regroupement des lames et fixations déposées",
+
+  "Chargement dans le véhicule",
+
+  "Transport, déchargement et retour depuis une filière adaptée",
+
+],
+{ conditions:
+"À quantifier selon le volume, le poids, l’accès et la distance. Hors frais exceptionnels de traitement et trajets supplémentaires.",
+rentabilite:
+"🟠 À contrôler",
+typeTravaux:
+"deplacement",
+tags:
+["terrasse",
+"tri",
+"chargement",
+"évacuation",
+"déchèterie"]
+}),
+
+p("TERR-SATURATEUR",
+"Terrasse bois",
+"Application d’un saturateur sur terrasse bois",
+"m²",
+0.2,
+[
+
+  "Dépoussiérage et préparation légère des lames",
+
+  "Application régulière du saturateur prévu",
+
+  "Essuyage des éventuels excédents et contrôle de finition",
+
+],
+{ conditions:
+"Sur bois propre, sec et compatible avec le produit retenu. Nombre de couches, nettoyage approfondi, dégrisage et renouvellement ultérieur à adapter au chantier.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"bois",
+"saturateur",
+"protection",
+"entretien",
+"uv"]
 }),
 // ================= TOITURE LEGERE =================
 p("TOIT-DIAG",
