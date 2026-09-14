@@ -1386,6 +1386,57 @@ tags:
 }),
 
 p(
+  "PEINT-FACADE-PREP-LEG",
+  "Peinture",
+  "Nettoyage et préparation légère d’une façade",
+  "m²",
+  0.12,
+  [
+    "Brossage et nettoyage courant du support extérieur",
+    "Grattage localisé des parties non adhérentes",
+    "Dépoussiérage et préparation avant mise en peinture",
+  ],
+  {
+    conditions:
+      "Pour façade globalement saine et accessible. Hors nettoyage haute pression, traitement curatif important des mousses, réparation de fissures, reprise d’enduit et traitement d’une humidité active.",
+    tags: [
+      "peinture",
+      "façade",
+      "mur extérieur",
+      "crépi",
+      "nettoyage",
+      "préparation",
+    ],
+  }
+),
+
+p(
+  "PEINT-FACADE-1C",
+  "Peinture",
+  "Mise en peinture d’une façade - 1 couche",
+  "m²",
+  0.25,
+  [
+    "Application d’une couche de peinture extérieure adaptée sur support préparé",
+    "Réalisation des réchampis autour des éléments conservés",
+    "Mise en peinture des faces, dessus et retours compris dans la surface indiquée",
+    "Contrôle et finitions courantes",
+  ],
+  {
+    conditions:
+      "Support sec, sain et prêt à peindre. Protection générale, préparation, réparations, primaire spécifique et moyen d’accès particulier comptés séparément. Une couche supplémentaire rendue nécessaire par un changement important de teinte, une absorption irrégulière ou un défaut d’opacité sera comptée séparément.",
+    tags: [
+      "peinture",
+      "façade",
+      "mur extérieur",
+      "crépi",
+      "1 couche",
+      "une couche",
+    ],
+  }
+),
+
+p(
   "PEINT-MURS",
   "Peinture",
   "Mise en peinture des murs - 1 couche",
