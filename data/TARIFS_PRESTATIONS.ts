@@ -3443,6 +3443,37 @@ p("BRI-REB-FIX-MURAL",
       "réparation",
 ],}
 ),
+p("BRI-CAISSON-CLIM-EXT",
+"Bricolage / Menuiserie légère",
+"Fabrication et pose d’un caisson extérieur ventilé pour unité de climatisation",
+"forfait",
+17.5,
+[
+
+  "Prise de mesures et fabrication de l’ossature adaptée à l’emplacement",
+
+  "Création d’un rangement inférieur équipé de deux portes",
+
+  "Habillage extérieur avec les lames retenues pour le chantier",
+
+  "Réalisation d’une façade supérieure largement ajourée et démontable",
+
+  "Pose, réglage des ouvrants et contrôle des finitions",
+
+],
+{ conditions:
+"Dimensions, profondeur, habillage et ventilation à adapter au chantier. L’entrée et la sortie d’air de l’unité doivent rester dégagées conformément à la notice du fabricant. Hors déplacement, déconnexion, réparation ou modification de la climatisation.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["caisson",
+"climatisation",
+"unité extérieure",
+"rangement",
+"portes",
+"ventilation",
+"terrasse"]
+}),
 // ================= EXTERIEUR / METAL =================
 p("EXT-METAL-PREP",
 "Extérieur / Métal",
@@ -3544,7 +3575,237 @@ tags:
 ["métal",
 "peinture"]
 }),
+p("EXT-PERGOLA-ACIER-FAB",
+"Extérieur / Métal",
+"Fabrication d’une structure de pergola en acier",
+"h",
+1,
+[
+
+  "Contrôle des dimensions et préparation du débit des profilés",
+
+  "Découpe, perçage et assemblage des éléments de structure",
+
+  "Soudure des assemblages prévus et préparation des raccords",
+
+  "Meulage, ébavurage et contrôle visuel avant finition",
+
+],
+{ conditions:
+"Temps à adapter aux dimensions, au nombre de poteaux et de traverses. Sections et ancrages à valider avant fabrication. Hors étude de structure, couverture, finition, thermolaquage, transport spécialisé et moyen de levage.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["pergola",
+"acier",
+"fabrication",
+"soudure",
+"structure extérieure"]
+}),
+
+p("EXT-PERGOLA-ACIER-POS",
+"Extérieur / Métal",
+"Pose et fixation d’une structure de pergola en acier",
+"h",
+1,
+[
+
+  "Implantation et repérage des points de fixation",
+
+  "Mise en place des poteaux, poutres et traverses",
+
+  "Réalisation des ancrages au sol et au support mural prévus",
+
+  "Réglage de l’aplomb, contrôle des assemblages et finitions de pose",
+
+],
+{ conditions:
+"Support sain, stable et compatible avec les ancrages prévus. Hors étude structurelle, terrassement important, reprise du support, couverture, étanchéité, échafaudage et moyen de levage spécialisé.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["pergola",
+"acier",
+"pose",
+"fixation",
+"ancrage"]
+}),
+
+p("EXT-PERGOLA-RENFORT-POSE",
+"Extérieur / Métal",
+"Renfort ponctuel pour manutention et pose d’une structure métallique",
+"forfait",
+0,
+[
+
+  "Présence ponctuelle d’une seconde personne pour les manutentions lourdes",
+
+  "Assistance à la mise en place et au maintien des éléments de grande longueur",
+
+  "Sécurisation des opérations de levage et de fixation accessibles",
+
+],
+{ prixFixe:
+180,
+conditions:
+"Forfait à adapter à la durée et au poids des éléments. Hors grue, nacelle, échafaudage ou engin de levage.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["pergola",
+"renfort",
+"manutention",
+"pose lourde",
+"seconde personne"]
+}),
+
+p("EXT-THERMOLAQUAGE-LOG",
+"Extérieur / Métal",
+"Préparation et manutention d’éléments destinés au thermolaquage",
+"h",
+1,
+[
+
+  "Repérage et préparation des éléments avant traitement extérieur",
+
+  "Protection, chargement et manutention des pièces",
+
+  "Dépôt et récupération auprès du prestataire retenu",
+
+  "Contrôle visuel de la finition avant pose",
+
+],
+{ conditions:
+"Le prix facturé par le prestataire de thermolaquage, les réparations de finition et les transports exceptionnels sont comptés séparément.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["thermolaquage",
+"métal",
+"préparation",
+"manutention",
+"prestataire"]
+}),
 // ================= TERRASSE BOIS =================
+p("TERR-IMPLANT-GEOTEXTILE",
+"Terrasse bois",
+"Implantation et préparation du sol pour création d’une terrasse",
+"m²",
+0.228,
+[
+
+  "Implantation de l’emprise et repérage des niveaux finis",
+
+  "Préparation courante et nettoyage de la zone dégagée",
+
+  "Pose du géotextile sur l’emprise prévue",
+
+  "Repérage des futurs points d’appui de la structure",
+
+],
+{ conditions:
+"Zone dégagée et ancienne terrasse déposée avant intervention. Hors terrassement important, décaissement, compactage mécanique, drainage, évacuation de terre et traitement de réseaux enterrés.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"création",
+"implantation",
+"sol",
+"géotextile"]
+}),
+
+p("TERR-POINTS-APPUI",
+"Terrasse bois",
+"Réalisation et réglage des points d’appui d’une terrasse",
+"m²",
+0.456,
+[
+
+  "Répartition des appuis selon l’ossature prévue",
+
+  "Mise en place des supports béton ou dalles d’appui nécessaires",
+
+  "Pose et réglage des pieds ou plots réglables",
+
+  "Contrôle des niveaux, alignements et stabilité des appuis",
+
+],
+{ conditions:
+"Quantité et méthode à confirmer après contrôle du terrain et de la hauteur disponible. Hors fondations profondes, dalle béton complète, étude de sol et reprise d’un terrain instable.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"création",
+"plot béton",
+"pied réglable",
+"niveau",
+"appui"]
+}),
+
+p("TERR-OSSATURE-NEUVE",
+"Terrasse bois",
+"Création d’une structure porteuse neuve en lambourdes",
+"m²",
+0.57,
+[
+
+  "Calepinage et débit des lambourdes selon l’emprise",
+
+  "Pose de la structure porteuse sur les appuis réglés",
+
+  "Renfort des périphéries, aboutages et zones particulières",
+
+  "Réglage de la planéité, fixation et contrôle de la stabilité",
+
+  "Pose des bandes de protection prévues sur les lambourdes",
+
+],
+{ conditions:
+"Pour une structure courante de terrasse piétonne. Sections, entraxes et doubles lambourdes à adapter aux lames choisies. Hors structure porteuse surélevée, garde-corps, escalier et étude structurelle.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"création",
+"structure neuve",
+"lambourdes",
+"ossature"]
+}),
+
+p("TERR-POSE-LAMES-NEUF",
+"Terrasse bois",
+"Pose de lames de terrasse sur structure neuve",
+"m²",
+0.798,
+[
+
+  "Implantation et calepinage courant des lames",
+
+  "Pose avec visserie inox ou clips adaptés au produit retenu",
+
+  "Respect des jeux, espacements et prescriptions de pose",
+
+  "Réalisation des coupes droites, rives et finitions périphériques courantes",
+
+  "Contrôle de l’alignement, de la stabilité et nettoyage de fin de pose",
+
+],
+{ conditions:
+"Sur structure neuve plane, stable et compatible. Hors fourniture, traitement de finition, marches, trappes, motifs particuliers et coupes complexes facturées séparément. Temps à ajuster pour un système de fixation spécifique.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["terrasse",
+"création",
+"lames",
+"bois",
+"composite",
+"pose neuve",
+"rives"]
+}),
+
 p("TERR-PROT-CHEMINEMENT",
 "Terrasse bois",
 "Protection du cheminement intérieur pour accès au chantier",

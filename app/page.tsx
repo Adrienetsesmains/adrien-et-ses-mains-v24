@@ -142,6 +142,53 @@ const PACKS_PRESTATIONS_V25 = [
     ] as [string, number][],
   },
   {
+    id: "PACK-TERRASSE-BOIS-CREATION",
+    nom: "Création complète d’une terrasse en bois",
+    description:
+      "Création sur terrain dégagé : implantation, géotextile, points d’appui, structure neuve en lambourdes, pose des lames et finitions courantes. Renseigner la surface réelle sur chaque ligne.",
+    lignes: [
+      ["TERR-IMPLANT-GEOTEXTILE", 1],
+      ["TERR-POINTS-APPUI", 1],
+      ["TERR-OSSATURE-NEUVE", 1],
+      ["TERR-POSE-LAMES-NEUF", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-CAISSON-CLIM-EXT",
+    nom: "Caisson extérieur ventilé pour climatisation",
+    description:
+      "Fabrication d’un caisson habillé avec rangement inférieur, deux portes et partie haute largement ventilée et démontable.",
+    lignes: [
+      ["BRI-CAISSON-CLIM-EXT", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-PERGOLA-ACIER-PEINTE",
+    nom: "Pergola acier ouverte — finition peinte",
+    description:
+      "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention, préparation, anticorrosion et peinture. Sans couverture.",
+    lignes: [
+      ["EXT-PERGOLA-ACIER-FAB", 17.5],
+      ["EXT-PERGOLA-ACIER-POS", 10.5],
+      ["EXT-PERGOLA-RENFORT-POSE", 1],
+      ["EXT-METAL-PREP", 11.05],
+      ["EXT-ANTIROUILLE", 11.05],
+      ["EXT-METAL-PEINT", 11.05],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-PERGOLA-ACIER-THERMOLAQUEE",
+    nom: "Pergola acier ouverte — finition thermolaquée",
+    description:
+      "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention et logistique de thermolaquage. Le coût du prestataire reste à ajouter aux fournitures.",
+    lignes: [
+      ["EXT-PERGOLA-ACIER-FAB", 17.5],
+      ["EXT-PERGOLA-ACIER-POS", 10.5],
+      ["EXT-PERGOLA-RENFORT-POSE", 1],
+      ["EXT-THERMOLAQUAGE-LOG", 3.5],
+    ] as [string, number][],
+  },
+  {
     id: "PACK-JARDIN-REMISE-ETAT",
     nom: "Remise en état d’un jardin",
     description:
@@ -6444,6 +6491,38 @@ return (
 
     <button
       type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "Les fournitures seront choisies, commandées et réglées séparément par le client. Elles ne sont pas comprises dans le montant du présent devis.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Fournitures client
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "Les quantités définitives seront confirmées après dépose des éléments existants et contrôle des supports.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Quantités après dépose
+    </button>
+
+    <button
+      type="button"
       onClick={() => setCommentaireFournitures("")}
       className="px-3 py-1 rounded-lg bg-white text-slate-600 border text-xs font-semibold"
     >
@@ -6477,6 +6556,56 @@ return (
       className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
     >
       Remettre les phrases générales
+    </button>
+  </div>
+
+  <div className="flex gap-2 flex-wrap">
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsChantier((texteActuel) => {
+          const phrase =
+            "La dépose et l’évacuation des éléments existants sont réalisées par le client avant le commencement des travaux. La zone doit être dégagée et accessible.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Dépose par le client
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsChantier((texteActuel) => {
+          const phrase =
+            "Les quantités et réglages définitifs seront confirmés après dépose et contrôle de l’état ainsi que des niveaux du support.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Contrôle après dépose
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsChantier((texteActuel) => {
+          const phrase =
+            "La pergola est prévue comme une structure ouverte, sans canisse, couverture ni étanchéité. Toute couverture ultérieure nécessite une nouvelle étude et peut imposer un renforcement de la structure.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Pergola sans couverture
     </button>
   </div>
 
