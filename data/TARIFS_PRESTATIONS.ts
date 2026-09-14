@@ -3447,7 +3447,7 @@ p("BRI-CAISSON-CLIM-EXT",
 "Bricolage / Menuiserie légère",
 "Fabrication et pose d’un caisson extérieur ventilé pour unité de climatisation",
 "forfait",
-17.5,
+7,
 [
 
   "Prise de mesures et fabrication de l’ossature adaptée à l’emplacement",
@@ -3778,7 +3778,7 @@ p("TERR-POSE-LAMES-NEUF",
 "Terrasse bois",
 "Pose de lames de terrasse sur structure neuve",
 "m²",
-0.798,
+0.588636,
 [
 
   "Implantation et calepinage courant des lames",
