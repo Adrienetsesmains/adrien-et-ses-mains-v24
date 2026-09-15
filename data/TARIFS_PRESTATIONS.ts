@@ -4640,4 +4640,144 @@ tags:
 "mise en place"]
 }),
 
+
+// ================= CLOISONS / PLACO - COMPLEMENTS =================
+p("PLAC-CLOISON-DEPOSE",
+"Placo",
+"Dépose d’une cloison légère existante",
+"m²",
+0.45,
+[
+  "Protection de la zone d’intervention",
+  "Dépose méthodique de la cloison existante",
+  "Retrait des éléments de fixation accessibles",
+  "Regroupement des éléments déposés et gravats",
+],
+{ conditions:
+"Pour cloison légère non porteuse de type carreaux de plâtre, Promonta ou plaques de plâtre. Hors dépose de bloc-porte, évacuation en déchèterie, désamiantage, reprise structurelle et réseaux intégrés.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["cloison","dépose","démolition","carreaux de plâtre","Promonta","placo"]
+}),
+
+p("PLAC-CLOISON-BA13",
+"Placo",
+"Création d’une cloison sur ossature métallique avec plaques de plâtre",
+"m²",
+0.8,
+[
+  "Implantation et traçage de la cloison",
+  "Pose des rails et montants métalliques",
+  "Mise en place des renforts courants nécessaires",
+  "Découpe et pose des plaques de plâtre sur les deux faces",
+  "Réalisation des ajustements périphériques",
+],
+{ conditions:
+"Surface calculée sur une face de cloison finie, plaques sur les deux faces comprises. Hors isolant, bandes et enduits, peinture, renfort spécifique pour charge lourde et création ou modification de réseaux.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["placo","cloison","BA13","ossature métallique","création"]
+}),
+
+p("PLAC-CLOISON-RENFORT-PORTE",
+"Placo",
+"Renforcement d’une cloison pour intégration d’un bloc-porte",
+"u",
+1.5,
+[
+  "Implantation de l’ouverture",
+  "Renforcement de l’ossature au droit du bloc-porte",
+  "Création du chevêtre et des montants nécessaires",
+  "Contrôle de l’aplomb et des dimensions de réservation",
+],
+{ conditions:
+"Pour intégration d’un bloc-porte courant dans une cloison légère neuve. Hors fourniture et pose du bloc-porte.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["placo","cloison","porte","bloc-porte","renfort","chevêtre"]
+}),
+
+// ================= BRICOLAGE / MENUISERIE LEGERE - COMPLEMENTS =================
+p("BRI-BLOC-PORTE-DEPOSE",
+"Bricolage / Menuiserie légère",
+"Dépose soignée d’un bloc-porte existant à conserver",
+"u",
+1.5,
+[
+  "Protection de la zone d’intervention",
+  "Dépose de l’ouvrant",
+  "Dépose soigneuse de l’huisserie ou du dormant",
+  "Retrait des fixations accessibles",
+  "Stockage provisoire des éléments conservés",
+],
+{ conditions:
+"Pour bloc-porte existant destiné à être reposé. Hors réparation importante, remplacement du bloc-porte et démolition de la cloison.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["porte","bloc-porte","dépose","huisserie","conservation"]
+}),
+
+p("BRI-BLOC-PORTE-REPOSE",
+"Bricolage / Menuiserie légère",
+"Repose et réglage d’un bloc-porte existant",
+"u",
+2,
+[
+  "Mise en place du bloc-porte conservé",
+  "Contrôle de l’aplomb, du niveau et des jeux",
+  "Fixation adaptée au support",
+  "Repose de l’ouvrant",
+  "Réglage et essais de fonctionnement",
+],
+{ conditions:
+"Pour repose d’un bloc-porte existant en état compatible avec sa réutilisation. Hors réparation importante du bloc-porte, fourniture de quincaillerie et reprises importantes du support.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["porte","bloc-porte","repose","huisserie","réglage"]
+}),
+
+p("BRI-POIGNEE-FENETRE-REMPL",
+"Bricolage / Menuiserie légère",
+"Remplacement d’une poignée de fenêtre",
+"u",
+0.5,
+[
+  "Dépose de la poignée existante",
+  "Contrôle de la fixation et du mécanisme accessible",
+  "Pose de la nouvelle poignée",
+  "Réglage et essai de fonctionnement",
+],
+{ conditions:
+"Pour remplacement simple d’une poignée compatible avec la menuiserie existante. Hors remplacement ou réparation du mécanisme de fermeture.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["fenêtre","poignée","remplacement","quincaillerie"]
+}),
+
+// ================= SOLS - COMPLEMENT =================
+p("SOL-SEUIL-PORTE",
+"Sols",
+"Pose d’une barre de seuil",
+"u",
+0.5,
+[
+  "Prise de mesure et repérage",
+  "Découpe de la barre de seuil",
+  "Pose et fixation adaptées au support",
+  "Contrôle et finitions courantes",
+],
+{ conditions:
+"Pour barre de seuil droite de dimensions courantes. Hors reprise importante du sol ou différence de niveau nécessitant un profil spécifique.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["sol","seuil","barre de seuil","inox","porte"]
+}),
+
 ];
