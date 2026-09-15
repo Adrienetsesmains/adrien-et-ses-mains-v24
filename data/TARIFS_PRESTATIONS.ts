@@ -4700,6 +4700,28 @@ tags:
 ["placo","cloison","porte","bloc-porte","renfort","chevêtre"]
 }),
 
+
+p("PLAC-CLOISON-SEPARATIVE-RENF",
+"Placo",
+"Création d’une cloison séparative renforcée sur ossature métallique",
+"m²",
+1.15,
+[
+  "Implantation et traçage de la cloison",
+  "Pose d’une ossature métallique renforcée adaptée à la configuration",
+  "Mise en place d’un isolant dans l’ossature",
+  "Pose de parements adaptés sur les deux faces",
+  "Découpes et ajustements périphériques",
+  "Traitement courant des raccords avec les supports existants",
+],
+{ conditions:
+"Surface calculée sur une face de cloison finie, parements sur les deux faces et isolant compris. Prestation destinée notamment aux séparations entre un logement et une circulation, un palier ou une partie commune. Composition exacte des parements, de l’isolant et de l’ossature à adapter aux exigences applicables au bâtiment, notamment acoustiques et de résistance au feu. Hors bandes et enduits de finition, peinture, bloc-porte, renfort spécifique de bloc-porte, modification de réseaux et travaux structurels.",
+rentabilite:
+"🟠 À contrôler",
+tags:
+["placo","cloison","séparative","renforcée","logement","palier","partie commune","acoustique","feu","isolation"]
+}),
+
 // ================= BRICOLAGE / MENUISERIE LEGERE - COMPLEMENTS =================
 p("BRI-BLOC-PORTE-DEPOSE",
 "Bricolage / Menuiserie légère",
