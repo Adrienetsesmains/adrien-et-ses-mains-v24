@@ -372,6 +372,19 @@ Cuisine:
 
 ],
 
+"Extérieur / Clôture":
+[
+
+  "Implantation et contrôle des supports existants",
+
+  "Pose et fixation des éléments de clôture prévus",
+
+  "Découpes, adaptations et réglages courants",
+
+  "Contrôle des fixations et nettoyage de fin d’intervention",
+
+],
+
 "Toiture légère":
 [
 
@@ -1411,6 +1424,34 @@ p(
 ),
 
 p(
+  "PEINT-EXT-NET-HP",
+  "Peinture",
+  "Nettoyage haute pression d’un support maçonné extérieur",
+  "m²",
+  0.15,
+  [
+    "Protection courante des éléments situés à proximité",
+    "Nettoyage à haute pression adapté à la résistance du support",
+    "Élimination des salissures, dépôts et parties faiblement adhérentes",
+    "Rinçage et contrôle visuel du support avant séchage",
+  ],
+  {
+    conditions:
+      "Pour support maçonné extérieur sain, accessible et compatible avec un nettoyage haute pression. Hors traitement curatif important des mousses, réparation de fissures, reprise d’enduit, récupération des eaux souillées et traitement d’une humidité active. Mise en peinture réalisée après séchage suffisant du support.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "peinture",
+      "extérieur",
+      "façade",
+      "murette",
+      "mur extérieur",
+      "nettoyage haute pression",
+      "préparation",
+    ],
+  }
+),
+
+p(
   "PEINT-FACADE-1C",
   "Peinture",
   "Mise en peinture d’une façade - 1 couche",
@@ -1432,6 +1473,36 @@ p(
       "crépi",
       "1 couche",
       "une couche",
+    ],
+  }
+),
+
+p(
+  "PEINT-FACADE-2C",
+  "Peinture",
+  "Mise en peinture d’un support maçonné extérieur - 2 couches",
+  "m²",
+  0.43,
+  [
+    "Application d’une première couche de peinture extérieure adaptée sur support préparé",
+    "Respect du temps de séchage nécessaire",
+    "Application d’une deuxième couche de peinture extérieure",
+    "Réalisation des réchampis autour des éléments conservés",
+    "Mise en peinture des faces, dessus et retours compris dans la surface indiquée",
+    "Contrôle et finitions courantes",
+  ],
+  {
+    conditions:
+      "Support sec, sain et prêt à peindre. Protection générale, nettoyage, réparations, primaire spécifique et moyen d’accès particulier comptés séparément. Une couche supplémentaire rendue nécessaire par un changement important de teinte, une absorption irrégulière ou un défaut d’opacité sera comptée séparément.",
+    tags: [
+      "peinture",
+      "extérieur",
+      "façade",
+      "murette",
+      "mur extérieur",
+      "crépi",
+      "2 couches",
+      "deux couches",
     ],
   }
 ),
@@ -3737,6 +3808,146 @@ tags:
 "manutention",
 "prestataire"]
 }),
+
+// ================= EXTERIEUR / CLOTURE =================
+p(
+  "EXT-CLOTURE-APPRO-MANUT",
+  "Extérieur / Clôture",
+  "Approvisionnement et manutention d’éléments de clôture",
+  "forfait",
+  2.5,
+  [
+    "Préparation de la liste des éléments nécessaires à la pose",
+    "Chargement et transport courant des panneaux, poteaux et accessoires",
+    "Déchargement et répartition des éléments sur la zone d’intervention",
+    "Manutention courante des fournitures avant pose",
+  ],
+  {
+    conditions:
+      "Pour approvisionnement local et éléments de dimensions courantes. Hors livraison facturée par le fournisseur, transport exceptionnel, manutention mécanisée, stockage prolongé et évacuation des emballages volumineux.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "grillage rigide",
+      "approvisionnement",
+      "manutention",
+      "panneau",
+      "poteau",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-POTEAU-PLATINE",
+  "Extérieur / Clôture",
+  "Pose d’un poteau de clôture sur platine",
+  "u",
+  0.9,
+  [
+    "Implantation et repérage de la position du poteau",
+    "Perçage du support et mise en place des fixations adaptées",
+    "Pose de la platine et du poteau",
+    "Réglage de l’alignement, de l’aplomb et du niveau",
+    "Serrage et contrôle de la fixation",
+  ],
+  {
+    conditions:
+      "Support maçonné sain, stable, suffisamment large et résistant aux efforts transmis par la clôture. Fixations et scellement adaptés comptés en fournitures. Hors réparation ou renforcement de la maçonnerie, carottage important et étude de résistance au vent.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "grillage rigide",
+      "poteau",
+      "platine",
+      "murette",
+      "fixation",
+      "scellement chimique",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-PANNEAU-POS",
+  "Extérieur / Clôture",
+  "Pose de panneaux de clôture rigide",
+  "ml",
+  0.4,
+  [
+    "Présentation des panneaux entre les poteaux préparés",
+    "Découpes droites nécessaires à l’ajustement des longueurs",
+    "Pose et fixation des panneaux rigides",
+    "Réglage de l’alignement et contrôle de la tenue de l’ensemble",
+    "Protection courante des coupes métalliques réalisées sur place",
+  ],
+  {
+    conditions:
+      "Pour pose droite sur poteaux préparés et support accessible. Poteaux, platines, occultation, adaptation importante à une pente, reprise de maçonnerie et renforcement du support comptés séparément.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "grillage rigide",
+      "panneau rigide",
+      "pose",
+      "découpe",
+      "extérieur",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-ADAPT-PENTE",
+  "Extérieur / Clôture",
+  "Adaptation de panneaux de clôture à une pente",
+  "ml",
+  0.6,
+  [
+    "Relevé de la pente et traçage des hauteurs nécessaires",
+    "Découpe progressive des panneaux suivant la configuration",
+    "Ébavurage et protection des coupes métalliques",
+    "Ajustement des panneaux et contrôle de la continuité visuelle",
+  ],
+  {
+    conditions:
+      "À ajouter à la pose des panneaux lorsque la hauteur doit évoluer suivant une pente ou une arase irrégulière. Hors fabrication sur mesure en atelier, modification structurelle des poteaux et reprise du support maçonné.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "grillage rigide",
+      "pente",
+      "découpe",
+      "adaptation",
+      "murette",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-OCCULT-PVC",
+  "Extérieur / Clôture",
+  "Pose de lames occultantes PVC sur clôture rigide",
+  "m²",
+  0.5,
+  [
+    "Contrôle de la compatibilité entre les lames et les mailles des panneaux",
+    "Découpe des lames occultantes aux hauteurs nécessaires",
+    "Mise en place des lames et des clips de maintien",
+    "Ajustement des extrémités, des panneaux recoupés et des zones en pente",
+    "Contrôle visuel et nettoyage de fin d’intervention",
+  ],
+  {
+    conditions:
+      "Clôture rigide posée, stable et compatible avec le système d’occultation retenu. La résistance de la murette, des poteaux, platines et fixations aux efforts supplémentaires dus au vent doit être validée avant pose. Hors fourniture, renforcement du support et remplacement d’un panneau inadapté.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "grillage rigide",
+      "occultation",
+      "lame PVC",
+      "brise-vue",
+      "pente",
+    ],
+  }
+),
 // ================= TERRASSE BOIS =================
 p("TERR-IMPLANT-GEOTEXTILE",
 "Terrasse bois",
