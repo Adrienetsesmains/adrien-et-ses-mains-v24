@@ -4853,6 +4853,38 @@ tags:
 
 
 // ================= CLOISONS / PLACO - COMPLEMENTS =================
+
+p(
+  "MAC-CLOISON-CARREAUX-PLATRE",
+  "Maçonnerie légère",
+  "Création d’une cloison en carreaux de plâtre",
+  "m²",
+  1.05,
+  [
+    "Implantation et traçage de la cloison",
+    "Préparation des liaisons avec les supports existants",
+    "Montage des carreaux de plâtre avec liant adapté",
+    "Réalisation des découpes et ajustements courants",
+    "Création des réservations prévues au devis",
+    "Dressage et préparation courante des raccords avant finition",
+  ],
+  {
+    conditions:
+      "Surface calculée sur une face de cloison finie. Épaisseur et type de carreaux à adapter au chantier. Hors fourniture, bloc-porte, dépose de l’existant, évacuation des gravats, reprise structurelle, réseaux intégrés, ratissage généralisé et peinture. Pour une séparation de logement vers palier ou partie commune, la composition retenue doit être compatible avec les exigences applicables au bâtiment.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "maçonnerie",
+      "cloison",
+      "carreau de plâtre",
+      "carreaux de plâtre",
+      "Promonta",
+      "caroplatre",
+      "séparation",
+      "mur intérieur",
+    ],
+  }
+),
+
 p("PLAC-CLOISON-DEPOSE",
 "Placo",
 "Dépose d’une cloison légère existante",
