@@ -4185,15 +4185,7 @@ const hauteurChantierAuto =
         decalageValeurChantier
       );
 
-// Les deux cadres adoptent la hauteur du plus rempli.
-const hauteurCadresInfos =
-  estFactureMeurisse
-    ? hauteurClientAuto
-    : Math.max(
-        hauteurClientAuto,
-        hauteurChantierAuto
-      );
-
+// Chaque cadre possède sa propre hauteur selon son contenu.
 dessinerCadreInfos(
   "Client",
   xClient,
@@ -4201,7 +4193,7 @@ dessinerCadreInfos(
   largeurClient,
   lignesClient,
   decalageValeurClient,
-  hauteurCadresInfos
+  hauteurClientAuto
 );
 
 if (!estFactureMeurisse) {
@@ -4212,16 +4204,24 @@ if (!estFactureMeurisse) {
     largeurChantier,
     lignesChantier,
     decalageValeurChantier,
-    hauteurCadresInfos
+    hauteurChantierAuto
   );
 }
+
+// Le tableau commence toujours sous le cadre le plus haut.
+const hauteurMaxCadresInfos = estFactureMeurisse
+  ? hauteurClientAuto
+  : Math.max(
+      hauteurClientAuto,
+      hauteurChantierAuto
+    );
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
 y =
   yCadres +
-  hauteurCadresInfos +
+  hauteurMaxCadresInfos +
   5.5;
 
 enteteTableau();
