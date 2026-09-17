@@ -3639,19 +3639,44 @@ const ecart = totalAttendu - totalApres;
 };
 
 const chargerBanniereV26 = async () => {
-  const reponse = await fetch(CHEMIN_BANNIERE_V26);
-
-  if (!reponse.ok) {
-    throw new Error("Bannière V26 introuvable dans le dossier public.");
-  }
-
-  const fichier = await reponse.blob();
-
   return new Promise<string>((resolve, reject) => {
-    const lecteur = new FileReader();
-    lecteur.onloadend = () => resolve(lecteur.result as string);
-    lecteur.onerror = () => reject(lecteur.error);
-    lecteur.readAsDataURL(fichier);
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        // jsPDF peut échouer avec certains PNG transparents volumineux.
+        // Le passage par un canvas produit un JPEG fiable sans modifier
+        // le fichier original présent dans le dossier public.
+        const largeurCanvas = 1600;
+        const hauteurCanvas = Math.round(
+          largeurCanvas * (image.naturalHeight / image.naturalWidth)
+        );
+        const canvas = document.createElement("canvas");
+        canvas.width = largeurCanvas;
+        canvas.height = hauteurCanvas;
+
+        const contexte = canvas.getContext("2d");
+
+        if (!contexte) {
+          reject(new Error("Impossible de préparer la bannière V26."));
+          return;
+        }
+
+        contexte.fillStyle = "#ffffff";
+        contexte.fillRect(0, 0, largeurCanvas, hauteurCanvas);
+        contexte.drawImage(image, 0, 0, largeurCanvas, hauteurCanvas);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.92));
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    image.onerror = () =>
+      reject(new Error("Bannière V26 introuvable dans le dossier public."));
+
+    // Le paramètre évite de réutiliser une ancienne image conservée en cache.
+    image.src = `${CHEMIN_BANNIERE_V26}?version=26`;
   });
 };
 
@@ -3721,16 +3746,17 @@ if (type === "facture" && !numeroFacture) {
   let y = 0;
 
   const enteteTableau = () => {
-    doc.setFillColor(52, 63, 79);
-    doc.rect(15, y, 180, 11, "F");
+    doc.setFillColor(20, 57, 72);
+    doc.roundedRect(15, y, 180, 7.2, 1.6, 1.6, "F");
 
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.text("Designation", 20, y + 7);
-    doc.text("Montant", 165, y + 7);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.4);
+    doc.text("Désignation", 20, y + 4.9);
+    doc.text("Montant", 188, y + 4.9, { align: "right" });
 
     doc.setTextColor(0, 0, 0);
-    y += 16;
+    y += 10.8;
   };
 
   const nouvellePageTableau = () => {
@@ -3754,7 +3780,7 @@ if (type === "facture" && !numeroFacture) {
     const hauteurBanniere = largeurBanniere * (762 / 2048);
     doc.addImage(
       banniereV26,
-      "PNG",
+      "JPEG",
       10,
       7,
       largeurBanniere,
@@ -3762,7 +3788,8 @@ if (type === "facture" && !numeroFacture) {
       "banniere-v26",
       "FAST"
     );
-  } catch {
+  } catch (error) {
+    console.error("Erreur de chargement de la bannière V26 :", error);
     // Secours lisible si le fichier image n'a pas encore été copié dans /public.
     doc.setFillColor(20, 57, 72);
     doc.roundedRect(10, 7, 190, 32, 2, 2, "F");
@@ -3777,45 +3804,63 @@ if (type === "facture" && !numeroFacture) {
     });
   }
 
-// Cartouche du document sous la bannière.
-const yCartoucheDocument = 82;
-doc.setFillColor(20, 57, 72);
-doc.roundedRect(15, yCartoucheDocument, 180, 17, 2.5, 2.5, "F");
-doc.setFillColor(218, 164, 73);
-doc.rect(15, yCartoucheDocument, 4, 17, "F");
+// Cartouche fin et léger sous la bannière.
+const yCartoucheDocument = 80.5;
+const hauteurCartoucheDocument = 9.5;
 
+doc.setFillColor(250, 248, 243);
+doc.setDrawColor(218, 164, 73);
+doc.setLineWidth(0.3);
+doc.roundedRect(
+  15,
+  yCartoucheDocument,
+  180,
+  hauteurCartoucheDocument,
+  2.5,
+  2.5,
+  "FD"
+);
+
+// Petite capsule de titre, plus douce que l'ancien grand bandeau plein.
+doc.setFillColor(20, 57, 72);
+doc.roundedRect(18, yCartoucheDocument + 1.25, 30, 7, 3.5, 3.5, "F");
 doc.setTextColor(255, 255, 255);
 doc.setFont("helvetica", "bold");
-doc.setFontSize(20);
-doc.text(titre, 25, yCartoucheDocument + 11.5);
-
 doc.setFontSize(10.5);
-doc.text(`N° ${numero}`, 188, yCartoucheDocument + 7, { align: "right" });
+doc.text(type === "devis" ? "Devis" : "Facture", 33, yCartoucheDocument + 6, {
+  align: "center",
+});
+
+doc.setTextColor(20, 57, 72);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(8.4);
+doc.text(`N° ${numero}`, 188, yCartoucheDocument + 4, { align: "right" });
 doc.setFont("helvetica", "normal");
-doc.setFontSize(8.5);
+doc.setFontSize(6.8);
 doc.text(
   `Date : ${new Date().toLocaleDateString("fr-FR")}`,
   188,
-  yCartoucheDocument + 13,
+  yCartoucheDocument + 7.6,
   { align: "right" }
 );
 doc.setTextColor(0, 0, 0);
 
 if (type === "facture") {
-  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
   doc.setTextColor(90, 90, 90);
 
   doc.text(
     `Facture établie suite au devis signé n° ${numeroDevis}`,
     105,
-    105,
+    94.5,
     { align: "center" }
   );
 
   doc.text(
     `Échéance de paiement : ${datePaiement || "À réception de facture"}`,
     105,
-    110,
+    98.5,
     { align: "center" }
   );
 
@@ -3826,13 +3871,13 @@ if (type === "facture") {
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = type === "facture" ? 116 : 106;
+const yCadres = type === "facture" ? 103.5 : 94;
 
 const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
 
-const hauteurEnteteCadre = 12;
-const interligne = 5;
+const hauteurEnteteCadre = 7.2;
+const interligne = 3.8;
 
 type LigneBloc = {
   label: string;
@@ -3858,7 +3903,7 @@ const dessinerCadreInfos = (
     valeur.replace(/[ \t]{2,}/g, "\n").trim();
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.4);
+  doc.setFontSize(7.1);
 
   // Largeur réellement disponible entre le début des valeurs
   // et la marge droite du cadre.
@@ -3869,56 +3914,51 @@ const dessinerCadreInfos = (
   lignesFiltrees.forEach((ligne) => {
     const valeurPreparee = preparerValeurPDF(ligne.valeur);
     const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 1.8;
+    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 0.5;
   });
 
-  // 10 mm entre le bandeau et la première ligne, puis 5 mm de marge basse.
+  // Cadre très compact tout en restant lisible à l'impression.
   const hauteurBloc = Math.max(
-    48,
-    hauteurEnteteCadre + 10 + hauteurTexte + 5
+    31.5,
+    hauteurEnteteCadre + 4 + hauteurTexte + 3
   );
 
-  // Ombre légère
-  doc.setFillColor(230, 230, 230);
-  doc.roundedRect(x + 1.2, yDepart + 1.2, largeur, hauteurBloc, 3, 3, "F");
+  // Ombre très discrète.
+  doc.setFillColor(238, 238, 238);
+  doc.roundedRect(x + 0.5, yDepart + 0.5, largeur, hauteurBloc, 3, 3, "F");
 
   // Fond blanc + contour doré
   doc.setFillColor(255, 255, 255);
-  doc.setDrawColor(190, 145, 55);
-  doc.setLineWidth(0.35);
+  doc.setDrawColor(218, 164, 73);
+  doc.setLineWidth(0.25);
   doc.roundedRect(x, yDepart, largeur, hauteurBloc, 3, 3, "FD");
 
-  // Bandeau bleu foncé
-  doc.setFillColor(52, 63, 79);
+  // Bandeau bleu pétrole plus fin.
+  doc.setFillColor(20, 57, 72);
   doc.roundedRect(x, yDepart, largeur, hauteurEnteteCadre, 3, 3, "F");
+  doc.rect(x, yDepart + hauteurEnteteCadre - 3, largeur, 3, "F");
 
- 
-  // Pastille titre
-  doc.setFillColor(190, 145, 55);
-  doc.circle(x + 7.5, yDepart + 6, 2.5, "F");
+  // Petit repère doré, plus léger que l'ancienne grande pastille.
+  doc.setFillColor(218, 164, 73);
+  doc.circle(x + 6, yDepart + 3.6, 1.1, "F");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11.5);
+  doc.setFontSize(8.8);
   doc.setTextColor(255, 255, 255);
-  doc.text(titre, x + 16, yDepart + 7.5);
+  doc.text(titre, x + 10, yDepart + 4.9);
 
-  let yTexte = yDepart + hauteurEnteteCadre + 10;
+  let yTexte = yDepart + hauteurEnteteCadre + 4.8;
 
   lignesFiltrees.forEach((ligne) => {
-    // Petite pastille ligne
-    doc.setFillColor(52, 63, 79);
-    doc.circle(x + 7.5, yTexte - 1.4, 1.7, "F");
-
-    doc.setTextColor(190, 145, 55);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.5);
-    doc.text(ligne.icone || "•", x + 7.5, yTexte - 0.6, { align: "center" });
+    // Repère de ligne minimaliste.
+    doc.setFillColor(218, 164, 73);
+    doc.circle(x + 6, yTexte - 1, 0.55, "F");
 
     // Label
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.6);
-    doc.setTextColor(25, 35, 48);
-    doc.text(`${ligne.label} :`, x + 14, yTexte);
+    doc.setFontSize(7.1);
+    doc.setTextColor(20, 57, 72);
+    doc.text(`${ligne.label} :`, x + 9, yTexte);
 
     // Valeur placée après la plus longue étiquette du bloc.
     const valeurPreparee = preparerValeurPDF(ligne.valeur);
@@ -3926,11 +3966,11 @@ const dessinerCadreInfos = (
     const nbLignes = Math.max(1, texteCoupe.length);
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.6);
+    doc.setFontSize(7.1);
     doc.setTextColor(35, 35, 35);
     doc.text(texteCoupe, x + decalageValeur, yTexte);
 
-    yTexte += nbLignes * interligne + 1.8;
+    yTexte += nbLignes * interligne + 0.5;
   });
 
   return hauteurBloc;
@@ -3979,29 +4019,29 @@ if (modeClient === "jeremie") {
 }
 
 const hauteurClientAuto = dessinerCadreInfos(
-  "CLIENT",
+  "Client",
   xClient,
   yCadres,
   largeurClient,
   lignesClient,
-  31
+  27
 );
 
 const hauteurChantierAuto = estFactureMeurisse
   ? 0
   : dessinerCadreInfos(
-      "CHANTIER",
+      "Chantier",
       xChantier,
       yCadres,
       largeurChantier,
       lignesChantier,
-      modeClient === "agence" ? 35 : 31
+      modeClient === "agence" ? 31 : 27
     );
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
 
-y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 10;
+y = yCadres + Math.max(hauteurClientAuto, hauteurChantierAuto) + 5.5;
 
 enteteTableau();
 
@@ -4074,7 +4114,7 @@ y += detailCoupe.length * 3.5;
 
 // ================= BLOC TOTAL MIS EN VALEUR =================
 // On garde aussi une marge basse imprimable pour éviter tout chevauchement.
-if (y + 52 > 250) {
+if (y + 37 > 250) {
   doc.addPage();
   page += 1;
   y = 35;
@@ -4096,12 +4136,13 @@ const resteAPayerPDF = Math.max(
   Math.round((montantTotalPDF - montantAcompteOuEncaissePDF) * 100) / 100
 );
 
-const xBlocTotal = 80;
-const largeurBlocTotal = 115;
-const hauteurBlocTotal = 44;
+const xBlocTotal = 103;
+const largeurBlocTotal = 92;
+const hauteurBlocTotal = 29;
 
-doc.setFillColor(248, 244, 236);
-doc.setDrawColor(190, 145, 55);
+doc.setFillColor(250, 248, 243);
+doc.setDrawColor(218, 164, 73);
+doc.setLineWidth(0.3);
 doc.roundedRect(
   xBlocTotal,
   y,
@@ -4113,48 +4154,48 @@ doc.roundedRect(
 );
 
 // Bandeau principal : le montant total est volontairement le plus visible.
-doc.setFillColor(52, 63, 79);
-doc.roundedRect(xBlocTotal, y, largeurBlocTotal, 15, 3, 3, "F");
-doc.rect(xBlocTotal, y + 10, largeurBlocTotal, 5, "F");
+doc.setFillColor(20, 57, 72);
+doc.roundedRect(xBlocTotal, y, largeurBlocTotal, 9.5, 3, 3, "F");
+doc.rect(xBlocTotal, y + 6.5, largeurBlocTotal, 3, "F");
 
 doc.setFont("helvetica", "bold");
-doc.setFontSize(9.5);
+doc.setFontSize(7.3);
 doc.setTextColor(255, 255, 255);
 doc.text(
-  type === "devis" ? "MONTANT TOTAL DU DEVIS" : "TOTAL DE LA FACTURE",
+  type === "devis" ? "Montant total du devis" : "Total de la facture",
   xBlocTotal + 7,
-  y + 10
+  y + 6.3
 );
 
-doc.setFontSize(13.5);
-doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10.5, { align: "right" });
+doc.setFontSize(10.3);
+doc.text(formatEuroPDF(montantTotalPDF), 188, y + 6.6, { align: "right" });
 
 doc.setFont("helvetica", "normal");
-doc.setFontSize(9.5);
-doc.setTextColor(0, 0, 0);
+doc.setFontSize(7.5);
+doc.setTextColor(35, 35, 35);
 doc.text(
   type === "devis" ? "Acompte demandé" : "Déjà encaissé",
-  xBlocTotal + 8,
-  y + 25
+  xBlocTotal + 7,
+  y + 16
 );
-doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 25, {
+doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 16, {
   align: "right",
 });
 
-doc.setDrawColor(200);
-doc.line(xBlocTotal + 8, y + 30, 188, y + 30);
+doc.setDrawColor(220, 210, 190);
+doc.line(xBlocTotal + 7, y + 19.8, 188, y + 19.8);
 
 doc.setFont("helvetica", "bold");
-doc.setFontSize(10);
-doc.setTextColor(0, 0, 0);
+doc.setFontSize(8);
+doc.setTextColor(20, 57, 72);
 doc.text(
-  type === "devis" ? "Solde après acompte" : "RESTE À PAYER",
-  xBlocTotal + 8,
-  y + 39
+  type === "devis" ? "Solde après acompte" : "Reste à payer",
+  xBlocTotal + 7,
+  y + 25.5
 );
-doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 39, { align: "right" });
+doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 25.5, { align: "right" });
 
-y += hauteurBlocTotal + 8;
+y += hauteurBlocTotal + 5;
 
 // ================= FOURNITURES + CONDITIONS MODIFIABLES =================
 // Le pied de page de la dernière page commence à 256 mm.
