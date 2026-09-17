@@ -3877,7 +3877,7 @@ const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
 
 const hauteurEnteteCadre = 7.2;
-const interligne = 3.6;
+const interligne = 4.1;
 
 type LigneBloc = {
   label: string;
@@ -3920,7 +3920,7 @@ const dessinerCadreInfos = (
   // Calcul exact jusqu'à la dernière ligne, sans interligne ajouté dessous.
   const hauteurTexte =
     Math.max(0, nombreLignesVisuelles - 1) * interligne +
-    Math.max(0, lignesFiltrees.length - 1) * 0.3;
+    Math.max(0, lignesFiltrees.length - 1) * 0.4;
 
   // Cadre très compact tout en restant lisible à l'impression.
   const hauteurBloc = Math.max(
@@ -3975,7 +3975,7 @@ const dessinerCadreInfos = (
     doc.setTextColor(35, 35, 35);
     doc.text(texteCoupe, x + decalageValeur, yTexte);
 
-    yTexte += nbLignes * interligne + 0.3;
+    yTexte += nbLignes * interligne + 0.4;
   });
 
   return hauteurBloc;
@@ -4272,7 +4272,7 @@ const hauteurListeConditions = (liste: string[]) =>
 
 // Cadre fortement compacté par défaut, toujours extensible automatiquement.
 const hauteurConditions = Math.max(
-  42,
+  47,
   15 +
     hauteurListeConditions(conditions) +
     (conditionsPropresChantier.length > 0
@@ -4355,10 +4355,10 @@ if (type === "devis" || type === "facture") {
  doc.text("Bon pour accord", 167, yConditions + 15.5, { align: "center" });
 doc.text("Date :        /        / 2026", 150, yConditions + 21);
 
-doc.rect(148, yConditions + 25, 40, 8);
+doc.rect(148, yConditions + 24.5, 40, 13.5);
 
 doc.setFontSize(8);
-doc.text("Signature client", 168, yConditions + 37.5, { align: "center" });
+doc.text("Signature client", 168, yConditions + 43.5, { align: "center" });
 }
 
 // On repart après la hauteur réellement utilisée + une marge courte.
