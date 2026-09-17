@@ -484,6 +484,28 @@ tags:
 ["ménage",
 "logement"]
 }),
+
+p("NET-EQUIPEMENT-LOCAL",
+"Nettoyage",
+"Nettoyage localisé d’un équipement intérieur",
+"u",
+0.3,
+[
+
+  "Nettoyage manuel des salissures sur les surfaces accessibles",
+
+  "Essuyage et contrôle visuel de finition",
+
+],
+{ conditions:
+"Pour une intervention localisée sur un équipement existant. Hors démontage, décapage, traitement spécialisé ou remise en peinture.",
+tags:
+["nettoyage",
+"équipement",
+"radiateur",
+"salissures",
+"entretien"]
+}),
 // ================= DEBARRAS =================
 p("DEB-ENCOMBRANTS",
 "Débarras",
@@ -848,6 +870,27 @@ p("SOL-PLINTHE-CARR",
 { tags:
 ["plinthe",
 "carrelage"]
+}),
+
+p("SOL-PLINTHE-REFIX",
+"Sols",
+"Reprise de fixation de plinthes existantes",
+"ml",
+0.25,
+[
+
+  "Nettoyage localisé des surfaces de collage accessibles",
+
+  "Recollage, maintien et contrôle de la fixation",
+
+],
+{ conditions:
+"Pour plinthes existantes réutilisables et support sain. Hors remplacement, fabrication, reprise importante du mur ou finition de peinture.",
+tags:
+["plinthe",
+"recollage",
+"refixation",
+"réparation"]
 }),
 
 p("SOL-PONCAGE-PARQUET",
@@ -3268,6 +3311,29 @@ p("BRI-PORTE-REG",
 tags:
 ["porte",
 "réglage"]
+}),
+
+p("BRI-POIGNEE-PETITE-REP",
+"Bricolage / Menuiserie légère",
+"Resserrage / petite réparation de poignée ou quincaillerie",
+"u",
+0.2,
+[
+
+  "Resserrage ou remplacement d’une petite fixation accessible",
+
+  "Réglage et essai de fonctionnement",
+
+],
+{ conditions:
+"Pour réparation simple avec mécanisme existant conservé. Hors remplacement complet de poignée, serrure ou quincaillerie défectueuse.",
+tags:
+["poignée",
+"porte",
+"vis",
+"quincaillerie",
+"resserrage",
+"petite réparation"]
 }),
 
 p("BRI-RABOT",
