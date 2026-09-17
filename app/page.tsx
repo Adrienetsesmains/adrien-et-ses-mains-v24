@@ -11,7 +11,11 @@ import {
 
 import { supabase } from "./lib/supabaseClient";
 
-const VERSION_APPLICATION = "V25";
+const VERSION_APPLICATION = "V26";
+const CHEMIN_BANNIERE_V26 = "/banniere-v26.png";
+
+// Les clés V25 sont volontairement conservées : la V26 reprend ainsi toutes
+// les données, l'historique, les compteurs et les favoris sans migration risquée.
 const CLE_SAUVEGARDE_V25 = "tableauDeBordEntrepriseV25";
 const CLE_SAUVEGARDE_V24 = "tableauDeBordEntrepriseV24";
 const CLE_BACKUPS_V25 = "backupHistoriqueV25";
@@ -22,7 +26,7 @@ const CLE_BACKUPS_V24 = "backupHistoriqueV24";
 // Toute modification d’une prestation du catalogue actualise donc automatiquement les packs.
 const TARIFS_PRESTATIONS = TARIFS_PRESTATIONS_BASE;
 
-const PACKS_PRESTATIONS_V25 = [
+const PACKS_PRESTATIONS_V26 = [
   {
     id: "PACK-SDB-DOUCHE",
     nom: "Réfection d’un espace douche",
@@ -3286,7 +3290,7 @@ const ajouterPrestationAuDevis = (
 };
 
 const ajouterPackAuDevis = (idPack: string) => {
-  const pack = PACKS_PRESTATIONS_V25.find(
+  const pack = PACKS_PRESTATIONS_V26.find(
     (packDisponible) => packDisponible.id === idPack
   );
 
@@ -3634,6 +3638,23 @@ const ecart = totalAttendu - totalApres;
   return lignesAvecFrais.map((l) => [l.designation, l.montant]);
 };
 
+const chargerBanniereV26 = async () => {
+  const reponse = await fetch(CHEMIN_BANNIERE_V26);
+
+  if (!reponse.ok) {
+    throw new Error("Bannière V26 introuvable dans le dossier public.");
+  }
+
+  const fichier = await reponse.blob();
+
+  return new Promise<string>((resolve, reject) => {
+    const lecteur = new FileReader();
+    lecteur.onloadend = () => resolve(lecteur.result as string);
+    lecteur.onerror = () => reject(lecteur.error);
+    lecteur.readAsDataURL(fichier);
+  });
+};
+
 const genererPDF = async (type: "devis" | "facture") => {
   const doc = new jsPDF();
 
@@ -3697,7 +3718,7 @@ if (type === "facture" && !numeroFacture) {
 }
 
   let page = 1;
-let y = modeClient === "agence" || modeClient === "jeremie" ? 160 : 138;  
+  let y = 0;
 
   const enteteTableau = () => {
     doc.setFillColor(52, 63, 79);
@@ -3720,57 +3741,92 @@ let y = modeClient === "agence" || modeClient === "jeremie" ? 160 : 138;
   };
 
   const verifierPlace = (hauteur: number) => {
-    if (y + hauteur > 292) {
+    if (y + hauteur > 278) {
       nouvellePageTableau();
     }
   };
 
   try {
-    // Marge de sécurité pour les imprimantes qui ne peuvent pas imprimer à bord perdu.
-    // Le bandeau reste centré et conserve ses proportions sans rogner le SIRET ni le QR code.
-    doc.addImage("/Logo banderole.png", "PNG", 6, 5, 198, 39.6);
+    // Bannière finale 2026 : uniquement sur la première page, centrée,
+    // avec ses proportions d'origine pour ne déformer aucun élément.
+    const banniereV26 = await chargerBanniereV26();
+    const largeurBanniere = 190;
+    const hauteurBanniere = largeurBanniere * (762 / 2048);
+    doc.addImage(
+      banniereV26,
+      "PNG",
+      10,
+      7,
+      largeurBanniere,
+      hauteurBanniere,
+      "banniere-v26",
+      "FAST"
+    );
   } catch {
-    doc.setFontSize(18);
-    doc.text("Adrien et ses mains", 20, 20);
+    // Secours lisible si le fichier image n'a pas encore été copié dans /public.
+    doc.setFillColor(20, 57, 72);
+    doc.roundedRect(10, 7, 190, 32, 2, 2, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Adrien et ses mains", 105, 22, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Une personne de confiance pour votre maison", 105, 30, {
+      align: "center",
+    });
   }
 
-  doc.setFontSize(24);
-doc.text(titre, 105, 58, { align: "center" });
+// Cartouche du document sous la bannière.
+const yCartoucheDocument = 82;
+doc.setFillColor(20, 57, 72);
+doc.roundedRect(15, yCartoucheDocument, 180, 17, 2.5, 2.5, "F");
+doc.setFillColor(218, 164, 73);
+doc.rect(15, yCartoucheDocument, 4, 17, "F");
+
+doc.setTextColor(255, 255, 255);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(20);
+doc.text(titre, 25, yCartoucheDocument + 11.5);
+
+doc.setFontSize(10.5);
+doc.text(`N° ${numero}`, 188, yCartoucheDocument + 7, { align: "right" });
+doc.setFont("helvetica", "normal");
+doc.setFontSize(8.5);
+doc.text(
+  `Date : ${new Date().toLocaleDateString("fr-FR")}`,
+  188,
+  yCartoucheDocument + 13,
+  { align: "right" }
+);
+doc.setTextColor(0, 0, 0);
 
 if (type === "facture") {
   doc.setFontSize(10);
   doc.setTextColor(90, 90, 90);
-console.log("numeroDevis PDF =", numeroDevis);
 
   doc.text(
     `Facture établie suite au devis signé n° ${numeroDevis}`,
     105,
-    65,
+    105,
     { align: "center" }
   );
 
   doc.text(
     `Échéance de paiement : ${datePaiement || "À réception de facture"}`,
     105,
-    70,
+    110,
     { align: "center" }
   );
 
   doc.setTextColor(0, 0, 0);
 }
 
-doc.setDrawColor(190, 145, 55);
-doc.line(92, 60, 118, 60);
-
-  doc.setFontSize(11);
-  doc.text(`N° ${numero}`, 160, 58);
-  doc.text(`Date : ${new Date().toLocaleDateString("fr-FR")}`, 160, 66);
-
   // ================= CADRES CLIENT / CHANTIER PREMIUM PRESTIGE =================
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = 80;
+const yCadres = type === "facture" ? 116 : 106;
 
 const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
@@ -3981,7 +4037,8 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
 
   const hauteur = 4 + designationCoupe.length * 4 + detailCoupe.length * 3 + 2;
 
-  if (y + hauteur > 292) {
+  // Marge basse sûre : aucune ligne ne descend dans la zone non imprimable.
+  if (y + hauteur > 274) {
     doc.addPage();
     page += 1;
     y = 35;
@@ -4410,17 +4467,6 @@ doc.save(nomFichier);
 
 // ✅ crée aussi le PDF pour la pièce jointe mail
 const pdfBlob = doc.output("blob");
-
-return new Promise<string>((resolve) => {
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    const base64 = (reader.result as string).split(",")[1];
-    resolve(base64);
-  };
-
-  reader.readAsDataURL(pdfBlob);
-});
 
 return new Promise<string>((resolve) => {
   const reader = new FileReader();
@@ -5832,7 +5878,7 @@ return (
   <div className="mb-5 rounded-2xl border border-blue-200 bg-blue-50 p-4">
     <div className="mb-3">
       <p className="text-sm font-bold text-blue-900">
-        Packs de prestations V25
+        Packs de prestations V26
       </p>
       <p className="mt-1 text-xs text-blue-700">
         Les packs utilisent toujours les tarifs et les détails actuels du catalogue. Adapte les quantités au chantier après l’ajout.
@@ -5846,7 +5892,7 @@ return (
         className="w-full rounded-xl border border-blue-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800"
       >
         <option value="">Choisir un pack de prestations</option>
-        {PACKS_PRESTATIONS_V25.map((pack) => (
+        {PACKS_PRESTATIONS_V26.map((pack) => (
           <option key={pack.id} value={pack.id}>
             {pack.nom}
           </option>
@@ -5870,7 +5916,7 @@ return (
     {packSelectionne && (
       <p className="mt-3 text-xs text-slate-600">
         {
-          PACKS_PRESTATIONS_V25.find(
+          PACKS_PRESTATIONS_V26.find(
             (pack) => pack.id === packSelectionne
           )?.description
         }
