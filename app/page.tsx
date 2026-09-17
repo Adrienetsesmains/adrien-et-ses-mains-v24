@@ -3773,11 +3773,11 @@ if (type === "facture" && !numeroFacture) {
   };
 
   try {
-    // Bannière finale 2026 : uniquement sur la première page, centrée,
-    // avec ses proportions d'origine pour ne déformer aucun élément.
+    // Bannière finale 2026 : uniquement sur la première page, centrée.
+    // Hauteur corrigée pour rendre le cercle du logo réellement rond.
     const banniereV26 = await chargerBanniereV26();
     const largeurBanniere = 190;
-    const hauteurBanniere = largeurBanniere * (762 / 2048);
+    const hauteurBanniere = 62.5;
     doc.addImage(
       banniereV26,
       "JPEG",
@@ -3805,7 +3805,7 @@ if (type === "facture" && !numeroFacture) {
   }
 
 // Cartouche fin et léger sous la bannière.
-const yCartoucheDocument = 80.5;
+const yCartoucheDocument = 72;
 const hauteurCartoucheDocument = 9.5;
 
 doc.setFillColor(250, 248, 243);
@@ -3853,14 +3853,14 @@ if (type === "facture") {
   doc.text(
     `Facture établie suite au devis signé n° ${numeroDevis}`,
     105,
-    94.5,
+    86,
     { align: "center" }
   );
 
   doc.text(
     `Échéance de paiement : ${datePaiement || "À réception de facture"}`,
     105,
-    98.5,
+    90,
     { align: "center" }
   );
 
@@ -3871,13 +3871,13 @@ if (type === "facture") {
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = type === "facture" ? 103.5 : 94;
+const yCadres = type === "facture" ? 95 : 85.5;
 
 const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
 
 const hauteurEnteteCadre = 7.2;
-const interligne = 3.8;
+const interligne = 3.6;
 
 type LigneBloc = {
   label: string;
@@ -3903,24 +3903,29 @@ const dessinerCadreInfos = (
     valeur.replace(/[ \t]{2,}/g, "\n").trim();
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.1);
+  doc.setFontSize(8.2);
 
   // Largeur réellement disponible entre le début des valeurs
   // et la marge droite du cadre.
   const largeurTexte = largeur - decalageValeur - 5;
 
-  let hauteurTexte = 0;
+  let nombreLignesVisuelles = 0;
 
   lignesFiltrees.forEach((ligne) => {
     const valeurPreparee = preparerValeurPDF(ligne.valeur);
     const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
-    hauteurTexte += Math.max(1, texteCoupe.length) * interligne + 0.5;
+    nombreLignesVisuelles += Math.max(1, texteCoupe.length);
   });
+
+  // Calcul exact jusqu'à la dernière ligne, sans interligne ajouté dessous.
+  const hauteurTexte =
+    Math.max(0, nombreLignesVisuelles - 1) * interligne +
+    Math.max(0, lignesFiltrees.length - 1) * 0.3;
 
   // Cadre très compact tout en restant lisible à l'impression.
   const hauteurBloc = Math.max(
-    31.5,
-    hauteurEnteteCadre + 4 + hauteurTexte + 3
+    24,
+    hauteurEnteteCadre + 3.8 + hauteurTexte + 1.5
   );
 
   // Ombre très discrète.
@@ -3947,7 +3952,7 @@ const dessinerCadreInfos = (
   doc.setTextColor(255, 255, 255);
   doc.text(titre, x + 10, yDepart + 4.9);
 
-  let yTexte = yDepart + hauteurEnteteCadre + 4.8;
+  let yTexte = yDepart + hauteurEnteteCadre + 3.8;
 
   lignesFiltrees.forEach((ligne) => {
     // Repère de ligne minimaliste.
@@ -3956,7 +3961,7 @@ const dessinerCadreInfos = (
 
     // Label
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.1);
+    doc.setFontSize(8.2);
     doc.setTextColor(20, 57, 72);
     doc.text(`${ligne.label} :`, x + 9, yTexte);
 
@@ -3966,11 +3971,11 @@ const dessinerCadreInfos = (
     const nbLignes = Math.max(1, texteCoupe.length);
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.1);
+    doc.setFontSize(8.2);
     doc.setTextColor(35, 35, 35);
     doc.text(texteCoupe, x + decalageValeur, yTexte);
 
-    yTexte += nbLignes * interligne + 0.5;
+    yTexte += nbLignes * interligne + 0.3;
   });
 
   return hauteurBloc;
@@ -4262,14 +4267,13 @@ const conditionsPropresChantier = preparerListePDF(conditionsChantier);
 const hauteurListeConditions = (liste: string[]) =>
   liste.reduce((hauteur, ligne) => {
     const coupe = doc.splitTextToSize(ligne, 105);
-    return hauteur + coupe.length * 3.7 + 2;
+    return hauteur + coupe.length * 3.3 + 1.2;
   }, 0);
 
-// Le cadre conserve toujours sa hauteur d'origine de 72 mm.
-// Il grandit uniquement si les textes ajoutés ont besoin de plus de place.
+// Cadre fortement compacté par défaut, toujours extensible automatiquement.
 const hauteurConditions = Math.max(
-  72,
-  27 +
+  42,
+  15 +
     hauteurListeConditions(conditions) +
     (conditionsPropresChantier.length > 0
       ? 7 + hauteurListeConditions(conditionsPropresChantier)
@@ -4296,7 +4300,7 @@ doc.text("CONDITIONS PARTICULIERES ET PROTECTIONS CHANTIER", 25, yConditions + 8
 doc.setDrawColor(190, 145, 55);
 doc.line(25, yConditions + 12, 67, yConditions + 12);
 
-let cy = yConditions + 19;
+let cy = yConditions + 18;
 doc.setFont("helvetica", "normal");
 doc.setFontSize(8.2);
 doc.setTextColor(50, 50, 50);
@@ -4309,7 +4313,7 @@ conditions.forEach((ligne) => {
 
   const coupe = doc.splitTextToSize(ligne, 105);
   doc.text(coupe, 28, cy);
-  cy += coupe.length * 3.7 + 2;
+  cy += coupe.length * 3.3 + 1.2;
 });
 
 if (conditionsPropresChantier.length > 0) {
@@ -4332,7 +4336,7 @@ if (conditionsPropresChantier.length > 0) {
 
     const coupe = doc.splitTextToSize(ligne, 105);
     doc.text(coupe, 28, cy);
-    cy += coupe.length * 3.7 + 2;
+    cy += coupe.length * 3.3 + 1.2;
   });
 }
 
@@ -4340,25 +4344,25 @@ if (type === "devis" || type === "facture") {
   doc.setDrawColor(80);
   doc.line(
     140,
-    yConditions + 15,
+    yConditions + 12,
     140,
-    yConditions + hauteurConditions - 20
+    yConditions + hauteurConditions - 5
   );
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
- doc.text("Bon pour accord", 167, yConditions + 20, { align: "center" });
-doc.text("Date :        /        / 2026", 150, yConditions + 27);
+ doc.text("Bon pour accord", 167, yConditions + 15.5, { align: "center" });
+doc.text("Date :        /        / 2026", 150, yConditions + 21);
 
-doc.rect(148, yConditions + 31, 40, 13);
+doc.rect(148, yConditions + 25, 40, 8);
 
 doc.setFontSize(8);
-doc.text("Signature client", 168, yConditions + 50, { align: "center" });
+doc.text("Signature client", 168, yConditions + 37.5, { align: "center" });
 }
 
-// On repart après la hauteur réellement utilisée + 8 mm de marge.
-y = yConditions + hauteurConditions + 8;
+// On repart après la hauteur réellement utilisée + une marge courte.
+y = yConditions + hauteurConditions + 5;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
@@ -4371,7 +4375,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
     ibanCoupe.length +
     (ribBic ? 1 : 0);
 
-  const hauteurBlocRib = Math.max(36, 14 + nombreLignesRib * 6);
+  const hauteurBlocRib = Math.max(21.5, 6.3 + nombreLignesRib * 3.8);
 
   if (y + hauteurBlocRib > limiteBasseContenu) {
     doc.addPage();
@@ -4386,27 +4390,27 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
   doc.setTextColor(52, 63, 79);
-  doc.text("MODALITES DE PAIEMENT", 25, y + 8);
+  doc.text("MODALITES DE PAIEMENT", 25, y + 5.5);
 
   doc.setDrawColor(190, 145, 55);
-  doc.line(25, y + 11, 72, y + 11);
+  doc.line(25, y + 8, 72, y + 8);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(60, 60, 60);
 
-  doc.text("Règlement par virement bancaire :", 25, y + 19);
+  doc.text("Règlement par virement bancaire :", 25, y + 13.5);
 
   if (type === "devis") {
-    doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 25);
+    doc.text("Paiement selon les modalités indiquées sur le document.", 25, y + 17.8);
   } else {
-    doc.text("Paiement à réception de facture.", 25, y + 25);
+    doc.text("Paiement à réception de facture.", 25, y + 17.8);
   }
 
   doc.setDrawColor(220);
-  doc.line(102, y + 6, 102, y + hauteurBlocRib - 6);
+  doc.line(102, y + 4, 102, y + hauteurBlocRib - 4);
 
-  let ribY = y + 8;
+  let ribY = y + 5.5;
 
   doc.setFontSize(8.5);
   doc.setTextColor(0, 0, 0);
@@ -4416,7 +4420,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
     doc.text("Titulaire :", 108, ribY);
     doc.setFont("helvetica", "normal");
     doc.text(ribTitulaire, 132, ribY);
-    ribY += 6;
+    ribY += 3.8;
   }
 
   if (ribBanque) {
@@ -4424,7 +4428,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
     doc.text("Banque :", 108, ribY);
     doc.setFont("helvetica", "normal");
     doc.text(ribBanque, 132, ribY);
-    ribY += 6;
+    ribY += 3.8;
   }
 
   if (ribIban) {
@@ -4432,7 +4436,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
     doc.text("IBAN :", 108, ribY);
     doc.setFont("helvetica", "normal");
     doc.text(ibanCoupe, 132, ribY);
-    ribY += ibanCoupe.length * 6;
+    ribY += ibanCoupe.length * 3.8;
   }
 
   if (ribBic) {
@@ -4445,7 +4449,7 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "normal");
 
-  y += hauteurBlocRib + 4;
+  y += hauteurBlocRib + 3;
 }
 
 const totalPages = doc.getNumberOfPages();
