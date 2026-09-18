@@ -792,7 +792,7 @@ setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
 setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
 
 setAchatFournitures(b.achatFournitures ?? 0);
-setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
+setCoefficientFournitures(b.coefficientFournitures ?? 1.3);
 setFournituresClient(b.fournituresClient ?? true);
 setDetailsFournitures(b.detailsFournitures || "");
 setConditionsGeneralesDevis(
@@ -889,7 +889,7 @@ const appliquerSauvegardeComplete = (data: any) => {
     setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
 
     setAchatFournitures(b.achatFournitures ?? 0);
-    setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
+    setCoefficientFournitures(b.coefficientFournitures ?? 1.3);
     setFournituresClient(b.fournituresClient ?? true);
     setDetailsFournitures(b.detailsFournitures || "");
     setConditionsGeneralesDevis(
@@ -1068,7 +1068,7 @@ const [idDossierActuel, setIdDossierActuel] = useState<number | null>(null);
   const [fraisDeplacementManuelActif, setFraisDeplacementManuelActif] = useState(false);
 const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
   const [achatFournitures, setAchatFournitures] = useState(0);
-  const [coefficientFournitures, setCoefficientFournitures] = useState(1.22);
+  const [coefficientFournitures, setCoefficientFournitures] = useState(1.3);
   const [fournituresClient, setFournituresClient] = useState(true);
   const [detailsFournitures, setDetailsFournitures] = useState("");
   const [conditionsGeneralesDevis, setConditionsGeneralesDevis] = useState(
@@ -1161,7 +1161,7 @@ setFraisDeplacementManuelActif(b.fraisDeplacementManuelActif ?? false);
 setFraisDeplacementManuel(b.fraisDeplacementManuel ?? 0);
 
 setAchatFournitures(b.achatFournitures ?? 0);
-setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
+setCoefficientFournitures(b.coefficientFournitures ?? 1.3);
 setFournituresClient(b.fournituresClient ?? true);
 setDetailsFournitures(b.detailsFournitures || "");
 setConditionsGeneralesDevis(
@@ -1857,7 +1857,7 @@ setNumeroFacture("");
   setFraisDeplacementManuelActif(false);
 setFraisDeplacementManuel(0);
   setAchatFournitures(0);
-  setCoefficientFournitures(1.22);
+  setCoefficientFournitures(1.3);
   setFournituresClient(true);
   setDetailsFournitures("");
   setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
@@ -1932,7 +1932,7 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   setKmAller(0);
   setAchatFournitures(0);
   setFournituresClient(true);
-  setCoefficientFournitures(1.22);
+  setCoefficientFournitures(1.3);
   setDetailsFournitures("");
   setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
   setConditionsChantier("");
@@ -2262,7 +2262,7 @@ setFraisDeplacementManuel(
   d.fraisDeplacementManuel ?? 0
 );
 setAchatFournitures(d.achatFournitures ?? 0);
-setCoefficientFournitures(d.coefficientFournitures ?? 1.22);
+setCoefficientFournitures(d.coefficientFournitures ?? 1.3);
 setFournituresClient(d.fournituresClient ?? true);
 setDetailsFournitures(d.detailsFournitures || "");
 setConditionsGeneralesDevis(
@@ -2469,7 +2469,7 @@ const creerRappelDepuisCalendrier = (date: Date) => {
 
     kmAller: 0,
     achatFournitures: 0,
-    coefficientFournitures: 1.22,
+    coefficientFournitures: 1.3,
     fournituresClient: true,
     detailsFournitures: "",
     conditionsGeneralesDevis: "",
@@ -3408,7 +3408,7 @@ const reinitialiserApplicationComplete = () => {
   setFraisDeplacementManuelActif(false);
 setFraisDeplacementManuel(0);
   setAchatFournitures(0);
-  setCoefficientFournitures(1.22);
+  setCoefficientFournitures(1.3);
   setFournituresClient(true);
   setDetailsFournitures("");
   setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
@@ -3520,7 +3520,7 @@ setFraisDeplacementManuel(
   b.fraisDeplacementManuel ?? 0
 );
         setAchatFournitures(b.achatFournitures ?? 0);
-        setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
+        setCoefficientFournitures(b.coefficientFournitures ?? 1.3);
         setFournituresClient(b.fournituresClient ?? true);
         setDetailsFournitures(b.detailsFournitures || "");
         setConditionsGeneralesDevis(
@@ -6508,18 +6508,18 @@ return (
 <div className="flex gap-2 flex-wrap">
   <button
     type="button"
-    onClick={() => setCoefficientFournitures(1.22)}
+    onClick={() => setCoefficientFournitures(1.3)}
     className="px-3 py-1 rounded-lg bg-green-50 text-green-800 border border-green-200 text-xs font-semibold"
   >
-    x1.22
+    x1.30
   </button>
 
   <button
     type="button"
-    onClick={() => setCoefficientFournitures(1.4)}
+    onClick={() => setCoefficientFournitures(1.5)}
     className="px-3 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold"
   >
-    x1.4
+    x1.50
   </button>
 
   <button
@@ -6543,7 +6543,7 @@ return (
       </div>
 
       <p className="text-xs text-slate-500">
-        Minimum conseillé : coefficient 1.22. Idéal selon chantier : jusqu’à 1.6.
+        Minimum conseillé : coefficient 1.30. Marge renforcée : 1.50. Selon chantier : jusqu’à 1.60.
       </p>
     </div>
   )}
@@ -7688,7 +7688,7 @@ ${d.notes || ""}`,
 
       kmAller: 0,
       achatFournitures: 0,
-      coefficientFournitures: 1.22,
+      coefficientFournitures: 1.3,
       fournituresClient: true,
       detailsFournitures: "",
       conditionsGeneralesDevis: "",
@@ -8423,3 +8423,4 @@ function GraphiqueCourbe({
     </div>
   );
 }
+
