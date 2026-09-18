@@ -5171,14 +5171,6 @@ return (
     </div>
 
     <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-1 xl:grid-cols-[repeat(14,minmax(0,1fr))]">
-      <button onClick={envoyerCloud} className="btn-blue px-2 py-1 text-[11px]">
-        ☁️ Sauv. cloud
-      </button>
-
-      <button onClick={recupererCloud} className="btn-emerald px-2 py-1 text-[11px]">
-        📥 Charger
-      </button>
-
       <button
         onClick={() => {
           setFicheOuverte(true);
@@ -5244,6 +5236,20 @@ return (
         RAZ appli
       </button>
     </div>
+
+    <details className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
+      <summary className="cursor-pointer select-none text-[11px] font-semibold text-slate-500">
+        ⚙️ Secours cloud
+      </summary>
+      <div className="mt-1 grid grid-cols-2 gap-1">
+        <button onClick={envoyerCloud} className="btn-blue px-2 py-1 text-[11px]">
+          ☁️ Forcer la sauvegarde cloud
+        </button>
+        <button onClick={recupererCloud} className="btn-emerald px-2 py-1 text-[11px]">
+          📥 Forcer le chargement cloud
+        </button>
+      </div>
+    </details>
   </div>
 
   {/* VERSION TÉLÉPHONE */}
@@ -5294,20 +5300,6 @@ return (
       </button>
 
       <button
-        onClick={envoyerCloud}
-        className="rounded-md border border-blue-200 bg-blue-50 px-1 py-1 text-[10px] font-bold text-blue-800"
-      >   
-        Sauv.
-      </button>
-
-      <button
-        onClick={recupererCloud}
-        className="rounded-md border border-emerald-200 bg-emerald-50 px-1 py-1 text-[10px] font-bold text-emerald-800"
-      >
-        Charger
-      </button>
-
-      <button
         onClick={genererFicheChantier}
         className="rounded-md border border-violet-200 bg-violet-50 px-1 py-1 text-[10px] font-bold text-violet-800"
       >
@@ -5317,6 +5309,26 @@ return (
       
       
     </div>
+
+    <details className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">
+      <summary className="cursor-pointer select-none text-[10px] font-semibold text-slate-500">
+        ⚙️ Secours cloud
+      </summary>
+      <div className="mt-1 grid grid-cols-2 gap-1">
+        <button
+          onClick={envoyerCloud}
+          className="rounded-md border border-blue-200 bg-blue-50 px-1 py-1 text-[10px] font-bold text-blue-800"
+        >
+          Sauvegarder
+        </button>
+        <button
+          onClick={recupererCloud}
+          className="rounded-md border border-emerald-200 bg-emerald-50 px-1 py-1 text-[10px] font-bold text-emerald-800"
+        >
+          Charger
+        </button>
+      </div>
+    </details>
   </div>
 </div>
     <style jsx>{`
