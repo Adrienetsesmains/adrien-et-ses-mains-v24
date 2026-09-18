@@ -20,6 +20,8 @@ const CLE_SAUVEGARDE_V25 = "tableauDeBordEntrepriseV25";
 const CLE_SAUVEGARDE_V24 = "tableauDeBordEntrepriseV24";
 const CLE_BACKUPS_V25 = "backupHistoriqueV25";
 const CLE_BACKUPS_V24 = "backupHistoriqueV24";
+const CLE_DERNIERE_SYNCHRO_CLOUD_V26 = "derniereSynchronisationCloudV26";
+const CLE_DERNIERE_MODIFICATION_LOCALE_V26 = "derniereModificationLocaleV26";
 
 // Le catalogue officiel est l’unique source des temps, tarifs, unités et détails PDF.
 // Les packs ne conservent que des identifiants et des quantités de départ.
@@ -961,13 +963,14 @@ const envoyerDonneesCloud = async (
   data: any,
   afficherConfirmation = true
 ) => {
+  const dateSynchronisation = new Date().toISOString();
   const { error } = await supabase
     .from("dashboard_data")
     .upsert([
       {
         id: "global",
         data,
-        updated_at: new Date().toISOString(),
+        updated_at: dateSynchronisation,
       },
     ]);
 
@@ -980,6 +983,14 @@ const envoyerDonneesCloud = async (
   }
 
   localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(data));
+  localStorage.setItem(
+    CLE_DERNIERE_SYNCHRO_CLOUD_V26,
+    dateSynchronisation
+  );
+  localStorage.setItem(
+    CLE_DERNIERE_MODIFICATION_LOCALE_V26,
+    dateSynchronisation
+  );
 
   if (afficherConfirmation) {
     alert("✅ Données complètes envoyées au cloud");
@@ -1011,14 +1022,102 @@ const recupererCloud = async () => {
     return;
   }
 
+  applicationCloudEnCoursRef.current = true;
   appliquerSauvegardeComplete(data.data);
 
   localStorage.setItem(
     CLE_SAUVEGARDE_V25,
     JSON.stringify(data.data)
   );
+  const dateSynchronisation =
+    data.updated_at || new Date().toISOString();
+  localStorage.setItem(
+    CLE_DERNIERE_SYNCHRO_CLOUD_V26,
+    dateSynchronisation
+  );
+  localStorage.setItem(
+    CLE_DERNIERE_MODIFICATION_LOCALE_V26,
+    dateSynchronisation
+  );
+
+  window.setTimeout(() => {
+    applicationCloudEnCoursRef.current = false;
+  }, 300);
 
   alert("✅ Données complètes récupérées depuis le cloud");
+};
+
+const recupererCloudAutomatiquement = async () => {
+  if (synchronisationCloudEnCoursRef.current) return;
+
+  synchronisationCloudEnCoursRef.current = true;
+
+  try {
+    const { data, error } = await supabase
+      .from("dashboard_data")
+      .select("data, updated_at")
+      .eq("id", "global")
+      .single();
+
+    if (error || !data?.data) {
+      if (error) {
+        console.error("Erreur synchronisation automatique :", error);
+      }
+      return;
+    }
+
+    const dateCloud = data.updated_at || "";
+    const dateDerniereSynchro =
+      localStorage.getItem(CLE_DERNIERE_SYNCHRO_CLOUD_V26) || "";
+
+    if (
+      dateCloud &&
+      dateDerniereSynchro &&
+      new Date(dateCloud).getTime() <=
+        new Date(dateDerniereSynchro).getTime()
+    ) {
+      return;
+    }
+
+    const dateModificationLocale =
+      localStorage.getItem(CLE_DERNIERE_MODIFICATION_LOCALE_V26) || "";
+    const travailLocalNonSynchronise =
+      dateModificationLocale &&
+      (!dateDerniereSynchro ||
+        new Date(dateModificationLocale).getTime() >
+          new Date(dateDerniereSynchro).getTime());
+
+    if (travailLocalNonSynchronise) {
+      const chargerVersionCloud = window.confirm(
+        "Une version plus récente existe dans le cloud, mais cet appareil contient aussi des modifications non enregistrées.\n\nOK : charger la version cloud\nAnnuler : conserver le travail de cet appareil"
+      );
+
+      if (!chargerVersionCloud) return;
+    }
+
+    applicationCloudEnCoursRef.current = true;
+    appliquerSauvegardeComplete(data.data);
+    localStorage.setItem(
+      CLE_SAUVEGARDE_V25,
+      JSON.stringify(data.data)
+    );
+
+    const dateSynchronisation = dateCloud || new Date().toISOString();
+    localStorage.setItem(
+      CLE_DERNIERE_SYNCHRO_CLOUD_V26,
+      dateSynchronisation
+    );
+    localStorage.setItem(
+      CLE_DERNIERE_MODIFICATION_LOCALE_V26,
+      dateSynchronisation
+    );
+
+    window.setTimeout(() => {
+      applicationCloudEnCoursRef.current = false;
+    }, 300);
+  } finally {
+    synchronisationCloudEnCoursRef.current = false;
+  }
 };
 
   const importRef = useRef<HTMLInputElement | null>(null);
@@ -1132,6 +1231,9 @@ const [estAndroid, setEstAndroid] = useState(false);
 const [sauvegardesOuvertes, setSauvegardesOuvertes] = useState(false);
 const [detailsEncaissementsOuverts, setDetailsEncaissementsOuverts] = useState(false);
 const [listeBackups, setListeBackups] = useState<any[]>([]);
+const applicationCloudEnCoursRef = useRef(false);
+const synchronisationCloudEnCoursRef = useRef(false);
+const premiereSauvegardeLocaleRef = useRef(true);
 
 useEffect(() => {
   setEstAndroid(/Android/i.test(window.navigator.userAgent));
@@ -1250,6 +1352,30 @@ setTypeRdv(b.typeRdv || "visite");
   setSauvegardePrete(true);
 }, []);
 
+// Synchronisation automatique au démarrage et lorsque l'application revient
+// au premier plan. Les boutons manuels restent disponibles en secours.
+useEffect(() => {
+  if (!sauvegardePrete) return;
+
+  const synchroniserSiNecessaire = () => {
+    if (document.visibilityState === "visible") {
+      void recupererCloudAutomatiquement();
+    }
+  };
+
+  void recupererCloudAutomatiquement();
+  window.addEventListener("focus", synchroniserSiNecessaire);
+  document.addEventListener("visibilitychange", synchroniserSiNecessaire);
+
+  return () => {
+    window.removeEventListener("focus", synchroniserSiNecessaire);
+    document.removeEventListener(
+      "visibilitychange",
+      synchroniserSiNecessaire
+    );
+  };
+}, [sauvegardePrete]);
+
 // ================= FAVORIS PRESTATIONS V25 =================
 
 useEffect(() => {
@@ -1283,6 +1409,15 @@ useEffect(() => {
 
   const donnees = construireSauvegardeComplete();
   localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(donnees));
+
+  if (premiereSauvegardeLocaleRef.current) {
+    premiereSauvegardeLocaleRef.current = false;
+  } else if (!applicationCloudEnCoursRef.current) {
+    localStorage.setItem(
+      CLE_DERNIERE_MODIFICATION_LOCALE_V26,
+      new Date().toISOString()
+    );
+  }
 }, [
   sauvegardePrete,
   historique,
@@ -2206,33 +2341,28 @@ fraisDeplacementManuel:
     );
   }
 
-  if (estAndroid) {
-    const donneesAndroid = persisterImmediatement
-      ? { ...donneesAvecDossier, brouillon: null }
-      : donneesAvecDossier;
+  const donneesSynchronisees = persisterImmediatement
+    ? { ...donneesAvecDossier, brouillon: null }
+    : donneesAvecDossier;
 
-    void envoyerDonneesCloud(donneesAndroid, false).then((succes) => {
-      if (!silencieux) {
-        alert(
-          succes
-            ? estRdv
-              ? "✅ RDV enregistré et synchronisé pour l'ordinateur"
-              : estRappel
-              ? "✅ Rappel enregistré et synchronisé pour l'ordinateur"
-              : "✅ Dossier enregistré et synchronisé pour l'ordinateur"
-            : "⚠️ Dossier enregistré sur Android, mais la synchronisation cloud a échoué"
-        );
-      }
-    });
-  } else if (!silencieux) {
-    alert(
-      estRdv
-        ? "RDV enregistré"
-        : estRappel
-        ? "Rappel enregistré"
-        : "Dossier enregistré"
-    );
-  }
+  // Ordinateur et Android envoient désormais chaque enregistrement au cloud.
+  // L'autre appareil récupérera automatiquement cette version à l'ouverture
+  // ou dès qu'il reviendra au premier plan.
+  void envoyerDonneesCloud(donneesSynchronisees, false).then((succes) => {
+    if (!silencieux) {
+      alert(
+        succes
+          ? estRdv
+            ? "✅ RDV enregistré et synchronisé"
+            : estRappel
+            ? "✅ Rappel enregistré et synchronisé"
+            : "✅ Dossier enregistré et synchronisé"
+          : estAndroid
+          ? "⚠️ Dossier enregistré sur Android, mais la synchronisation cloud a échoué"
+          : "⚠️ Dossier enregistré sur l'ordinateur, mais la synchronisation cloud a échoué"
+      );
+    }
+  });
 };
 
 const enregistrer = () => {
