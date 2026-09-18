@@ -957,9 +957,10 @@ const appliquerSauvegardeComplete = (data: any) => {
   }
 };
 
-const envoyerCloud = async () => {
-  const data = construireSauvegardeComplete();
-
+const envoyerDonneesCloud = async (
+  data: any,
+  afficherConfirmation = true
+) => {
   const { error } = await supabase
     .from("dashboard_data")
     .upsert([
@@ -972,13 +973,24 @@ const envoyerCloud = async () => {
 
   if (error) {
     console.error("Erreur cloud :", error);
-    alert("❌ Erreur envoi cloud");
-    return;
+    if (afficherConfirmation) {
+      alert("❌ Erreur envoi cloud");
+    }
+    return false;
   }
 
   localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(data));
 
-  alert("✅ Données complètes envoyées au cloud");
+  if (afficherConfirmation) {
+    alert("✅ Données complètes envoyées au cloud");
+  }
+
+  return true;
+};
+
+const envoyerCloud = async () => {
+  const data = construireSauvegardeComplete();
+  await envoyerDonneesCloud(data, true);
 };
 
 const recupererCloud = async () => {
@@ -1116,9 +1128,14 @@ const [acompteManuel, setAcompteManuel] = useState(0);
 const [moisSelectionne, setMoisSelectionne] = useState(today.getMonth());
 const [anneeSelectionnee, setAnneeSelectionnee] = useState(today.getFullYear());
 const [sauvegardePrete, setSauvegardePrete] = useState(false);
+const [estAndroid, setEstAndroid] = useState(false);
 const [sauvegardesOuvertes, setSauvegardesOuvertes] = useState(false);
 const [detailsEncaissementsOuverts, setDetailsEncaissementsOuverts] = useState(false);
 const [listeBackups, setListeBackups] = useState<any[]>([]);
+
+useEffect(() => {
+  setEstAndroid(/Android/i.test(window.navigator.userAgent));
+}, []);
 
 useEffect(() => {
   if (!dateChantier) return;
@@ -2166,20 +2183,48 @@ fraisDeplacementManuel:
 
   setIdDossierActuel(idFinal);
 
-  if (persisterImmediatement) {
-    const donnees = construireSauvegardeComplete();
+  // Construction immédiate avec le dossier qui vient d'être enregistré.
+  // Cela évite d'envoyer au cloud l'ancien historique pendant que React
+  // termine encore la mise à jour de l'état local.
+  const donneesCourantes = construireSauvegardeComplete();
+  const donneesAvecDossier = {
+    ...donneesCourantes,
+    historique: historiqueMisAJour,
+    brouillon: {
+      ...donneesCourantes.brouillon,
+      idDossierActuel: idFinal,
+    },
+  };
 
+  if (persisterImmediatement) {
     localStorage.setItem(
       CLE_SAUVEGARDE_V25,
       JSON.stringify({
-        ...donnees,
-        historique: historiqueMisAJour,
+        ...donneesAvecDossier,
         brouillon: null,
       })
     );
   }
 
-  if (!silencieux) {
+  if (estAndroid) {
+    const donneesAndroid = persisterImmediatement
+      ? { ...donneesAvecDossier, brouillon: null }
+      : donneesAvecDossier;
+
+    void envoyerDonneesCloud(donneesAndroid, false).then((succes) => {
+      if (!silencieux) {
+        alert(
+          succes
+            ? estRdv
+              ? "✅ RDV enregistré et synchronisé pour l'ordinateur"
+              : estRappel
+              ? "✅ Rappel enregistré et synchronisé pour l'ordinateur"
+              : "✅ Dossier enregistré et synchronisé pour l'ordinateur"
+            : "⚠️ Dossier enregistré sur Android, mais la synchronisation cloud a échoué"
+        );
+      }
+    });
+  } else if (!silencieux) {
     alert(
       estRdv
         ? "RDV enregistré"
@@ -3717,6 +3762,15 @@ const chargerBanniereV26 = async () => {
 };
 
 const genererPDF = async (type: "devis" | "facture") => {
+  // Sur Android, aucun devis ni aucune facture ne doit être finalisé :
+  // pas de PDF et surtout aucune attribution de numéro.
+  if (estAndroid) {
+    alert(
+      "La création des PDF devis et factures est réservée à la version ordinateur. Le dossier Android reste enregistré sans numéro."
+    );
+    return "";
+  }
+
   const doc = new jsPDF();
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
@@ -5015,9 +5069,11 @@ return (
         Enregistrer
       </button>
 
-      <button onClick={() => genererPDF("devis")} className="btn-blue px-2 py-1 text-[11px]">
-        PDF devis
-      </button>
+      {!estAndroid && (
+        <button onClick={() => genererPDF("devis")} className="btn-blue px-2 py-1 text-[11px]">
+          PDF devis
+        </button>
+      )}
 
       <button
         onClick={genererFicheChantier}
@@ -5026,17 +5082,21 @@ return (
         Fiche chantier
       </button>
 
-      <button onClick={() => genererPDF("facture")} className="btn-emerald px-2 py-1 text-[11px]">
-        PDF facture
-      </button>
+      {!estAndroid && (
+        <>
+          <button onClick={() => genererPDF("facture")} className="btn-emerald px-2 py-1 text-[11px]">
+            PDF facture
+          </button>
 
-      <button onClick={envoyerDevisMail} className="btn-green px-2 py-1 text-[11px]">
-        Mail devis
-      </button>
+          <button onClick={envoyerDevisMail} className="btn-green px-2 py-1 text-[11px]">
+            Mail devis
+          </button>
 
-      <button onClick={envoyerFactureMail} className="btn-green px-2 py-1 text-[11px]">
-        Mail facture
-      </button>
+          <button onClick={envoyerFactureMail} className="btn-green px-2 py-1 text-[11px]">
+            Mail facture
+          </button>
+        </>
+      )}
 
      
       <button onClick={exporter} className="btn-purple px-2 py-1 text-[11px]">
@@ -5096,11 +5156,11 @@ return (
         Nouveau
       </button>
 
-<button
+      <button
         onClick={enregistrer}
         className="rounded-md border border-amber-200 bg-amber-50 px-1 py-1 text-[10px] font-bold text-amber-800"
       >
-        Enreg.
+        Enreg. ☁️
       </button>
 
       <button
@@ -5815,8 +5875,17 @@ return (
   value={montantEncaisse}
   onChange={setMontantEncaisse}
 />
-            <Input label="Numéro devis" value={numeroDevis} onChange={setNumeroDevis} />
-            <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
+            {!estAndroid ? (
+              <>
+                <Input label="Numéro devis" value={numeroDevis} onChange={setNumeroDevis} />
+                <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
+              </>
+            ) : (
+              <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                Mode Android : le dossier reste sans numéro. Le numéro du devis
+                ou de la facture sera attribué uniquement depuis l'ordinateur.
+              </p>
+            )}
 
    
             <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
