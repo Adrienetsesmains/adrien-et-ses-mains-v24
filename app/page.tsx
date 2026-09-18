@@ -332,6 +332,10 @@ heuresUniteManuel?: boolean;
   detailsPdfPersonnalises?: string[];
   detailsPdfOuvert?: boolean;
 
+  // Petite fourniture rattachée directement à cette prestation.
+  fournitureIncluse?: boolean;
+  prixFournitureInclus?: number;
+
   offert?: boolean;
 };
 
@@ -601,12 +605,24 @@ function champsTravaux(type: string) {
   return ["Q1", "Q2", "R1", "R2", "Option"];
 }
 function detailsTravaux(ligne: LigneTravaux): string[] {
+  const completerAvecFourniture = (details: string[]) => {
+    const detailsSansMentionAutomatique = details.filter(
+      (detail) => detail.trim().toLowerCase() !== "fournitures incluses"
+    );
+
+    return ligne.fournitureIncluse
+      ? [...detailsSansMentionAutomatique, "Fournitures incluses"]
+      : detailsSansMentionAutomatique;
+  };
+
   if (
     ligne.detailsPdfPersonnalises &&
     ligne.detailsPdfPersonnalises.length > 0 &&
     ligne.detailsPdfPersonnalises.some((d) => d.trim() !== "")
   ) {
-    return ligne.detailsPdfPersonnalises.filter((d) => d.trim() !== "");
+    return completerAvecFourniture(
+      ligne.detailsPdfPersonnalises.filter((d) => d.trim() !== "")
+    );
   }
 
   const tarifAssocie = TARIFS_PRESTATIONS.find(
@@ -614,11 +630,13 @@ function detailsTravaux(ligne: LigneTravaux): string[] {
   );
 
   if (tarifAssocie?.detailsPdf && tarifAssocie.detailsPdf.length > 0) {
-    return tarifAssocie.detailsPdf;
+    return completerAvecFourniture(tarifAssocie.detailsPdf);
   }
 
   if (tarifAssocie?.categorie && DETAILS_PDF_PAR_CATEGORIE[tarifAssocie.categorie]) {
-    return DETAILS_PDF_PAR_CATEGORIE[tarifAssocie.categorie];
+    return completerAvecFourniture(
+      DETAILS_PDF_PAR_CATEGORIE[tarifAssocie.categorie]
+    );
   }
 
   const d: string[] = [];
@@ -687,14 +705,14 @@ function detailsTravaux(ligne: LigneTravaux): string[] {
     if (ligne.option > 0) d.push("Accès et travail en hauteur");
   }
 
-  if (d.length > 0) return d;
+  if (d.length > 0) return completerAvecFourniture(d);
 
-  return [
+  return completerAvecFourniture([
     "Réalisation de la prestation prévue au devis",
     "Ajustements simples",
     "Finitions standards",
     "Nettoyage de fin d’intervention",
-  ];
+  ]);
 }
 function prixLigne(ligne: LigneTravaux, modeClient: string) {
   const c = modeClient === "jeremie" ? 190 / 220 : 1;
@@ -738,11 +756,21 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
     return 0;
   }
 
+  const montantFourniture = ligne.fournitureIncluse
+    ? Math.max(0, Number(ligne.prixFournitureInclus) || 0)
+    : 0;
+
+  let montantPrestation = 0;
+
   if (ligne.prixUnitaire) {
-    return Math.round(ligne.prixUnitaire * (ligne.q1 || 1));
+    montantPrestation = ligne.prixUnitaire * (ligne.q1 || 1);
+  } else {
+    montantPrestation = prixLigne(ligne, modeClient);
   }
 
-  return prixLigne(ligne, modeClient);
+  return (
+    Math.round((montantPrestation + montantFourniture) * 100) / 100
+  );
 }
   export default function Home() {
    const restaurerBackup = (index: number) => {
@@ -1734,6 +1762,8 @@ const ajouterLigne = () => {
     heuresUnite: 0,
     detailsPdfPersonnalises: [],
     detailsPdfOuvert: false,
+    fournitureIncluse: false,
+    prixFournitureInclus: 0,
     offert: false,
   };
 
@@ -1756,6 +1786,7 @@ const modifierLigne = (
         "r2",
         "option",
         "prixUnitaire",
+        "prixFournitureInclus",
         "heuresUnite",
       ];
 
@@ -3277,6 +3308,8 @@ const ajouterPrestationAuDevis = (
 
       detailsPdfPersonnalises: [...detailsBase],
       detailsPdfOuvert: false,
+      fournitureIncluse: false,
+      prixFournitureInclus: 0,
     },
   ]);
 
@@ -3330,6 +3363,8 @@ const ajouterPackAuDevis = (idPack: string) => {
         heuresUnite: prestation.heuresUnite || 0,
         detailsPdfPersonnalises: [...detailsBase],
         detailsPdfOuvert: false,
+        fournitureIncluse: false,
+        prixFournitureInclus: 0,
         offert: false,
       } as LigneTravaux;
     })
@@ -6329,7 +6364,7 @@ return (
       </p>
 
       <ul className="mt-2 space-y-1 text-sm text-slate-700">
-        {(ligne.detailsPdfPersonnalises || detailsTravaux(ligne)).map(
+        {detailsTravaux(ligne).map(
           (detail, detailIndex) => (
             <li key={detailIndex}>• {detail}</li>
           )
@@ -6396,6 +6431,44 @@ return (
                 </div>
               </>
             )}
+
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 space-y-3">
+              <Check
+                label="Inclure une fourniture dans cette prestation"
+                checked={ligne.fournitureIncluse || false}
+                onChange={(checked) =>
+                  setLignesTravaux((anciennesLignes) =>
+                    anciennesLignes.map((l) =>
+                      l.id === ligne.id
+                        ? { ...l, fournitureIncluse: checked }
+                        : l
+                    )
+                  )
+                }
+              />
+
+              {ligne.fournitureIncluse && (
+                <div className="rounded-lg border border-emerald-200 bg-white p-3 space-y-2">
+                  <NumberInput
+                    label="Montant de la fourniture à ajouter (€)"
+                    value={ligne.prixFournitureInclus || 0}
+                    onChange={(v) =>
+                      modifierLigne(
+                        ligne.id,
+                        "prixFournitureInclus",
+                        v
+                      )
+                    }
+                  />
+
+                  <p className="text-xs text-emerald-700">
+                    Ce montant est ajouté une seule fois au prix de la ligne.
+                    La mention « Fournitures incluses » apparaîtra automatiquement
+                    dans les sous-détails du devis.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="rounded-xl border bg-white p-4 space-y-2">
@@ -8423,4 +8496,3 @@ function GraphiqueCourbe({
     </div>
   );
 }
-
