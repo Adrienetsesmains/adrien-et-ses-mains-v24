@@ -18,9 +18,9 @@ number;
 prix220:
 number;
 
-// ConservÃ© uniquement pour compatibilitÃ© avec l'ancien code.
-// Le tarif JÃ©rÃ©mie rÃ©el est dÃ©sormais calculÃ© dans page.tsx
-// Ã  partir de prix220 Ã— 190 / 220.
+// Conservé uniquement pour compatibilité avec l'ancien code.
+// Le tarif Jérémie réel est désormais calculé dans page.tsx
+// à partir de prix220 × 190 / 220.
 
 prix190:
 number;
@@ -140,11 +140,11 @@ prix220,
 
   rentabilite:
 options.rentabilite
-?? "ðŸŸ¢ Base cohÃ©rente",
+?? "🟢 Base cohérente",
 
   action:
 options.action
-?? "Adapter au chantier si nÃ©cessaire",
+?? "Adapter au chantier si nécessaire",
 
   conditions:
 options.conditions
@@ -166,58 +166,58 @@ options.tags
 
 export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
-Nettoyage:
+"Nettoyage":
 [
 
-  "PrÃ©paration de la zone dâ€™intervention",
+  "Préparation de la zone d’intervention",
 
-  "Nettoyage des surfaces concernÃ©es",
+  "Nettoyage des surfaces concernées",
 
-  "ContrÃ´le et remise en ordre de fin dâ€™intervention",
+  "Contrôle et remise en ordre de fin d’intervention",
 
 ],
 
-DÃ©barras:
+"Débarras":
 [
-  "RepÃ©rage des Ã©lÃ©ments concernÃ©s ; manutention et tri si nÃ©cessaire.",
-  "Ã‰vacuation prÃ©vue au devis.",
+  "Repérage des éléments concernés ; manutention et tri si nécessaire.",
+  "Évacuation prévue au devis.",
   "Nettoyage sommaire de la zone.",
 ],
 
-Sols:
+"Sols":
 [
-  "ContrÃ´le du support existant ; prÃ©paration prÃ©vue au devis.",
-  "Pose et dÃ©coupes courantes.",
-  "Ajustements et finitions pÃ©riphÃ©riques.",
+  "Contrôle du support existant ; préparation prévue au devis.",
+  "Pose et découpes courantes.",
+  "Ajustements et finitions périphériques.",
 ],
 
-"Carrelage / FaÃ¯ence":
+"Carrelage / Faïence":
 [
-  "ContrÃ´le et prÃ©paration du support ; implantation et pose du revÃªtement.",
-  "DÃ©coupes et ajustements courants.",
-  "Finitions prÃ©vues au devis.",
+  "Contrôle et préparation du support ; implantation et pose du revêtement.",
+  "Découpes et ajustements courants.",
+  "Finitions prévues au devis.",
 ],
 
-Peinture:
+"Peinture":
 [
-  "Protection de la zone dâ€™intervention ; prÃ©paration du support selon son Ã©tat.",
-  "Application des produits prÃ©vus.",
-  "RÃ©alisation des finitions courantes.",
+  "Protection de la zone d’intervention ; préparation du support selon son état.",
+  "Application des produits prévus.",
+  "Réalisation des finitions courantes.",
 ],
 
-DÃ©co:
+"Déco":
 [
-  "PrÃ©paration du support ; pose ou dÃ©pose du revÃªtement prÃ©vu.",
-  "DÃ©coupes et ajustements courants.",
-  "Nettoyage de fin dâ€™intervention.",
+  "Préparation du support ; pose ou dépose du revêtement prévu.",
+  "Découpes et ajustements courants.",
+  "Nettoyage de fin d’intervention.",
 ],
 
-Placo:
+"Placo":
 [
 
-  "ContrÃ´le de la zone dâ€™intervention",
+  "Contrôle de la zone d’intervention",
 
-  "Pose ou reprise des Ã©lÃ©ments prÃ©vus",
+  "Pose ou reprise des éléments prévus",
 
   "Ajustements et finitions courantes",
 
@@ -225,92 +225,92 @@ Placo:
 
 "Plomberie / Sanitaires":
 [
-  "DÃ©pose si prÃ©vue au devis ; pose ou remplacement de lâ€™Ã©quipement.",
+  "Dépose si prévue au devis ; pose ou remplacement de l’équipement.",
   "Raccordement sur installation existante accessible.",
-  "ContrÃ´le dâ€™Ã©tanchÃ©itÃ© et de fonctionnement.",
+  "Contrôle d’étanchéité et de fonctionnement.",
 ],
 
-Ã‰lectricitÃ©:
+"Électricité":
 [
-  "Mise en sÃ©curitÃ© de lâ€™intervention ; pose ou remplacement sur installation existante.",
+  "Mise en sécurité de l’intervention ; pose ou remplacement sur installation existante.",
   "Raccordement courant.",
   "Essai de fonctionnement.",
 ],
 
-Chauffage:
+"Chauffage":
 [
-  "DÃ©pose de lâ€™Ã©quipement existant si prÃ©vue ; pose et fixation du nouvel Ã©quipement.",
+  "Dépose de l’équipement existant si prévue ; pose et fixation du nouvel équipement.",
   "Raccordement sur installation existante.",
   "Essai de fonctionnement.",
 ],
 
-Ventilation:
+"Ventilation":
 [
-  "ContrÃ´le de lâ€™installation existante ; dÃ©pose si nÃ©cessaire.",
-  "Pose ou remplacement de lâ€™Ã©lÃ©ment prÃ©vu.",
+  "Contrôle de l’installation existante ; dépose si nécessaire.",
+  "Pose ou remplacement de l’élément prévu.",
   "Essai de fonctionnement.",
 ],
 
-Cuisine:
+"Cuisine":
 [
-  "Implantation de lâ€™Ã©lÃ©ment concernÃ© ; montage ou pose prÃ©vue au devis.",
-  "DÃ©coupes et ajustements courants.",
-  "ContrÃ´le des fixations et finitions.",
+  "Implantation de l’élément concerné ; montage ou pose prévue au devis.",
+  "Découpes et ajustements courants.",
+  "Contrôle des fixations et finitions.",
 ],
 
-"Bricolage / Menuiserie lÃ©gÃ¨re":
+"Bricolage / Menuiserie légère":
 [
-  "RepÃ©rage et prÃ©paration ; montage, pose, rÃ©glage ou rÃ©paration prÃ©vue.",
+  "Repérage et préparation ; montage, pose, réglage ou réparation prévue.",
   "Ajustements courants.",
-  "ContrÃ´le final.",
+  "Contrôle final.",
 ],
 
 "Terrasse bois":
 [
-  "Protection et prÃ©paration de la zone dâ€™intervention ; dÃ©pose des Ã©lÃ©ments prÃ©vus au devis.",
-  "ContrÃ´le du support et de la structure existante ; pose, dÃ©coupes et ajustements des lames.",
-  "Finitions pÃ©riphÃ©riques prÃ©vues au devis.",
+  "Protection et préparation de la zone d’intervention ; dépose des éléments prévus au devis.",
+  "Contrôle du support et de la structure existante ; pose, découpes et ajustements des lames.",
+  "Finitions périphériques prévues au devis.",
 ],
 
-Ã‰quipement:
+"Équipement":
 [
-  "PrÃ©paration de lâ€™emplacement ; mise en place de lâ€™Ã©quipement.",
-  "Raccordement standard si prÃ©vu.",
+  "Préparation de l’emplacement ; mise en place de l’équipement.",
+  "Raccordement standard si prévu.",
   "Essai de fonctionnement.",
 ],
 
-"ExtÃ©rieur / MÃ©tal":
+"Extérieur / Métal":
 [
-  "PrÃ©paration de la zone dâ€™intervention ; contrÃ´le du support existant.",
-  "RÃ©alisation de lâ€™intervention prÃ©vue.",
+  "Préparation de la zone d’intervention ; contrôle du support existant.",
+  "Réalisation de l’intervention prévue.",
   "Ajustements et finitions courantes.",
 ],
 
-"ExtÃ©rieur / ClÃ´ture":
+"Extérieur / Clôture":
 [
-  "Implantation et contrÃ´le des supports existants ; pose et fixation des Ã©lÃ©ments de clÃ´ture prÃ©vus.",
-  "DÃ©coupes, adaptations et rÃ©glages courants.",
-  "ContrÃ´le des fixations et nettoyage de fin dâ€™intervention.",
+  "Implantation et contrôle des supports existants ; pose et fixation des éléments de clôture prévus.",
+  "Découpes, adaptations et réglages courants.",
+  "Contrôle des fixations et nettoyage de fin d’intervention.",
 ],
 
-"Toiture lÃ©gÃ¨re":
+"Toiture légère":
 [
-  "ContrÃ´le visuel de la zone accessible ; intervention ponctuelle prÃ©vue au devis.",
+  "Contrôle visuel de la zone accessible ; intervention ponctuelle prévue au devis.",
   "Ajustements et finitions courantes.",
-  "Hors travaux structurels et rÃ©fection complÃ¨te.",
+  "Hors travaux structurels et réfection complète.",
 ],
 
-Jardin:
+"Jardin":
 [
-  "PrÃ©paration de la zone ; rÃ©alisation de lâ€™entretien prÃ©vu.",
-  "Ramassage si prÃ©vu.",
-  "Nettoyage sommaire de fin dâ€™intervention.",
+  "Préparation de la zone ; réalisation de l’entretien prévu.",
+  "Ramassage si prévu.",
+  "Nettoyage sommaire de fin d’intervention.",
 ],
 
-"DÃ©placement / logistique":
+"Déplacement / logistique":
 [
 
-  "DÃ©placement aller-retour chantier",
+  "Déplacement aller-retour chantier",
 
   "Temps et organisation logistique",
 
@@ -322,20 +322,20 @@ export const TARIFS_PRESTATIONS: PrestationTarif[] = [
 // ================= NETTOYAGE =================
 p("NET-FIN-CHANTIER",
 "Nettoyage",
-"Nettoyage de fin de chantier / remise en Ã©tat",
-"mÂ²",
+"Nettoyage de fin de chantier / remise en état",
+"m²",
 0.06,
 [
 
-  "DÃ©poussiÃ©rage et nettoyage des surfaces accessibles",
+  "Dépoussiérage et nettoyage des surfaces accessibles",
 
-  "Nettoyage courant des sols et Ã©quipements concernÃ©s",
+  "Nettoyage courant des sols et équipements concernés",
 
-  "ContrÃ´le et remise en ordre de la zone",
+  "Contrôle et remise en ordre de la zone",
 
 ],
 { conditions:
-"Hors gros gravats et nettoyage spÃ©cialisÃ©. Minimum chantier applicable.",
+"Hors gros gravats et nettoyage spécialisé. Minimum chantier applicable.",
 tags:
 ["nettoyage",
 "fin chantier"]
@@ -344,17 +344,17 @@ tags:
 p("NET-VITRAGE",
 "Nettoyage",
 "Nettoyage de vitrages",
-"mÂ²",
+"m²",
 0.05,
 [
 
-  "Nettoyage des faces accessibles prÃ©vues au devis",
+  "Nettoyage des faces accessibles prévues au devis",
 
-  "Essuyage et contrÃ´le visuel de finition",
+  "Essuyage et contrôle visuel de finition",
 
 ],
 { conditions:
-"Hors travail en hauteur ou accÃ¨s nÃ©cessitant un moyen spÃ©cifique.",
+"Hors travail en hauteur ou accès nécessitant un moyen spécifique.",
 tags:
 ["vitre",
 "vitrage"]
@@ -362,78 +362,78 @@ tags:
 
 p("NET-LOGEMENT",
 "Nettoyage",
-"Nettoyage / mÃ©nage de logement",
+"Nettoyage / ménage de logement",
 "h",
 1,
 [
 
-  "Entretien courant des surfaces prÃ©vues",
+  "Entretien courant des surfaces prévues",
 
-  "Nettoyage des Ã©quipements accessibles",
+  "Nettoyage des équipements accessibles",
 
-  "Remise en ordre de fin dâ€™intervention",
+  "Remise en ordre de fin d’intervention",
 
 ],
 { conditions:
-"Temps minimum et niveau de remise en Ã©tat Ã  prÃ©ciser selon le logement.",
+"Temps minimum et niveau de remise en état à préciser selon le logement.",
 tags:
-["mÃ©nage",
+["ménage",
 "logement"]
 }),
 
 p("NET-EQUIPEMENT-LOCAL",
 "Nettoyage",
-"Nettoyage localisÃ© dâ€™un Ã©quipement intÃ©rieur",
+"Nettoyage localisé d’un équipement intérieur",
 "u",
 0.3,
 [
 
   "Nettoyage manuel des salissures sur les surfaces accessibles",
 
-  "Essuyage et contrÃ´le visuel de finition",
+  "Essuyage et contrôle visuel de finition",
 
 ],
 { conditions:
-"Pour une intervention localisÃ©e sur un Ã©quipement existant. Hors dÃ©montage, dÃ©capage, traitement spÃ©cialisÃ© ou remise en peinture.",
+"Pour une intervention localisée sur un équipement existant. Hors démontage, décapage, traitement spécialisé ou remise en peinture.",
 tags:
 ["nettoyage",
-"Ã©quipement",
+"équipement",
 "radiateur",
 "salissures",
 "entretien"]
 }),
 // ================= DEBARRAS =================
 p("DEB-ENCOMBRANTS",
-"DÃ©barras",
-"DÃ©barras et manutention dâ€™encombrants",
-"mÂ³",
+"Débarras",
+"Débarras et manutention d’encombrants",
+"m³",
 0.5,
 [
 
-  "Manutention des encombrants prÃ©vus au devis",
+  "Manutention des encombrants prévus au devis",
 
   "Regroupement et chargement",
 
 ],
 { conditions:
-"AccÃ¨s, Ã©tages, poids et volume Ã  contrÃ´ler avant devis. Hors frais de dÃ©chÃ¨terie.",
+"Accès, étages, poids et volume à contrôler avant devis. Hors frais de déchèterie.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["dÃ©barras",
+["débarras",
 "encombrants"]
 }),
 
 p("DEB-TRI",
-"DÃ©barras",
+"Débarras",
 "Tri et mise en sac",
 "h",
 1,
 [
 
-  "Tri des dÃ©chets ou Ã©lÃ©ments concernÃ©s",
+  "Tri des déchets ou éléments concernés",
 
-  "Mise en sacs ou regroupement pour Ã©vacuation",
+  "Mise en sacs ou regroupement pour évacuation",
 
 ],
 { tags:
@@ -442,17 +442,17 @@ p("DEB-TRI",
 }),
 
 p("DEB-DECHETTERIE",
-"DÃ©barras",
-"Transport / Ã©vacuation en dÃ©chÃ¨terie",
+"Débarras",
+"Transport / évacuation en déchèterie",
 "forfait",
 2.5,
 [
 
-  "Chargement des dÃ©chets prÃ©parÃ©s",
+  "Chargement des déchets préparés",
 
-  "Transport vers une filiÃ¨re adaptÃ©e",
+  "Transport vers une filière adaptée",
 
-  "DÃ©chargement et retour",
+  "Déchargement et retour",
 
 ],
 { prixFixe:
@@ -460,102 +460,102 @@ p("DEB-DECHETTERIE",
 conditions:
 "Forfait de base hors frais exceptionnels de traitement et hors volume important.",
 rentabilite:
-"ðŸŸ  Ã€ adapter",
+"🟠 À adapter",
 typeTravaux:
 "deplacement",
 tags:
-["dÃ©chÃ¨terie",
+["déchèterie",
 "transport"]
 }),
 
 p("DEB-GRAVATS",
-"DÃ©barras",
-"Manutention et Ã©vacuation de gravats",
-"mÂ³",
+"Débarras",
+"Manutention et évacuation de gravats",
+"m³",
 2.5,
 [
 
   "Manutention et chargement des gravats",
 
-  "Ã‰vacuation vers une filiÃ¨re adaptÃ©e",
+  "Évacuation vers une filière adaptée",
 
 ], { prixFixe: 80,
-conditions: "Prix indicatif par mÂ³ Ã  ajuster selon poids, accÃ¨s, distance et coÃ»t de traitement.", rentabilite:
-"ðŸŸ  Ã€ adapter", tags:
-["gravats", "Ã©vacuation"]
+conditions: "Prix indicatif par m³ à ajuster selon poids, accès, distance et coût de traitement.", rentabilite:
+"🟠 À adapter", tags:
+["gravats", "évacuation"]
 }),
 // ================= SOLS =================
 p("SOL-DEPOSE",
 "Sols",
-"DÃ©pose dâ€™un revÃªtement de sol souple ou flottant",
-"mÂ²",
+"Dépose d’un revêtement de sol souple ou flottant",
+"m²",
 0.14,
 [
 
-  "DÃ©pose du revÃªtement existant",
+  "Dépose du revêtement existant",
 
-  "Retrait des Ã©lÃ©ments non adhÃ©rents accessibles",
+  "Retrait des éléments non adhérents accessibles",
 
-  "Regroupement des dÃ©chets",
+  "Regroupement des déchets",
 
 ],
 { conditions:
-"Hors dÃ©pose collÃ©e difficile et hors Ã©vacuation en dÃ©chÃ¨terie.",
+"Hors dépose collée difficile et hors évacuation en déchèterie.",
 tags:
 ["sol",
-"dÃ©pose"]
+"dépose"]
 }),
 
 p("SOL-PREP-MECA",
 "Sols",
-"PrÃ©paration mÃ©canique dâ€™un support de sol",
-"mÂ²",
+"Préparation mécanique d’un support de sol",
+"m²",
 0.18,
 [
 
-  "Grattage ou ponÃ§age localisÃ© du support",
+  "Grattage ou ponçage localisé du support",
 
-  "Retrait des rÃ©sidus non adhÃ©rents",
+  "Retrait des résidus non adhérents",
 
-  "Aspiration et prÃ©paration avant finition",
+  "Aspiration et préparation avant finition",
 
 ],
 { conditions:
-"Niveau de prÃ©paration Ã  adapter Ã  lâ€™Ã©tat rÃ©el du support.",
+"Niveau de préparation à adapter à l’état réel du support.",
 tags:
 ["sol",
-"prÃ©paration",
-"ponÃ§age",
+"préparation",
+"ponçage",
 "colle"]
 }),
 
 p("SOL-RAGREAGE",
 "Sols",
-"RagrÃ©age autolissant du support",
-"mÂ²",
+"Ragréage autolissant du support",
+"m²",
 0.22,
 [
-  "ContrÃ´le et dÃ©poussiÃ©rage du support ; application du primaire adaptÃ© si prÃ©vu.",
-  "Mise en Å“uvre du ragrÃ©age autolissant.",
-  "ContrÃ´le de la planÃ©itÃ© aprÃ¨s sÃ©chage.",
+  "Contrôle et dépoussiérage du support ; application du primaire adapté si prévu.",
+  "Mise en œuvre du ragréage autolissant.",
+  "Contrôle de la planéité après séchage.",
 ],
 { conditions:
-"Ã‰paisseur courante. Hors reprise structurelle, forte Ã©paisseur ou support trÃ¨s dÃ©gradÃ©.",
+"Épaisseur courante. Hors reprise structurelle, forte épaisseur ou support très dégradé.",
 tags:
-["ragrÃ©age",
+["ragréage",
 "sol"]
 }),
 
 p("SOL-SOUS-COUCHE",
 "Sols",
-"Pose dâ€™une sous-couche / pare-vapeur",
-"mÂ²",
+"Pose d’une sous-couche / pare-vapeur",
+"m²",
 0.06,
 [
 
-  "DÃ©roulage et pose de la sous-couche",
+  "Déroulage et pose de la sous-couche",
 
-  "DÃ©coupes et raccords courants",
+  "Découpes et raccords courants",
 
 ],
 { tags:
@@ -565,50 +565,50 @@ p("SOL-SOUS-COUCHE",
 
 p("SOL-FLOTTANT",
 "Sols",
-"Pose dâ€™un revÃªtement de sol flottant",
-"mÂ²",
+"Pose d’un revêtement de sol flottant",
+"m²",
 0.22,
 [
-  "Implantation du sens de pose ; pose flottante du revÃªtement.",
-  "DÃ©coupes et jeux pÃ©riphÃ©riques.",
+  "Implantation du sens de pose ; pose flottante du revêtement.",
+  "Découpes et jeux périphériques.",
   "Finitions courantes.",
 ],
 { conditions:
-"Support prÃªt. Minimum chantier applicable pour petite surface.",
+"Support prêt. Minimum chantier applicable pour petite surface.",
 tags:
 ["parquet",
-"stratifiÃ©",
+"stratifié",
 "flottant"]
 }),
 
 p("SOL-PARQUET-COLLE",
 "Sols",
-"Pose dâ€™un parquet massif collÃ©",
-"mÂ²",
+"Pose d’un parquet massif collé",
+"m²",
 0.45,
 [
 
-  "Implantation et prÃ©paration de la pose",
+  "Implantation et préparation de la pose",
 
   "Encollage et pose du parquet",
 
-  "DÃ©coupes et ajustements pÃ©riphÃ©riques",
+  "Découpes et ajustements périphériques",
 
 ],
 { conditions:
-"Support prÃªt et compatible. Hors fourniture de colle et reprise du support.",
+"Support prêt et compatible. Hors fourniture de colle et reprise du support.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["parquet",
 "massif",
-"collÃ©"]
+"collé"]
 }),
 
 p("SOL-PVC-CLIP",
 "Sols",
-"Pose dâ€™un sol PVC clipsable",
-"mÂ²",
+"Pose d’un sol PVC clipsable",
+"m²",
 0.25,
 [
 
@@ -616,11 +616,11 @@ p("SOL-PVC-CLIP",
 
   "Pose des lames ou dalles clipsables",
 
-  "DÃ©coupes et ajustements pÃ©riphÃ©riques",
+  "Découpes et ajustements périphériques",
 
 ],
 { conditions:
-"Support prÃªt. Hors ragrÃ©age.",
+"Support prêt. Hors ragréage.",
 tags:
 ["PVC",
 "vinyle",
@@ -629,58 +629,58 @@ tags:
 
 p("SOL-PVC-COLLE",
 "Sols",
-"Pose dâ€™un sol PVC collÃ©",
-"mÂ²",
+"Pose d’un sol PVC collé",
+"m²",
 0.3,
 [
-  "Implantation du revÃªtement ; encollage et pose.",
-  "DÃ©coupes et marouflage.",
-  "Finitions pÃ©riphÃ©riques.",
+  "Implantation du revêtement ; encollage et pose.",
+  "Découpes et marouflage.",
+  "Finitions périphériques.",
 ],
 { conditions:
-"Support plan, propre et prÃªt. Hors ragrÃ©age.",
+"Support plan, propre et prêt. Hors ragréage.",
 tags:
 ["PVC",
 "vinyle",
-"collÃ©"]
+"collé"]
 }),
 
 p("SOL-MOQUETTE",
 "Sols",
-"Pose dâ€™une moquette",
-"mÂ²",
+"Pose d’une moquette",
+"m²",
 0.2,
 [
 
-  "Implantation et dÃ©coupe du revÃªtement",
+  "Implantation et découpe du revêtement",
 
-  "Pose selon le systÃ¨me prÃ©vu",
+  "Pose selon le système prévu",
 
-  "Finitions pÃ©riphÃ©riques",
+  "Finitions périphériques",
 
 ],
 { conditions:
-"Support prÃªt. Hors prÃ©paration lourde.",
+"Support prêt. Hors préparation lourde.",
 tags:
 ["moquette"]
 }),
 
 p("SOL-ROULEAU",
 "Sols",
-"Pose dâ€™un revÃªtement souple en rouleau",
-"mÂ²",
+"Pose d’un revêtement souple en rouleau",
+"m²",
 0.22,
 [
 
-  "Implantation et dÃ©coupe du revÃªtement",
+  "Implantation et découpe du revêtement",
 
   "Pose et ajustement",
 
-  "Finitions pÃ©riphÃ©riques",
+  "Finitions périphériques",
 
 ],
 { conditions:
-"Support prÃªt. Hors prÃ©paration lourde.",
+"Support prêt. Hors préparation lourde.",
 tags:
 ["lino",
 "rouleau",
@@ -689,23 +689,23 @@ tags:
 
 p("SOL-PLINTHE-DEPOSE",
 "Sols",
-"DÃ©pose de plinthes existantes",
+"Dépose de plinthes existantes",
 "ml",
 0.08,
 [
 
-  "DÃ©pose soignÃ©e des plinthes existantes",
+  "Dépose soignée des plinthes existantes",
 
-  "Retrait des rÃ©sidus de fixation non adhÃ©rents",
+  "Retrait des résidus de fixation non adhérents",
 
-  "Regroupement des Ã©lÃ©ments dÃ©posÃ©s",
+  "Regroupement des éléments déposés",
 
 ],
 { conditions:
-"Hors rÃ©paration importante du support et hors Ã©vacuation en dÃ©chÃ¨terie.",
+"Hors réparation importante du support et hors évacuation en déchèterie.",
 tags:
 ["plinthe",
-"dÃ©pose"]
+"dépose"]
 }),
 
 p("SOL-PLINTHE-BOIS",
@@ -715,7 +715,7 @@ p("SOL-PLINTHE-BOIS",
 0.13,
 [
 
-  "Mesure et dÃ©coupe des plinthes",
+  "Mesure et découpe des plinthes",
 
   "Pose et fixation",
 
@@ -733,16 +733,16 @@ tags:
 
 p("SOL-PLINTHE-CARR",
 "Sols",
-"Pose de plinthes carrelÃ©es",
+"Pose de plinthes carrelées",
 "ml",
 0.26,
 [
 
-  "DÃ©coupe et implantation des plinthes",
+  "Découpe et implantation des plinthes",
 
-  "Pose collÃ©e",
+  "Pose collée",
 
-  "RÃ©alisation des joints courants",
+  "Réalisation des joints courants",
 
 ],
 { tags:
@@ -757,57 +757,57 @@ p("SOL-PLINTHE-REFIX",
 0.25,
 [
 
-  "Nettoyage localisÃ© des surfaces de collage accessibles",
+  "Nettoyage localisé des surfaces de collage accessibles",
 
-  "Recollage, maintien et contrÃ´le de la fixation",
+  "Recollage, maintien et contrôle de la fixation",
 
 ],
 { conditions:
-"Pour plinthes existantes rÃ©utilisables et support sain. Hors remplacement, fabrication, reprise importante du mur ou finition de peinture.",
+"Pour plinthes existantes réutilisables et support sain. Hors remplacement, fabrication, reprise importante du mur ou finition de peinture.",
 tags:
 ["plinthe",
 "recollage",
 "refixation",
-"rÃ©paration"]
+"réparation"]
 }),
 
 p("SOL-PONCAGE-PARQUET",
 "Sols",
-"PonÃ§age dâ€™un parquet bois",
-"mÂ²",
+"Ponçage d’un parquet bois",
+"m²",
 0.25,
 [
 
-  "PonÃ§age mÃ©canique du parquet",
+  "Ponçage mécanique du parquet",
 
-  "Passes adaptÃ©es Ã  lâ€™Ã©tat du bois",
+  "Passes adaptées à l’état du bois",
 
-  "Aspiration des poussiÃ¨res",
+  "Aspiration des poussières",
 
 ],
 { conditions:
-"Location de matÃ©riel spÃ©cifique et abrasifs Ã  chiffrer sÃ©parÃ©ment si nÃ©cessaire.",
+"Location de matériel spécifique et abrasifs à chiffrer séparément si nécessaire.",
 tags:
 ["parquet",
-"ponÃ§age"]
+"ponçage"]
 }),
 
 p("SOL-FINITION-PARQUET",
 "Sols",
-"Application dâ€™une finition sur parquet",
-"mÂ²",
+"Application d’une finition sur parquet",
+"m²",
 0.18,
 [
 
-  "PrÃ©paration lÃ©gÃ¨re avant finition",
+  "Préparation légère avant finition",
 
-  "Application de la finition prÃ©vue",
+  "Application de la finition prévue",
 
-  "Ã‰grenage intermÃ©diaire si nÃ©cessaire",
+  "Égrenage intermédiaire si nécessaire",
 
 ],
 { conditions:
-"Produit et nombre de couches Ã  prÃ©ciser dans le devis.",
+"Produit et nombre de couches à préciser dans le devis.",
 tags:
 ["parquet",
 "huile",
@@ -816,102 +816,102 @@ tags:
 
 p("SOL-DECOUPE-CPLX",
 "Sols",
-"DÃ©coupes complexes / adaptations particuliÃ¨res",
+"Découpes complexes / adaptations particulières",
 "forfait",
 1.5,
 [
 
-  "RepÃ©rage des contraintes",
+  "Repérage des contraintes",
 
-  "DÃ©coupes ou ajustements spÃ©cifiques prÃ©vus au devis",
+  "Découpes ou ajustements spécifiques prévus au devis",
 
-], { conditions: "Forfait Ã  ajuster selon nombre dâ€™obstacles et complexitÃ©.",
-rentabilite: "ðŸŸ  Ã€ adapter", tags:
-["dÃ©coupe", "complexe"]
+], { conditions: "Forfait à ajuster selon nombre d’obstacles et complexité.",
+rentabilite: "🟠 À adapter", tags:
+["découpe", "complexe"]
 }),
 // ================= CARRELAGE / FAIENCE =================
 p("CAR-DEPOSE",
-"Carrelage / FaÃ¯ence",
-"DÃ©pose de carrelage ou faÃ¯ence",
-"mÂ²",
+"Carrelage / Faïence",
+"Dépose de carrelage ou faïence",
+"m²",
 0.5,
 [
 
-  "DÃ©pose du revÃªtement existant",
+  "Dépose du revêtement existant",
 
-  "Grattage des rÃ©sidus non adhÃ©rents",
+  "Grattage des résidus non adhérents",
 
   "Regroupement des gravats",
 
 ],
 { conditions:
-"Hors Ã©vacuation et hors remplacement complet du support.",
+"Hors évacuation et hors remplacement complet du support.",
 tags:
 ["carrelage",
-"faÃ¯ence",
-"dÃ©pose"]
+"faïence",
+"dépose"]
 }),
 
 p("CAR-PREP",
-"Carrelage / FaÃ¯ence",
-"PrÃ©paration simple du support avant carrelage",
-"mÂ²",
+"Carrelage / Faïence",
+"Préparation simple du support avant carrelage",
+"m²",
 0.18,
 [
 
-  "Nettoyage et contrÃ´le du support",
+  "Nettoyage et contrôle du support",
 
-  "Reprises localisÃ©es courantes",
+  "Reprises localisées courantes",
 
-  "DÃ©poussiÃ©rage avant pose",
+  "Dépoussiérage avant pose",
 
 ],
 { conditions:
-"Hors ragrÃ©age important ou reprise complÃ¨te du support.",
+"Hors ragréage important ou reprise complète du support.",
 tags:
 ["carrelage",
 "support"]
 }),
 
 p("CAR-SOL",
-"Carrelage / FaÃ¯ence",
+"Carrelage / Faïence",
 "Pose de carrelage au sol",
-"mÂ²",
+"m²",
 0.55,
 [
 
   "Implantation et calepinage courant",
 
-  "Pose collÃ©e du carrelage",
+  "Pose collée du carrelage",
 
-  "DÃ©coupes et ajustements courants",
+  "Découpes et ajustements courants",
 
 ],
 { conditions:
-"Support prÃªt. Hors calepinage complexe et grands formats difficiles.",
+"Support prêt. Hors calepinage complexe et grands formats difficiles.",
 tags:
 ["carrelage",
 "sol"]
 }),
 
 p("CAR-COMPLEXE",
-"Carrelage / FaÃ¯ence",
+"Carrelage / Faïence",
 "Pose de carrelage avec calepinage complexe",
-"mÂ²",
+"m²",
 0.85,
 [
 
-  "Ã‰tude et implantation du calepinage",
+  "Étude et implantation du calepinage",
 
-  "Pose du revÃªtement",
+  "Pose du revêtement",
 
-  "DÃ©coupes et ajustements complexes",
+  "Découpes et ajustements complexes",
 
 ],
 { conditions:
-"Motifs, diagonales, nombreux angles ou contraintes particuliÃ¨res.",
+"Motifs, diagonales, nombreux angles ou contraintes particulières.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["carrelage",
 "diagonale",
@@ -919,34 +919,34 @@ tags:
 }),
 
 p("CAR-FAIENCE",
-"Carrelage / FaÃ¯ence",
-"Pose de faÃ¯ence murale",
-"mÂ²",
+"Carrelage / Faïence",
+"Pose de faïence murale",
+"m²",
 0.65,
 [
 
   "Implantation et calepinage courant",
 
-  "Pose collÃ©e de la faÃ¯ence",
+  "Pose collée de la faïence",
 
-  "DÃ©coupes et finitions courantes",
+  "Découpes et finitions courantes",
 
 ],
 { conditions:
-"Hors Ã©tanchÃ©itÃ© sous carrelage et hors reprise importante du support.",
+"Hors étanchéité sous carrelage et hors reprise importante du support.",
 tags:
-["faÃ¯ence",
+["faïence",
 "mur"]
 }),
 
 p("CAR-JOINT",
-"Carrelage / FaÃ¯ence",
-"RÃ©alisation des joints de carrelage / faÃ¯ence",
-"mÂ²",
+"Carrelage / Faïence",
+"Réalisation des joints de carrelage / faïence",
+"m²",
 0.15,
 [
 
-  "PrÃ©paration et nettoyage des joints",
+  "Préparation et nettoyage des joints",
 
   "Application du mortier de jointoiement",
 
@@ -956,38 +956,38 @@ p("CAR-JOINT",
 { tags:
 ["joint",
 "carrelage",
-"faÃ¯ence"]
+"faïence"]
 }),
 
 p("CAR-ETANCH",
-"Carrelage / FaÃ¯ence",
-"Protection Ã  lâ€™eau sous carrelage",
-"mÂ²",
+"Carrelage / Faïence",
+"Protection à l’eau sous carrelage",
+"m²",
 0.25,
 [
 
-  "Application du primaire adaptÃ© au support",
+  "Application du primaire adapté au support",
 
-  "Pose des bandes dâ€™Ã©tanchÃ©itÃ© aux points singuliers",
+  "Pose des bandes d’étanchéité aux points singuliers",
 
-  "Application du systÃ¨me de protection Ã  lâ€™eau",
+  "Application du système de protection à l’eau",
 
 ],
 { conditions:
-"Selon prescriptions du systÃ¨me retenu et temps de sÃ©chage.",
+"Selon prescriptions du système retenu et temps de séchage.",
 tags:
 ["SPEC",
-"Ã©tanchÃ©itÃ©"]
+"étanchéité"]
 }),
 
 p("CAR-SILICONE",
-"Carrelage / FaÃ¯ence",
-"RÃ©alisation de joints silicone de finition",
+"Carrelage / Faïence",
+"Réalisation de joints silicone de finition",
 "ml",
 0.08,
 [
 
-  "PrÃ©paration et dÃ©graissage des zones concernÃ©es",
+  "Préparation et dégraissage des zones concernées",
 
   "Application du joint silicone",
 
@@ -1004,20 +1004,20 @@ p("CAR-SILICONE",
 p(
   "PLAC-FAUX-PLAFOND-DEPOSE",
   "Placo",
-  "DÃ©pose de dalles de faux plafond dÃ©montables",
+  "Dépose de dalles de faux plafond démontables",
   "u",
   0.1,
 
     [
-  "Mise en place dâ€™un accÃ¨s adaptÃ© Ã  la hauteur du plafond",
-  "DÃ©pose soigneuse des dalles existantes",
-  "Regroupement des dalles dÃ©posÃ©es sans dÃ©tÃ©rioration de lâ€™ossature",
+  "Mise en place d’un accès adapté à la hauteur du plafond",
+  "Dépose soigneuse des dalles existantes",
+  "Regroupement des dalles déposées sans détérioration de l’ossature",
 
   ],
   {
     conditions:
-      "Pour dalle dÃ©montable sur ossature apparente existante et conservÃ©e. Hors intervention sur lâ€™ossature, lâ€™isolation, les rÃ©seaux ou les Ã©quipements prÃ©sents dans le plÃ©num.",
-    tags: ["faux plafond", "plafond dÃ©montable", "dalle", "dÃ©pose"],
+      "Pour dalle démontable sur ossature apparente existante et conservée. Hors intervention sur l’ossature, l’isolation, les réseaux ou les équipements présents dans le plénum.",
+    tags: ["faux plafond", "plafond démontable", "dalle", "dépose"],
   }
 ),
 
@@ -1028,16 +1028,16 @@ p(
   "u",
   0.15,
  [
-  "ContrÃ´le visuel de lâ€™ossature et des emplacements",
-  "PrÃ©sentation et mise en place des dalles neuves",
-  "Ajustement et contrÃ´le de lâ€™alignement avec les dalles conservÃ©es",
+  "Contrôle visuel de l’ossature et des emplacements",
+  "Présentation et mise en place des dalles neuves",
+  "Ajustement et contrôle de l’alignement avec les dalles conservées",
 ],
   {
     conditions:
-      "Pour dalle standard Ã  bord droit posÃ©e sur ossature apparente existante en bon Ã©tat. Hors fourniture, reprise dâ€™ossature et dÃ©coupe pour Ã©quipement encastrÃ©.",
+      "Pour dalle standard à bord droit posée sur ossature apparente existante en bon état. Hors fourniture, reprise d’ossature et découpe pour équipement encastré.",
     tags: [
       "faux plafond",
-      "plafond dÃ©montable",
+      "plafond démontable",
       "dalle",
       "pose",
       "remplacement",
@@ -1048,23 +1048,23 @@ p(
 p(
   "PLAC-FAUX-PLAFOND-SPOT",
   "Placo",
-  "DÃ©coupes de dalles de faux plafond pour spots encastrÃ©s",
+  "Découpes de dalles de faux plafond pour spots encastrés",
   "u",
   0.35,
   [
-  "RepÃ©rage et traÃ§age des emplacements des spots existants ; rÃ©alisation des dÃ©coupes circulaires dans les dalles neuves.",
-  "DÃ©pose et repose des spots encastrÃ©s existants.",
-  "ContrÃ´le de leur bonne tenue aprÃ¨s remise en place.",
+  "Repérage et traçage des emplacements des spots existants ; réalisation des découpes circulaires dans les dalles neuves.",
+  "Dépose et repose des spots encastrés existants.",
+  "Contrôle de leur bonne tenue après remise en place.",
 ],
   {
     conditions:
-      "Pour repose du spot existant sur alimentation existante, sans crÃ©ation de point lumineux, modification du cÃ¢blage ni remplacement du luminaire.",
+      "Pour repose du spot existant sur alimentation existante, sans création de point lumineux, modification du câblage ni remplacement du luminaire.",
     tags: [
       "faux plafond",
       "dalle",
-      "dÃ©coupe",
+      "découpe",
       "spot",
-      "luminaire encastrÃ©",
+      "luminaire encastré",
     ],
   }
 ),
@@ -1072,23 +1072,23 @@ p(
 p(
   "PLAC-FAUX-PLAFOND-EVAC",
   "Placo",
-  "Conditionnement et Ã©vacuation lÃ©gÃ¨re de dalles de faux plafond",
+  "Conditionnement et évacuation légère de dalles de faux plafond",
   "forfait",
   0.45,
   [
-    "Conditionnement des dalles dÃ©posÃ©es",
-    "Chargement et Ã©vacuation dâ€™une petite quantitÃ© de dÃ©chets",
-    "Nettoyage courant de la zone dâ€™intervention",
+    "Conditionnement des dalles déposées",
+    "Chargement et évacuation d’une petite quantité de déchets",
+    "Nettoyage courant de la zone d’intervention",
   ],
   {
     conditions:
-      "Forfait rÃ©servÃ© Ã  une petite quantitÃ© de dalles lÃ©gÃ¨res pouvant Ãªtre Ã©vacuÃ©e sans trajet spÃ©cifique. Pour un volume important ou une dÃ©chÃ¨terie dÃ©diÃ©e, utiliser la prestation dâ€™Ã©vacuation adaptÃ©e.",
-    rentabilite: "ðŸŸ  Ã€ adapter",
+      "Forfait réservé à une petite quantité de dalles légères pouvant être évacuée sans trajet spécifique. Pour un volume important ou une déchèterie dédiée, utiliser la prestation d’évacuation adaptée.",
+    rentabilite: "🟠 À adapter",
     tags: [
       "faux plafond",
       "dalle",
-      "dÃ©chets",
-      "Ã©vacuation",
+      "déchets",
+      "évacuation",
       "nettoyage",
     ],
   }
@@ -1096,20 +1096,20 @@ p(
 
 p("PLAC-OSSATURE",
 "Placo",
-"Pose dâ€™une ossature mÃ©tallique lÃ©gÃ¨re",
-"mÂ²",
+"Pose d’une ossature métallique légère",
+"m²",
 0.45,
 [
 
-  "TraÃ§age et implantation",
+  "Traçage et implantation",
 
-  "Pose de lâ€™ossature mÃ©tallique",
+  "Pose de l’ossature métallique",
 
 ],
 { conditions:
 "Travaux non structurels. Hauteur et configuration courantes.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["placo",
 "ossature"]
@@ -1117,18 +1117,18 @@ tags:
 
 p("PLAC-PLAQUE",
 "Placo",
-"Pose de plaques de plÃ¢tre",
-"mÂ²",
+"Pose de plaques de plâtre",
+"m²",
 0.35,
 [
 
-  "DÃ©coupe et prÃ©sentation des plaques",
+  "Découpe et présentation des plaques",
 
-  "Pose et fixation sur support prÃ©vu",
+  "Pose et fixation sur support prévu",
 
 ],
 { conditions:
-"Hors bandes, peinture et renforts spÃ©cifiques.",
+"Hors bandes, peinture et renforts spécifiques.",
 tags:
 ["placo",
 "BA13"]
@@ -1136,20 +1136,20 @@ tags:
 
 p("PLAC-DOUBLAGE",
 "Placo",
-"Pose dâ€™un doublage isolant lÃ©ger",
-"mÂ²",
+"Pose d’un doublage isolant léger",
+"m²",
 0.55,
 [
 
-  "Mise en place de lâ€™isolant prÃ©vu",
+  "Mise en place de l’isolant prévu",
 
-  "Pose du parement associÃ©",
+  "Pose du parement associé",
 
 ],
 { conditions:
-"Travaux intÃ©rieurs non structurels. Composition Ã  prÃ©ciser au devis.",
+"Travaux intérieurs non structurels. Composition à préciser au devis.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["placo",
 "isolant",
@@ -1158,20 +1158,20 @@ tags:
 
 p("PLAC-BANDES",
 "Placo",
-"RÃ©alisation des bandes et joints",
-"mÂ²",
+"Réalisation des bandes et joints",
+"m²",
 0.4,
 [
 
   "Pose des bandes",
 
-  "Passes dâ€™enduit nÃ©cessaires",
+  "Passes d’enduit nécessaires",
 
-  "PonÃ§age de finition courant",
+  "Ponçage de finition courant",
 
 ],
 { conditions:
-"Hors reprise de plaques mal posÃ©es et hors peinture.",
+"Hors reprise de plaques mal posées et hors peinture.",
 tags:
 ["placo",
 "bandes",
@@ -1180,25 +1180,25 @@ tags:
 
 p("PLAC-REPARATION",
 "Placo",
-"RÃ©paration locale dâ€™une plaque de plÃ¢tre",
+"Réparation locale d’une plaque de plâtre",
 "u",
 2,
 [
-  "DÃ©coupe de la zone endommagÃ©e si nÃ©cessaire ; mise en place dâ€™un renfort lÃ©ger.",
-  "Pose de la piÃ¨ce de rÃ©paration.",
+  "Découpe de la zone endommagée si nécessaire ; mise en place d’un renfort léger.",
+  "Pose de la pièce de réparation.",
   "Reprise locale des joints.",
-], { conditions: "Petite rÃ©paration non structurelle. Taille Ã  prÃ©ciser au devis.",
+], { conditions: "Petite réparation non structurelle. Taille à préciser au devis.",
 tags: ["placo",
-"rÃ©paration"] }),
+"réparation"] }),
 // ================= PEINTURE =================
 p("PEINT-PROT",
 "Peinture",
-"Protection et prÃ©paration du chantier peinture",
+"Protection et préparation du chantier peinture",
 "forfait",
 1.5,
 [
 
-  "Protection des sols, Ã©quipements et zones conservÃ©es",
+  "Protection des sols, équipements et zones conservées",
 
   "Mise en place du chantier peinture",
 
@@ -1210,41 +1210,41 @@ p("PEINT-PROT",
 
 p("PEINT-PREP-LEG",
 "Peinture",
-"PrÃ©paration lÃ©gÃ¨re dâ€™un support avant peinture",
-"mÂ²",
+"Préparation légère d’un support avant peinture",
+"m²",
 0.1,
 [
 
-  "Grattage lÃ©ger des parties non adhÃ©rentes",
+  "Grattage léger des parties non adhérentes",
 
   "Rebouchages ponctuels",
 
-  "PonÃ§age et dÃ©poussiÃ©rage",
+  "Ponçage et dépoussiérage",
 
 ],
 { conditions:
 "Pour support globalement sain.",
 tags:
 ["peinture",
-"prÃ©paration"]
+"préparation"]
 }),
 
 p("PEINT-PREP-RENF",
 "Peinture",
-"PrÃ©paration renforcÃ©e / reprise dâ€™un support",
-"mÂ²",
+"Préparation renforcée / reprise d’un support",
+"m²",
 0.35,
 [
 
-  "Grattage des parties non adhÃ©rentes",
+  "Grattage des parties non adhérentes",
 
-  "Rebouchage et reprise des dÃ©fauts",
+  "Rebouchage et reprise des défauts",
 
-  "PonÃ§age et dÃ©poussiÃ©rage avant finition",
+  "Ponçage et dépoussiérage avant finition",
 
 ],
 { conditions:
-"Hors reprise structurelle ou traitement de la cause dâ€™une infiltration active.",
+"Hors reprise structurelle ou traitement de la cause d’une infiltration active.",
 tags:
 ["peinture",
 "reprise",
@@ -1253,38 +1253,38 @@ tags:
 
 p("PEINT-RATISSAGE",
 "Peinture",
-"Ratissage complet et ponÃ§age",
-"mÂ²",
+"Ratissage complet et ponçage",
+"m²",
 0.4,
 [
 
-  "Application dâ€™un enduit de ratissage",
+  "Application d’un enduit de ratissage",
 
-  "PonÃ§age aprÃ¨s sÃ©chage",
+  "Ponçage après séchage",
 
-  "DÃ©poussiÃ©rage avant mise en peinture",
+  "Dépoussiérage avant mise en peinture",
 
 ],
 { tags:
 ["ratissage",
 "enduit",
-"ponÃ§age"]
+"ponçage"]
 }),
 
 p("PEINT-PRIMAIRE",
 "Peinture",
-"Application dâ€™un primaire dâ€™accrochage",
-"mÂ²",
+"Application d’un primaire d’accrochage",
+"m²",
 0.08,
 [
 
-  "PrÃ©paration lÃ©gÃ¨re du support",
+  "Préparation légère du support",
 
-  "Application du primaire adaptÃ©",
+  "Application du primaire adapté",
 
 ],
 { conditions:
-"Produit Ã  adapter Ã  la nature du support.",
+"Produit à adapter à la nature du support.",
 tags:
 ["primaire",
 "accrochage"]
@@ -1292,20 +1292,20 @@ tags:
 
 p("PEINT-ISOLANT",
 "Peinture",
-"Application dâ€™un primaire isolant / bloqueur de taches",
-"mÂ²",
+"Application d’un primaire isolant / bloqueur de taches",
+"m²",
 0.12,
 [
 
-  "PrÃ©paration locale du support",
+  "Préparation locale du support",
 
-  "Application du primaire isolant adaptÃ©",
+  "Application du primaire isolant adapté",
 
-  "Blocage des taches ou remontÃ©es compatibles avec le produit retenu",
+  "Blocage des taches ou remontées compatibles avec le produit retenu",
 
 ],
 { conditions:
-"Hors traitement de la cause dâ€™une humiditÃ© ou infiltration active.",
+"Hors traitement de la cause d’une humidité ou infiltration active.",
 tags:
 ["primaire",
 "tache",
@@ -1315,24 +1315,24 @@ tags:
 p(
   "PEINT-FACADE-PREP-LEG",
   "Peinture",
-  "Nettoyage et prÃ©paration lÃ©gÃ¨re dâ€™une faÃ§ade",
-  "mÂ²",
+  "Nettoyage et préparation légère d’une façade",
+  "m²",
   0.1,
   [
-    "Brossage et nettoyage courant du support extÃ©rieur",
-    "Grattage localisÃ© des parties non adhÃ©rentes",
-    "DÃ©poussiÃ©rage et prÃ©paration avant mise en peinture",
+    "Brossage et nettoyage courant du support extérieur",
+    "Grattage localisé des parties non adhérentes",
+    "Dépoussiérage et préparation avant mise en peinture",
   ],
   {
     conditions:
-      "Pour faÃ§ade globalement saine et accessible. Hors nettoyage haute pression, traitement curatif important des mousses, rÃ©paration de fissures, reprise dâ€™enduit et traitement dâ€™une humiditÃ© active.",
+      "Pour façade globalement saine et accessible. Hors nettoyage haute pression, traitement curatif important des mousses, réparation de fissures, reprise d’enduit et traitement d’une humidité active.",
     tags: [
       "peinture",
-      "faÃ§ade",
-      "mur extÃ©rieur",
-      "crÃ©pi",
+      "façade",
+      "mur extérieur",
+      "crépi",
       "nettoyage",
-      "prÃ©paration",
+      "préparation",
     ],
   }
 ),
@@ -1340,26 +1340,26 @@ p(
 p(
   "PEINT-EXT-NET-HP",
   "Peinture",
-  "Nettoyage haute pression dâ€™un support maÃ§onnÃ© extÃ©rieur",
-  "mÂ²",
+  "Nettoyage haute pression d’un support maçonné extérieur",
+  "m²",
   0.1,
   [
-  "Protection courante des Ã©lÃ©ments situÃ©s Ã  proximitÃ© ; nettoyage Ã  haute pression adaptÃ© Ã  la rÃ©sistance du support.",
-  "Ã‰limination des salissures, dÃ©pÃ´ts et parties faiblement adhÃ©rentes.",
-  "RinÃ§age et contrÃ´le visuel du support avant sÃ©chage.",
+  "Protection courante des éléments situés à proximité ; nettoyage à haute pression adapté à la résistance du support.",
+  "Élimination des salissures, dépôts et parties faiblement adhérentes.",
+  "Rinçage et contrôle visuel du support avant séchage.",
 ],
   {
     conditions:
-      "Pour support maÃ§onnÃ© extÃ©rieur sain, accessible et compatible avec un nettoyage haute pression. Hors traitement curatif important des mousses, rÃ©paration de fissures, reprise dâ€™enduit, rÃ©cupÃ©ration des eaux souillÃ©es et traitement dâ€™une humiditÃ© active. Mise en peinture rÃ©alisÃ©e aprÃ¨s sÃ©chage suffisant du support.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Pour support maçonné extérieur sain, accessible et compatible avec un nettoyage haute pression. Hors traitement curatif important des mousses, réparation de fissures, reprise d’enduit, récupération des eaux souillées et traitement d’une humidité active. Mise en peinture réalisée après séchage suffisant du support.",
+    rentabilite: "🟠 À contrôler",
     tags: [
       "peinture",
-      "extÃ©rieur",
-      "faÃ§ade",
+      "extérieur",
+      "façade",
       "murette",
-      "mur extÃ©rieur",
+      "mur extérieur",
       "nettoyage haute pression",
-      "prÃ©paration",
+      "préparation",
     ],
   }
 ),
@@ -1367,22 +1367,22 @@ p(
 p(
   "PEINT-FACADE-1C",
   "Peinture",
-  "Mise en peinture dâ€™une faÃ§ade - 1 couche",
-  "mÂ²",
+  "Mise en peinture d’une façade - 1 couche",
+  "m²",
   0.15,
   [
-  "Application dâ€™une couche de peinture extÃ©rieure adaptÃ©e sur support prÃ©parÃ© ; rÃ©alisation des rÃ©champis autour des Ã©lÃ©ments conservÃ©s.",
-  "Mise en peinture des faces, dessus et retours compris dans la surface indiquÃ©e.",
-  "ContrÃ´le et finitions courantes.",
+  "Application d’une couche de peinture extérieure adaptée sur support préparé ; réalisation des réchampis autour des éléments conservés.",
+  "Mise en peinture des faces, dessus et retours compris dans la surface indiquée.",
+  "Contrôle et finitions courantes.",
 ],
   {
     conditions:
-      "Support sec, sain et prÃªt Ã  peindre. Protection gÃ©nÃ©rale, prÃ©paration, rÃ©parations, primaire spÃ©cifique et moyen dâ€™accÃ¨s particulier comptÃ©s sÃ©parÃ©ment. Une couche supplÃ©mentaire rendue nÃ©cessaire par un changement important de teinte, une absorption irrÃ©guliÃ¨re ou un dÃ©faut dâ€™opacitÃ© sera comptÃ©e sÃ©parÃ©ment.",
+      "Support sec, sain et prêt à peindre. Protection générale, préparation, réparations, primaire spécifique et moyen d’accès particulier comptés séparément. Une couche supplémentaire rendue nécessaire par un changement important de teinte, une absorption irrégulière ou un défaut d’opacité sera comptée séparément.",
     tags: [
       "peinture",
-      "faÃ§ade",
-      "mur extÃ©rieur",
-      "crÃ©pi",
+      "façade",
+      "mur extérieur",
+      "crépi",
       "1 couche",
       "une couche",
     ],
@@ -1392,24 +1392,24 @@ p(
 p(
   "PEINT-FACADE-2C",
   "Peinture",
-  "Mise en peinture dâ€™un support maÃ§onnÃ© extÃ©rieur - 2 couches",
-  "mÂ²",
+  "Mise en peinture d’un support maçonné extérieur - 2 couches",
+  "m²",
   0.28,
   [
-  "Application dâ€™une premiÃ¨re couche de peinture extÃ©rieure adaptÃ©e sur support prÃ©parÃ© ; respect du temps de sÃ©chage nÃ©cessaire.",
-  "Application dâ€™une deuxiÃ¨me couche de peinture extÃ©rieure ; rÃ©alisation des rÃ©champis autour des Ã©lÃ©ments conservÃ©s.",
-  "Mise en peinture des faces, dessus et retours compris dans la surface indiquÃ©e ; contrÃ´le et finitions courantes.",
+  "Application d’une première couche de peinture extérieure adaptée sur support préparé ; respect du temps de séchage nécessaire.",
+  "Application d’une deuxième couche de peinture extérieure ; réalisation des réchampis autour des éléments conservés.",
+  "Mise en peinture des faces, dessus et retours compris dans la surface indiquée ; contrôle et finitions courantes.",
 ],
   {
     conditions:
-      "Support sec, sain et prÃªt Ã  peindre. Protection gÃ©nÃ©rale, nettoyage, rÃ©parations, primaire spÃ©cifique et moyen dâ€™accÃ¨s particulier comptÃ©s sÃ©parÃ©ment. Une couche supplÃ©mentaire rendue nÃ©cessaire par un changement important de teinte, une absorption irrÃ©guliÃ¨re ou un dÃ©faut dâ€™opacitÃ© sera comptÃ©e sÃ©parÃ©ment.",
+      "Support sec, sain et prêt à peindre. Protection générale, nettoyage, réparations, primaire spécifique et moyen d’accès particulier comptés séparément. Une couche supplémentaire rendue nécessaire par un changement important de teinte, une absorption irrégulière ou un défaut d’opacité sera comptée séparément.",
     tags: [
       "peinture",
-      "extÃ©rieur",
-      "faÃ§ade",
+      "extérieur",
+      "façade",
       "murette",
-      "mur extÃ©rieur",
-      "crÃ©pi",
+      "mur extérieur",
+      "crépi",
       "2 couches",
       "deux couches",
     ],
@@ -1420,16 +1420,16 @@ p(
   "PEINT-MURS",
   "Peinture",
   "Mise en peinture des murs - 1 couche",
-  "mÂ²",
+  "m²",
   0.15,
   [
-    "Application dâ€™une couche de peinture murale sur support prÃ©parÃ©",
-    "RÃ©alisation des rÃ©champis",
-    "ContrÃ´le et finitions courantes",
+    "Application d’une couche de peinture murale sur support préparé",
+    "Réalisation des réchampis",
+    "Contrôle et finitions courantes",
   ],
   {
     conditions:
-      "Support prÃªt Ã  peindre. Protection gÃ©nÃ©rale, prÃ©paration, rÃ©parations et primaire spÃ©cifique comptÃ©s sÃ©parÃ©ment.",
+      "Support prêt à peindre. Protection générale, préparation, réparations et primaire spécifique comptés séparément.",
     tags: [
       "peinture",
       "mur",
@@ -1443,16 +1443,16 @@ p(
   "PEINT-MURS-2C",
   "Peinture",
   "Mise en peinture des murs - 2 couches",
-  "mÂ²",
+  "m²",
   0.27,
   [
-  "Application dâ€™une premiÃ¨re couche de peinture murale sur support prÃ©parÃ© ; respect du temps de sÃ©chage nÃ©cessaire.",
-  "Application dâ€™une deuxiÃ¨me couche de peinture murale ; rÃ©alisation des rÃ©champis.",
-  "ContrÃ´le et finitions courantes.",
+  "Application d’une première couche de peinture murale sur support préparé ; respect du temps de séchage nécessaire.",
+  "Application d’une deuxième couche de peinture murale ; réalisation des réchampis.",
+  "Contrôle et finitions courantes.",
 ],
   {
     conditions:
-      "Support prÃªt Ã  peindre. Protection gÃ©nÃ©rale, prÃ©paration, rÃ©parations et primaire spÃ©cifique comptÃ©s sÃ©parÃ©ment.",
+      "Support prêt à peindre. Protection générale, préparation, réparations et primaire spécifique comptés séparément.",
     tags: [
       "peinture",
       "mur",
@@ -1465,25 +1465,25 @@ p(
 p(
   "PEINT-FINITION-PAILLETTES",
   "Peinture",
-  "RÃ©alisation dâ€™une finition pailletÃ©e sur peinture murale",
-  "mÂ²",
+  "Réalisation d’une finition pailletée sur peinture murale",
+  "m²",
   0.03,
   [
-    "Incorporation des paillettes dÃ©coratives dans la couche de finition.",
-    "Brassage rÃ©gulier et application homogÃ¨ne sur la surface prÃ©vue.",
-    "ContrÃ´le visuel et finitions courantes.",
+    "Incorporation des paillettes décoratives dans la couche de finition.",
+    "Brassage régulier et application homogène sur la surface prévue.",
+    "Contrôle visuel et finitions courantes.",
   ],
   {
     conditions:
-      "Ã€ ajouter Ã  la prestation de mise en peinture. Support prÃªt et accessible. Hors fourniture de la peinture et des paillettes, essai prÃ©alable, motif dÃ©coratif particulier et reprise complÃ¨te en cas de rendu refusÃ© aprÃ¨s validation de lâ€™Ã©chantillon.",
+      "À ajouter à la prestation de mise en peinture. Support prêt et accessible. Hors fourniture de la peinture et des paillettes, essai préalable, motif décoratif particulier et reprise complète en cas de rendu refusé après validation de l’échantillon.",
     tags: [
       "peinture",
       "mur",
       "paillette",
       "paillettes",
-      "dorÃ©",
-      "argentÃ©",
-      "dÃ©coratif",
+      "doré",
+      "argenté",
+      "décoratif",
       "finition",
     ],
   }
@@ -1491,13 +1491,13 @@ p(
 
 p(
 
- "PEINT-PLAFOND", "Peinture", "Mise en peinture dâ€™un plafond - 1 couche", "mÂ²", 0.25, [
+ "PEINT-PLAFOND", "Peinture", "Mise en peinture d’un plafond - 1 couche", "m²", 0.25, [
 
-   "Application dâ€™une couche de peinture sur support prÃ©parÃ©",
+   "Application d’une couche de peinture sur support préparé",
 
-   "RÃ©alisation des rÃ©champis",
+   "Réalisation des réchampis",
 
-   "ContrÃ´le et finitions courantes",
+   "Contrôle et finitions courantes",
 
  ],
 
@@ -1505,7 +1505,7 @@ p(
 
    conditions:
 
-     "Support prÃªt Ã  peindre. Protection gÃ©nÃ©rale, prÃ©paration, rÃ©parations, primaire spÃ©cifique et travaux en grande hauteur comptÃ©s sÃ©parÃ©ment.",
+     "Support prêt à peindre. Protection générale, préparation, réparations, primaire spécifique et travaux en grande hauteur comptés séparément.",
 
    tags: [
 
@@ -1525,17 +1525,17 @@ p(
 
 p(
 
- "PEINT-PLAFOND-2C", "Peinture", "Mise en peinture dâ€™un plafond - 2 couches", "mÂ²", 0.45, [
-  "Application dâ€™une premiÃ¨re couche de peinture sur support prÃ©parÃ© ; respect du temps de sÃ©chage nÃ©cessaire.",
-  "Application dâ€™une deuxiÃ¨me couche de peinture ; rÃ©alisation des rÃ©champis.",
-  "ContrÃ´le et finitions courantes.",
+ "PEINT-PLAFOND-2C", "Peinture", "Mise en peinture d’un plafond - 2 couches", "m²", 0.45, [
+  "Application d’une première couche de peinture sur support préparé ; respect du temps de séchage nécessaire.",
+  "Application d’une deuxième couche de peinture ; réalisation des réchampis.",
+  "Contrôle et finitions courantes.",
 ],
 
  {
 
    conditions:
 
-     "Support prÃªt Ã  peindre. Protection gÃ©nÃ©rale, prÃ©paration, rÃ©parations, primaire spÃ©cifique et travaux en grande hauteur comptÃ©s sÃ©parÃ©ment.",
+     "Support prêt à peindre. Protection générale, préparation, réparations, primaire spécifique et travaux en grande hauteur comptés séparément.",
 
    tags: [
 
@@ -1555,25 +1555,25 @@ p(
 
 p(
 
- "PEINT-TOILE-PLAFOND-POS", "Peinture", "Pose dâ€™une toile de rÃ©novation au plafond", "mÂ²", 0.45, [
-  "ContrÃ´le et prÃ©paration courante du support prÃªt Ã  recevoir la toile ; encollage rÃ©gulier du plafond.",
-  "Pose, marouflage et ajustement de la toile de rÃ©novation ; rÃ©alisation des dÃ©coupes et raccords courants.",
-  "ContrÃ´le de lâ€™adhÃ©rence et nettoyage de fin dâ€™intervention.",
+ "PEINT-TOILE-PLAFOND-POS", "Peinture", "Pose d’une toile de rénovation au plafond", "m²", 0.45, [
+  "Contrôle et préparation courante du support prêt à recevoir la toile ; encollage régulier du plafond.",
+  "Pose, marouflage et ajustement de la toile de rénovation ; réalisation des découpes et raccords courants.",
+  "Contrôle de l’adhérence et nettoyage de fin d’intervention.",
 ],
 
  {
 
    conditions:
 
-     "Support sain, stable et accessible. Protection gÃ©nÃ©rale, dÃ©pose dâ€™un ancien revÃªtement, prÃ©paration renforcÃ©e, traitement dâ€™une infiltration, peinture de finition et travail en grande hauteur comptÃ©s sÃ©parÃ©ment.",
+     "Support sain, stable et accessible. Protection générale, dépose d’un ancien revêtement, préparation renforcée, traitement d’une infiltration, peinture de finition et travail en grande hauteur comptés séparément.",
 
    tags: [
 
      "peinture",
 
-     "toile de rÃ©novation",
+     "toile de rénovation",
 
-     "toile tissÃ©e",
+     "toile tissée",
 
      "plafond",
 
@@ -1587,19 +1587,19 @@ p(
 
 p(
 
- "PEINT-VOLET-BOIS-RENOV-2C", "Peinture", "RÃ©novation et mise en peinture dâ€™un volet bois - 2 couches", "u", 3, [
-  "DÃ©pose du volet et installation sur une zone de travail adaptÃ©e ; grattage et ponÃ§age des parties non adhÃ©rentes.",
-  "Nettoyage et dÃ©poussiÃ©rage du support ; application dâ€™un primaire sur les parties mises Ã  nu si nÃ©cessaire.",
-  "Application de deux couches de peinture extÃ©rieure sur les deux faces et les chants ; repose du volet et contrÃ´le de son fonctionnement.",
+ "PEINT-VOLET-BOIS-RENOV-2C", "Peinture", "Rénovation et mise en peinture d’un volet bois - 2 couches", "u", 3, [
+  "Dépose du volet et installation sur une zone de travail adaptée ; grattage et ponçage des parties non adhérentes.",
+  "Nettoyage et dépoussiérage du support ; application d’un primaire sur les parties mises à nu si nécessaire.",
+  "Application de deux couches de peinture extérieure sur les deux faces et les chants ; repose du volet et contrôle de son fonctionnement.",
 ],
 
  {
 
    conditions:
 
-     "Pour volet bois courant pouvant Ãªtre dÃ©posÃ© sans rÃ©paration de ses fixations. Hors dÃ©capage intÃ©gral, remplacement de lame ou ferrure, rÃ©paration importante du bois, fourniture de peinture et moyen dâ€™accÃ¨s spÃ©cifique.",
+     "Pour volet bois courant pouvant être déposé sans réparation de ses fixations. Hors décapage intégral, remplacement de lame ou ferrure, réparation importante du bois, fourniture de peinture et moyen d’accès spécifique.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
@@ -1607,13 +1607,13 @@ p(
 
      "volet bois",
 
-     "rÃ©novation",
+     "rénovation",
 
-     "extÃ©rieur",
+     "extérieur",
 
      "2 couches",
 
-     "dÃ©pose repose",
+     "dépose repose",
 
    ],
 
@@ -1623,9 +1623,9 @@ p(
 
 p(
 
- "MAC-ENCADREMENT-OUVERTURE-REP", "MaÃ§onnerie lÃ©gÃ¨re", "Reprise maÃ§onnÃ©e dâ€™un encadrement dâ€™ouverture", "ml", 1.15, [
-  "Piquage et retrait des parties non adhÃ©rentes strictement nÃ©cessaires ; dÃ©poussiÃ©rage et prÃ©paration du support.",
-  "Rebouchage et reprise de lâ€™encadrement au mortier adaptÃ© ; dressage des arÃªtes et raccord avec le support existant.",
+ "MAC-ENCADREMENT-OUVERTURE-REP", "Maçonnerie légère", "Reprise maçonnée d’un encadrement d’ouverture", "ml", 1.15, [
+  "Piquage et retrait des parties non adhérentes strictement nécessaires ; dépoussiérage et préparation du support.",
+  "Rebouchage et reprise de l’encadrement au mortier adapté ; dressage des arêtes et raccord avec le support existant.",
   "Finition courante avant mise en peinture.",
 ],
 
@@ -1633,25 +1633,25 @@ p(
 
    conditions:
 
-     "Pour reprise localisÃ©e autour dâ€™une porte ou dâ€™une fenÃªtre sur support maÃ§onnÃ© sain. Hors reprise structurelle, linteau, infiltration active, ravalement complet, peinture de finition et moyen dâ€™accÃ¨s spÃ©cifique.",
+     "Pour reprise localisée autour d’une porte ou d’une fenêtre sur support maçonné sain. Hors reprise structurelle, linteau, infiltration active, ravalement complet, peinture de finition et moyen d’accès spécifique.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
-     "maÃ§onnerie",
+     "maçonnerie",
 
      "encadrement",
 
-     "tableau extÃ©rieur",
+     "tableau extérieur",
 
-     "fenÃªtre",
+     "fenêtre",
 
      "porte",
 
      "mortier",
 
-     "faÃ§ade",
+     "façade",
 
    ],
 
@@ -1661,31 +1661,31 @@ p(
 
 p(
 
- "PEINT-ENCADREMENT-EXT-2C", "Peinture", "Mise en peinture dâ€™un encadrement extÃ©rieur - 2 couches", "ml", 0.35, [
-  "PrÃ©paration lÃ©gÃ¨re et dÃ©poussiÃ©rage de lâ€™encadrement ; application dâ€™une premiÃ¨re couche de peinture extÃ©rieure adaptÃ©e.",
-  "Respect du temps de sÃ©chage nÃ©cessaire ; application dâ€™une deuxiÃ¨me couche de peinture.",
-  "RÃ©alisation des rÃ©champis et finitions courantes.",
+ "PEINT-ENCADREMENT-EXT-2C", "Peinture", "Mise en peinture d’un encadrement extérieur - 2 couches", "ml", 0.35, [
+  "Préparation légère et dépoussiérage de l’encadrement ; application d’une première couche de peinture extérieure adaptée.",
+  "Respect du temps de séchage nécessaire ; application d’une deuxième couche de peinture.",
+  "Réalisation des réchampis et finitions courantes.",
 ],
 
  {
 
    conditions:
 
-     "Support sec, stabilisÃ© et prÃªt Ã  peindre. Protection gÃ©nÃ©rale, rÃ©paration du support, primaire spÃ©cifique, traitement dâ€™une infiltration, ravalement complet et moyen dâ€™accÃ¨s spÃ©cifique comptÃ©s sÃ©parÃ©ment.",
+     "Support sec, stabilisé et prêt à peindre. Protection générale, réparation du support, primaire spécifique, traitement d’une infiltration, ravalement complet et moyen d’accès spécifique comptés séparément.",
 
    tags: [
 
      "peinture",
 
-     "extÃ©rieur",
+     "extérieur",
 
      "encadrement",
 
-     "fenÃªtre",
+     "fenêtre",
 
      "porte",
 
-     "faÃ§ade",
+     "façade",
 
      "2 couches",
 
@@ -1697,18 +1697,18 @@ p(
 
 p(
 
- "PEINT-BOIS-SURF", "Peinture", "Mise en peinture dâ€™un support bois - 1 couche", "mÂ²", 0.22,
+ "PEINT-BOIS-SURF", "Peinture", "Mise en peinture d’un support bois - 1 couche", "m²", 0.22,
 [
-  "Ã‰grenage ou prÃ©paration lÃ©gÃ¨re du support bois ; dÃ©poussiÃ©rage du support.",
-  "Application dâ€™une couche de finition.",
-  "ContrÃ´le et rÃ©alisation des finitions courantes.",
+  "Égrenage ou préparation légère du support bois ; dépoussiérage du support.",
+  "Application d’une couche de finition.",
+  "Contrôle et réalisation des finitions courantes.",
 ],
 
  {
 
    conditions:
 
-     "Pour une surface bois rÃ©guliÃ¨re et accessible. Hors dÃ©capage, rÃ©paration importante et primaire spÃ©cifique, Ã  compter sÃ©parÃ©ment si nÃ©cessaire.",
+     "Pour une surface bois régulière et accessible. Hors décapage, réparation importante et primaire spécifique, à compter séparément si nécessaire.",
 
    tags: [
 
@@ -1732,18 +1732,18 @@ p(
 
 p(
 
- "PEINT-BOIS-SURF-2C", "Peinture", "Mise en peinture dâ€™un support bois - 2 couches", "mÂ²",
+ "PEINT-BOIS-SURF-2C", "Peinture", "Mise en peinture d’un support bois - 2 couches", "m²",
 0.38, [
-  "Ã‰grenage ou prÃ©paration lÃ©gÃ¨re du support bois ; dÃ©poussiÃ©rage du support.",
-  "Application dâ€™une premiÃ¨re couche de finition ; Ã©grenage intermÃ©diaire si nÃ©cessaire.",
-  "Application dâ€™une deuxiÃ¨me couche de finition ; contrÃ´le et rÃ©alisation des finitions courantes.",
+  "Égrenage ou préparation légère du support bois ; dépoussiérage du support.",
+  "Application d’une première couche de finition ; égrenage intermédiaire si nécessaire.",
+  "Application d’une deuxième couche de finition ; contrôle et réalisation des finitions courantes.",
 ],
 
  {
 
    conditions:
 
-     "Pour une surface bois rÃ©guliÃ¨re et accessible. Hors dÃ©capage, rÃ©paration importante et primaire spÃ©cifique, Ã  compter sÃ©parÃ©ment si nÃ©cessaire.",
+     "Pour une surface bois régulière et accessible. Hors décapage, réparation importante et primaire spécifique, à compter séparément si nécessaire.",
 
    tags: [
 
@@ -1767,20 +1767,20 @@ p(
 
 p(
 
- "PEINT-MENUISERIE", "Peinture", "Mise en peinture dâ€™une boiserie ou menuiserie - 1 couche", "u",
+ "PEINT-MENUISERIE", "Peinture", "Mise en peinture d’une boiserie ou menuiserie - 1 couche", "u",
 1.25, [
-  "PrÃ©paration lÃ©gÃ¨re et Ã©grenage de la menuiserie ; dÃ©poussiÃ©rage du support.",
-  "Application dâ€™une couche de finition.",
-  "RÃ©alisation des rÃ©champis et finitions courantes.",
+  "Préparation légère et égrenage de la menuiserie ; dépoussiérage du support.",
+  "Application d’une couche de finition.",
+  "Réalisation des réchampis et finitions courantes.",
 ],
 
  {
 
    conditions:
 
-     "Pour une menuiserie courante de dimensions standard. Temps Ã  adapter selon les dimensions, le nombre de faces, les moulures, les reliefs et lâ€™Ã©tat du support. Hors dÃ©capage, rÃ©paration importante et primaire spÃ©cifique.",
+     "Pour une menuiserie courante de dimensions standard. Temps à adapter selon les dimensions, le nombre de faces, les moulures, les reliefs et l’état du support. Hors décapage, réparation importante et primaire spécifique.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
@@ -1806,20 +1806,20 @@ p(
 
 p(
 
- "PEINT-MENUISERIE-2C", "Peinture", "Mise en peinture dâ€™une boiserie ou menuiserie - 2 couches", "u",
+ "PEINT-MENUISERIE-2C", "Peinture", "Mise en peinture d’une boiserie ou menuiserie - 2 couches", "u",
 2.25, [
-  "PrÃ©paration lÃ©gÃ¨re et Ã©grenage de la menuiserie ; dÃ©poussiÃ©rage du support.",
-  "Application dâ€™une premiÃ¨re couche de finition ; Ã©grenage intermÃ©diaire si nÃ©cessaire.",
-  "Application dâ€™une deuxiÃ¨me couche de finition ; rÃ©alisation des rÃ©champis et finitions courantes.",
+  "Préparation légère et égrenage de la menuiserie ; dépoussiérage du support.",
+  "Application d’une première couche de finition ; égrenage intermédiaire si nécessaire.",
+  "Application d’une deuxième couche de finition ; réalisation des réchampis et finitions courantes.",
 ],
 
  {
 
    conditions:
 
-     "Pour une menuiserie courante de dimensions standard. Temps Ã  adapter selon les dimensions, le nombre de faces, les moulures, les reliefs et lâ€™Ã©tat du support. Hors dÃ©capage, rÃ©paration importante et primaire spÃ©cifique.",
+     "Pour une menuiserie courante de dimensions standard. Temps à adapter selon les dimensions, le nombre de faces, les moulures, les reliefs et l’état du support. Hors décapage, réparation importante et primaire spécifique.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
@@ -1845,12 +1845,12 @@ p(
 
 p("PEINT-ACRYLIQUE",
 "Peinture",
-"RÃ©alisation dâ€™un joint acrylique de finition",
+"Réalisation d’un joint acrylique de finition",
 "ml",
 0.08,
 [
 
-  "PrÃ©paration des supports",
+  "Préparation des supports",
 
   "Application et lissage du joint acrylique",
 
@@ -1858,110 +1858,110 @@ p("PEINT-ACRYLIQUE",
 "acrylique"] }),
 // ================= DECO =================
 p("DECO-DEPOSE-MURAL",
-"DÃ©co",
-"DÃ©pose dâ€™un revÃªtement mural",
-"mÂ²",
+"Déco",
+"Dépose d’un revêtement mural",
+"m²",
 0.18,
 [
 
-  "DÃ©pose du revÃªtement mural existant",
+  "Dépose du revêtement mural existant",
 
-  "Grattage lÃ©ger des rÃ©sidus",
+  "Grattage léger des résidus",
 
   "Nettoyage simple du support",
 
 ],
 { conditions:
-"Hors colle trÃ¨s tenace et hors reprise lourde du support.",
+"Hors colle très tenace et hors reprise lourde du support.",
 tags:
 ["papier peint",
-"revÃªtement mural",
-"dÃ©pose"]
+"revêtement mural",
+"dépose"]
 }),
 
 p("DECO-POSE-MURAL",
-"DÃ©co",
-"Pose dâ€™un revÃªtement mural",
-"mÂ²",
+"Déco",
+"Pose d’un revêtement mural",
+"m²",
 0.3,
 [
-  "PrÃ©paration simple du support ; application de la colle si nÃ©cessaire.",
-  "Pose du revÃªtement.",
-  "DÃ©coupes et ajustements courants.",
+  "Préparation simple du support ; application de la colle si nécessaire.",
+  "Pose du revêtement.",
+  "Découpes et ajustements courants.",
 ],
 { conditions:
-"Motifs Ã  raccord ou revÃªtement technique : temps Ã  adapter.",
+"Motifs à raccord ou revêtement technique : temps à adapter.",
 tags:
 ["papier peint",
-"revÃªtement mural"]
+"revêtement mural"]
 }),
 
 p("DECO-PREP-LEG",
-"DÃ©co",
-"PrÃ©paration lÃ©gÃ¨re dâ€™un support mural",
-"mÂ²",
+"Déco",
+"Préparation légère d’un support mural",
+"m²",
 0.1,
 [
 
   "Rebouchages ponctuels",
 
-  "PonÃ§age et dÃ©poussiÃ©rage",
+  "Ponçage et dépoussiérage",
 
 ],
 { tags:
 ["mur",
-"prÃ©paration"]
+"préparation"]
 }),
 
 p("DECO-PREP-RENF",
-"DÃ©co",
-"PrÃ©paration renforcÃ©e dâ€™un support mural",
-"mÂ²",
+"Déco",
+"Préparation renforcée d’un support mural",
+"m²",
 0.35,
 [
 
-  "Grattage et reprise des dÃ©fauts",
+  "Grattage et reprise des défauts",
 
-  "Enduit localisÃ© ou gÃ©nÃ©ralisÃ© selon Ã©tat",
+  "Enduit localisé ou généralisé selon état",
 
-  "PonÃ§age et dÃ©poussiÃ©rage",
+  "Ponçage et dépoussiérage",
 
 ],
 { tags:
 ["mur",
-"prÃ©paration",
+"préparation",
 "enduit"]
 }),
 // ================= ELECTRICITE =================
   p("ELEC-DIAG",
-"Ã‰lectricitÃ©",
-"Diagnostic simple dâ€™un Ã©quipement Ã©lectrique",
+"Électricité",
+"Diagnostic simple d’un équipement électrique",
 "forfait",
 1.5,
 [
 
-  "ContrÃ´le visuel de lâ€™Ã©quipement et de ses connexions accessibles",
+  "Contrôle visuel de l’équipement et de ses connexions accessibles",
 
   "Essais simples de fonctionnement",
 
-  "Identification dâ€™une anomalie apparente",
+  "Identification d’une anomalie apparente",
 
 ],
 { conditions:
-"Ne remplace pas un diagnostic rÃ©glementaire ni une recherche spÃ©cialisÃ©e sur circuit.",
+"Ne remplace pas un diagnostic réglementaire ni une recherche spécialisée sur circuit.",
 tags:
 ["diagnostic",
-"Ã©lectrique"]
+"électrique"]
 }),
 
 p("ELEC-H",
-"Ã‰lectricitÃ©",
-"Intervention Ã©lectrique courante",
+"Électricité",
+"Intervention électrique courante",
 "h",
 1,
 [
 
-  "Mise hors tension de la zone concernÃ©e",
+  "Mise hors tension de la zone concernée",
 
   "Intervention sur appareillage existant",
 
@@ -1969,35 +1969,35 @@ p("ELEC-H",
 
 ],
 { conditions:
-"Sur installation existante, sans crÃ©ation de circuit ni modification du tableau.",
+"Sur installation existante, sans création de circuit ni modification du tableau.",
 tags:
-["Ã©lectricitÃ©",
-"main d'Å“uvre"]
+["électricité",
+"main d'œuvre"]
 }),
 
 p("ELEC-PRISE",
-"Ã‰lectricitÃ©",
-"Remplacement dâ€™une prise existante",
+"Électricité",
+"Remplacement d’une prise existante",
 "u",
 0.5,
 [
-  "Mise hors tension ; dÃ©pose de la prise existante.",
+  "Mise hors tension ; dépose de la prise existante.",
   "Pose et raccordement de la nouvelle prise.",
   "Essai de fonctionnement.",
 ],
 { conditions:
-"Sur cÃ¢blage existant en Ã©tat et conforme Ã  lâ€™intervention prÃ©vue.",
+"Sur câblage existant en état et conforme à l’intervention prévue.",
 tags:
 ["prise"]
 }),
 
 p("ELEC-INT",
-"Ã‰lectricitÃ©",
-"Remplacement dâ€™un interrupteur existant",
+"Électricité",
+"Remplacement d’un interrupteur existant",
 "u",
 0.5,
 [
-  "Mise hors tension ; dÃ©pose de lâ€™interrupteur existant.",
+  "Mise hors tension ; dépose de l’interrupteur existant.",
   "Pose et raccordement du nouvel appareillage.",
   "Essai de fonctionnement.",
 ],
@@ -2006,40 +2006,40 @@ p("ELEC-INT",
 }),
 
 p("ELEC-APP",
-"Ã‰lectricitÃ©",
-"Remplacement dâ€™un appareillage Ã©lectrique existant",
+"Électricité",
+"Remplacement d’un appareillage électrique existant",
 "u",
 0.5,
 [
-  "Mise hors tension ; dÃ©pose de lâ€™appareillage existant.",
-  "Pose et raccordement de lâ€™appareillage prÃ©vu.",
+  "Mise hors tension ; dépose de l’appareillage existant.",
+  "Pose et raccordement de l’appareillage prévu.",
   "Essai de fonctionnement.",
 ],
 { conditions:
-"Type dâ€™appareillage Ã  prÃ©ciser au devis.",
+"Type d’appareillage à préciser au devis.",
 tags:
 ["appareillage"]
 }),
 
 p("ELEC-LUM",
-"Ã‰lectricitÃ©",
-"Pose / remplacement dâ€™un luminaire",
+"Électricité",
+"Pose / remplacement d’un luminaire",
 "u",
 0.75,
 [
-  "DÃ©pose du luminaire existant si prÃ©vue ; montage et fixation du nouveau luminaire.",
+  "Dépose du luminaire existant si prévue ; montage et fixation du nouveau luminaire.",
   "Raccordement sur sortie existante.",
   "Essai de fonctionnement.",
 ],
 { conditions:
-"Hors crÃ©ation de point lumineux ou modification du circuit.",
+"Hors création de point lumineux ou modification du circuit.",
 tags:
 ["luminaire"]
 }),
 
 p("ELEC-SORTIE",
-"Ã‰lectricitÃ©",
-"Remplacement dâ€™une sortie de cÃ¢ble / connexion existante",
+"Électricité",
+"Remplacement d’une sortie de câble / connexion existante",
 "u",
 0.5,
 [
@@ -2048,28 +2048,28 @@ p("ELEC-SORTIE",
 
   "Remplacement ou reprise simple de la connexion",
 
-  "ContrÃ´le et essai",
+  "Contrôle et essai",
 
 ],
 { conditions:
-"Sur cÃ¢blage existant accessible.",
+"Sur câblage existant accessible.",
 tags:
-["sortie de cÃ¢ble",
+["sortie de câble",
 "connexion"]
 }),
 // ================= CHAUFFAGE =================
 p("CHAU-RADIATEUR",
 "Chauffage",
-"Pose / remplacement dâ€™un radiateur Ã©lectrique",
+"Pose / remplacement d’un radiateur électrique",
 "u",
 1.25,
 [
-  "DÃ©pose de lâ€™ancien radiateur si prÃ©vue ; implantation et fixation du nouvel appareil.",
+  "Dépose de l’ancien radiateur si prévue ; implantation et fixation du nouvel appareil.",
   "Raccordement sur alimentation existante.",
-  "RÃ©glage et essai de fonctionnement.",
+  "Réglage et essai de fonctionnement.",
 ],
 { conditions:
-"Hors crÃ©ation ou modification du circuit Ã©lectrique et hors renfort important du support.",
+"Hors création ou modification du circuit électrique et hors renfort important du support.",
 tags:
 ["radiateur",
 "chauffage"]
@@ -2077,14 +2077,14 @@ tags:
 // ================= VENTILATION =================
   p("VMC-NET",
 "Ventilation",
-"Nettoyage / entretien dâ€™une bouche de ventilation", "u",
+"Nettoyage / entretien d’une bouche de ventilation", "u",
 0.35, [
 
-  "DÃ©pose accessible de la bouche si nÃ©cessaire",
+  "Dépose accessible de la bouche si nécessaire",
 
-  "Nettoyage de lâ€™Ã©lÃ©ment",
+  "Nettoyage de l’élément",
 
-  "Repose et contrÃ´le simple",
+  "Repose et contrôle simple",
 
 ],
 { tags:
@@ -2094,12 +2094,12 @@ tags:
 
 p("VMC-DIAG",
 "Ventilation",
-"Diagnostic simple dâ€™une ventilation existante",
+"Diagnostic simple d’une ventilation existante",
 "forfait",
 1.5,
 [
 
-  "ContrÃ´le visuel des Ã©lÃ©ments accessibles",
+  "Contrôle visuel des éléments accessibles",
 
   "Essai simple de fonctionnement",
 
@@ -2107,7 +2107,7 @@ p("VMC-DIAG",
 
 ],
 { conditions:
-"Hors mesure rÃ©glementaire de dÃ©bit et Ã©tude de dimensionnement.",
+"Hors mesure réglementaire de débit et étude de dimensionnement.",
 tags:
 ["VMC",
 "diagnostic"]
@@ -2115,16 +2115,16 @@ tags:
 
 p("VMC-GROUPE",
 "Ventilation",
-"Remplacement dâ€™un groupe VMC existant",
+"Remplacement d’un groupe VMC existant",
 "u",
 2,
 [
-  "DÃ©pose du groupe existant ; pose du nouveau groupe sur rÃ©seau existant.",
+  "Dépose du groupe existant ; pose du nouveau groupe sur réseau existant.",
   "Raccordements accessibles.",
   "Essai de fonctionnement.",
 ],
 { conditions:
-"Hors crÃ©ation ou modification importante du rÃ©seau de gaines.",
+"Hors création ou modification importante du réseau de gaines.",
 tags:
 ["VMC",
 "groupe"]
@@ -2132,12 +2132,12 @@ tags:
 
 p("VMC-BOUCHE",
 "Ventilation",
-"Remplacement dâ€™une bouche de ventilation",
+"Remplacement d’une bouche de ventilation",
 "u",
 0.5,
 [
 
-  "DÃ©pose de la bouche existante",
+  "Dépose de la bouche existante",
 
   "Nettoyage simple de la zone",
 
@@ -2151,73 +2151,73 @@ p("VMC-BOUCHE",
 
 p("VMC-EXTRACTEUR",
 "Ventilation",
-"Pose dâ€™un extracteur dâ€™air individuel",
+"Pose d’un extracteur d’air individuel",
 "u",
 2,
 [
-  "Implantation et fixation de lâ€™extracteur ; raccordement au conduit de rejet existant ou crÃ©Ã© sÃ©parÃ©ment.",
-  "Raccordement sur alimentation Ã©lectrique existante accessible.",
+  "Implantation et fixation de l’extracteur ; raccordement au conduit de rejet existant ou créé séparément.",
+  "Raccordement sur alimentation électrique existante accessible.",
   "Essai de fonctionnement et finitions courantes.",
-], { conditions: "Hors crÃ©ation de circuit Ã©lectrique, modification du tableau et rÃ©seau de gaines. Appareil adaptÃ© au volume de sÃ©curitÃ© de la piÃ¨ce humide.", rentabilite: "ðŸŸ  Ã€ contrÃ´ler", tags:
+], { conditions: "Hors création de circuit électrique, modification du tableau et réseau de gaines. Appareil adapté au volume de sécurité de la pièce humide.", rentabilite: "🟠 À contrôler", tags:
 ["ventilation", "extracteur",
-"aÃ©rateur", "salle de bain"] }),
+"aérateur", "salle de bain"] }),
 
 p("VMC-TRAVERSEE-MUR",
 "Ventilation",
-"CrÃ©ation dâ€™une traversÃ©e murale pour ventilation",
+"Création d’une traversée murale pour ventilation",
 "u",
 3.5,
 [
-  "RepÃ©rage et contrÃ´le de la zone de percement ; percement du mur au diamÃ¨tre prÃ©vu.",
-  "Mise en place du conduit de traversÃ©e.",
+  "Repérage et contrôle de la zone de percement ; percement du mur au diamètre prévu.",
+  "Mise en place du conduit de traversée.",
   "Calfeutrement et finitions courantes autour du passage.",
 ],
 { conditions:
-"Pour mur non porteur en matÃ©riau courant, accessible sur les deux faces et sans rÃ©seau dans la zone. Hors bÃ©ton armÃ©, pierre, amiante, travail en hauteur et reprise importante de faÃ§ade.",
+"Pour mur non porteur en matériau courant, accessible sur les deux faces et sans réseau dans la zone. Hors béton armé, pierre, amiante, travail en hauteur et reprise importante de façade.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["ventilation",
-"traversÃ©e murale",
+"traversée murale",
 "percement",
 "brique"]
 }),
 
 p("VMC-ENTREE-AIR",
 "Ventilation",
-"Pose dâ€™une entrÃ©e dâ€™air simple",
+"Pose d’une entrée d’air simple",
 "u",
 0.5,
 [
-  "RepÃ©rage et traÃ§age de lâ€™emplacement ; dÃ©coupe courante du support accessible.",
-  "Pose et fixation de lâ€™entrÃ©e dâ€™air.",
-  "ContrÃ´le de lâ€™ouverture et nettoyage de la zone.",
+  "Repérage et traçage de l’emplacement ; découpe courante du support accessible.",
+  "Pose et fixation de l’entrée d’air.",
+  "Contrôle de l’ouverture et nettoyage de la zone.",
 ],
 { conditions:
-"Sur coffre de volet roulant ou menuiserie compatible et accessible. Dimensionnement, rÃ©servation et absence dâ€™obstacle Ã  contrÃ´ler avant intervention.",
+"Sur coffre de volet roulant ou menuiserie compatible et accessible. Dimensionnement, réservation et absence d’obstacle à contrôler avant intervention.",
 tags:
 ["ventilation",
-"entrÃ©e dâ€™air",
-"hygrorÃ©glable",
+"entrée d’air",
+"hygroréglable",
 "coffre volet roulant"]
 }),
 
 p("VMC-GRILLE-EXT",
 "Ventilation",
-"Pose dâ€™une grille extÃ©rieure de ventilation",
+"Pose d’une grille extérieure de ventilation",
 "u",
 0.5,
 [
-  "PrÃ©sentation et ajustement de la grille ; fixation sur le support extÃ©rieur.",
-  "Calfeutrement pÃ©riphÃ©rique courant.",
-  "ContrÃ´le du passage dâ€™air.",
+  "Présentation et ajustement de la grille ; fixation sur le support extérieur.",
+  "Calfeutrement périphérique courant.",
+  "Contrôle du passage d’air.",
 ],
 { conditions:
-"AccÃ¨s extÃ©rieur simple et sÃ©curisÃ©. Hors travail en hauteur ou reprise importante de faÃ§ade.",
+"Accès extérieur simple et sécurisé. Hors travail en hauteur ou reprise importante de façade.",
 tags:
 ["ventilation",
-"grille extÃ©rieure",
-"rejet extÃ©rieur"]
+"grille extérieure",
+"rejet extérieur"]
 }),
 // ================= PLOMBERIE / SANITAIRES =================
 p("PLOMB-H",
@@ -2227,18 +2227,18 @@ p("PLOMB-H",
 1,
 [
 
-  "Intervention sur Ã©lÃ©ments accessibles",
+  "Intervention sur éléments accessibles",
 
-  "Raccordements courants prÃ©vus au devis",
+  "Raccordements courants prévus au devis",
 
-  "ContrÃ´le dâ€™Ã©tanchÃ©itÃ©",
+  "Contrôle d’étanchéité",
 
 ],
 { conditions:
-"Sans crÃ©ation de rÃ©seau encastrÃ© ni modification lourde de lâ€™installation.",
+"Sans création de réseau encastré ni modification lourde de l’installation.",
 tags:
 ["plomberie",
-"main d'Å“uvre"]
+"main d'œuvre"]
 }),
 
    p("PLOMB-RACC",
@@ -2248,13 +2248,13 @@ tags:
 
   "Adaptation simple des raccordements accessibles",
 
-  "Raccordement de lâ€™Ã©quipement prÃ©vu",
+  "Raccordement de l’équipement prévu",
 
-  "Essai dâ€™Ã©coulement et contrÃ´le dâ€™Ã©tanchÃ©itÃ©",
+  "Essai d’écoulement et contrôle d’étanchéité",
 
 ],
 { conditions:
-"Sans crÃ©ation de rÃ©seau encastrÃ©.",
+"Sans création de réseau encastré.",
 tags:
 ["raccordement",
 "sanitaire"]
@@ -2267,17 +2267,17 @@ p("PLOMB-FUITE-RECH",
 2,
 [
 
-  "ContrÃ´le visuel des Ã©lÃ©ments accessibles",
+  "Contrôle visuel des éléments accessibles",
 
-  "Recherche de lâ€™origine apparente de la fuite",
+  "Recherche de l’origine apparente de la fuite",
 
-  "Compte rendu de lâ€™intervention",
+  "Compte rendu de l’intervention",
 
 ],
 { conditions:
-"Hors recherche destructive, camÃ©ra, rÃ©seau encastrÃ© ou diagnostic spÃ©cialisÃ©.",
+"Hors recherche destructive, caméra, réseau encastré ou diagnostic spécialisé.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["fuite",
 "recherche"]
@@ -2285,33 +2285,33 @@ tags:
 
 p("PLOMB-FUITE-REP",
 "Plomberie / Sanitaires",
-"RÃ©paration simple dâ€™une fuite accessible",
+"Réparation simple d’une fuite accessible",
 "forfait",
 2,
 [
 
-  "Mise hors eau locale si nÃ©cessaire",
+  "Mise hors eau locale si nécessaire",
 
-  "RÃ©paration ou remplacement simple de lâ€™Ã©lÃ©ment accessible",
+  "Réparation ou remplacement simple de l’élément accessible",
 
-  "Remise en eau et contrÃ´le dâ€™Ã©tanchÃ©itÃ©",
+  "Remise en eau et contrôle d’étanchéité",
 
-], { conditions: "Hors rÃ©seau encastrÃ© et hors remplacement important de canalisation.",
+], { conditions: "Hors réseau encastré et hors remplacement important de canalisation.",
 tags: ["fuite",
-"rÃ©paration"] }),
+"réparation"] }),
 
 p("PLOMB-ROBINET",
 "Plomberie / Sanitaires",
-"Pose / remplacement dâ€™un robinet ou mitigeur",
+"Pose / remplacement d’un robinet ou mitigeur",
 "u",
 1.25,
 [
-  "DÃ©pose de lâ€™ancienne robinetterie si prÃ©vue ; pose de la nouvelle robinetterie.",
-  "Raccordement sur arrivÃ©es existantes accessibles.",
-  "ContrÃ´le dâ€™Ã©tanchÃ©itÃ©.",
+  "Dépose de l’ancienne robinetterie si prévue ; pose de la nouvelle robinetterie.",
+  "Raccordement sur arrivées existantes accessibles.",
+  "Contrôle d’étanchéité.",
 ],
 { conditions:
-"Hors modification des alimentations encastrÃ©es.",
+"Hors modification des alimentations encastrées.",
 tags:
 ["robinet",
 "mitigeur"]
@@ -2319,49 +2319,49 @@ tags:
 
 p("PLOMB-SIPHON",
 "Plomberie / Sanitaires",
-"Remplacement dâ€™un siphon / vidage",
+"Remplacement d’un siphon / vidage",
 "u",
 0.75,
 [
 
-  "DÃ©pose du siphon ou vidage existant",
+  "Dépose du siphon ou vidage existant",
 
-  "Pose et raccordement du nouvel Ã©lÃ©ment",
+  "Pose et raccordement du nouvel élément",
 
-  "Essai dâ€™Ã©coulement et contrÃ´le dâ€™Ã©tanchÃ©itÃ©",
+  "Essai d’écoulement et contrôle d’étanchéité",
 
 ], { tags: ["siphon",
 "vidage"] }),
 
 p("PLOMB-DEPOSE-EQP",
 "Plomberie / Sanitaires",
-"DÃ©pose dâ€™un Ã©quipement sanitaire",
+"Dépose d’un équipement sanitaire",
 "u",
 1.5,
 [
 
-  "DÃ©connexion des raccordements accessibles",
+  "Déconnexion des raccordements accessibles",
 
-  "DÃ©pose de lâ€™Ã©quipement",
+  "Dépose de l’équipement",
 
-  "Mise en sÃ©curitÃ© provisoire si nÃ©cessaire",
+  "Mise en sécurité provisoire si nécessaire",
 
-], { conditions: "Hors Ã©vacuation en dÃ©chÃ¨terie.", tags:
-["sanitaire", "dÃ©pose"]
+], { conditions: "Hors évacuation en déchèterie.", tags:
+["sanitaire", "dépose"]
 }),
 
 p("PLOMB-VASQUE",
 "Plomberie / Sanitaires",
-"Pose / remplacement dâ€™un lavabo ou dâ€™une vasque",
+"Pose / remplacement d’un lavabo ou d’une vasque",
 "u",
 2.5,
 [
 
-  "DÃ©pose de lâ€™ancien Ã©quipement si prÃ©vue",
+  "Dépose de l’ancien équipement si prévue",
 
   "Mise en place et fixation",
 
-  "Raccordement du vidage et des Ã©lÃ©ments accessibles",
+  "Raccordement du vidage et des éléments accessibles",
 
 ],
 { tags:
@@ -2371,7 +2371,7 @@ p("PLOMB-VASQUE",
 
 p("PLOMB-MEUBLE-VASQUE",
 "Plomberie / Sanitaires",
-"Pose / remplacement dâ€™un meuble vasque",
+"Pose / remplacement d’un meuble vasque",
 "u",
 4,
 [
@@ -2388,58 +2388,58 @@ tags:
 
 p("PLOMB-MEUBLE-VASQUE-REEMPLOI",
 "Plomberie / Sanitaires",
-"Remplacement dâ€™un meuble sous-vasque avec rÃ©emploi des Ã©quipements",
+"Remplacement d’un meuble sous-vasque avec réemploi des équipements",
 "u",
 5,
 [
-  "DÃ©connexion et dÃ©pose soigneuse de la vasque et de la robinetterie existantes ; dÃ©pose de lâ€™ancien meuble et montage du nouveau meuble.",
-  "RÃ©installation de la vasque et de la robinetterie conservÃ©es.",
-  "Fixation, raccordements accessibles et contrÃ´le dâ€™Ã©tanchÃ©itÃ©.",
+  "Déconnexion et dépose soigneuse de la vasque et de la robinetterie existantes ; dépose de l’ancien meuble et montage du nouveau meuble.",
+  "Réinstallation de la vasque et de la robinetterie conservées.",
+  "Fixation, raccordements accessibles et contrôle d’étanchéité.",
 ],
 { conditions:
-"Sous rÃ©serve du bon Ã©tat, de la compatibilitÃ© et des dimensions de la vasque et de la robinetterie conservÃ©es. Hors modification lourde de plomberie et renfort structurel.",
+"Sous réserve du bon état, de la compatibilité et des dimensions de la vasque et de la robinetterie conservées. Hors modification lourde de plomberie et renfort structurel.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["meuble vasque",
-"rÃ©emploi",
+"réemploi",
 "vasque",
 "robinet"]
 }),
 
 p("PLOMB-POMME-HAUTE",
 "Plomberie / Sanitaires",
-"Pose dâ€™une pomme haute de douche",
+"Pose d’une pomme haute de douche",
 "u",
 1,
 [
-  "ContrÃ´le de la compatibilitÃ© avec lâ€™installation existante ; montage et fixation de la pomme haute et de son support.",
+  "Contrôle de la compatibilité avec l’installation existante ; montage et fixation de la pomme haute et de son support.",
   "Raccordement sur la robinetterie existante accessible.",
-  "Essai de fonctionnement et contrÃ´le dâ€™Ã©tanchÃ©itÃ©.",
+  "Essai de fonctionnement et contrôle d’étanchéité.",
 ],
 { conditions:
-"Sur installation existante compatible, sans modification encastrÃ©e des alimentations.",
+"Sur installation existante compatible, sans modification encastrée des alimentations.",
 tags:
 ["douche",
 "pomme haute",
-"pomme de tÃªte"]
+"pomme de tête"]
 }),
 
  p(
 
  "PLOMB-WC", "Plomberie / Sanitaires",
-"Remplacement Ã  neuf dâ€™un WC posÃ© au sol", "u",
+"Remplacement à neuf d’un WC posé au sol", "u",
 2.5, [
-  "Fermeture de lâ€™alimentation et vidange du rÃ©servoir ; dÃ©connexion et dÃ©pose de lâ€™ancien WC ; nettoyage et prÃ©paration courante de lâ€™emplacement.",
+  "Fermeture de l’alimentation et vidange du réservoir ; déconnexion et dépose de l’ancien WC ; nettoyage et préparation courante de l’emplacement.",
   "Mise en place et fixation du nouveau WC ; raccordement sur les attentes existantes accessibles.",
-  "Remise en eau et essai de la chasse ; contrÃ´le dâ€™Ã©tanchÃ©itÃ© et de fonctionnement.",
+  "Remise en eau et essai de la chasse ; contrôle d’étanchéité et de fonctionnement.",
 ],
 
  {
 
    conditions:
 
-     "Pour remplacement par un WC posÃ© au sol compatible avec les raccordements existants. Hors modification des rÃ©seaux, rÃ©paration du support et Ã©vacuation de lâ€™ancien Ã©quipement.",
+     "Pour remplacement par un WC posé au sol compatible avec les raccordements existants. Hors modification des réseaux, réparation du support et évacuation de l’ancien équipement.",
 
    tags: [
 
@@ -2460,20 +2460,20 @@ tags:
 p(
 
  "PLOMB-WC-DEPOSE-REPOSE", "Plomberie / Sanitaires",
-"DÃ©pose et repose dâ€™un WC existant", "u", 3,
+"Dépose et repose d’un WC existant", "u", 3,
 [
-  "Fermeture de lâ€™alimentation et vidange du rÃ©servoir ; dÃ©connexion et dÃ©pose soigneuse du WC existant ; stockage et protection temporaire de lâ€™Ã©quipement.",
-  "Nettoyage courant de la zone de raccordement ; repose et fixation du WC conservÃ©.",
-  "Raccordement sur les attentes existantes ; remise en eau et contrÃ´le dâ€™Ã©tanchÃ©itÃ© et de fonctionnement.",
+  "Fermeture de l’alimentation et vidange du réservoir ; déconnexion et dépose soigneuse du WC existant ; stockage et protection temporaire de l’équipement.",
+  "Nettoyage courant de la zone de raccordement ; repose et fixation du WC conservé.",
+  "Raccordement sur les attentes existantes ; remise en eau et contrôle d’étanchéité et de fonctionnement.",
 ],
 
  {
 
    conditions:
 
-     "Sous rÃ©serve du bon Ã©tat du WC, des fixations et des raccordements conservÃ©s. Intervention sur le support, piÃ¨ces de remplacement et dÃ©placement supplÃ©mentaire comptÃ©s sÃ©parÃ©ment.",
+     "Sous réserve du bon état du WC, des fixations et des raccordements conservés. Intervention sur le support, pièces de remplacement et déplacement supplémentaire comptés séparément.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
@@ -2481,11 +2481,11 @@ p(
 
      "toilettes",
 
-     "dÃ©pose",
+     "dépose",
 
      "repose",
 
-     "rÃ©emploi",
+     "réemploi",
 
    ],
 
@@ -2495,37 +2495,37 @@ p(
 
 p("PLOMB-WC-MECA",
 "Plomberie / Sanitaires",
-"Remplacement dâ€™un mÃ©canisme de WC",
+"Remplacement d’un mécanisme de WC",
 "u",
 1,
 [
 
-  "DÃ©pose du mÃ©canisme existant",
+  "Dépose du mécanisme existant",
 
-  "Pose et rÃ©glage du nouveau mÃ©canisme",
+  "Pose et réglage du nouveau mécanisme",
 
-  "Essai et contrÃ´le dâ€™Ã©tanchÃ©itÃ©",
+  "Essai et contrôle d’étanchéité",
 
 ],
 { tags:
 ["WC",
-"mÃ©canisme"]
+"mécanisme"]
 }),
 
 p("PLOMB-REC-DCH",
 "Plomberie / Sanitaires",
-"Pose dâ€™un receveur de douche",
+"Pose d’un receveur de douche",
 "u",
 7,
 [
-  "PrÃ©paration et contrÃ´le de lâ€™emplacement ; pose et calage du receveur.",
+  "Préparation et contrôle de l’emplacement ; pose et calage du receveur.",
   "Pose de la bonde et raccordement accessible.",
-  "ContrÃ´le de lâ€™Ã©coulement et finitions sanitaires.",
+  "Contrôle de l’écoulement et finitions sanitaires.",
 ],
 { conditions:
-"Dimensions, modÃ¨le et Ã©tat du support Ã  prÃ©ciser au devis. Hors crÃ©ation complÃ¨te du rÃ©seau.",
+"Dimensions, modèle et état du support à préciser au devis. Hors création complète du réseau.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["receveur",
 "douche"]
@@ -2533,40 +2533,40 @@ tags:
 
 p("PLOMB-PAROI-DEP",
 "Plomberie / Sanitaires",
-"DÃ©pose dâ€™une paroi ou cabine de douche",
+"Dépose d’une paroi ou cabine de douche",
 "u",
 1.5,
 [
 
-  "DÃ©pose soigneuse de la paroi ou cabine",
+  "Dépose soigneuse de la paroi ou cabine",
 
-  "Regroupement ou stockage des Ã©lÃ©ments selon devis",
+  "Regroupement ou stockage des éléments selon devis",
 
 ],
 { conditions:
-"RÃ©emploi dâ€™un Ã©quipement ancien sans garantie sur sa tenue au dÃ©montage.",
+"Réemploi d’un équipement ancien sans garantie sur sa tenue au démontage.",
 tags:
 ["paroi",
 "douche",
-"dÃ©pose"]
+"dépose"]
 }),
 
 p("PLOMB-PAROI-POS",
 "Plomberie / Sanitaires",
-"Pose dâ€™une paroi ou cabine de douche",
+"Pose d’une paroi ou cabine de douche",
 "u",
 3,
 [
 
   "Implantation et fixation",
 
-  "RÃ©glage des profilÃ©s et ouvrants",
+  "Réglage des profilés et ouvrants",
 
-  "RÃ©alisation des joints sanitaires pÃ©riphÃ©riques",
+  "Réalisation des joints sanitaires périphériques",
 
 ],
 { conditions:
-"Support adaptÃ© et modÃ¨le compatible avec lâ€™implantation.",
+"Support adapté et modèle compatible avec l’implantation.",
 tags:
 ["paroi",
 "douche"]
@@ -2574,16 +2574,16 @@ tags:
 // ================= CUISINE =================
 p("CUI-MEUBLE-MONT",
 "Cuisine",
-"Montage dâ€™un meuble de cuisine",
+"Montage d’un meuble de cuisine",
 "u",
 1.25,
 [
 
   "Assemblage du meuble",
 
-  "RÃ©glage des Ã©lÃ©ments courants",
+  "Réglage des éléments courants",
 
-  "PrÃ©paration pour la pose",
+  "Préparation pour la pose",
 
 ],
 { tags:
@@ -2594,20 +2594,20 @@ p("CUI-MEUBLE-MONT",
 
 p("CUI-MEUBLE-POS",
 "Cuisine",
-"Pose / fixation dâ€™un meuble de cuisine",
+"Pose / fixation d’un meuble de cuisine",
 "u",
 1,
 [
 
-  "Implantation et mise Ã  niveau",
+  "Implantation et mise à niveau",
 
   "Fixation au support",
 
-  "RÃ©glage des portes ou faÃ§ades",
+  "Réglage des portes ou façades",
 
 ],
 { conditions:
-"Support apte Ã  recevoir les fixations prÃ©vues.",
+"Support apte à recevoir les fixations prévues.",
 tags:
 ["cuisine",
 "meuble",
@@ -2616,120 +2616,120 @@ tags:
 
 p("CUI-PLAN-DEPOSE",
 "Cuisine",
-"DÃ©pose dâ€™un plan de travail existant",
+"Dépose d’un plan de travail existant",
 "ml",
 0.4,
 [
-  "DÃ©connexion des Ã©quipements accessibles si prÃ©vue au devis ; dÃ©coupe des joints et dÃ©pose soigneuse du plan de travail.",
-  "PrÃ©servation des meubles et revÃªtements muraux conservÃ©s.",
-  "Regroupement des Ã©lÃ©ments dÃ©posÃ©s.",
+  "Déconnexion des équipements accessibles si prévue au devis ; découpe des joints et dépose soigneuse du plan de travail.",
+  "Préservation des meubles et revêtements muraux conservés.",
+  "Regroupement des éléments déposés.",
 ],
 { conditions:
-"Sous rÃ©serve dâ€™une dÃ©pose possible sans dÃ©tÃ©riorer la crÃ©dence ou les supports conservÃ©s. Hors Ã©vacuation en dÃ©chÃ¨terie et rÃ©paration des dommages cachÃ©s.",
+"Sous réserve d’une dépose possible sans détériorer la crédence ou les supports conservés. Hors évacuation en déchèterie et réparation des dommages cachés.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["plan de travail",
-"dÃ©pose",
-"crÃ©dence conservÃ©e"]
+"dépose",
+"crédence conservée"]
 }),
 
 p("CUI-PLAN",
 "Cuisine",
-"Pose dâ€™un plan de travail",
+"Pose d’un plan de travail",
 "ml",
 0.75,
 [
-  "Mesure et prÃ©sentation du plan ; ajustements et mise Ã  niveau.",
-  "Fixation sur meubles existants ou posÃ©s.",
+  "Mesure et présentation du plan ; ajustements et mise à niveau.",
+  "Fixation sur meubles existants ou posés.",
   "Finitions courantes.",
 ],
 { conditions:
-"DÃ©coupes dâ€™Ã©vier/plaque comptÃ©es sÃ©parÃ©ment si nÃ©cessaires.",
+"Découpes d’évier/plaque comptées séparément si nécessaires.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["plan de travail"]
 }),
 
 p("CUI-DECOUPE",
 "Cuisine",
-"DÃ©coupe dâ€™un plan de travail",
+"Découpe d’un plan de travail",
 "u",
 1.25,
 [
 
-  "TraÃ§age de la dÃ©coupe",
+  "Traçage de la découpe",
 
-  "DÃ©coupe pour lâ€™Ã©quipement prÃ©vu",
+  "Découpe pour l’équipement prévu",
 
-  "Protection et finition du chant dÃ©coupÃ© si nÃ©cessaire",
+  "Protection et finition du chant découpé si nécessaire",
 
 ],
 { conditions:
-"MatÃ©riau courant. Hors pierre, quartz ou matÃ©riaux nÃ©cessitant un atelier spÃ©cialisÃ©.",
+"Matériau courant. Hors pierre, quartz ou matériaux nécessitant un atelier spécialisé.",
 tags:
 ["plan de travail",
-"dÃ©coupe"]
+"découpe"]
 }),
 
 p("CUI-CREDENCE",
 "Cuisine",
-"Pose dâ€™une crÃ©dence",
-"mÂ²",
+"Pose d’une crédence",
+"m²",
 0.55,
 [
-  "Implantation et prise de mesures ; dÃ©coupes courantes.",
-  "Pose de la crÃ©dence.",
-  "Finitions pÃ©riphÃ©riques.",
+  "Implantation et prise de mesures ; découpes courantes.",
+  "Pose de la crédence.",
+  "Finitions périphériques.",
 ],
 { conditions:
-"MatÃ©riau et systÃ¨me de pose Ã  prÃ©ciser au devis.",
+"Matériau et système de pose à préciser au devis.",
 tags:
-["crÃ©dence"]
+["crédence"]
 }),
 
 p("CUI-EVIER-DEPOSE-REPOSE",
 "Cuisine",
-"DÃ©pose et repose dâ€™un Ã©vier existant",
+"Dépose et repose d’un évier existant",
 "u",
 3,
 [
-  "DÃ©connexion et dÃ©pose soigneuse de lâ€™Ã©vier et de la robinetterie ; nettoyage des Ã©lÃ©ments conservÃ©s et prÃ©paration de la repose.",
-  "RÃ©installation, fixation et rÃ©alisation de lâ€™Ã©tanchÃ©itÃ© pÃ©riphÃ©rique.",
-  "Raccordement du vidage et de la robinetterie puis contrÃ´le dâ€™Ã©tanchÃ©itÃ©.",
+  "Déconnexion et dépose soigneuse de l’évier et de la robinetterie ; nettoyage des éléments conservés et préparation de la repose.",
+  "Réinstallation, fixation et réalisation de l’étanchéité périphérique.",
+  "Raccordement du vidage et de la robinetterie puis contrôle d’étanchéité.",
 ],
 { conditions:
-"Sous rÃ©serve du bon Ã©tat et de la compatibilitÃ© des Ã©quipements conservÃ©s avec le nouveau plan de travail. DÃ©coupe du plan comptÃ©e sÃ©parÃ©ment.",
+"Sous réserve du bon état et de la compatibilité des équipements conservés avec le nouveau plan de travail. Découpe du plan comptée séparément.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["Ã©vier",
-"dÃ©pose",
+["évier",
+"dépose",
 "repose",
-"rÃ©emploi",
+"réemploi",
 "robinetterie"]
 }),
 
 p("CUI-EVIER",
 "Cuisine",
-"Pose dâ€™un Ã©vier",
+"Pose d’un évier",
 "u",
 1.5,
 [
-  "Mise en place de lâ€™Ã©vier ; fixation et Ã©tanchÃ©itÃ© pÃ©riphÃ©rique.",
+  "Mise en place de l’évier ; fixation et étanchéité périphérique.",
   "Raccordement du vidage accessible.",
-  "ContrÃ´le dâ€™Ã©tanchÃ©itÃ©.",
+  "Contrôle d’étanchéité.",
 ],
 { conditions:
-"DÃ©coupe du plan de travail comptÃ©e sÃ©parÃ©ment si nÃ©cessaire.",
+"Découpe du plan de travail comptée séparément si nécessaire.",
 tags:
-["Ã©vier"]
+["évier"]
 }),
 
 p("CUI-MITIGEUR",
 "Cuisine",
-"Pose dâ€™un mitigeur de cuisine",
+"Pose d’un mitigeur de cuisine",
 "u",
 1,
 [
@@ -2738,7 +2738,7 @@ p("CUI-MITIGEUR",
 
   "Raccordement sur alimentations existantes accessibles",
 
-  "ContrÃ´le dâ€™Ã©tanchÃ©itÃ©",
+  "Contrôle d’étanchéité",
 
 ],
 { tags:
@@ -2748,16 +2748,16 @@ p("CUI-MITIGEUR",
 
 p("CUI-ENCASTRABLE",
 "Cuisine",
-"Pose dâ€™un Ã©quipement encastrable",
+"Pose d’un équipement encastrable",
 "u",
 0.75,
 [
-  "Mise en place de lâ€™Ã©quipement ; fixation selon le systÃ¨me prÃ©vu.",
-  "Raccordement standard sur attentes existantes si prÃ©vu.",
+  "Mise en place de l’équipement ; fixation selon le système prévu.",
+  "Raccordement standard sur attentes existantes si prévu.",
   "Essai de fonctionnement.",
 ],
 { conditions:
-"Hors modification de meuble importante, plomberie ou circuit Ã©lectrique.",
+"Hors modification de meuble importante, plomberie ou circuit électrique.",
 tags:
 ["four",
 "lave vaisselle",
@@ -2771,63 +2771,63 @@ p("CUI-AJUST",
 1,
 [
 
-  "RÃ©glages des Ã©lÃ©ments concernÃ©s",
+  "Réglages des éléments concernés",
 
-  "Petits ajustements et finitions prÃ©vus au devis",
+  "Petits ajustements et finitions prévus au devis",
 
 ], { tags: ["cuisine",
-"rÃ©glage", "finition"]
+"réglage", "finition"]
 }),
 // ================= EQUIPEMENT =================
 p("EQP-DEPOSE",
-"Ã‰quipement",
-"DÃ©pose dâ€™un appareil existant",
+"Équipement",
+"Dépose d’un appareil existant",
 "u",
 0.5,
 [
 
-  "DÃ©connexion accessible de lâ€™appareil",
+  "Déconnexion accessible de l’appareil",
 
-  "DÃ©pose et dÃ©placement dans la zone prÃ©vue",
+  "Dépose et déplacement dans la zone prévue",
 
 ],
 { conditions:
-"Hors Ã©vacuation en dÃ©chÃ¨terie.",
+"Hors évacuation en déchèterie.",
 tags:
-["Ã©quipement",
-"dÃ©pose"]
+["équipement",
+"dépose"]
 }),
 
 p("EQP-ELECTRO",
-"Ã‰quipement",
-"Pose / remplacement dâ€™un appareil Ã©lectromÃ©nager",
+"Équipement",
+"Pose / remplacement d’un appareil électroménager",
 "u",
 0.75,
 [
 
-  "Mise en place et mise Ã  niveau",
+  "Mise en place et mise à niveau",
 
-  "Raccordement standard sur attentes existantes si prÃ©vu",
+  "Raccordement standard sur attentes existantes si prévu",
 
   "Essai de fonctionnement",
 
-], { conditions: "Hors modification plomberie, Ã©lectricitÃ© ou meuble.", tags:
-["Ã©lectromÃ©nager"] }),
+], { conditions: "Hors modification plomberie, électricité ou meuble.", tags:
+["électroménager"] }),
 
-// ================= BRICOLAGE / MENUISERIE LÃ‰GÃˆRE =================
+// ================= BRICOLAGE / MENUISERIE LÉGÈRE =================
 
 p("BRI-H",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
+"Bricolage / Menuiserie légère",
 "Intervention de bricolage courante",
 "h",
 1,
 [
 
-  "PrÃ©paration de lâ€™intervention",
+  "Préparation de l’intervention",
 
-  "RÃ©alisation du petit bricolage prÃ©vu",
+  "Réalisation du petit bricolage prévu",
 
-  "ContrÃ´le et nettoyage sommaire",
+  "Contrôle et nettoyage sommaire",
 
 ],
 { conditions:
@@ -2837,85 +2837,85 @@ tags:
 }),
 
 p("BRI-MENUISERIE-H",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Petite rÃ©paration de menuiserie",
+"Bricolage / Menuiserie légère",
+"Petite réparation de menuiserie",
 "h",
 1,
 [
 
-  "Diagnostic simple de la rÃ©paration",
+  "Diagnostic simple de la réparation",
 
   "Reprise ou ajustement courant",
 
-  "ContrÃ´le final",
+  "Contrôle final",
 
-], { conditions: "Hors rÃ©paration structurelle ou fabrication complexe.", tags:
-["menuiserie", "rÃ©paration"]
+], { conditions: "Hors réparation structurelle ou fabrication complexe.", tags:
+["menuiserie", "réparation"]
 }),
 
 p("BRI-MEUBLE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Montage dâ€™un meuble",
+"Bricolage / Menuiserie légère",
+"Montage d’un meuble",
 "u",
 0.75,
 [
 
-  "DÃ©ballage et contrÃ´le des Ã©lÃ©ments",
+  "Déballage et contrôle des éléments",
 
   "Assemblage du meuble",
 
-  "RÃ©glages courants",
+  "Réglages courants",
 
 ],
 { conditions:
-"Temps Ã  adapter selon dimensions et complexitÃ©.",
+"Temps à adapter selon dimensions et complexité.",
 tags:
 ["meuble",
 "montage"]
 }),
 
 p("BRI-FIX-MURAL",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Pose / fixation dâ€™un Ã©quipement mural",
+"Bricolage / Menuiserie légère",
+"Pose / fixation d’un équipement mural",
 "u",
 1,
 [
 
-  "RepÃ©rage de lâ€™emplacement",
+  "Repérage de l’emplacement",
 
-  "PerÃ§age et fixation adaptÃ©s au support accessible",
+  "Perçage et fixation adaptés au support accessible",
 
-  "ContrÃ´le de lâ€™alignement et de la tenue",
+  "Contrôle de l’alignement et de la tenue",
 
 ],
 { conditions:
-"Hors renfort structurel du support et hors Ã©quipement exceptionnellement lourd.",
+"Hors renfort structurel du support et hors équipement exceptionnellement lourd.",
 tags:
 ["fixation",
 "mur"]
 }),
 
 p("BRI-ETAGERE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Pose dâ€™une Ã©tagÃ¨re",
+"Bricolage / Menuiserie légère",
+"Pose d’une étagère",
 "u",
 0.75,
 [
 
-  "Implantation et traÃ§age",
+  "Implantation et traçage",
 
-  "PerÃ§age et fixation",
+  "Perçage et fixation",
 
-  "ContrÃ´le du niveau et de la tenue",
+  "Contrôle du niveau et de la tenue",
 
 ],
 { tags:
-["Ã©tagÃ¨re"]
+["étagère"]
 }),
 
 p("BRI-TRINGLE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Pose dâ€™une tringle ou dâ€™un store",
+"Bricolage / Menuiserie légère",
+"Pose d’une tringle ou d’un store",
 "u",
 1,
 [
@@ -2924,7 +2924,7 @@ p("BRI-TRINGLE",
 
   "Pose des supports",
 
-  "Montage et rÃ©glage de lâ€™Ã©quipement",
+  "Montage et réglage de l’équipement",
 
 ],
 { tags:
@@ -2933,36 +2933,36 @@ p("BRI-TRINGLE",
 }),
 
 p("BRI-COULISSANTE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"RÃ©glage dâ€™une porte coulissante",
+"Bricolage / Menuiserie légère",
+"Réglage d’une porte coulissante",
 "u",
 0.75,
 [
 
-  "ContrÃ´le du rail et des galets",
+  "Contrôle du rail et des galets",
 
-  "RÃ©glage et alignement",
+  "Réglage et alignement",
 
   "Essai de fonctionnement",
 
 ],
 { conditions:
-"SystÃ¨me existant rÃ©parable sans remplacement complet.",
+"Système existant réparable sans remplacement complet.",
 tags:
 ["porte coulissante",
-"rÃ©glage"]
+"réglage"]
 }),
 
 p("BRI-PORTE-REG",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"RÃ©glage dâ€™une porte",
+"Bricolage / Menuiserie légère",
+"Réglage d’une porte",
 "u",
 0.75,
 [
 
-  "ContrÃ´le des jeux et points de frottement",
+  "Contrôle des jeux et points de frottement",
 
-  "RÃ©glage des paumelles ou Ã©lÃ©ments accessibles",
+  "Réglage des paumelles ou éléments accessibles",
 
   "Essai de fonctionnement",
 
@@ -2971,39 +2971,39 @@ p("BRI-PORTE-REG",
 "Hors remplacement complet du bloc-porte.",
 tags:
 ["porte",
-"rÃ©glage"]
+"réglage"]
 }),
 
 p("BRI-POIGNEE-PETITE-REP",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Resserrage / petite rÃ©paration de poignÃ©e ou quincaillerie",
+"Bricolage / Menuiserie légère",
+"Resserrage / petite réparation de poignée ou quincaillerie",
 "u",
 0.2,
 [
 
-  "Resserrage ou remplacement dâ€™une petite fixation accessible",
+  "Resserrage ou remplacement d’une petite fixation accessible",
 
-  "RÃ©glage et essai de fonctionnement",
+  "Réglage et essai de fonctionnement",
 
 ],
 { conditions:
-"Pour rÃ©paration simple avec mÃ©canisme existant conservÃ©. Hors remplacement complet de poignÃ©e, serrure ou quincaillerie dÃ©fectueuse.",
+"Pour réparation simple avec mécanisme existant conservé. Hors remplacement complet de poignée, serrure ou quincaillerie défectueuse.",
 tags:
-["poignÃ©e",
+["poignée",
 "porte",
 "vis",
 "quincaillerie",
 "resserrage",
-"petite rÃ©paration"]
+"petite réparation"]
 }),
 
 p("BRI-RABOT",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Rabotage / ajustement dâ€™une porte",
+"Bricolage / Menuiserie légère",
+"Rabotage / ajustement d’une porte",
 "u",
 1,
 [
-  "RepÃ©rage de la zone de frottement ; dÃ©pose si nÃ©cessaire.",
+  "Repérage de la zone de frottement ; dépose si nécessaire.",
   "Rabotage ou ajustement.",
   "Repose et essai.",
 ],
@@ -3013,10 +3013,10 @@ p("BRI-RABOT",
 }),
 
 p("BRI-FENETRE-REG",
-"Bricolage / Menuiserie lÃ©gÃ¨re", "RÃ©glage / petite rÃ©paration dâ€™une fenÃªtre ou fenÃªtre de toit", "u",
+"Bricolage / Menuiserie légère", "Réglage / petite réparation d’une fenêtre ou fenêtre de toit", "u",
 0.75, [
-  "ContrÃ´le de lâ€™ouvrant et des Ã©lÃ©ments accessibles ; dÃ©pose partielle si nÃ©cessaire Ã  lâ€™intervention.",
-  "Resserrage, rÃ©glage ou reprise simple de la quincaillerie.",
+  "Contrôle de l’ouvrant et des éléments accessibles ; dépose partielle si nécessaire à l’intervention.",
+  "Resserrage, réglage ou reprise simple de la quincaillerie.",
   "Repose et essai de fonctionnement.",
 ],
 
@@ -3024,172 +3024,172 @@ p("BRI-FENETRE-REG",
 
     conditions:
 
-      "Pour intervention simple sur fenÃªtre ou fenÃªtre de toit existante. Hors remplacement complet de menuiserie, vitrage ou mÃ©canisme complexe.",
+      "Pour intervention simple sur fenêtre ou fenêtre de toit existante. Hors remplacement complet de menuiserie, vitrage ou mécanisme complexe.",
 
     tags: [
 
-      "fenÃªtre",
+      "fenêtre",
 
-      "fenÃªtre de toit",
+      "fenêtre de toit",
 
       "Velux",
 
-      "poignÃ©e",
+      "poignée",
 
 "quincaillerie",
 
-      "rÃ©glage",
+      "réglage",
 
       "resserrage",
 
-      "rÃ©paration",
+      "réparation",
 ],  }),
 
 p("BRI-BAL-DEPOSE-BLOC",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"DÃ©pose dâ€™un bloc de boÃ®tes aux lettres encastrÃ©es",
+"Bricolage / Menuiserie légère",
+"Dépose d’un bloc de boîtes aux lettres encastrées",
 "forfait",
 3.5,
 [
-  "Protection et prÃ©paration de la zone dâ€™intervention ; descellement et dÃ©pose de lâ€™ensemble de boÃ®tes aux lettres existant.",
-  "DÃ©molition pÃ©riphÃ©rique strictement nÃ©cessaire Ã  la dÃ©pose.",
-  "Regroupement des Ã©lÃ©ments dÃ©posÃ©s et gravats.",
+  "Protection et préparation de la zone d’intervention ; descellement et dépose de l’ensemble de boîtes aux lettres existant.",
+  "Démolition périphérique strictement nécessaire à la dépose.",
+  "Regroupement des éléments déposés et gravats.",
 ],
 { conditions:
-"Pour bloc existant encastrÃ© en maÃ§onnerie. Hors Ã©vacuation en dÃ©chÃ¨terie et hors reprise structurelle du mur.",
+"Pour bloc existant encastré en maçonnerie. Hors évacuation en déchèterie et hors reprise structurelle du mur.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["boÃ®te aux lettres",
-"dÃ©pose",
+["boîte aux lettres",
+"dépose",
 "bloc",
-"encastrÃ©"]
+"encastré"]
 }),
 
 p("BRI-BAL-PREP",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"PrÃ©paration / adaptation dâ€™une rÃ©servation pour boÃ®tes aux lettres",
+"Bricolage / Menuiserie légère",
+"Préparation / adaptation d’une réservation pour boîtes aux lettres",
 "forfait",
 2.5,
 [
 
-  "Piquage et reprises localisÃ©es nÃ©cessaires",
+  "Piquage et reprises localisées nécessaires",
 
-  "Adaptation courante de lâ€™ouverture au nouvel ensemble",
+  "Adaptation courante de l’ouverture au nouvel ensemble",
 
-  "PrÃ©paration des supports avant scellement",
+  "Préparation des supports avant scellement",
 
 ],
 { conditions:
-"Hors modification structurelle, linteau ou reconstruction importante de maÃ§onnerie.",
+"Hors modification structurelle, linteau ou reconstruction importante de maçonnerie.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["boÃ®te aux lettres",
-"maÃ§onnerie",
-"rÃ©servation",
-"prÃ©paration"]
+["boîte aux lettres",
+"maçonnerie",
+"réservation",
+"préparation"]
 }),
 
 p("BRI-BAL-FIN-MAC",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Reprise de maÃ§onnerie pÃ©riphÃ©rique autour dâ€™un bloc de boÃ®tes aux lettres",
+"Bricolage / Menuiserie légère",
+"Reprise de maçonnerie périphérique autour d’un bloc de boîtes aux lettres",
 "forfait",
 2.8,
 [
 
-  "Rebouchage et scellement pÃ©riphÃ©rique au mortier adaptÃ©",
+  "Rebouchage et scellement périphérique au mortier adapté",
 
-  "Reprise localisÃ©e des parties dÃ©gradÃ©es autour du bloc",
+  "Reprise localisée des parties dégradées autour du bloc",
 
-  "Dressage et finition des raccords avec la maÃ§onnerie existante",
+  "Dressage et finition des raccords avec la maçonnerie existante",
 
-], { conditions: "Finition raccordÃ©e Ã  lâ€™existant, hors ravalement complet, peinture de faÃ§ade et reprise structurelle.", rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler", tags:
-["boÃ®te aux lettres",
-"maÃ§onnerie", "mortier",
+], { conditions: "Finition raccordée à l’existant, hors ravalement complet, peinture de façade et reprise structurelle.", rentabilite:
+"🟠 À contrôler", tags:
+["boîte aux lettres",
+"maçonnerie", "mortier",
 "finition"] }),
 
 p("BRI-BAL-POSE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Pose et scellement dâ€™une boÃ®te aux lettres en ensemble",
+"Bricolage / Menuiserie légère",
+"Pose et scellement d’une boîte aux lettres en ensemble",
 "u",
 0.65,
 [
-  "PrÃ©sentation et assemblage avec les boÃ®tes adjacentes ; calage, alignement et mise Ã  niveau.",
-  "Fixation et scellement dans la rÃ©servation prÃ©parÃ©e.",
-  "ContrÃ´le de lâ€™ouverture et du fonctionnement.",
+  "Présentation et assemblage avec les boîtes adjacentes ; calage, alignement et mise à niveau.",
+  "Fixation et scellement dans la réservation préparée.",
+  "Contrôle de l’ouverture et du fonctionnement.",
 ],
 { conditions:
-"BoÃ®te fournie sÃ©parÃ©ment. Pose en ensemble accessible, support prÃ©parÃ©. Temps Ã  adapter si fixation ou assemblage particulier.",
+"Boîte fournie séparément. Pose en ensemble accessible, support préparé. Temps à adapter si fixation ou assemblage particulier.",
 tags:
-["boÃ®te aux lettres",
+["boîte aux lettres",
 "pose",
 "scellement",
 "ensemble"]
 }),
 
 p("BRI-BAL-BARILLET",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Remplacement dâ€™un barillet de boÃ®te aux lettres",
+"Bricolage / Menuiserie légère",
+"Remplacement d’un barillet de boîte aux lettres",
 "u",
 0.5,
 [
-  "DÃ©pose du barillet existant ; pose dâ€™un barillet standard compatible.",
-  "RÃ©glage du verrouillage.",
-  "ContrÃ´le de la fermeture et essai avec les clÃ©s.",
+  "Dépose du barillet existant ; pose d’un barillet standard compatible.",
+  "Réglage du verrouillage.",
+  "Contrôle de la fermeture et essai avec les clés.",
 ],
 { conditions:
-"Barillet et clÃ©s fournis sÃ©parÃ©ment. Pour boÃ®te aux lettres existante accessible et porte conservÃ©e. Hors perÃ§age dâ€™un barillet bloquÃ©, modification importante de la porte ou remplacement complet de la boÃ®te aux lettres.",
+"Barillet et clés fournis séparément. Pour boîte aux lettres existante accessible et porte conservée. Hors perçage d’un barillet bloqué, modification importante de la porte ou remplacement complet de la boîte aux lettres.",
 tags:
-["boÃ®te aux lettres",
+["boîte aux lettres",
 "barillet",
 "serrure",
-"clÃ©",
+"clé",
 "remplacement"]
 }),
 
 p("BRI-BAL-PORTE-REG",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Redressage et rÃ©glage dâ€™une porte de boÃ®te aux lettres",
+"Bricolage / Menuiserie légère",
+"Redressage et réglage d’une porte de boîte aux lettres",
 "u",
 0.75,
 [
-  "ContrÃ´le de la porte, des jeux et de la fermeture ; dÃ©pose partielle si nÃ©cessaire.",
-  "Redressage localisÃ© de la porte mÃ©tallique ; rÃ©glage de lâ€™alignement et de la fermeture.",
+  "Contrôle de la porte, des jeux et de la fermeture ; dépose partielle si nécessaire.",
+  "Redressage localisé de la porte métallique ; réglage de l’alignement et de la fermeture.",
   "Repose et essai de fonctionnement.",
 ],
 { conditions:
-"Pour dÃ©formation lÃ©gÃ¨re Ã  modÃ©rÃ©e permettant la conservation de la porte, du caisson et des charniÃ¨res. Hors remplacement de porte, remise en peinture ou remplacement complet de la boÃ®te aux lettres.",
+"Pour déformation légère à modérée permettant la conservation de la porte, du caisson et des charnières. Hors remplacement de porte, remise en peinture ou remplacement complet de la boîte aux lettres.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["boÃ®te aux lettres",
+["boîte aux lettres",
 "porte",
 "redressage",
-"rÃ©glage",
-"rÃ©paration"]
+"réglage",
+"réparation"]
 }),
 // ================= FIXATIONS / MAINS COURANTES =================
 p("BRI-MAIN-COURANTE-REP",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"RÃ©paration / reprise de fixations de main courante",
+"Bricolage / Menuiserie légère",
+"Réparation / reprise de fixations de main courante",
 "h",
 1,
 [
-  "ContrÃ´le des fixations existantes accessibles ; dÃ©pose des Ã©lÃ©ments nÃ©cessaires Ã  lâ€™intervention.",
-  "Retrait des fixations dÃ©fectueuses ; reprise localisÃ©e des anciens points de fixation si nÃ©cessaire.",
-  "CrÃ©ation de nouveaux points dâ€™ancrage adaptÃ©s au support ; repose, rÃ©glage et contrÃ´le de la tenue de la main courante.",
+  "Contrôle des fixations existantes accessibles ; dépose des éléments nécessaires à l’intervention.",
+  "Retrait des fixations défectueuses ; reprise localisée des anciens points de fixation si nécessaire.",
+  "Création de nouveaux points d’ancrage adaptés au support ; repose, réglage et contrôle de la tenue de la main courante.",
 ],
 
   {
 
     conditions:
 
-      "MÃ©thode de fixation Ã  adapter Ã  la nature et Ã  lâ€™Ã©tat du support. Hors renforcement structurel de la paroi. Reprises de peinture comptÃ©es sÃ©parÃ©ment si nÃ©cessaires.",
+      "Méthode de fixation à adapter à la nature et à l’état du support. Hors renforcement structurel de la paroi. Reprises de peinture comptées séparément si nécessaires.",
 
     rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 
     tags:
 [
@@ -3204,21 +3204,21 @@ p("BRI-MAIN-COURANTE-REP",
 
       "ancrage",
 
-      "rÃ©paration",
+      "réparation",
 ],}
 ),
 
 p("BRI-REB-FIX-MURAL",
-"Bricolage / Menuiserie lÃ©gÃ¨re", "Rebouchage et reprise locale dâ€™anciens points de fixation",
+"Bricolage / Menuiserie légère", "Rebouchage et reprise locale d’anciens points de fixation",
 "u",
 0.25,
 [
 
-    "Purge et nettoyage du point de fixation dÃ©gradÃ©",
+    "Purge et nettoyage du point de fixation dégradé",
 
-    "Rebouchage avec produit adaptÃ© au support",
+    "Rebouchage avec produit adapté au support",
 
-    "PonÃ§age et prÃ©paration locale aprÃ¨s sÃ©chage",
+    "Ponçage et préparation locale après séchage",
 
   ],
 
@@ -3226,7 +3226,7 @@ p("BRI-REB-FIX-MURAL",
 
     conditions:
 
-      "Pour reprises localisÃ©es courantes. Hors rÃ©paration structurelle du support et hors mise en peinture.",
+      "Pour reprises localisées courantes. Hors réparation structurelle du support et hors mise en peinture.",
 
     tags:
 [
@@ -3241,27 +3241,27 @@ p("BRI-REB-FIX-MURAL",
 
       "enduit",
 
-      "rÃ©paration",
+      "réparation",
 ],}
 ),
 p("BRI-CAISSON-CLIM-EXT",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Fabrication et pose dâ€™un caisson extÃ©rieur ventilÃ© pour unitÃ© de climatisation",
+"Bricolage / Menuiserie légère",
+"Fabrication et pose d’un caisson extérieur ventilé pour unité de climatisation",
 "forfait",
 7,
 [
-  "Prise de mesures et fabrication de lâ€™ossature adaptÃ©e Ã  lâ€™emplacement ; crÃ©ation dâ€™un rangement infÃ©rieur Ã©quipÃ© de deux portes.",
-  "Habillage extÃ©rieur avec les lames retenues pour le chantier ; rÃ©alisation dâ€™une faÃ§ade supÃ©rieure largement ajourÃ©e et dÃ©montable.",
-  "Pose, rÃ©glage des ouvrants et contrÃ´le des finitions.",
+  "Prise de mesures et fabrication de l’ossature adaptée à l’emplacement ; création d’un rangement inférieur équipé de deux portes.",
+  "Habillage extérieur avec les lames retenues pour le chantier ; réalisation d’une façade supérieure largement ajourée et démontable.",
+  "Pose, réglage des ouvrants et contrôle des finitions.",
 ],
 { conditions:
-"Dimensions, profondeur, habillage et ventilation Ã  adapter au chantier. Lâ€™entrÃ©e et la sortie dâ€™air de lâ€™unitÃ© doivent rester dÃ©gagÃ©es conformÃ©ment Ã  la notice du fabricant. Hors dÃ©placement, dÃ©connexion, rÃ©paration ou modification de la climatisation.",
+"Dimensions, profondeur, habillage et ventilation à adapter au chantier. L’entrée et la sortie d’air de l’unité doivent rester dégagées conformément à la notice du fabricant. Hors déplacement, déconnexion, réparation ou modification de la climatisation.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["caisson",
 "climatisation",
-"unitÃ© extÃ©rieure",
+"unité extérieure",
 "rangement",
 "portes",
 "ventilation",
@@ -3269,141 +3269,141 @@ tags:
 }),
 // ================= EXTERIEUR / METAL =================
 p("EXT-METAL-PREP",
-"ExtÃ©rieur / MÃ©tal",
-"PrÃ©paration dâ€™un support mÃ©tallique",
-"mÂ²",
+"Extérieur / Métal",
+"Préparation d’un support métallique",
+"m²",
 0.35,
 [
 
-  "Grattage et Ã©limination des parties non adhÃ©rentes",
+  "Grattage et élimination des parties non adhérentes",
 
-  "PonÃ§age ou prÃ©paration mÃ©canique lÃ©gÃ¨re",
+  "Ponçage ou préparation mécanique légère",
 
-  "DÃ©poussiÃ©rage avant finition",
+  "Dépoussiérage avant finition",
 
 ],
 { conditions:
-"Hors dÃ©capage lourd ou corrosion structurelle.",
+"Hors décapage lourd ou corrosion structurelle.",
 tags:
-["mÃ©tal",
-"prÃ©paration"]
+["métal",
+"préparation"]
 }),
 
 p("EXT-METAL-REP-H",
-"ExtÃ©rieur / MÃ©tal",
-"RÃ©paration / reprise lÃ©gÃ¨re dâ€™un Ã©lÃ©ment mÃ©tallique",
+"Extérieur / Métal",
+"Réparation / reprise légère d’un élément métallique",
 "h",
 1,
 [
 
-  "RepÃ©rage de la zone Ã  reprendre",
+  "Repérage de la zone à reprendre",
 
-  "RÃ©paration ou renforcement lÃ©ger prÃ©vu",
+  "Réparation ou renforcement léger prévu",
 
   "Nettoyage de la zone",
 
 ],
 { conditions:
-"Hors Ã©lÃ©ment structurel ou rÃ©paration nÃ©cessitant une certification spÃ©cifique.",
+"Hors élément structurel ou réparation nécessitant une certification spécifique.",
 tags:
-["mÃ©tal",
-"rÃ©paration"]
+["métal",
+"réparation"]
 }),
 
 p("EXT-SOUDURE",
-"ExtÃ©rieur / MÃ©tal",
+"Extérieur / Métal",
 "Reprise ponctuelle par soudure",
 "u",
 1,
 [
 
-  "PrÃ©paration de la zone",
+  "Préparation de la zone",
 
   "Reprise ponctuelle de la soudure",
 
-  "Nettoyage et contrÃ´le visuel",
+  "Nettoyage et contrôle visuel",
 
 ],
 { conditions:
-"Petite reprise accessible, hors ouvrage structurel ou soumis Ã  qualification spÃ©cifique.",
+"Petite reprise accessible, hors ouvrage structurel ou soumis à qualification spécifique.",
 tags:
 ["soudure",
-"mÃ©tal"]
+"métal"]
 }),
 
 p("EXT-ANTIROUILLE",
-"ExtÃ©rieur / MÃ©tal",
+"Extérieur / Métal",
 "Traitement anticorrosion",
-"mÂ²",
+"m²",
 0.15,
 [
 
-  "PrÃ©paration lÃ©gÃ¨re des zones concernÃ©es",
+  "Préparation légère des zones concernées",
 
-  "Application du traitement anticorrosion prÃ©vu",
+  "Application du traitement anticorrosion prévu",
 
 ],
 { conditions:
 "Hors corrosion perforante ou structurelle.",
 tags:
 ["antirouille",
-"mÃ©tal"]
+"métal"]
 }),
 
 p("EXT-METAL-PEINT",
-"ExtÃ©rieur / MÃ©tal",
-"Mise en peinture dâ€™un support mÃ©tallique",
-"mÂ²",
+"Extérieur / Métal",
+"Mise en peinture d’un support métallique",
+"m²",
 0.25,
 [
 
-  "Application de la finition prÃ©vue",
+  "Application de la finition prévue",
 
-  "RÃ©alisation des reprises et finitions courantes",
+  "Réalisation des reprises et finitions courantes",
 
 ],
 { conditions:
-"Support prÃ©parÃ©. Primaire anticorrosion Ã  ajouter si nÃ©cessaire.",
+"Support préparé. Primaire anticorrosion à ajouter si nécessaire.",
 tags:
-["mÃ©tal",
+["métal",
 "peinture"]
 }),
 p("EXT-PERGOLA-ACIER-FAB",
-"ExtÃ©rieur / MÃ©tal",
-"Fabrication dâ€™une structure de pergola en acier",
+"Extérieur / Métal",
+"Fabrication d’une structure de pergola en acier",
 "h",
 1,
 [
-  "ContrÃ´le des dimensions et prÃ©paration du dÃ©bit des profilÃ©s ; dÃ©coupe, perÃ§age et assemblage des Ã©lÃ©ments de structure.",
-  "Soudure des assemblages prÃ©vus et prÃ©paration des raccords.",
-  "Meulage, Ã©bavurage et contrÃ´le visuel avant finition.",
+  "Contrôle des dimensions et préparation du débit des profilés ; découpe, perçage et assemblage des éléments de structure.",
+  "Soudure des assemblages prévus et préparation des raccords.",
+  "Meulage, ébavurage et contrôle visuel avant finition.",
 ],
 { conditions:
-"Temps Ã  adapter aux dimensions, au nombre de poteaux et de traverses. Sections et ancrages Ã  valider avant fabrication. Hors Ã©tude de structure, couverture, finition, thermolaquage, transport spÃ©cialisÃ© et moyen de levage.",
+"Temps à adapter aux dimensions, au nombre de poteaux et de traverses. Sections et ancrages à valider avant fabrication. Hors étude de structure, couverture, finition, thermolaquage, transport spécialisé et moyen de levage.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["pergola",
 "acier",
 "fabrication",
 "soudure",
-"structure extÃ©rieure"]
+"structure extérieure"]
 }),
 
 p("EXT-PERGOLA-ACIER-POS",
-"ExtÃ©rieur / MÃ©tal",
-"Pose et fixation dâ€™une structure de pergola en acier",
+"Extérieur / Métal",
+"Pose et fixation d’une structure de pergola en acier",
 "h",
 1,
 [
-  "Implantation et repÃ©rage des points de fixation ; mise en place des poteaux, poutres et traverses.",
-  "RÃ©alisation des ancrages au sol et au support mural prÃ©vus.",
-  "RÃ©glage de lâ€™aplomb, contrÃ´le des assemblages et finitions de pose.",
+  "Implantation et repérage des points de fixation ; mise en place des poteaux, poutres et traverses.",
+  "Réalisation des ancrages au sol et au support mural prévus.",
+  "Réglage de l’aplomb, contrôle des assemblages et finitions de pose.",
 ],
 { conditions:
-"Support sain, stable et compatible avec les ancrages prÃ©vus. Hors Ã©tude structurelle, terrassement important, reprise du support, couverture, Ã©tanchÃ©itÃ©, Ã©chafaudage et moyen de levage spÃ©cialisÃ©.",
+"Support sain, stable et compatible avec les ancrages prévus. Hors étude structurelle, terrassement important, reprise du support, couverture, étanchéité, échafaudage et moyen de levage spécialisé.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["pergola",
 "acier",
@@ -3413,25 +3413,25 @@ tags:
 }),
 
 p("EXT-PERGOLA-RENFORT-POSE",
-"ExtÃ©rieur / MÃ©tal",
-"Renfort ponctuel pour manutention et pose dâ€™une structure mÃ©tallique",
+"Extérieur / Métal",
+"Renfort ponctuel pour manutention et pose d’une structure métallique",
 "forfait",
 0,
 [
 
-  "PrÃ©sence ponctuelle dâ€™une seconde personne pour les manutentions lourdes",
+  "Présence ponctuelle d’une seconde personne pour les manutentions lourdes",
 
-  "Assistance Ã  la mise en place et au maintien des Ã©lÃ©ments de grande longueur",
+  "Assistance à la mise en place et au maintien des éléments de grande longueur",
 
-  "SÃ©curisation des opÃ©rations de levage et de fixation accessibles",
+  "Sécurisation des opérations de levage et de fixation accessibles",
 
 ],
 { prixFixe:
 180,
 conditions:
-"Forfait Ã  adapter Ã  la durÃ©e et au poids des Ã©lÃ©ments. Hors grue, nacelle, Ã©chafaudage ou engin de levage.",
+"Forfait à adapter à la durée et au poids des éléments. Hors grue, nacelle, échafaudage ou engin de levage.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["pergola",
 "renfort",
@@ -3441,23 +3441,23 @@ tags:
 }),
 
 p("EXT-THERMOLAQUAGE-LOG",
-"ExtÃ©rieur / MÃ©tal",
-"PrÃ©paration et manutention dâ€™Ã©lÃ©ments destinÃ©s au thermolaquage",
+"Extérieur / Métal",
+"Préparation et manutention d’éléments destinés au thermolaquage",
 "h",
 1,
 [
-  "RepÃ©rage et prÃ©paration des Ã©lÃ©ments avant traitement extÃ©rieur ; protection, chargement et manutention des piÃ¨ces.",
-  "DÃ©pÃ´t et rÃ©cupÃ©ration auprÃ¨s du prestataire retenu.",
-  "ContrÃ´le visuel de la finition avant pose.",
+  "Repérage et préparation des éléments avant traitement extérieur ; protection, chargement et manutention des pièces.",
+  "Dépôt et récupération auprès du prestataire retenu.",
+  "Contrôle visuel de la finition avant pose.",
 ],
 { conditions:
-"Le prix facturÃ© par le prestataire de thermolaquage, les rÃ©parations de finition et les transports exceptionnels sont comptÃ©s sÃ©parÃ©ment.",
+"Le prix facturé par le prestataire de thermolaquage, les réparations de finition et les transports exceptionnels sont comptés séparément.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["thermolaquage",
-"mÃ©tal",
-"prÃ©paration",
+"métal",
+"préparation",
 "manutention",
 "prestataire"]
 }),
@@ -3465,21 +3465,21 @@ tags:
 // ================= EXTERIEUR / CLOTURE =================
 p(
   "EXT-CLOTURE-APPRO-MANUT",
-  "ExtÃ©rieur / ClÃ´ture",
-  "Approvisionnement et manutention dâ€™Ã©lÃ©ments de clÃ´ture",
+  "Extérieur / Clôture",
+  "Approvisionnement et manutention d’éléments de clôture",
   "forfait",
   2.5,
   [
-  "PrÃ©paration de la liste des Ã©lÃ©ments nÃ©cessaires Ã  la pose ; chargement et transport courant des panneaux, poteaux et accessoires.",
-  "DÃ©chargement et rÃ©partition des Ã©lÃ©ments sur la zone dâ€™intervention.",
+  "Préparation de la liste des éléments nécessaires à la pose ; chargement et transport courant des panneaux, poteaux et accessoires.",
+  "Déchargement et répartition des éléments sur la zone d’intervention.",
   "Manutention courante des fournitures avant pose.",
 ],
   {
     conditions:
-      "Pour approvisionnement local et Ã©lÃ©ments de dimensions courantes. Hors livraison facturÃ©e par le fournisseur, transport exceptionnel, manutention mÃ©canisÃ©e, stockage prolongÃ© et Ã©vacuation des emballages volumineux.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Pour approvisionnement local et éléments de dimensions courantes. Hors livraison facturée par le fournisseur, transport exceptionnel, manutention mécanisée, stockage prolongé et évacuation des emballages volumineux.",
+    rentabilite: "🟠 À contrôler",
     tags: [
-      "clÃ´ture",
+      "clôture",
       "grillage rigide",
       "approvisionnement",
       "manutention",
@@ -3491,21 +3491,21 @@ p(
 
 p(
   "EXT-CLOTURE-POTEAU-PLATINE",
-  "ExtÃ©rieur / ClÃ´ture",
-  "Pose dâ€™un poteau de clÃ´ture sur platine",
+  "Extérieur / Clôture",
+  "Pose d’un poteau de clôture sur platine",
   "u",
   0.9,
   [
-  "Implantation et repÃ©rage de la position du poteau ; perÃ§age du support et mise en place des fixations adaptÃ©es.",
-  "Pose de la platine et du poteau ; rÃ©glage de lâ€™alignement, de lâ€™aplomb et du niveau.",
-  "Serrage et contrÃ´le de la fixation.",
+  "Implantation et repérage de la position du poteau ; perçage du support et mise en place des fixations adaptées.",
+  "Pose de la platine et du poteau ; réglage de l’alignement, de l’aplomb et du niveau.",
+  "Serrage et contrôle de la fixation.",
 ],
   {
     conditions:
-      "Support maÃ§onnÃ© sain, stable, suffisamment large et rÃ©sistant aux efforts transmis par la clÃ´ture. Fixations et scellement adaptÃ©s comptÃ©s en fournitures. Hors rÃ©paration ou renforcement de la maÃ§onnerie, carottage important et Ã©tude de rÃ©sistance au vent.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Support maçonné sain, stable, suffisamment large et résistant aux efforts transmis par la clôture. Fixations et scellement adaptés comptés en fournitures. Hors réparation ou renforcement de la maçonnerie, carottage important et étude de résistance au vent.",
+    rentabilite: "🟠 À contrôler",
     tags: [
-      "clÃ´ture",
+      "clôture",
       "grillage rigide",
       "poteau",
       "platine",
@@ -3518,50 +3518,50 @@ p(
 
 p(
   "EXT-CLOTURE-PANNEAU-POS",
-  "ExtÃ©rieur / ClÃ´ture",
-  "Pose de panneaux de clÃ´ture rigide",
+  "Extérieur / Clôture",
+  "Pose de panneaux de clôture rigide",
   "ml",
   0.4,
   [
-  "PrÃ©sentation des panneaux entre les poteaux prÃ©parÃ©s ; dÃ©coupes droites nÃ©cessaires Ã  lâ€™ajustement des longueurs.",
-  "Pose et fixation des panneaux rigides ; rÃ©glage de lâ€™alignement et contrÃ´le de la tenue de lâ€™ensemble.",
-  "Protection courante des coupes mÃ©talliques rÃ©alisÃ©es sur place.",
+  "Présentation des panneaux entre les poteaux préparés ; découpes droites nécessaires à l’ajustement des longueurs.",
+  "Pose et fixation des panneaux rigides ; réglage de l’alignement et contrôle de la tenue de l’ensemble.",
+  "Protection courante des coupes métalliques réalisées sur place.",
 ],
   {
     conditions:
-      "Pour pose droite sur poteaux prÃ©parÃ©s et support accessible. Poteaux, platines, occultation, adaptation importante Ã  une pente, reprise de maÃ§onnerie et renforcement du support comptÃ©s sÃ©parÃ©ment.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Pour pose droite sur poteaux préparés et support accessible. Poteaux, platines, occultation, adaptation importante à une pente, reprise de maçonnerie et renforcement du support comptés séparément.",
+    rentabilite: "🟠 À contrôler",
     tags: [
-      "clÃ´ture",
+      "clôture",
       "grillage rigide",
       "panneau rigide",
       "pose",
-      "dÃ©coupe",
-      "extÃ©rieur",
+      "découpe",
+      "extérieur",
     ],
   }
 ),
 
 p(
   "EXT-CLOTURE-ADAPT-PENTE",
-  "ExtÃ©rieur / ClÃ´ture",
-  "Adaptation de panneaux de clÃ´ture Ã  une pente",
+  "Extérieur / Clôture",
+  "Adaptation de panneaux de clôture à une pente",
   "ml",
   0.3,
   [
-  "RelevÃ© de la pente et traÃ§age des hauteurs nÃ©cessaires ; dÃ©coupe progressive des panneaux suivant la configuration.",
-  "Ã‰bavurage et protection des coupes mÃ©talliques.",
-  "Ajustement des panneaux et contrÃ´le de la continuitÃ© visuelle.",
+  "Relevé de la pente et traçage des hauteurs nécessaires ; découpe progressive des panneaux suivant la configuration.",
+  "Ébavurage et protection des coupes métalliques.",
+  "Ajustement des panneaux et contrôle de la continuité visuelle.",
 ],
   {
     conditions:
-      "Ã€ ajouter Ã  la pose des panneaux lorsque la hauteur doit Ã©voluer suivant une pente ou une arase irrÃ©guliÃ¨re. Hors fabrication sur mesure en atelier, modification structurelle des poteaux et reprise du support maÃ§onnÃ©.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "À ajouter à la pose des panneaux lorsque la hauteur doit évoluer suivant une pente ou une arase irrégulière. Hors fabrication sur mesure en atelier, modification structurelle des poteaux et reprise du support maçonné.",
+    rentabilite: "🟠 À contrôler",
     tags: [
-      "clÃ´ture",
+      "clôture",
       "grillage rigide",
       "pente",
-      "dÃ©coupe",
+      "découpe",
       "adaptation",
       "murette",
     ],
@@ -3570,21 +3570,21 @@ p(
 
 p(
   "EXT-CLOTURE-OCCULT-PVC",
-  "ExtÃ©rieur / ClÃ´ture",
-  "Pose de lames occultantes PVC sur clÃ´ture rigide",
-  "mÂ²",
+  "Extérieur / Clôture",
+  "Pose de lames occultantes PVC sur clôture rigide",
+  "m²",
   0.18,
   [
-  "ContrÃ´le de la compatibilitÃ© entre les lames et les mailles des panneaux ; dÃ©coupe des lames occultantes aux hauteurs nÃ©cessaires.",
-  "Mise en place des lames et des clips de maintien ; ajustement des extrÃ©mitÃ©s, des panneaux recoupÃ©s et des zones en pente.",
-  "ContrÃ´le visuel et nettoyage de fin dâ€™intervention.",
+  "Contrôle de la compatibilité entre les lames et les mailles des panneaux ; découpe des lames occultantes aux hauteurs nécessaires.",
+  "Mise en place des lames et des clips de maintien ; ajustement des extrémités, des panneaux recoupés et des zones en pente.",
+  "Contrôle visuel et nettoyage de fin d’intervention.",
 ],
   {
     conditions:
-      "ClÃ´ture rigide posÃ©e, stable et compatible avec le systÃ¨me dâ€™occultation retenu. La rÃ©sistance de la murette, des poteaux, platines et fixations aux efforts supplÃ©mentaires dus au vent doit Ãªtre validÃ©e avant pose. Hors fourniture, renforcement du support et remplacement dâ€™un panneau inadaptÃ©.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Clôture rigide posée, stable et compatible avec le système d’occultation retenu. La résistance de la murette, des poteaux, platines et fixations aux efforts supplémentaires dus au vent doit être validée avant pose. Hors fourniture, renforcement du support et remplacement d’un panneau inadapté.",
+    rentabilite: "🟠 À contrôler",
     tags: [
-      "clÃ´ture",
+      "clôture",
       "grillage rigide",
       "occultation",
       "lame PVC",
@@ -3596,66 +3596,66 @@ p(
 // ================= TERRASSE BOIS =================
 p("TERR-IMPLANT-GEOTEXTILE",
 "Terrasse bois",
-"Implantation et prÃ©paration du sol pour crÃ©ation dâ€™une terrasse",
-"mÂ²",
+"Implantation et préparation du sol pour création d’une terrasse",
+"m²",
 0.2,
 [
-  "Implantation de lâ€™emprise et repÃ©rage des niveaux finis ; prÃ©paration courante et nettoyage de la zone dÃ©gagÃ©e.",
-  "Pose du gÃ©otextile sur lâ€™emprise prÃ©vue.",
-  "RepÃ©rage des futurs points dâ€™appui de la structure.",
+  "Implantation de l’emprise et repérage des niveaux finis ; préparation courante et nettoyage de la zone dégagée.",
+  "Pose du géotextile sur l’emprise prévue.",
+  "Repérage des futurs points d’appui de la structure.",
 ],
 { conditions:
-"Zone dÃ©gagÃ©e et ancienne terrasse dÃ©posÃ©e avant intervention. Hors terrassement important, dÃ©caissement, compactage mÃ©canique, drainage, Ã©vacuation de terre et traitement de rÃ©seaux enterrÃ©s.",
+"Zone dégagée et ancienne terrasse déposée avant intervention. Hors terrassement important, décaissement, compactage mécanique, drainage, évacuation de terre et traitement de réseaux enterrés.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
-"crÃ©ation",
+"création",
 "implantation",
 "sol",
-"gÃ©otextile"]
+"géotextile"]
 }),
 
 p("TERR-POINTS-APPUI",
 "Terrasse bois",
-"RÃ©alisation et rÃ©glage des points dâ€™appui dâ€™une terrasse",
-"mÂ²",
+"Réalisation et réglage des points d’appui d’une terrasse",
+"m²",
 0.4,
 [
-  "RÃ©partition des appuis selon lâ€™ossature prÃ©vue ; mise en place des supports bÃ©ton ou dalles dâ€™appui nÃ©cessaires.",
-  "Pose et rÃ©glage des pieds ou plots rÃ©glables.",
-  "ContrÃ´le des niveaux, alignements et stabilitÃ© des appuis.",
+  "Répartition des appuis selon l’ossature prévue ; mise en place des supports béton ou dalles d’appui nécessaires.",
+  "Pose et réglage des pieds ou plots réglables.",
+  "Contrôle des niveaux, alignements et stabilité des appuis.",
 ],
 { conditions:
-"QuantitÃ© et mÃ©thode Ã  confirmer aprÃ¨s contrÃ´le du terrain et de la hauteur disponible. Hors fondations profondes, dalle bÃ©ton complÃ¨te, Ã©tude de sol et reprise dâ€™un terrain instable.",
+"Quantité et méthode à confirmer après contrôle du terrain et de la hauteur disponible. Hors fondations profondes, dalle béton complète, étude de sol et reprise d’un terrain instable.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
-"crÃ©ation",
-"plot bÃ©ton",
-"pied rÃ©glable",
+"création",
+"plot béton",
+"pied réglable",
 "niveau",
 "appui"]
 }),
 
 p("TERR-OSSATURE-NEUVE",
 "Terrasse bois",
-"CrÃ©ation dâ€™une structure porteuse neuve en lambourdes",
-"mÂ²",
+"Création d’une structure porteuse neuve en lambourdes",
+"m²",
 0.45,
 [
-  "Calepinage et dÃ©bit des lambourdes selon lâ€™emprise ; pose de la structure porteuse sur les appuis rÃ©glÃ©s.",
-  "Renfort des pÃ©riphÃ©ries, aboutages et zones particuliÃ¨res ; rÃ©glage de la planÃ©itÃ©, fixation et contrÃ´le de la stabilitÃ©.",
-  "Pose des bandes de protection prÃ©vues sur les lambourdes.",
+  "Calepinage et débit des lambourdes selon l’emprise ; pose de la structure porteuse sur les appuis réglés.",
+  "Renfort des périphéries, aboutages et zones particulières ; réglage de la planéité, fixation et contrôle de la stabilité.",
+  "Pose des bandes de protection prévues sur les lambourdes.",
 ],
 { conditions:
-"Pour une structure courante de terrasse piÃ©tonne. Sections, entraxes et doubles lambourdes Ã  adapter aux lames choisies. Hors structure porteuse surÃ©levÃ©e, garde-corps, escalier et Ã©tude structurelle.",
+"Pour une structure courante de terrasse piétonne. Sections, entraxes et doubles lambourdes à adapter aux lames choisies. Hors structure porteuse surélevée, garde-corps, escalier et étude structurelle.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
-"crÃ©ation",
+"création",
 "structure neuve",
 "lambourdes",
 "ossature"]
@@ -3664,20 +3664,20 @@ tags:
 p("TERR-POSE-LAMES-NEUF",
 "Terrasse bois",
 "Pose de lames de terrasse sur structure neuve",
-"mÂ²",
+"m²",
 0.588636,
 [
-  "Implantation et calepinage courant des lames ; pose avec visserie inox ou clips adaptÃ©s au produit retenu.",
-  "Respect des jeux, espacements et prescriptions de pose ; rÃ©alisation des coupes droites, rives et finitions pÃ©riphÃ©riques courantes.",
-  "ContrÃ´le de lâ€™alignement, de la stabilitÃ© et nettoyage de fin de pose.",
+  "Implantation et calepinage courant des lames ; pose avec visserie inox ou clips adaptés au produit retenu.",
+  "Respect des jeux, espacements et prescriptions de pose ; réalisation des coupes droites, rives et finitions périphériques courantes.",
+  "Contrôle de l’alignement, de la stabilité et nettoyage de fin de pose.",
 ],
 { conditions:
-"Sur structure neuve plane, stable et compatible. Hors fourniture, traitement de finition, marches, trappes, motifs particuliers et coupes complexes facturÃ©es sÃ©parÃ©ment. Temps Ã  ajuster pour un systÃ¨me de fixation spÃ©cifique.",
+"Sur structure neuve plane, stable et compatible. Hors fourniture, traitement de finition, marches, trappes, motifs particuliers et coupes complexes facturées séparément. Temps à ajuster pour un système de fixation spécifique.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
-"crÃ©ation",
+"création",
 "lames",
 "bois",
 "composite",
@@ -3687,51 +3687,51 @@ tags:
 
 p("TERR-PROT-CHEMINEMENT",
 "Terrasse bois",
-"Protection du cheminement intÃ©rieur pour accÃ¨s au chantier",
+"Protection du cheminement intérieur pour accès au chantier",
 "h",
 1,
 [
 
-  "Protection des sols et des zones de passage concernÃ©es",
+  "Protection des sols et des zones de passage concernées",
 
-  "Mise en place dâ€™un cheminement adaptÃ© aux manutentions",
+  "Mise en place d’un cheminement adapté aux manutentions",
 
-  "DÃ©pose des protections en fin dâ€™intervention",
+  "Dépose des protections en fin d’intervention",
 
 ],
 { conditions:
-"Ã€ quantifier selon le nombre de piÃ¨ces, les Ã©tages, la longueur du cheminement et la fragilitÃ© des surfaces.",
+"À quantifier selon le nombre de pièces, les étages, la longueur du cheminement et la fragilité des surfaces.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
 "protection",
-"intÃ©rieur",
+"intérieur",
 "cheminement",
-"accÃ¨s"]
+"accès"]
 }),
 
 p("TERR-DEPOSE-LAMES",
 "Terrasse bois",
-"DÃ©pose de lames de terrasse existantes",
-"mÂ²",
+"Dépose de lames de terrasse existantes",
+"m²",
 0.25,
 [
 
-  "DÃ©pose mÃ©thodique des lames et de leurs fixations accessibles",
+  "Dépose méthodique des lames et de leurs fixations accessibles",
 
-  "Regroupement des Ã©lÃ©ments dÃ©posÃ©s en vue de leur Ã©vacuation",
+  "Regroupement des éléments déposés en vue de leur évacuation",
 
-  "PrÃ©servation de la structure porteuse destinÃ©e Ã  Ãªtre conservÃ©e",
+  "Préservation de la structure porteuse destinée à être conservée",
 
 ],
 { conditions:
-"Pour des lames dÃ©montables sur une structure accessible. Hors dÃ©pose ou remplacement des lambourdes, Ã©vacuation et frais de traitement.",
+"Pour des lames démontables sur une structure accessible. Hors dépose ou remplacement des lambourdes, évacuation et frais de traitement.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
-"dÃ©pose",
+"dépose",
 "lames",
 "bois",
 "composite"]
@@ -3739,70 +3739,70 @@ tags:
 
 p("TERR-MANUT-ACCES",
 "Terrasse bois",
-"Manutention en accÃ¨s difficile",
+"Manutention en accès difficile",
 "h",
 1,
 [
 
-  "Acheminement manuel des matÃ©riaux et de lâ€™outillage",
+  "Acheminement manuel des matériaux et de l’outillage",
 
-  "Manutention fractionnÃ©e adaptÃ©e aux contraintes dâ€™accÃ¨s",
+  "Manutention fractionnée adaptée aux contraintes d’accès",
 
-  "Transport manuel des Ã©lÃ©ments dÃ©posÃ©s vers la zone de chargement",
+  "Transport manuel des éléments déposés vers la zone de chargement",
 
 ],
 { conditions:
-"Ã€ quantifier selon les Ã©tages, passages intÃ©rieurs, longueurs transportables, poids des matÃ©riaux et contraintes rÃ©elles dâ€™accÃ¨s. Hors moyen de levage, Ã©chafaudage et circulation sur une verriÃ¨re.",
+"À quantifier selon les étages, passages intérieurs, longueurs transportables, poids des matériaux et contraintes réelles d’accès. Hors moyen de levage, échafaudage et circulation sur une verrière.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
 "manutention",
-"accÃ¨s difficile",
-"Ã©tage",
+"accès difficile",
+"étage",
 "transport manuel"]
 }),
 
 p("TERR-CONTROLE-SUPPORT",
 "Terrasse bois",
-"ContrÃ´le et prÃ©paration de la structure porteuse existante",
-"mÂ²",
+"Contrôle et préparation de la structure porteuse existante",
+"m²",
 0.15,
 [
 
-  "ContrÃ´le visuel de la structure accessible aprÃ¨s dÃ©pose",
+  "Contrôle visuel de la structure accessible après dépose",
 
-  "Nettoyage des appuis et retrait des fixations rÃ©siduelles",
+  "Nettoyage des appuis et retrait des fixations résiduelles",
 
-  "Petits rÃ©glages nÃ©cessaires avant la pose des nouvelles lames",
+  "Petits réglages nécessaires avant la pose des nouvelles lames",
 
 ],
 { conditions:
-"Chiffrage Ã©tabli pour une structure existante saine, stable et compatible avec les nouvelles lames. Toute rÃ©paration importante ou tout remplacement de lambourdes est comptÃ© sÃ©parÃ©ment.",
+"Chiffrage établi pour une structure existante saine, stable et compatible avec les nouvelles lames. Toute réparation importante ou tout remplacement de lambourdes est compté séparément.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
 "support",
 "structure",
 "lambourdes",
-"prÃ©paration"]
+"préparation"]
 }),
 
 p("TERR-POSE-LAMES-BOIS",
 "Terrasse bois",
 "Pose de lames de terrasse en bois sur structure existante",
-"mÂ²",
+"m²",
 0.65,
 [
-  "Implantation et calepinage courant des lames ; pose des lames avec fixations adaptÃ©es au bois retenu.",
-  "Respect des jeux de dilatation et des espacements nÃ©cessaires.",
-  "ContrÃ´le de lâ€™alignement et de la stabilitÃ© de lâ€™ensemble.",
+  "Implantation et calepinage courant des lames ; pose des lames avec fixations adaptées au bois retenu.",
+  "Respect des jeux de dilatation et des espacements nécessaires.",
+  "Contrôle de l’alignement et de la stabilité de l’ensemble.",
 ],
 { conditions:
 "Sur structure existante saine, plane, stable et compatible. Hors fourniture des lames et fixations, coupes complexes, finitions de rives, reprise de structure et traitement de finition.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
 "bois",
@@ -3819,71 +3819,71 @@ p("TERR-COUPES-FINITIONS",
 1,
 [
 
-  "TraÃ§age et rÃ©alisation des coupes biaises ou particuliÃ¨res",
+  "Traçage et réalisation des coupes biaises ou particulières",
 
-  "Ajustement autour des angles et dÃ©crochements",
+  "Ajustement autour des angles et décrochements",
 
-  "RÃ©alisation des finitions de rives prÃ©vues au devis",
+  "Réalisation des finitions de rives prévues au devis",
 
 ],
 { conditions:
-"Prestation facturÃ©e selon le temps nÃ©cessaire. Les coupes droites courantes restent comprises dans la pose des lames.",
+"Prestation facturée selon le temps nécessaire. Les coupes droites courantes restent comprises dans la pose des lames.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
 "coupe biaise",
-"dÃ©coupe",
+"découpe",
 "rive",
 "finition"]
 }),
 
 p("TERR-TRI-EVAC",
 "Terrasse bois",
-"Tri, chargement et Ã©vacuation des Ã©lÃ©ments dÃ©posÃ©s",
+"Tri, chargement et évacuation des éléments déposés",
 "h",
 1,
 [
 
-  "Tri et regroupement des lames et fixations dÃ©posÃ©es",
+  "Tri et regroupement des lames et fixations déposées",
 
-  "Chargement dans le vÃ©hicule",
+  "Chargement dans le véhicule",
 
-  "Transport, dÃ©chargement et retour depuis une filiÃ¨re adaptÃ©e",
+  "Transport, déchargement et retour depuis une filière adaptée",
 
 ],
 { conditions:
-"Ã€ quantifier selon le volume, le poids, lâ€™accÃ¨s et la distance. Hors frais exceptionnels de traitement et trajets supplÃ©mentaires.",
+"À quantifier selon le volume, le poids, l’accès et la distance. Hors frais exceptionnels de traitement et trajets supplémentaires.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 typeTravaux:
 "deplacement",
 tags:
 ["terrasse",
 "tri",
 "chargement",
-"Ã©vacuation",
-"dÃ©chÃ¨terie"]
+"évacuation",
+"déchèterie"]
 }),
 
 p("TERR-SATURATEUR",
 "Terrasse bois",
-"Application dâ€™un saturateur sur terrasse bois",
-"mÂ²",
+"Application d’un saturateur sur terrasse bois",
+"m²",
 0.15,
 [
 
-  "DÃ©poussiÃ©rage et prÃ©paration lÃ©gÃ¨re des lames",
+  "Dépoussiérage et préparation légère des lames",
 
-  "Application rÃ©guliÃ¨re du saturateur prÃ©vu",
+  "Application régulière du saturateur prévu",
 
-  "Essuyage des Ã©ventuels excÃ©dents et contrÃ´le de finition",
+  "Essuyage des éventuels excédents et contrôle de finition",
 
 ],
 { conditions:
-"Sur bois propre, sec et compatible avec le produit retenu. Nombre de couches, nettoyage approfondi, dÃ©grisage et renouvellement ultÃ©rieur Ã  adapter au chantier.",
+"Sur bois propre, sec et compatible avec le produit retenu. Nombre de couches, nettoyage approfondi, dégrisage et renouvellement ultérieur à adapter au chantier.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["terrasse",
 "bois",
@@ -3894,69 +3894,69 @@ tags:
 }),
 // ================= TOITURE LEGERE =================
 p("TOIT-DIAG",
-"Toiture lÃ©gÃ¨re",
-"Diagnostic visuel ponctuel dâ€™une couverture",
+"Toiture légère",
+"Diagnostic visuel ponctuel d’une couverture",
 "forfait",
 1.5,
 [
 
-  "ContrÃ´le visuel des Ã©lÃ©ments accessibles",
+  "Contrôle visuel des éléments accessibles",
 
-  "RepÃ©rage dâ€™une anomalie apparente",
+  "Repérage d’une anomalie apparente",
 
-  "Compte rendu de lâ€™observation",
+  "Compte rendu de l’observation",
 
 ],
 { conditions:
-"AccÃ¨s sÃ©curisÃ© obligatoire. Ne remplace pas un diagnostic spÃ©cialisÃ©.",
+"Accès sécurisé obligatoire. Ne remplace pas un diagnostic spécialisé.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["toiture",
 "diagnostic"]
 }),
 
 p("TOIT-ELEM",
-"Toiture lÃ©gÃ¨re",
-"Remplacement ponctuel dâ€™un Ã©lÃ©ment de couverture",
+"Toiture légère",
+"Remplacement ponctuel d’un élément de couverture",
 "u",
 0.5,
 [
 
-  "DÃ©pose de lâ€™Ã©lÃ©ment endommagÃ© accessible",
+  "Dépose de l’élément endommagé accessible",
 
-  "Pose de lâ€™Ã©lÃ©ment de remplacement",
+  "Pose de l’élément de remplacement",
 
-  "ContrÃ´le visuel de la zone",
+  "Contrôle visuel de la zone",
 
 ],
 { conditions:
-"Intervention ponctuelle uniquement, accÃ¨s sÃ©curisÃ©, hors rÃ©fection de couverture.",
+"Intervention ponctuelle uniquement, accès sécurisé, hors réfection de couverture.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["tuile",
 "couverture"]
 }),
 
 p("TOIT-FINITION",
-"Toiture lÃ©gÃ¨re",
-"Intervention lÃ©gÃ¨re de finition de couverture",
+"Toiture légère",
+"Intervention légère de finition de couverture",
 "ml",
 0.3,
 [
 
-  "ContrÃ´le de la zone",
+  "Contrôle de la zone",
 
-  "Pose ou reprise ponctuelle de lâ€™Ã©lÃ©ment de finition prÃ©vu",
+  "Pose ou reprise ponctuelle de l’élément de finition prévu",
 
   "Fixations et ajustements courants",
 
 ],
 { conditions:
-"AccÃ¨s sÃ©curisÃ© obligatoire. Hors Ã©tanchÃ©itÃ© lourde et rÃ©fection complÃ¨te.",
+"Accès sécurisé obligatoire. Hors étanchéité lourde et réfection complète.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["rive",
 "finition",
@@ -3964,24 +3964,24 @@ tags:
 }),
 // ================= HABILLAGE SOUS-FACE =================
 p("TOIT-HAB-DEPOSE-COMP",
-"Toiture lÃ©gÃ¨re",
-"DÃ©pose complÃ¨te dâ€™un habillage de sous-face",
-"mÂ²",
+"Toiture légère",
+"Dépose complète d’un habillage de sous-face",
+"m²",
 0.22,
 [
-  "Protection et prÃ©paration de la zone dâ€™intervention ; dÃ©pose complÃ¨te de lâ€™habillage existant.",
-  "Retrait des fixations accessibles devenues inutiles ; regroupement des Ã©lÃ©ments dÃ©posÃ©s.",
-  "ContrÃ´le visuel du support rendu accessible.",
+  "Protection et préparation de la zone d’intervention ; dépose complète de l’habillage existant.",
+  "Retrait des fixations accessibles devenues inutiles ; regroupement des éléments déposés.",
+  "Contrôle visuel du support rendu accessible.",
 ],
 
   {
 
     conditions:
 
-      "Hors rÃ©paration ou remplacement des Ã©lÃ©ments porteurs dÃ©couverts aprÃ¨s dÃ©pose et hors Ã©vacuation en dÃ©chÃ¨terie.",
+      "Hors réparation ou remplacement des éléments porteurs découverts après dépose et hors évacuation en déchèterie.",
 
     rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 
     tags:
 [
@@ -3992,22 +3992,22 @@ p("TOIT-HAB-DEPOSE-COMP",
 
       "sous toiture",
 
-      "dÃ©pose",
+      "dépose",
 
       "habillage",
 ],}
 ),
 
 p("TOIT-HABILLAGE",
-"Toiture lÃ©gÃ¨re",
-"Pose / remplacement dâ€™un habillage sous toiture",
-"mÂ²",
+"Toiture légère",
+"Pose / remplacement d’un habillage sous toiture",
+"m²",
 0.45,
 [
 
-  "DÃ©pose locale si prÃ©vue",
+  "Dépose locale si prévue",
 
-  "DÃ©coupe et pose de lâ€™habillage",
+  "Découpe et pose de l’habillage",
 
   "Ajustements et finitions courantes",
 
@@ -4021,50 +4021,50 @@ tags:
 
 p(
   "TOIT-HAB-REPOSE",
-  "Toiture lÃ©gÃ¨re",
-  "Repose dâ€™un habillage de sous-face existant",
-  "mÂ²",
+  "Toiture légère",
+  "Repose d’un habillage de sous-face existant",
+  "m²",
   0.45,
   [
-  "ContrÃ´le visuel des Ã©lÃ©ments dÃ©posÃ©s et du support accessible ; remise en place de lâ€™habillage existant conservÃ©.",
-  "Remplacement ou complÃ©ment des fixations courantes si nÃ©cessaire ; ajustements et finitions pÃ©riphÃ©riques courantes.",
-  "ContrÃ´le visuel de la bonne tenue de lâ€™ensemble.",
+  "Contrôle visuel des éléments déposés et du support accessible ; remise en place de l’habillage existant conservé.",
+  "Remplacement ou complément des fixations courantes si nécessaire ; ajustements et finitions périphériques courantes.",
+  "Contrôle visuel de la bonne tenue de l’ensemble.",
 ],
   {
     conditions:
-      "Repose sous rÃ©serve de lâ€™Ã©tat des Ã©lÃ©ments existants et du support aprÃ¨s dÃ©pose. Les Ã©lÃ©ments dÃ©tÃ©riorÃ©s, dÃ©formÃ©s ou ne permettant pas une repose correcte ne sont pas compris et feront lâ€™objet dâ€™un accord complÃ©mentaire. Hors rÃ©paration de charpente, structure ou infiltration.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Repose sous réserve de l’état des éléments existants et du support après dépose. Les éléments détériorés, déformés ou ne permettant pas une repose correcte ne sont pas compris et feront l’objet d’un accord complémentaire. Hors réparation de charpente, structure ou infiltration.",
+    rentabilite: "🟠 À contrôler",
     tags: [
       "lambris",
       "sous-face",
       "sous toiture",
       "habillage",
       "repose",
-      "rÃ©emploi",
+      "réemploi",
       "existant",
     ],
   }
 ),
 
 p("TOIT-HAB-PVC",
-"Toiture lÃ©gÃ¨re",
-"Pose dâ€™un habillage PVC de sous-face",
-"mÂ²",
+"Toiture légère",
+"Pose d’un habillage PVC de sous-face",
+"m²",
 0.5,
 [
-  "ContrÃ´le du support existant accessible ; implantation de lâ€™habillage.",
-  "Pose des profils de dÃ©part et de finition ; dÃ©coupe et pose des lames PVC.",
-  "Fixation sur support adaptÃ© ; ajustements et finitions pÃ©riphÃ©riques.",
+  "Contrôle du support existant accessible ; implantation de l’habillage.",
+  "Pose des profils de départ et de finition ; découpe et pose des lames PVC.",
+  "Fixation sur support adapté ; ajustements et finitions périphériques.",
 ],
 
   {
 
     conditions:
 
-      "Support existant sain, stable et apte Ã  recevoir lâ€™habillage. Fourniture PVC adaptÃ©e Ã  lâ€™usage prÃ©vu. Hors rÃ©paration de charpente, structure ou infiltration.",
+      "Support existant sain, stable et apte à recevoir l’habillage. Fourniture PVC adaptée à l’usage prévu. Hors réparation de charpente, structure ou infiltration.",
 
     rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 
     tags:
 [
@@ -4079,20 +4079,20 @@ p("TOIT-HAB-PVC",
 
       "habillage",
 
-      "extÃ©rieur",
+      "extérieur",
 ], }),
 
-// ================= JARDIN - REMISE EN Ã‰TAT =================
+// ================= JARDIN - REMISE EN ÉTAT =================
 
 p("JAR-TONTE",
-"Jardin", "Tonte dâ€™entretien dâ€™une pelouse",
-"mÂ²", 0.01, [
+"Jardin", "Tonte d’entretien d’une pelouse",
+"m²", 0.01, [
 
-   "PrÃ©paration et contrÃ´le de la zone accessible",
+   "Préparation et contrôle de la zone accessible",
 
-   "Tonte de la surface prÃ©vue au devis",
+   "Tonte de la surface prévue au devis",
 
-   "RÃ©alisation des finitions courantes",
+   "Réalisation des finitions courantes",
 
  ],
 
@@ -4100,7 +4100,7 @@ p("JAR-TONTE",
 
    conditions:
 
-     "Pour une pelouse rÃ©guliÃ¨rement entretenue, sur terrain courant, dÃ©gagÃ© et accessible. Herbe haute, dÃ©broussaillage, ramassage et Ã©vacuation comptÃ©s sÃ©parÃ©ment.",
+     "Pour une pelouse régulièrement entretenue, sur terrain courant, dégagé et accessible. Herbe haute, débroussaillage, ramassage et évacuation comptés séparément.",
 
    tags: [
 
@@ -4113,14 +4113,14 @@ p("JAR-TONTE",
      "entretien", ], }),
 
 p("JAR-DEBROU",
-"Jardin", "DÃ©broussaillage lÃ©ger", "mÂ²",
+"Jardin", "Débroussaillage léger", "m²",
 0.02, [
 
-   "PrÃ©paration et contrÃ´le de la zone accessible",
+   "Préparation et contrôle de la zone accessible",
 
-   "DÃ©broussaillage lÃ©ger de la surface prÃ©vue",
+   "Débroussaillage léger de la surface prévue",
 
-   "Regroupement sommaire des dÃ©chets verts",
+   "Regroupement sommaire des déchets verts",
 
  ],
 
@@ -4128,34 +4128,34 @@ p("JAR-DEBROU",
 
    conditions:
 
-     "Pour une vÃ©gÃ©tation lÃ©gÃ¨re et un terrain accessible. Hors vÃ©gÃ©tation trÃ¨s dense, ronces importantes, coupe mÃ©canisÃ©e lourde, ramassage complet et Ã©vacuation.",
+     "Pour une végétation légère et un terrain accessible. Hors végétation très dense, ronces importantes, coupe mécanisée lourde, ramassage complet et évacuation.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
      "jardin",
 
-     "dÃ©broussaillage",
+     "débroussaillage",
 
      "herbe haute",
 
-     "vÃ©gÃ©tation",  ],}),
+     "végétation",  ],}),
 
 p(
-"JAR-HAIE", "Jardin", "Taille dâ€™entretien dâ€™une haie", "ml", 0.15, [
-  "PrÃ©paration de la zone dâ€™intervention ; taille dâ€™entretien des faces accessibles.",
-  "Taille du dessus de la haie lorsquâ€™il est accessible ; rÃ©alisation des finitions courantes.",
-  "Regroupement des dÃ©chets de taille.",
+"JAR-HAIE", "Jardin", "Taille d’entretien d’une haie", "ml", 0.15, [
+  "Préparation de la zone d’intervention ; taille d’entretien des faces accessibles.",
+  "Taille du dessus de la haie lorsqu’il est accessible ; réalisation des finitions courantes.",
+  "Regroupement des déchets de taille.",
 ],
 
  {
 
    conditions:
 
-     "Pour une haie courante jusquâ€™Ã  environ 2 m de hauteur, accessible et rÃ©guliÃ¨rement entretenue. Tarif Ã  adapter selon hauteur, largeur, densitÃ© et difficultÃ©s dâ€™accÃ¨s. Ramassage complet et Ã©vacuation comptÃ©s sÃ©parÃ©ment.",
+     "Pour une haie courante jusqu’à environ 2 m de hauteur, accessible et régulièrement entretenue. Tarif à adapter selon hauteur, largeur, densité et difficultés d’accès. Ramassage complet et évacuation comptés séparément.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
@@ -4168,17 +4168,17 @@ p(
      "entretien", ], }),
 
 p(
-"JAR-ARBUSTE", "Jardin", "Taille et entretien dâ€™arbustes", "h", 1, [
-  "RepÃ©rage des vÃ©gÃ©taux concernÃ©s ; taille dâ€™entretien des arbustes prÃ©vus.",
-  "RÃ©alisation des finitions accessibles.",
-  "Regroupement sommaire des dÃ©chets verts.",
+"JAR-ARBUSTE", "Jardin", "Taille et entretien d’arbustes", "h", 1, [
+  "Repérage des végétaux concernés ; taille d’entretien des arbustes prévus.",
+  "Réalisation des finitions accessibles.",
+  "Regroupement sommaire des déchets verts.",
 ],
 
  {
 
    conditions:
 
-     "Prestation facturÃ©e selon le temps nÃ©cessaire. Hors Ã©lagage spÃ©cialisÃ©, abattage et travail nÃ©cessitant un dÃ©placement dans lâ€™arbre. Ramassage complet et Ã©vacuation comptÃ©s sÃ©parÃ©ment.",
+     "Prestation facturée selon le temps nécessaire. Hors élagage spécialisé, abattage et travail nécessitant un déplacement dans l’arbre. Ramassage complet et évacuation comptés séparément.",
 
    tags: [
 
@@ -4191,14 +4191,14 @@ p(
      "entretien", ], }),
 
 p("JAR-RAMASSAGE",
-"Jardin", "Ramassage des dÃ©chets verts", "mÂ²",
+"Jardin", "Ramassage des déchets verts", "m²",
 0.008, [
 
-   "Ramassage des dÃ©chets verts issus de lâ€™intervention",
+   "Ramassage des déchets verts issus de l’intervention",
 
-   "Regroupement des dÃ©chets dans la zone prÃ©vue",
+   "Regroupement des déchets dans la zone prévue",
 
-   "PrÃ©paration pour stockage sur place ou Ã©vacuation",
+   "Préparation pour stockage sur place ou évacuation",
 
  ],
 
@@ -4206,49 +4206,49 @@ p("JAR-RAMASSAGE",
 
    conditions:
 
-     "Ã€ utiliser lorsque le ramassage complet nâ€™est pas dÃ©jÃ  compris dans une prestation facturÃ©e au temps. Hors transport et frais de traitement.",
+     "À utiliser lorsque le ramassage complet n’est pas déjà compris dans une prestation facturée au temps. Hors transport et frais de traitement.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
      "jardin",
 
-     "dÃ©chets verts",
+     "déchets verts",
 
      "ramassage",
 
      "nettoyage", ], }),
 
 p("JAR-NET-H",
-"Jardin", "Ramassage et nettoyage extÃ©rieur",
+"Jardin", "Ramassage et nettoyage extérieur",
 "h", 1, [
-  "Ramassage des dÃ©chets vÃ©gÃ©taux ou salissures courantes ; nettoyage des bordures et zones accessibles.",
-  "Regroupement des dÃ©chets.",
-  "Nettoyage sommaire de fin dâ€™intervention.",
+  "Ramassage des déchets végétaux ou salissures courantes ; nettoyage des bordures et zones accessibles.",
+  "Regroupement des déchets.",
+  "Nettoyage sommaire de fin d’intervention.",
 ],
 
  {
 
    conditions:
 
-     "Prestation facturÃ©e selon le temps nÃ©cessaire. Hors nettoyage spÃ©cialisÃ©, enlÃ¨vement dâ€™encombrants et Ã©vacuation en dÃ©chÃ¨terie.",
+     "Prestation facturée selon le temps nécessaire. Hors nettoyage spécialisé, enlèvement d’encombrants et évacuation en déchèterie.",
 
    tags: [
 
      "jardin",
 
-     "extÃ©rieur",
+     "extérieur",
 
      "nettoyage",
 
      "ramassage", ], }),
 
 p(
-"JAR-EVAC", "Jardin", "Ã‰vacuation de dÃ©chets verts", "forfait", 2, [
-  "Chargement des dÃ©chets verts prÃ©parÃ©s ; transport vers une filiÃ¨re adaptÃ©e.",
-  "DÃ©chargement des dÃ©chets.",
-  "Retour de lâ€™intervention.",
+"JAR-EVAC", "Jardin", "Évacuation de déchets verts", "forfait", 2, [
+  "Chargement des déchets verts préparés ; transport vers une filière adaptée.",
+  "Déchargement des déchets.",
+  "Retour de l’intervention.",
 ],
 
  {
@@ -4257,126 +4257,126 @@ p(
 
    conditions:
 
-     "Forfait de base Ã  adapter selon le volume, le poids, la distance, le nombre de trajets et les Ã©ventuels frais de traitement.",
+     "Forfait de base à adapter selon le volume, le poids, la distance, le nombre de trajets et les éventuels frais de traitement.",
 
    typeTravaux: "deplacement",
 
-   rentabilite: "ðŸŸ  Ã€ adapter",
+   rentabilite: "🟠 À adapter",
 
    tags: [
 
      "jardin",
 
-     "dÃ©chets verts",
+     "déchets verts",
 
-     "Ã©vacuation",
+     "évacuation",
 
      "transport",
 
-     "dÃ©chÃ¨terie", ],} ),
+     "déchèterie", ],} ),
 
 p("JAR-H",
-"Jardin", "Intervention courante dâ€™entretien extÃ©rieur", "h", 1, [
-  "PrÃ©paration de la zone dâ€™intervention ; rÃ©alisation de lâ€™entretien extÃ©rieur prÃ©vu au devis.",
-  "Regroupement sommaire des dÃ©chets produits.",
-  "Nettoyage courant de fin dâ€™intervention.",
+"Jardin", "Intervention courante d’entretien extérieur", "h", 1, [
+  "Préparation de la zone d’intervention ; réalisation de l’entretien extérieur prévu au devis.",
+  "Regroupement sommaire des déchets produits.",
+  "Nettoyage courant de fin d’intervention.",
 ],
 
  {
 
    conditions:
 
-     "Pour une intervention extÃ©rieure courante ne correspondant pas Ã  une prestation plus prÃ©cise du catalogue. Ã‰vacuation comptÃ©e sÃ©parÃ©ment.",
+     "Pour une intervention extérieure courante ne correspondant pas à une prestation plus précise du catalogue. Évacuation comptée séparément.",
 
    tags: [
 
      "jardin",
 
-     "extÃ©rieur",
+     "extérieur",
 
      "entretien",
 
      "intervention courante", ], } ),
 
 p("JAR-REMISE-ETAT",
-"Jardin", "Remise en Ã©tat dâ€™un espace vert",
+"Jardin", "Remise en état d’un espace vert",
 "h", 1, [
-  "PrÃ©paration et contrÃ´le de la zone dâ€™intervention ; tonte ou dÃ©broussaillage selon lâ€™Ã©tat de la vÃ©gÃ©tation.",
-  "Taille lÃ©gÃ¨re des arbustes prÃ©vue au devis ; nettoyage des bordures et zones accessibles.",
-  "Ramassage et regroupement des dÃ©chets verts ; nettoyage sommaire de fin dâ€™intervention.",
+  "Préparation et contrôle de la zone d’intervention ; tonte ou débroussaillage selon l’état de la végétation.",
+  "Taille légère des arbustes prévue au devis ; nettoyage des bordures et zones accessibles.",
+  "Ramassage et regroupement des déchets verts ; nettoyage sommaire de fin d’intervention.",
 ],
 
  {
 
    conditions:
 
-     "Prestation globale facturÃ©e selon le temps nÃ©cessaire. Ã€ utiliser lorsque plusieurs travaux dâ€™entretien sont mÃ©langÃ©s. Ne pas cumuler avec les lignes dÃ©taillÃ©es pour les mÃªmes travaux. Hors Ã©lagage spÃ©cialisÃ©, abattage et Ã©vacuation.",
+     "Prestation globale facturée selon le temps nécessaire. À utiliser lorsque plusieurs travaux d’entretien sont mélangés. Ne pas cumuler avec les lignes détaillées pour les mêmes travaux. Hors élagage spécialisé, abattage et évacuation.",
 
-   rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+   rentabilite: "🟠 À contrôler",
 
    tags: [
 
      "jardin",
 
-     "remise en Ã©tat",
+     "remise en état",
 
      "espace vert",
 
      "tonte",
 
-     "dÃ©broussaillage",
+     "débroussaillage",
 
      "arbuste",
 
      "nettoyage",  ],} ),
 // ================= DEPLACEMENT / LOGISTIQUE =================
 p("deplacement_premier_jour_chantier",
-"DÃ©placement / logistique",
-"DÃ©placement premier jour chantier",
+"Déplacement / logistique",
+"Déplacement premier jour chantier",
 "km",
 0,
 [
 
-  "DÃ©placement aller-retour chantier",
+  "Déplacement aller-retour chantier",
 
-  "Temps de trajet et usure du vÃ©hicule",
+  "Temps de trajet et usure du véhicule",
 
 ],
 { prixFixe:
 0.75,
 conditions:
-"Tarif par kilomÃ¨tre aller-retour, premier passage chantier.",
+"Tarif par kilomètre aller-retour, premier passage chantier.",
 typeTravaux:
 "deplacement",
 tags:
-["dÃ©placement",
+["déplacement",
 "km"]
 }),
 
 p("deplacement_jours_suivants",
-"DÃ©placement / logistique",
-"DÃ©placement jours suivants",
+"Déplacement / logistique",
+"Déplacement jours suivants",
 "km",
 0,
 [
 
-  "DÃ©placement aller-retour chantier",
+  "Déplacement aller-retour chantier",
 
   "Trajet journalier",
 
 ],
 { prixFixe:
 0.7,conditions:
-"Tarif par kilomÃ¨tre aller-retour aprÃ¨s le premier jour.",
+"Tarif par kilomètre aller-retour après le premier jour.",
 typeTravaux:
 "deplacement",
 tags:
-["dÃ©placement",
+["déplacement",
 "km"]
 }),
 
 p("forfait_mise_en_place_chantier",
-"DÃ©placement / logistique",
+"Déplacement / logistique",
 "Forfait mise en place chantier",
 "forfait",
 0,
@@ -4384,7 +4384,7 @@ p("forfait_mise_en_place_chantier",
 
   "Organisation du chantier",
 
-  "Chargement du matÃ©riel",
+  "Chargement du matériel",
 
   "Temps logistique de mise en place",
 
@@ -4402,26 +4402,26 @@ tags:
 
 p(
   "LOG-ACCES-MOBILE-HAUTEUR",
-  "DÃ©placement / logistique",
-  "Mise en place dâ€™un accÃ¨s mobile pour travail en hauteur",
+  "Déplacement / logistique",
+  "Mise en place d’un accès mobile pour travail en hauteur",
   "forfait",
   2,
   [
-    "Installation et sÃ©curisation du moyen dâ€™accÃ¨s adaptÃ© Ã  la hauteur prÃ©vue.",
-    "DÃ©placements nÃ©cessaires pendant lâ€™intervention.",
-    "Repli et rangement du matÃ©riel en fin de travaux.",
+    "Installation et sécurisation du moyen d’accès adapté à la hauteur prévue.",
+    "Déplacements nécessaires pendant l’intervention.",
+    "Repli et rangement du matériel en fin de travaux.",
   ],
   {
     conditions:
-      "Pour intervention intÃ©rieure sur sol stable et dÃ©gagÃ©, avec Ã©chafaudage roulant ou Ã©quipement Ã©quivalent. Hors location ou fourniture du matÃ©riel, nacelle, montage complexe, protection renforcÃ©e du sol et intervention au-dessus dâ€™un vide.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Pour intervention intérieure sur sol stable et dégagé, avec échafaudage roulant ou équipement équivalent. Hors location ou fourniture du matériel, nacelle, montage complexe, protection renforcée du sol et intervention au-dessus d’un vide.",
+    rentabilite: "🟠 À contrôler",
     tags: [
       "logistique",
-      "accÃ¨s",
+      "accès",
       "hauteur",
-      "Ã©chafaudage roulant",
+      "échafaudage roulant",
       "travail en hauteur",
-      "intÃ©rieur",
+      "intérieur",
     ],
   }
 ),
@@ -4431,175 +4431,175 @@ p(
 
 p(
   "MAC-CLOISON-CARREAUX-PLATRE",
-  "MaÃ§onnerie lÃ©gÃ¨re",
-  "CrÃ©ation dâ€™une cloison en carreaux de plÃ¢tre",
-  "mÂ²",
+  "Maçonnerie légère",
+  "Création d’une cloison en carreaux de plâtre",
+  "m²",
   1.05,
   [
-  "Implantation et traÃ§age de la cloison ; prÃ©paration des liaisons avec les supports existants.",
-  "Montage des carreaux de plÃ¢tre avec liant adaptÃ© ; rÃ©alisation des dÃ©coupes et ajustements courants.",
-  "CrÃ©ation des rÃ©servations prÃ©vues au devis ; dressage et prÃ©paration courante des raccords avant finition.",
+  "Implantation et traçage de la cloison ; préparation des liaisons avec les supports existants.",
+  "Montage des carreaux de plâtre avec liant adapté ; réalisation des découpes et ajustements courants.",
+  "Création des réservations prévues au devis ; dressage et préparation courante des raccords avant finition.",
 ],
   {
     conditions:
-      "Surface calculÃ©e sur une face de cloison finie. Ã‰paisseur et type de carreaux Ã  adapter au chantier. Hors fourniture, bloc-porte, dÃ©pose de lâ€™existant, Ã©vacuation des gravats, reprise structurelle, rÃ©seaux intÃ©grÃ©s, ratissage gÃ©nÃ©ralisÃ© et peinture. Pour une sÃ©paration de logement vers palier ou partie commune, la composition retenue doit Ãªtre compatible avec les exigences applicables au bÃ¢timent.",
-    rentabilite: "ðŸŸ  Ã€ contrÃ´ler",
+      "Surface calculée sur une face de cloison finie. Épaisseur et type de carreaux à adapter au chantier. Hors fourniture, bloc-porte, dépose de l’existant, évacuation des gravats, reprise structurelle, réseaux intégrés, ratissage généralisé et peinture. Pour une séparation de logement vers palier ou partie commune, la composition retenue doit être compatible avec les exigences applicables au bâtiment.",
+    rentabilite: "🟠 À contrôler",
     tags: [
-      "maÃ§onnerie",
+      "maçonnerie",
       "cloison",
-      "carreau de plÃ¢tre",
-      "carreaux de plÃ¢tre",
+      "carreau de plâtre",
+      "carreaux de plâtre",
       "Promonta",
       "caroplatre",
-      "sÃ©paration",
-      "mur intÃ©rieur",
+      "séparation",
+      "mur intérieur",
     ],
   }
 ),
 
 p("PLAC-CLOISON-DEPOSE",
 "Placo",
-"DÃ©pose dâ€™une cloison lÃ©gÃ¨re existante",
-"mÂ²",
+"Dépose d’une cloison légère existante",
+"m²",
 0.3,
 [
-  "Protection de la zone dâ€™intervention ; dÃ©pose mÃ©thodique de la cloison existante.",
-  "Retrait des Ã©lÃ©ments de fixation accessibles.",
-  "Regroupement des Ã©lÃ©ments dÃ©posÃ©s et gravats.",
+  "Protection de la zone d’intervention ; dépose méthodique de la cloison existante.",
+  "Retrait des éléments de fixation accessibles.",
+  "Regroupement des éléments déposés et gravats.",
 ],
 { conditions:
-"Pour cloison lÃ©gÃ¨re non porteuse de type carreaux de plÃ¢tre, Promonta ou plaques de plÃ¢tre. Hors dÃ©pose de bloc-porte, Ã©vacuation en dÃ©chÃ¨terie, dÃ©samiantage, reprise structurelle et rÃ©seaux intÃ©grÃ©s.",
+"Pour cloison légère non porteuse de type carreaux de plâtre, Promonta ou plaques de plâtre. Hors dépose de bloc-porte, évacuation en déchèterie, désamiantage, reprise structurelle et réseaux intégrés.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["cloison","dÃ©pose","dÃ©molition","carreaux de plÃ¢tre","Promonta","placo"]
+["cloison","dépose","démolition","carreaux de plâtre","Promonta","placo"]
 }),
 
 p("PLAC-CLOISON-BA13",
 "Placo",
-"CrÃ©ation dâ€™une cloison sur ossature mÃ©tallique avec plaques de plÃ¢tre",
-"mÂ²",
+"Création d’une cloison sur ossature métallique avec plaques de plâtre",
+"m²",
 0.8,
 [
-  "Implantation et traÃ§age de la cloison ; pose des rails et montants mÃ©talliques.",
-  "Mise en place des renforts courants nÃ©cessaires ; dÃ©coupe et pose des plaques de plÃ¢tre sur les deux faces.",
-  "RÃ©alisation des ajustements pÃ©riphÃ©riques.",
+  "Implantation et traçage de la cloison ; pose des rails et montants métalliques.",
+  "Mise en place des renforts courants nécessaires ; découpe et pose des plaques de plâtre sur les deux faces.",
+  "Réalisation des ajustements périphériques.",
 ],
 { conditions:
-"Surface calculÃ©e sur une face de cloison finie, plaques sur les deux faces comprises. Hors isolant, bandes et enduits, peinture, renfort spÃ©cifique pour charge lourde et crÃ©ation ou modification de rÃ©seaux.",
+"Surface calculée sur une face de cloison finie, plaques sur les deux faces comprises. Hors isolant, bandes et enduits, peinture, renfort spécifique pour charge lourde et création ou modification de réseaux.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["placo","cloison","BA13","ossature mÃ©tallique","crÃ©ation"]
+["placo","cloison","BA13","ossature métallique","création"]
 }),
 
 p("PLAC-CLOISON-RENFORT-PORTE",
 "Placo",
-"Renforcement dâ€™une cloison pour intÃ©gration dâ€™un bloc-porte",
+"Renforcement d’une cloison pour intégration d’un bloc-porte",
 "u",
 1.5,
 [
-  "Implantation de lâ€™ouverture ; renforcement de lâ€™ossature au droit du bloc-porte.",
-  "CrÃ©ation du chevÃªtre et des montants nÃ©cessaires.",
-  "ContrÃ´le de lâ€™aplomb et des dimensions de rÃ©servation.",
+  "Implantation de l’ouverture ; renforcement de l’ossature au droit du bloc-porte.",
+  "Création du chevêtre et des montants nécessaires.",
+  "Contrôle de l’aplomb et des dimensions de réservation.",
 ],
 { conditions:
-"Pour intÃ©gration dâ€™un bloc-porte courant dans une cloison lÃ©gÃ¨re neuve. Hors fourniture et pose du bloc-porte.",
+"Pour intégration d’un bloc-porte courant dans une cloison légère neuve. Hors fourniture et pose du bloc-porte.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["placo","cloison","porte","bloc-porte","renfort","chevÃªtre"]
+["placo","cloison","porte","bloc-porte","renfort","chevêtre"]
 }),
 
 
 p("PLAC-CLOISON-SEPARATIVE-RENF",
 "Placo",
-"CrÃ©ation dâ€™une cloison sÃ©parative renforcÃ©e sur ossature mÃ©tallique",
-"mÂ²",
+"Création d’une cloison séparative renforcée sur ossature métallique",
+"m²",
 1.15,
 [
-  "Implantation et traÃ§age de la cloison ; pose dâ€™une ossature mÃ©tallique renforcÃ©e adaptÃ©e Ã  la configuration.",
-  "Mise en place dâ€™un isolant dans lâ€™ossature ; pose de parements adaptÃ©s sur les deux faces.",
-  "DÃ©coupes et ajustements pÃ©riphÃ©riques ; traitement courant des raccords avec les supports existants.",
+  "Implantation et traçage de la cloison ; pose d’une ossature métallique renforcée adaptée à la configuration.",
+  "Mise en place d’un isolant dans l’ossature ; pose de parements adaptés sur les deux faces.",
+  "Découpes et ajustements périphériques ; traitement courant des raccords avec les supports existants.",
 ],
 { conditions:
-"Surface calculÃ©e sur une face de cloison finie, parements sur les deux faces et isolant compris. Prestation destinÃ©e notamment aux sÃ©parations entre un logement et une circulation, un palier ou une partie commune. Composition exacte des parements, de lâ€™isolant et de lâ€™ossature Ã  adapter aux exigences applicables au bÃ¢timent, notamment acoustiques et de rÃ©sistance au feu. Hors bandes et enduits de finition, peinture, bloc-porte, renfort spÃ©cifique de bloc-porte, modification de rÃ©seaux et travaux structurels.",
+"Surface calculée sur une face de cloison finie, parements sur les deux faces et isolant compris. Prestation destinée notamment aux séparations entre un logement et une circulation, un palier ou une partie commune. Composition exacte des parements, de l’isolant et de l’ossature à adapter aux exigences applicables au bâtiment, notamment acoustiques et de résistance au feu. Hors bandes et enduits de finition, peinture, bloc-porte, renfort spécifique de bloc-porte, modification de réseaux et travaux structurels.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["placo","cloison","sÃ©parative","renforcÃ©e","logement","palier","partie commune","acoustique","feu","isolation"]
+["placo","cloison","séparative","renforcée","logement","palier","partie commune","acoustique","feu","isolation"]
 }),
 
 // ================= BRICOLAGE / MENUISERIE LEGERE - COMPLEMENTS =================
 p("BRI-BLOC-PORTE-DEPOSE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"DÃ©pose soignÃ©e dâ€™un bloc-porte existant Ã  conserver",
+"Bricolage / Menuiserie légère",
+"Dépose soignée d’un bloc-porte existant à conserver",
 "u",
 1.5,
 [
-  "Protection de la zone dâ€™intervention ; dÃ©pose de lâ€™ouvrant.",
-  "DÃ©pose soigneuse de lâ€™huisserie ou du dormant ; retrait des fixations accessibles.",
-  "Stockage provisoire des Ã©lÃ©ments conservÃ©s.",
+  "Protection de la zone d’intervention ; dépose de l’ouvrant.",
+  "Dépose soigneuse de l’huisserie ou du dormant ; retrait des fixations accessibles.",
+  "Stockage provisoire des éléments conservés.",
 ],
 { conditions:
-"Pour bloc-porte existant destinÃ© Ã  Ãªtre reposÃ©. Hors rÃ©paration importante, remplacement du bloc-porte et dÃ©molition de la cloison.",
+"Pour bloc-porte existant destiné à être reposé. Hors réparation importante, remplacement du bloc-porte et démolition de la cloison.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["porte","bloc-porte","dÃ©pose","huisserie","conservation"]
+["porte","bloc-porte","dépose","huisserie","conservation"]
 }),
 
 p("BRI-BLOC-PORTE-REPOSE",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Repose et rÃ©glage dâ€™un bloc-porte existant",
+"Bricolage / Menuiserie légère",
+"Repose et réglage d’un bloc-porte existant",
 "u",
 2,
 [
-  "Mise en place du bloc-porte conservÃ© ; contrÃ´le de lâ€™aplomb, du niveau et des jeux.",
-  "Fixation adaptÃ©e au support ; repose de lâ€™ouvrant.",
-  "RÃ©glage et essais de fonctionnement.",
+  "Mise en place du bloc-porte conservé ; contrôle de l’aplomb, du niveau et des jeux.",
+  "Fixation adaptée au support ; repose de l’ouvrant.",
+  "Réglage et essais de fonctionnement.",
 ],
 { conditions:
-"Pour repose dâ€™un bloc-porte existant en Ã©tat compatible avec sa rÃ©utilisation. Hors rÃ©paration importante du bloc-porte, fourniture de quincaillerie et reprises importantes du support.",
+"Pour repose d’un bloc-porte existant en état compatible avec sa réutilisation. Hors réparation importante du bloc-porte, fourniture de quincaillerie et reprises importantes du support.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["porte","bloc-porte","repose","huisserie","rÃ©glage"]
+["porte","bloc-porte","repose","huisserie","réglage"]
 }),
 
 p("BRI-POIGNEE-FENETRE-REMPL",
-"Bricolage / Menuiserie lÃ©gÃ¨re",
-"Remplacement dâ€™une poignÃ©e de fenÃªtre",
+"Bricolage / Menuiserie légère",
+"Remplacement d’une poignée de fenêtre",
 "u",
 0.5,
 [
-  "DÃ©pose de la poignÃ©e existante ; contrÃ´le de la fixation et du mÃ©canisme accessible.",
-  "Pose de la nouvelle poignÃ©e.",
-  "RÃ©glage et essai de fonctionnement.",
+  "Dépose de la poignée existante ; contrôle de la fixation et du mécanisme accessible.",
+  "Pose de la nouvelle poignée.",
+  "Réglage et essai de fonctionnement.",
 ],
 { conditions:
-"Pour remplacement simple dâ€™une poignÃ©e compatible avec la menuiserie existante. Hors remplacement ou rÃ©paration du mÃ©canisme de fermeture.",
+"Pour remplacement simple d’une poignée compatible avec la menuiserie existante. Hors remplacement ou réparation du mécanisme de fermeture.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
-["fenÃªtre","poignÃ©e","remplacement","quincaillerie"]
+["fenêtre","poignée","remplacement","quincaillerie"]
 }),
 
 // ================= SOLS - COMPLEMENT =================
 p("SOL-SEUIL-PORTE",
 "Sols",
-"Pose dâ€™une barre de seuil",
+"Pose d’une barre de seuil",
 "u",
 0.5,
 [
-  "Prise de mesure et repÃ©rage ; dÃ©coupe de la barre de seuil.",
-  "Pose et fixation adaptÃ©es au support.",
-  "ContrÃ´le et finitions courantes.",
+  "Prise de mesure et repérage ; découpe de la barre de seuil.",
+  "Pose et fixation adaptées au support.",
+  "Contrôle et finitions courantes.",
 ],
 { conditions:
-"Pour barre de seuil droite de dimensions courantes. Hors reprise importante du sol ou diffÃ©rence de niveau nÃ©cessitant un profil spÃ©cifique.",
+"Pour barre de seuil droite de dimensions courantes. Hors reprise importante du sol ou différence de niveau nécessitant un profil spécifique.",
 rentabilite:
-"ðŸŸ  Ã€ contrÃ´ler",
+"🟠 À contrôler",
 tags:
 ["sol","seuil","barre de seuil","inox","porte"]
 }),
