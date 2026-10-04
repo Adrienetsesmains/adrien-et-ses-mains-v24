@@ -4604,4 +4604,132 @@ tags:
 ["sol","seuil","barre de seuil","inox","porte"]
 }),
 
+
+// ================= COMPLÉMENTS RÉUTILISABLES - RÉNOVATION / DOUCHE =================
+p(
+  "PEINT-VOLET-RENOV-SURFACE-2C", "Peinture", "Préparation et peinture de volets - 2 couches", "m²",
+  0.9,
+  [
+  "Grattage, ponçage et primaire local adapté au support.",
+  "Deux couches sur les faces et chants prévus ; dépose et repose courantes si nécessaires."
+],
+  {
+  "conditions": "Surface correspondant à la somme des faces réellement peintes, comptées une seule fois. Préparation courante de volets à panneaux bois ou métal. Hors décapage intégral, persiennes complexes, réparation importante, fourniture et moyen d’accès spécifique. Ne pas cumuler avec une autre préparation ou peinture de volet pour les mêmes faces.",
+  "tags": [
+    "volet",
+    "peinture",
+    "deux faces",
+    "rénovation",
+    "surface"
+  ]
+}
+),
+p(
+  "PEINT-PORTE-BOIS-RENOV-FACE-2C", "Peinture", "Préparation et peinture d’une face de porte bois - 2 couches", "u",
+  3.5,
+  [
+  "Protection des accessoires, grattage, ponçage et primaire local.",
+  "Deux couches de peinture adaptée sur une face et les chants accessibles."
+],
+  {
+  "conditions": "Une unité correspond à une face d’ouvrant bois courant jusqu’à environ 3 m². Hors dormant, décapage intégral, réparation importante et fourniture. Adapter pour reliefs complexes. Ne pas cumuler avec une autre préparation ou peinture de la même face.",
+  "tags": [
+    "porte",
+    "bois",
+    "peinture",
+    "rénovation",
+    "face"
+  ]
+}
+),
+p(
+  "PLOMB-REC-DCH-DEPOSE", "Plomberie / Sanitaires", "Dépose d’un receveur de douche existant", "u",
+  2,
+  [
+  "Désolidarisation et dépose du receveur existant.",
+  "Déconnexion de la bonde accessible et protection de l’évacuation."
+],
+  {
+  "conditions": "Receveur et raccordement accessibles après dépose de la paroi. Hors dépose de faïence, démolition importante du socle, modification des réseaux et évacuation des déchets. État du support à contrôler après ouverture.",
+  "tags": [
+    "receveur",
+    "douche",
+    "dépose"
+  ]
+}
+),
+p(
+  "PLOMB-REC-DCH-POS-SIMPLE", "Plomberie / Sanitaires", "Pose d’un receveur de douche sur raccordements existants", "u",
+  4,
+  [
+  "Pose et calage sur support sain ; installation de la bonde et raccordement.",
+  "Contrôle des écoulements et fuites ; joints périphériques du receveur."
+],
+  {
+  "conditions": "Receveur courant jusqu’à environ 170 × 90 cm, compatible avec les attentes accessibles. Hors dépose, reprise importante du sol, création ou déplacement des réseaux, faïence, protection à l’eau sous faïence et fourniture. Respecter la notice du receveur et les séchages. Ne pas ajouter les mêmes joints périphériques à CAR-SILICONE.",
+  "tags": [
+    "receveur",
+    "douche",
+    "pose",
+    "remplacement",
+    "raccordement"
+  ]
+}
+),
+p(
+  "PLOMB-COL-DCH-DEPOSE-REPOSE", "Plomberie / Sanitaires", "Dépose et repose d’une colonne de douche conservée", "u",
+  1.5,
+  [
+  "Déconnexion, dépose soigneuse et stockage de la colonne.",
+  "Repose sur fixations adaptées, raccordement et contrôle des fuites."
+],
+  {
+  "conditions": "Colonne et mitigeur existants réutilisables, raccordements conservés et accessibles. Hors modification des réseaux encastrés, réparation de l’équipement et fourniture. Pas de remplacement inclus. Renfort du support à prévoir dans la reconstruction de cloison.",
+  "tags": [
+    "colonne",
+    "douche",
+    "dépose",
+    "repose",
+    "réemploi"
+  ]
+}
+),
+p(
+  "MAC-CLOISON-REPRISE-LOCAL-HUMIDE", "Maçonnerie", "Reconstruction localisée d’une cloison de pièce d’eau", "m²",
+  2.4,
+  [
+  "Dépose contrôlée de la zone dégradée et reconstruction adaptée à l’existant.",
+  "Renforts courants et raccords ; finition locale des deux faces avant revêtement."
+],
+  {
+  "conditions": "Surface mesurée sur une seule face de la cloison, traitement des deux côtés inclus. Base pour une reprise localisée non porteuse d’environ 1 à 3 m². Carreaux de plâtre hydrofuges de même épaisseur ou ossature avec parement hydrofuge H1 côté humide ; composition, renforts et raccords à préciser après contrôle. Hors faïence, protection à l’eau, peinture, évacuation, réseaux, extension des dégâts et fourniture. Ne pas cumuler avec dépose de cloison, ossature, plaques, bandes ou ratissage déjà compris pour cette zone.",
+  "tags": [
+    "cloison",
+    "reprise",
+    "pièce d’eau",
+    "Promonta",
+    "carreaux de plâtre",
+    "hydrofuge",
+    "BA13"
+  ]
+}
+),
+p(
+  "CAR-REPRISE-SOL-LOCALISEE", "Carrelage / Faïence", "Reprise localisée d’un sol carrelé", "forfait",
+  2,
+  [
+  "Préparation locale du support et pose des carreaux de raccord.",
+  "Découpes, joints et nettoyage de la zone reprise."
+],
+  {
+  "conditions": "Petite reprise jusqu’à environ 1 m² sur support sain, sans réfection complète de chape ni étanchéité de sol. Carreaux adaptés à préciser ; concordance exacte avec l’existant non garantie. Hors réparation importante du support et fourniture. Ne pas cumuler avec CAR-PREP, CAR-SOL et CAR-JOINT pour la même reprise.",
+  "tags": [
+    "carrelage",
+    "sol",
+    "reprise",
+    "raccord",
+    "douche"
+  ]
+}
+),
 ];
