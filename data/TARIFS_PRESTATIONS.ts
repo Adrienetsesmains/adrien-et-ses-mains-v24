@@ -3593,6 +3593,160 @@ p(
     ],
   }
 ),
+
+p(
+  "EXT-CLOTURE-IMPLANT",
+  "Extérieur / Clôture",
+  "Implantation et préparation d’une clôture / palissade",
+  "forfait",
+  2.5,
+  [
+    "Repérage de l’implantation et traçage au cordeau ; contrôle des niveaux et des alignements.",
+    "Répartition des poteaux suivant le système de clôture retenu.",
+    "Préparation courante de la zone avant terrassement.",
+  ],
+  {
+    conditions:
+      "Terrain accessible et limite d’implantation définie par le client. Hors bornage, recherche de réseaux enterrés et terrassement important.",
+    rentabilite: "🟢 Rentable",
+    tags: [
+      "clôture",
+      "palissade",
+      "implantation",
+      "traçage",
+      "poteau",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-FONDATION-TERR",
+  "Extérieur / Clôture",
+  "Terrassement manuel pour fondation de poteau",
+  "u",
+  0.5,
+  [
+    "Repérage et creusement manuel du trou de fondation.",
+    "Mise aux dimensions nécessaires suivant le poteau et le système de clôture.",
+    "Regroupement des terres au droit de la zone de travail.",
+  ],
+  {
+    conditions:
+      "Terrain courant accessible. Hors roche, racines importantes, réseaux enterrés, évacuation des terres et terrassement mécanisé.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "palissade",
+      "fondation",
+      "terrassement",
+      "poteau",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-MASSIF-BETON",
+  "Extérieur / Clôture",
+  "Réalisation d’un massif béton pour poteau de clôture",
+  "u",
+  0.3,
+  [
+    "Préparation du béton et remplissage de la fondation.",
+    "Mise en forme et réglage du massif autour du poteau.",
+    "Nettoyage courant de la zone après coulage.",
+  ],
+  {
+    conditions:
+      "Dimensions du massif adaptées au système de clôture et au terrain. Béton et fournitures comptés séparément.",
+    rentabilite: "🟢 Rentable",
+    tags: [
+      "clôture",
+      "palissade",
+      "béton",
+      "fondation",
+      "massif",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-POTEAU-SCELLE",
+  "Extérieur / Clôture",
+  "Pose et scellement d’un poteau de clôture",
+  "u",
+  0.45,
+  [
+    "Mise en place du poteau dans la fondation préparée.",
+    "Réglage de l’aplomb, de la hauteur et de l’alignement.",
+    "Maintien et contrôle avant prise du scellement.",
+  ],
+  {
+    conditions:
+      "Fondation préparée et poteau compatible avec une pose scellée. Profondeur et dimensions selon prescriptions du système retenu.",
+    rentabilite: "🟠 À contrôler",
+    tags: [
+      "clôture",
+      "palissade",
+      "poteau",
+      "scellement",
+      "PVC",
+      "aluminium",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-PALISSADE-PVC",
+  "Extérieur / Clôture",
+  "Pose de lames horizontales de palissade PVC",
+  "m²",
+  0.3,
+  [
+    "Mise en place et emboîtement des lames horizontales entre les poteaux préparés.",
+    "Découpes et ajustements nécessaires en extrémité de travée.",
+    "Contrôle de l’alignement et de l’aspect général de la palissade.",
+  ],
+  {
+    conditions:
+      "Poteaux posés et réglés. Pour système de palissade PVC pleine à lames horizontales compatible avec la hauteur prévue.",
+    rentabilite: "🟢 Rentable",
+    tags: [
+      "clôture",
+      "palissade",
+      "PVC",
+      "lame horizontale",
+      "occultation",
+      "brise-vue",
+    ],
+  }
+),
+
+p(
+  "EXT-CLOTURE-PALISSADE-FINITIONS",
+  "Extérieur / Clôture",
+  "Finitions d’une palissade PVC",
+  "ml",
+  0.12,
+  [
+    "Pose des profils et chapeaux de finition prévus par le système.",
+    "Reprise des découpes visibles et ajustements courants.",
+    "Contrôle final de l’ensemble et nettoyage de la zone.",
+  ],
+  {
+    conditions:
+      "Pour finitions courantes d’une palissade PVC posée. Accessoires et fournitures comptés séparément.",
+    rentabilite: "🟢 Rentable",
+    tags: [
+      "clôture",
+      "palissade",
+      "PVC",
+      "finition",
+      "profil",
+      "chapeau",
+    ],
+  }
+),
+
 // ================= TERRASSE BOIS =================
 p("TERR-IMPLANT-GEOTEXTILE",
 "Terrasse bois",
