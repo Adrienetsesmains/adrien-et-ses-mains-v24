@@ -4685,6 +4685,56 @@ if (ribIban || ribTitulaire || ribBic || ribBanque) {
   y += hauteurBlocRib + 3;
 }
 
+// ================= AVIS GOOGLE : FACTURES UNIQUEMENT =================
+if (type === "facture") {
+  const hauteurBlocAvis = 34;
+
+  // Garde le QR code et son texte ensemble, au-dessus du pied de page.
+  if (y + hauteurBlocAvis > limiteBasseContenu) {
+    doc.addPage();
+    page += 1;
+    y = 35;
+  }
+
+  doc.setDrawColor(190, 145, 55);
+  doc.setLineWidth(0.3);
+  doc.setFillColor(248, 250, 251);
+  doc.roundedRect(15, y, 180, hauteurBlocAvis, 2, 2, "FD");
+
+  // Fond blanc et marge blanche autour du QR pour faciliter la lecture.
+  doc.setFillColor(255, 255, 255);
+  doc.rect(19, y + 2, 30, 30, "F");
+  doc.addImage(
+    "data:image/png;base64,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",
+    "PNG",
+    23,
+    y + 6,
+    22,
+    22,
+    "qr-avis-google"
+  );
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(20, 57, 72);
+  doc.text("Votre avis compte !", 56, y + 9);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(60, 60, 60);
+  doc.text("Un petit avis Google m'aide à faire connaître", 56, y + 15);
+  doc.text("Adrien et ses mains. Merci pour votre confiance !", 56, y + 19.5);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(20, 57, 72);
+  doc.text("Scannez ce QR code pour partager votre expérience.", 56, y + 27);
+
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "normal");
+  y += hauteurBlocAvis + 3;
+}
+
 const totalPages = doc.getNumberOfPages();
 
   for (let i = 1; i <= totalPages; i++) {
