@@ -319,6 +319,27 @@ export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 };
 
 export const TARIFS_PRESTATIONS: PrestationTarif[] = [
+
+// ================= INTERVENTION GLOBALE - TEMPS MANUEL =================
+p(
+  "BRI-REMISE-ETAT-LOCAUX-MOBILIER",
+  "Bricolage / Menuiserie légère",
+  "Remise en état et entretien des locaux et du mobilier",
+  "forfait",
+  0,
+  [
+    "Travaux de réparation, de remise en état et d'entretien définis au devis.",
+    "Main-d’œuvre et fournitures incluses, sauf éléments fournis par le client. Déplacements comptés séparément.",
+  ],
+  {
+    prixFixe: 0,
+    action: "Renseigner le temps et la pénibilité, puis ajuster le prix total pour inclure les fournitures.",
+    conditions: "Travaux compris et éléments fournis par le client à préciser dans les détails de chaque devis. Fournitures prévues intégrées au prix du forfait, sans double comptage. Toute prestation supplémentaire fera l'objet d'un accord chiffré préalable. Déplacements comptés séparément.",
+    rentabilite: "🟠 Temps et fournitures à renseigner",
+    typeTravaux: "main_oeuvre",
+    tags: ["multiservice", "entretien", "remise en état", "locaux", "mobilier", "temps manuel", "forfait", "fournitures incluses"],
+  }
+),
 // ================= NETTOYAGE =================
 p("NET-FIN-CHANTIER",
 "Nettoyage",

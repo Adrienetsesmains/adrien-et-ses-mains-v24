@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -6734,13 +6733,9 @@ return (
 
     {!ligne.prixManuel && (
       <p className="text-xs text-slate-500">
-<<<<<<< HEAD
-        Prix automatique du tableau : {formatMontant(ligne.prixUnitaireAuto || ligne.prixUnitaire)} € / {ligne.unite}
-=======
         {ligne.tarifId === ID_INTERVENTION_GLOBALE
           ? `Main-d’œuvre calculée : ${formatMontant(prixInterventionGlobale(ligne, modeClient))} € pour le forfait`
           : `Prix automatique du tableau : ${formatMontant(ligne.prixUnitaireAuto || ligne.prixUnitaire)} € / ${ligne.unite}`}
->>>>>>> 724e023 (Ajout du forfait entretien avec temps manuel et pénibilité)
       </p>
     )}
   </div>
