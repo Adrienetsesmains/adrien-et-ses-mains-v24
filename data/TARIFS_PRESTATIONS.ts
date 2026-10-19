@@ -328,13 +328,14 @@ p(
   "forfait",
   0,
   [
-    "Travaux de réparation, de remise en état et d'entretien définis au devis.",
-    "Main-d’œuvre et fournitures incluses, sauf éléments fournis par le client. Déplacements comptés séparément.",
+    "Les travaux de réparation, de remise en état et d’entretien prévus au devis sont les suivants :",
+    "-",
+    "Certaines fournitures, notamment (à préciser), sont fournies par le client, comme convenu avec celui-ci.",
   ],
   {
     prixFixe: 0,
     action: "Renseigner le temps et la pénibilité, puis ajuster le prix total pour inclure les fournitures.",
-    conditions: "Travaux compris et éléments fournis par le client à préciser dans les détails de chaque devis. Fournitures prévues intégrées au prix du forfait, sans double comptage. Toute prestation supplémentaire fera l'objet d'un accord chiffré préalable. Déplacements comptés séparément.",
+    conditions: "Travaux compris et éléments fournis par le client à préciser dans les détails de chaque devis. Fournitures prévues intégrées au prix du forfait, sans double comptage. Toute prestation supplémentaire fera l'objet d'un accord chiffré préalable.",
     rentabilite: "🟠 Temps et fournitures à renseigner",
     typeTravaux: "main_oeuvre",
     tags: ["multiservice", "entretien", "remise en état", "locaux", "mobilier", "temps manuel", "forfait", "fournitures incluses"],
