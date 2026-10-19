@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -340,6 +341,7 @@ type LigneTravaux = {
   prixUnitaireAuto?: number;
   prixManuel?: boolean;
   heuresUnite?: number;
+  coefficientPenibilite?: number;
 heuresUniteManuel?: boolean;
   detailsPdfPersonnalises?: string[];
   detailsPdfOuvert?: boolean;
@@ -763,6 +765,15 @@ function prixLigne(ligne: LigneTravaux, modeClient: string) {
 
   return 0;
 }
+const ID_INTERVENTION_GLOBALE = "BRI-REMISE-ETAT-LOCAUX-MOBILIER";
+
+function prixInterventionGlobale(ligne: LigneTravaux, modeClient: string) {
+  const heures = Math.max(0, Number(ligne.heuresUnite) || 0);
+  const coefficient = Math.max(1, Number(ligne.coefficientPenibilite) || 1);
+  const tarifJour = modeClient === "jeremie" ? 190 : 220;
+  return Math.round(heures * (tarifJour / 7) * coefficient * 100) / 100;
+}
+
 function montantLigne(ligne: LigneTravaux, modeClient: string) {
   if (ligne.offert) {
     return 0;
@@ -771,6 +782,13 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
   const montantFourniture = ligne.fournitureIncluse
     ? Math.max(0, Number(ligne.prixFournitureInclus) || 0)
     : 0;
+
+  if (ligne.tarifId === ID_INTERVENTION_GLOBALE) {
+    const prix = ligne.prixManuel
+      ? Math.max(0, Number(ligne.prixUnitaire) || 0)
+      : prixInterventionGlobale(ligne, modeClient);
+    return Math.round((prix + montantFourniture) * 100) / 100;
+  }
 
   let montantPrestation = 0;
 
@@ -1950,6 +1968,7 @@ const modifierLigne = (
         "prixUnitaire",
         "prixFournitureInclus",
         "heuresUnite",
+        "coefficientPenibilite",
       ];
 
       if (champsNumeriques.includes(champ)) {
@@ -1962,6 +1981,18 @@ const modifierLigne = (
   ...l,
   [champ]: valeurNumerique,
 };
+
+if (
+  l.tarifId === ID_INTERVENTION_GLOBALE &&
+  (champ === "heuresUnite" || champ === "coefficientPenibilite")
+) {
+  ligneModifiee.heuresUnite = Math.max(0, Number(ligneModifiee.heuresUnite) || 0);
+  ligneModifiee.coefficientPenibilite = Math.max(1, Number(ligneModifiee.coefficientPenibilite) || 1);
+  ligneModifiee.prixUnitaireAuto = prixInterventionGlobale(ligneModifiee, modeClient);
+  if (!l.prixManuel) ligneModifiee.prixUnitaire = ligneModifiee.prixUnitaireAuto;
+  ligneModifiee.heuresUniteManuel = true;
+  return ligneModifiee;
+}
 
 if (
   champ === "heuresUnite" &&
@@ -3487,6 +3518,7 @@ const ajouterPrestationAuDevis = (
       prixUnitaire: prixClient,
       prixUnitaireAuto: prixClient,
       prixManuel: false,
+      coefficientPenibilite: 1,
 
       heuresUnite:
         prestationTrouvee.heuresUnite || 0,
@@ -6548,11 +6580,31 @@ return (
           <div className="rounded-xl bg-white p-4 space-y-4">
            {ligne.tarifId ? (
   <div className="space-y-3">
-    <NumberInput
-      label={`Quantité (${ligne.unite || "u"})`}
-      value={ligne.q1}
-      onChange={(v) => modifierLigne(ligne.id, "q1", v)}
-    />
+    {ligne.tarifId === ID_INTERVENTION_GLOBALE ? (
+      <div className="grid gap-3 md:grid-cols-2">
+        <NumberInput
+          label="Temps prévu pour le forfait (heures)"
+          value={ligne.heuresUnite || 0}
+          onChange={(v) => modifierLigne(ligne.id, "heuresUnite", v)}
+        />
+        <NumberInput
+          label="Coefficient de pénibilité (1 = normal, 1,30 = +30 %)"
+          value={ligne.coefficientPenibilite ?? 1}
+          onChange={(v) => modifierLigne(ligne.id, "coefficientPenibilite", v)}
+        />
+        <p className="text-xs text-slate-500 md:col-span-2">
+          Saisis ton temps, puis ajuste le prix total du forfait pour inclure tes fournitures.
+          Ce prix manuel inclut déjà la pénibilité : elle ne sera pas ajoutée une seconde fois.
+                Si les fournitures sont ajoutées à ce prix, ne les saisis pas aussi dans les champs de fournitures.
+        </p>
+      </div>
+    ) : (
+      <NumberInput
+        label={`Quantité (${ligne.unite || "u"})`}
+        value={ligne.q1}
+        onChange={(v) => modifierLigne(ligne.id, "q1", v)}
+      />
+    )}
 
     <Check
       label="Modifier le prix manuellement"
@@ -6566,7 +6618,9 @@ return (
                   prixManuel: checked,
                   prixUnitaire: checked
                     ? l.prixUnitaire
-                    : l.prixUnitaireAuto || l.prixUnitaire,
+                    : l.tarifId === ID_INTERVENTION_GLOBALE
+                      ? prixInterventionGlobale(l, modeClient)
+                      : l.prixUnitaireAuto || l.prixUnitaire,
                 }
               : l
           )
@@ -6664,7 +6718,9 @@ return (
 )}
     {ligne.prixManuel && (
       <NumberInput
-        label={`Prix unitaire manuel (€ / ${ligne.unite || "u"})`}
+        label={ligne.tarifId === ID_INTERVENTION_GLOBALE
+          ? "Prix total manuel du forfait, fournitures incluses (€)"
+          : `Prix unitaire manuel (€ / ${ligne.unite || "u"})`}
         value={ligne.prixUnitaire || 0}
         onChange={(v) =>
           setLignesTravaux(
@@ -6678,7 +6734,13 @@ return (
 
     {!ligne.prixManuel && (
       <p className="text-xs text-slate-500">
+<<<<<<< HEAD
         Prix automatique du tableau : {formatMontant(ligne.prixUnitaireAuto || ligne.prixUnitaire)} € / {ligne.unite}
+=======
+        {ligne.tarifId === ID_INTERVENTION_GLOBALE
+          ? `Main-d’œuvre calculée : ${formatMontant(prixInterventionGlobale(ligne, modeClient))} € pour le forfait`
+          : `Prix automatique du tableau : ${formatMontant(ligne.prixUnitaireAuto || ligne.prixUnitaire)} € / ${ligne.unite}`}
+>>>>>>> 724e023 (Ajout du forfait entretien avec temps manuel et pénibilité)
       </p>
     )}
   </div>
@@ -6761,7 +6823,7 @@ return (
               </>
             )}
 
-            {ligne.prixUnitaire && ligne.unite && (
+            {ligne.tarifId !== ID_INTERVENTION_GLOBALE && ligne.prixUnitaire && ligne.unite && (
               <p className="text-sm text-slate-500">
                 Tarif appliqué : {formatMontant(ligne.prixUnitaire)} € / {ligne.unite}
               </p>
