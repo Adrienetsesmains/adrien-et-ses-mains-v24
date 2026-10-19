@@ -11,6 +11,16 @@ import {
 
 import { supabase } from "./lib/supabaseClient";
 
+// Affichage monétaire commun : virgule française et deux décimales.
+function formatMontant(valeur: number | null | undefined): string {
+  const nombre = Number(valeur ?? 0);
+  return (Number.isFinite(nombre) ? nombre : 0).toLocaleString("fr-FR", {
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 const VERSION_APPLICATION = "V26";
 const CHEMIN_BANNIERE_V26 = "/banniere-v26.png";
 
@@ -1702,7 +1712,7 @@ const margeFournitures =
     ? 0
     : Math.round((reventeFournitures - achatFournitures) * 100) / 100;
 
-  let total = totalTravaux + fraisLogistique + reventeFournitures;
+  let total = Math.round((totalTravaux + fraisLogistique + reventeFournitures) * 100) / 100;
 
   // ================= MINIMUM CHANTIER =================
   const minimumChantier = 80;
@@ -1715,8 +1725,8 @@ const margeFournitures =
   ? Number(acompteManuel || 0)
   : Math.round(total * (pourcentageAcompte / 100));
 
-  const reste = total - acompte;
-  const resteReel = total - montantEncaisse;
+  const reste = Math.round((total - acompte) * 100) / 100;
+  const resteReel = Math.round((total - montantEncaisse) * 100) / 100;
 
   let rentabilite = "🟢 Correcte";
   if (total < 600 && modeClient === "jeremie") rentabilite = "🟠 À surveiller";
@@ -2819,7 +2829,7 @@ const envoyerFactureMail = () => {
 
 Veuillez trouver ci-joint la facture ${numeroFacture} concernant les travaux réalisés.
 
-Le reste à payer est de ${Math.max(0, calcul.total - montantEncaisse)} €.
+Le reste à payer est de ${formatMontant(Math.max(0, calcul.total - montantEncaisse))} €.
 
 Je reste disponible si besoin.
 
@@ -2844,7 +2854,7 @@ const preparerRelance = async (d: Dossier) => {
 
 Je me permets de revenir vers vous concernant la facture ${d.numeroFacture}, établie suite au devis signé ${d.numeroDevis}.
 
-Le règlement prévu pour un montant restant de ${d.reste} € semble ne pas avoir encore été réceptionné.
+Le règlement prévu pour un montant restant de ${formatMontant(d.reste)} € semble ne pas avoir encore été réceptionné.
 
 Sauf erreur de ma part, pouvez-vous me confirmer la date de règlement prévue ?
 
@@ -3004,7 +3014,7 @@ const tableauMensuel = useMemo(() => {
             className="rounded-lg border border-slate-200 bg-slate-50 p-2"
           >
             <p className="font-semibold text-slate-900">
-              {e.numero} — {e.montant} €
+              {e.numero} — {formatMontant(e.montant)} €
             </p>
             <p className="text-slate-600">{e.client}</p>
             <p className="text-slate-500">{e.chantier}</p>
@@ -4331,7 +4341,7 @@ doc.text(designationCoupe, 15, y);
 // 👉 PRIX UNIQUE propre
 doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);
-doc.text(`${montant.toFixed(2)} €`, 190, y, { align: "right" });
+doc.text(`${formatMontant(montant)} €`, 190, y, { align: "right" });
 
  y += designationCoupe.length * 3.5;
 
@@ -4359,7 +4369,7 @@ if (y + 37 > 250) {
 }
 
 const formatEuroPDF = (valeur: number) => {
-  return `${(Math.round((valeur || 0) * 100) / 100).toFixed(2)} €`;
+  return `${formatMontant((Math.round((valeur || 0) * 100) / 100))} €`;
 };
 
 const montantTotalPDF = Math.round((calcul.total || 0) * 100) / 100;
@@ -5006,10 +5016,10 @@ const genererFicheChantier = () => {
   const infosPratiques = [
     ["Trajet", `${Number(kmAller || 0).toFixed(1)} km aller`],
     ["Aller-retour", `${Number(calcul.kmAR || 0).toFixed(1)} km`],
-    ["Déplacement", `${Number(calcul.fraisLogistique || 0).toFixed(2)} €`],
+    ["Déplacement", `${formatMontant(Number(calcul.fraisLogistique || 0))} €`],
     ["Temps prévu", `${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h`],
     ["Durée estimée", `${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}`],
-    ["Achat fournitures", `${Number(achatFournitures || 0).toFixed(2)} € TTC`],
+    ["Achat fournitures", `${formatMontant(Number(achatFournitures || 0))} € TTC`],
   ];
   const hauteurEncadre = 9 + infosPratiques.length * 5.2;
 
@@ -5108,7 +5118,7 @@ const genererFicheChantier = () => {
     largeurBloc,
     fournituresClient
       ? undefined
-      : `Coût matériaux : ${Number(achatFournitures || 0).toFixed(2)} € TTC`
+      : `Coût matériaux : ${formatMontant(Number(achatFournitures || 0))} € TTC`
   );
   y = yBlocs + hauteurBlocs + 5;
 
@@ -5207,9 +5217,9 @@ return (
     <div className="grid grid-cols-6 gap-1">
       {[
         ["Client", resumeExpress.clientEnCours || "-"],
-        ["Total", `${resumeExpress.totalDevis} €`],
-        ["Encaissé", `${resumeExpress.dejaEncaisse} €`],
-        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Total", `${formatMontant(resumeExpress.totalDevis)} €`],
+        ["Encaissé", `${formatMontant(resumeExpress.dejaEncaisse)} €`],
+        ["Reste", `${formatMontant(resumeExpress.resteReel)} €`],
         ["Paiement", resumeExpress.paiementPrevu || "-"],
         ["Priorité", resumeExpress.prioriteActuelle || "-"],
       ].map(([titre, valeur]) => (
@@ -5307,9 +5317,9 @@ return (
     <div className="grid grid-cols-6 gap-1">
       {[
         ["Client", resumeExpress.clientEnCours || "-"],
-        ["Total", `${resumeExpress.totalDevis} €`],
-        ["Enc.", `${resumeExpress.dejaEncaisse} €`],
-        ["Reste", `${resumeExpress.resteReel} €`],
+        ["Total", `${formatMontant(resumeExpress.totalDevis)} €`],
+        ["Enc.", `${formatMontant(resumeExpress.dejaEncaisse)} €`],
+        ["Reste", `${formatMontant(resumeExpress.resteReel)} €`],
         ["Pay.", resumeExpress.paiementPrevu || "-"],
         ["Prio", resumeExpress.prioriteActuelle || "-"],
       ].map(([titre, valeur]) => (
@@ -5571,12 +5581,12 @@ return (
 
   <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5 mt-3">
 
-    <MiniResult titre="Encaisse" valeur={`${tableauMensuel.totalEncaisse} €`} couleur="text-green-700" />
-    <MiniResult titre="Reste" valeur={`${tableauMensuel.resteAEncaisser} €`} couleur="text-orange-600" />
-    <MiniResult titre="Relance" valeur={`${tableauMensuel.totalRelance} €`} couleur="text-red-600" />
-    <MiniResult titre="Dépenses" valeur={`${tableauMensuel.totalDepenses} €`} couleur="text-red-700" />
-<MiniResult titre="Solde réel" valeur={`${tableauMensuel.soldeReel} €`} couleur="text-blue-700" />
-<MiniResult titre="URSSAF" valeur={`${tableauMensuel.estimationUrssaf} €`} />
+    <MiniResult titre="Encaisse" valeur={`${formatMontant(tableauMensuel.totalEncaisse)} €`} couleur="text-green-700" />
+    <MiniResult titre="Reste" valeur={`${formatMontant(tableauMensuel.resteAEncaisser)} €`} couleur="text-orange-600" />
+    <MiniResult titre="Relance" valeur={`${formatMontant(tableauMensuel.totalRelance)} €`} couleur="text-red-600" />
+    <MiniResult titre="Dépenses" valeur={`${formatMontant(tableauMensuel.totalDepenses)} €`} couleur="text-red-700" />
+<MiniResult titre="Solde réel" valeur={`${formatMontant(tableauMensuel.soldeReel)} €`} couleur="text-blue-700" />
+<MiniResult titre="URSSAF" valeur={`${formatMontant(tableauMensuel.estimationUrssaf)} €`} />
   </div>
 
   {tableauMensuel.alerteFaible && (
@@ -5595,13 +5605,13 @@ return (
   <div className="grid gap-2 md:grid-cols-3">
     <MiniResult
       titre="Dépenses du mois"
-      valeur={`${resumeDepenses.totalMois.toFixed(2)} €`}
+      valeur={`${formatMontant(resumeDepenses.totalMois)} €`}
       couleur="text-red-700"
     />
 
     <MiniResult
       titre="Dépenses année"
-      valeur={`${resumeDepenses.totalAnnee.toFixed(2)} €`}
+      valeur={`${formatMontant(resumeDepenses.totalAnnee)} €`}
       couleur="text-orange-700"
     />
 
@@ -5696,7 +5706,7 @@ return (
               </div>
 
               <p className="font-bold text-red-700">
-                {(depense.montant || 0).toFixed(2)} €
+                {formatMontant((depense.montant || 0))} €
               </p>
             </div>
 
@@ -6410,9 +6420,7 @@ return (
                       </div>
 
                       <p className="mt-1 text-sm font-semibold text-blue-700">
-                        {Number(
-                          prixClient || 0
-                        ).toFixed(2)}{" "}
+                        {formatMontant(prixClient)}{" "}
                         €
                         {prestation.unite !==
                         "forfait"
@@ -6670,7 +6678,7 @@ return (
 
     {!ligne.prixManuel && (
       <p className="text-xs text-slate-500">
-        Prix automatique du tableau : {ligne.prixUnitaireAuto || ligne.prixUnitaire} € / {ligne.unite}
+        Prix automatique du tableau : {formatMontant(ligne.prixUnitaireAuto || ligne.prixUnitaire)} € / {ligne.unite}
       </p>
     )}
   </div>
@@ -6735,7 +6743,7 @@ return (
           <div className="rounded-xl border bg-white p-4 space-y-2">
             <Card
   titre="Prix ligne"
-  valeur={ligne.offert ? "Offert" : `${montantLigne(ligne, modeClient)} €`}
+  valeur={ligne.offert ? "Offert" : `${formatMontant(montantLigne(ligne, modeClient))} €`}
 />
 
             {tarifAssocie && (
@@ -6755,7 +6763,7 @@ return (
 
             {ligne.prixUnitaire && ligne.unite && (
               <p className="text-sm text-slate-500">
-                Tarif appliqué : {ligne.prixUnitaire} € / {ligne.unite}
+                Tarif appliqué : {formatMontant(ligne.prixUnitaire)} € / {ligne.unite}
               </p>
             )}
           </div>
@@ -6806,7 +6814,7 @@ return (
   )}
 
   <p className="text-xs text-slate-500">
-    {calcul.kmAR} km A/R → {calcul.fraisLogistique} €
+    {calcul.kmAR} km A/R → {formatMontant(calcul.fraisLogistique)} €
   </p>
 </div>
 
@@ -6871,9 +6879,9 @@ return (
 </div>
 
       <div className="grid gap-2 md:grid-cols-3">
-        <MiniResult titre="Achat" valeur={`${achatFournitures} €`} />
-        <MiniResult titre="Revente" valeur={`${calcul.reventeFournitures.toFixed(2)} €`} couleur="text-blue-700" />
-        <MiniResult titre="Marge" valeur={`${calcul.margeFournitures.toFixed(2)} €`} couleur="text-green-700" />
+        <MiniResult titre="Achat" valeur={`${formatMontant(achatFournitures)} €`} />
+        <MiniResult titre="Revente" valeur={`${formatMontant(calcul.reventeFournitures)} €`} couleur="text-blue-700" />
+        <MiniResult titre="Marge" valeur={`${formatMontant(calcul.margeFournitures)} €`} couleur="text-green-700" />
       </div>
 
       <p className="text-xs text-slate-500">
@@ -7070,13 +7078,13 @@ return (
   {/* ESTIMATIONS */}
   {statutDevis === "estimation_rapide" && (
     <>
-      <MiniResult titre="Basse" valeur={`${calcul.estimationBasse} €`} couleur="text-green-700" />
-      <MiniResult titre="Haute" valeur={`${calcul.estimationHaute} €`} couleur="text-orange-600" />
+      <MiniResult titre="Basse" valeur={`${formatMontant(calcul.estimationBasse)} €`} couleur="text-green-700" />
+      <MiniResult titre="Haute" valeur={`${formatMontant(calcul.estimationHaute)} €`} couleur="text-orange-600" />
 
       <div className="col-span-2 rounded-lg border border-purple-300 bg-purple-50 px-4 py-2">
         <p className="text-xs text-purple-600">💬 Prix à annoncer</p>
         <p className="text-xl font-bold text-purple-800">
-          {calcul.prixConseille} €
+          {formatMontant(calcul.prixConseille)} €
         </p>
       </div>
     </>
@@ -7112,8 +7120,8 @@ return (
     <h3 className="text-sm font-bold text-slate-800">🧾 Résumé financier</h3>
 
     <div className="grid gap-2 md:grid-cols-4">
-      <MiniResult titre="Travaux" valeur={`${calcul.totalTravaux} €`} />
-      <MiniResult titre="Déplacement" valeur={`${calcul.fraisLogistique} €`} />
+      <MiniResult titre="Travaux" valeur={`${formatMontant(calcul.totalTravaux)} €`} />
+      <MiniResult titre="Déplacement" valeur={`${formatMontant(calcul.fraisLogistique)} €`} />
       <MiniResult
   titre="Temps chantier"
   valeur={`${calcul.totalHeuresChantier.toFixed(1)} h`}
@@ -7123,24 +7131,24 @@ return (
   titre="Jours calculés"
   valeur={`${calcul.nombreJoursChantier} j`}
 />
-      <MiniResult titre="Fournitures" valeur={`${calcul.reventeFournitures} €`} />
-      <MiniResult titre="Total" valeur={`${calcul.total} €`} couleur="text-blue-700" />
+      <MiniResult titre="Fournitures" valeur={`${formatMontant(calcul.reventeFournitures)} €`} />
+      <MiniResult titre="Total" valeur={`${formatMontant(calcul.total)} €`} couleur="text-blue-700" />
     </div>
 
     <div className="rounded-lg bg-slate-50 px-3 py-2 space-y-1 text-xs">
       <div className="flex justify-between">
         <span>Déplacement ({calcul.kmAR} km)</span>
-        <strong>{calcul.fraisLogistique} €</strong>
+        <strong>{formatMontant(calcul.fraisLogistique)} €</strong>
       </div>
 
       <div className="flex justify-between">
         <span>Fournitures</span>
-        <strong>{calcul.reventeFournitures.toFixed(2)} €</strong>
+        <strong>{formatMontant(calcul.reventeFournitures)} €</strong>
       </div>
 
       <div className="border-t pt-1 flex justify-between font-bold text-blue-700">
         <span>Total devis</span>
-        <span>{calcul.total} €</span>
+        <span>{formatMontant(calcul.total)} €</span>
       </div>
     </div>
   </div>
@@ -7180,23 +7188,21 @@ return (
 
   {acompteManuelActif && (
     <div className="mt-2">
-      <input
-        type="number"
+      <NumberInput
+        label="Montant de l'acompte (€)"
         value={acompteManuel}
-        onChange={(e) => setAcompteManuel(Number(e.target.value))}
-        className="w-full border rounded px-2 py-1"
-        placeholder="Montant de l'acompte"
+        onChange={setAcompteManuel}
       />
     </div>
   )}
 </div>
 
 <div className="grid gap-2 md:grid-cols-3">
-  <MiniResult titre="Acompte" valeur={`${calcul.acompte} €`} />
-  <MiniResult titre="Encaissé" valeur={`${montantEncaisse} €`} />
+  <MiniResult titre="Acompte" valeur={`${formatMontant(calcul.acompte)} €`} />
+  <MiniResult titre="Encaissé" valeur={`${formatMontant(montantEncaisse)} €`} />
   <MiniResult
     titre="Reste"
-    valeur={`${Math.max(0, calcul.total - montantEncaisse)} €`}
+    valeur={`${formatMontant(Math.max(0, calcul.total - montantEncaisse))} €`}
     couleur="text-blue-700"
   />
 </div>
@@ -7556,28 +7562,28 @@ return (
               <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
                 <MiniResult
                   titre="Total"
-                  valeur={`${item.total || 0} €`}
+                  valeur={`${formatMontant(item.total || 0)} €`}
                   couleur="text-slate-900"
                 />
 
                 <MiniResult
                   titre="Acompte"
-                  valeur={`${item.acompte || 0} €`}
+                  valeur={`${formatMontant(item.acompte || 0)} €`}
                   couleur="text-amber-700"
                 />
 
                 <MiniResult
                   titre="Encaissé"
-                  valeur={`${item.montantEncaisse || 0} €`}
+                  valeur={`${formatMontant(item.montantEncaisse || 0)} €`}
                   couleur="text-emerald-700"
                 />
 
                 <MiniResult
                   titre="Reste"
-                  valeur={`${Math.max(
+                  valeur={`${formatMontant(Math.max(
                     0,
                     (item.total || 0) - (item.montantEncaisse || 0)
-                  )} €`}
+                  ))} €`}
                   couleur={factureEnRetard ? "text-red-700" : "text-slate-900"}
                 />
               </div>
@@ -7771,7 +7777,7 @@ return (
                     </span>
 
                     <span>
-                      💶 {estPaiement ? `${d.reste || 0} € à suivre` : "-"}
+                      💶 {estPaiement ? `${formatMontant(d.reste || 0)} € à suivre` : "-"}
                     </span>
                   </div>
 
@@ -8510,9 +8516,7 @@ function GraphiqueCourbe({
     creerChemin(pointsResultat);
 
   const formaterMontant = (montant: number) => {
-    return `${new Intl.NumberFormat("fr-FR", {
-      maximumFractionDigits: 0,
-    }).format(montant)} €`;
+    return `${formatMontant(montant)} €`;
   };
 
   const graduations = Array.from(
