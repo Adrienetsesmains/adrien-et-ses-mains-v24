@@ -350,6 +350,8 @@ heuresUniteManuel?: boolean;
   prixFournitureInclus?: number;
 
   offert?: boolean;
+  packInstanceId?: string;
+  packNom?: string;
 };
 
 type Depense = {
@@ -1228,6 +1230,20 @@ const [numeroDevis, setNumeroDevis] = useState("");
 const [numeroFacture, setNumeroFacture] = useState("");
 
   const [lignesTravaux, setLignesTravaux] = useState<LigneTravaux[]>([]);
+  // Historique d'annulation limité au devis courant (prestations et conditions).
+  const [historiqueAnnulation, setHistoriqueAnnulation] = useState<Array<{lignes: LigneTravaux[]; generales: string; chantier: string}>>([]);
+  const annulationEnCoursRef = useRef(false);
+  const precedentAnnulationRef = useRef<string | null>(null);
+  const annulerDerniereModification = () => {
+    const precedent = historiqueAnnulation[historiqueAnnulation.length - 1];
+    if (!precedent) return;
+    annulationEnCoursRef.current = true;
+    setHistoriqueAnnulation(h => h.slice(0, -1));
+    setLignesTravaux(precedent.lignes);
+    setConditionsGeneralesDevis(precedent.generales);
+    setConditionsChantier(precedent.chantier);
+  };
+
 
 const [idDossierActuel, setIdDossierActuel] = useState<number | null>(null);
   const [kmAller, setKmAller] = useState(37);
@@ -1261,6 +1277,17 @@ const [listeBackups, setListeBackups] = useState<any[]>([]);
 const applicationCloudEnCoursRef = useRef(false);
 const synchronisationCloudEnCoursRef = useRef(false);
 const premiereSauvegardeLocaleRef = useRef(true);
+
+useEffect(() => {
+  if (!sauvegardePrete) return;
+  const actuel = JSON.stringify({ lignes: lignesTravaux, generales: conditionsGeneralesDevis, chantier: conditionsChantier });
+  const precedent = precedentAnnulationRef.current;
+  precedentAnnulationRef.current = actuel;
+  if (annulationEnCoursRef.current) { annulationEnCoursRef.current = false; return; }
+  if (precedent !== null && precedent !== actuel) {
+    setHistoriqueAnnulation(h => [...h.slice(-29), JSON.parse(precedent)]);
+  }
+}, [lignesTravaux, conditionsGeneralesDevis, conditionsChantier, sauvegardePrete]);
 
 useEffect(() => {
   setEstAndroid(/Android/i.test(window.navigator.userAgent));
@@ -3547,6 +3574,7 @@ const ajouterPackAuDevis = (idPack: string) => {
   if (!pack) return;
 
   const maintenant = Date.now();
+  const instancePack = `${idPack}-${maintenant}-${Math.random().toString(36).slice(2)}`;
 
   const nouvellesLignes = pack.lignes
     .map(([idPrestation, quantite], index) => {
@@ -3582,6 +3610,8 @@ const ajouterPackAuDevis = (idPack: string) => {
         fournitureIncluse: false,
         prixFournitureInclus: 0,
         offert: false,
+        packInstanceId: instancePack,
+        packNom: pack.nom,
       } as LigneTravaux;
     })
     .filter(Boolean) as LigneTravaux[];
@@ -3603,6 +3633,13 @@ const ajouterPackAuDevis = (idPack: string) => {
       block: "center",
     });
   }, 100);
+};
+
+const supprimerPackDuDevis = (instanceId: string) => {
+  const lignesDuPack = lignesTravaux.filter(l => l.packInstanceId === instanceId);
+  if (!lignesDuPack.length) return;
+  if (!window.confirm(`Supprimer ce pack et ses ${lignesDuPack.length} prestations du devis ?`)) return;
+  setLignesTravaux(ancien => ancien.filter(l => l.packInstanceId !== instanceId));
 };
 
 const reinitialiserApplicationComplete = () => {
@@ -5312,6 +5349,8 @@ return (
       )}
 
      
+      <button type="button" onClick={annulerDerniereModification} disabled={!historiqueAnnulation.length} title="Annuler la dernière modification des prestations ou conditions" className="btn-outline px-2 py-1 text-[11px] disabled:opacity-40">↶ Retour</button>
+
       <button onClick={exporter} className="btn-purple px-2 py-1 text-[11px]">
         Export
       </button>
@@ -5320,12 +5359,7 @@ return (
         Import
       </button>
 
-      <button
-        onClick={reinitialiserApplicationComplete}
-        className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-bold text-red-700"
-      >
-        RAZ appli
-      </button>
+
     </div>
 
     <details className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
@@ -6281,6 +6315,12 @@ return (
       </p>
     </div>
 
+    {Array.from(new Map(lignesTravaux.filter(l => l.packInstanceId).map(l => [l.packInstanceId!, l.packNom || "Pack"])).entries()).map(([instanceId, nom]) => (
+      <div key={instanceId} className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-white p-2 text-sm">
+        <span className="font-semibold text-blue-900">{nom}</span>
+        <button type="button" onClick={() => supprimerPackDuDevis(instanceId)} className="rounded-lg border border-red-300 px-3 py-1 font-semibold text-red-700 hover:bg-red-50">Supprimer pack</button>
+      </div>
+    ))}
     <div className="grid gap-3 md:grid-cols-[1fr_auto]">
       <select
         value={packSelectionne}
@@ -7096,21 +7136,7 @@ return (
       Contrôle après dépose
     </button>
 
-    <button
-      type="button"
-      onClick={() =>
-        setConditionsChantier((texteActuel) => {
-          const phrase =
-            "La pergola est prévue comme une structure ouverte, sans canisse, couverture ni étanchéité. Toute couverture ultérieure nécessite une nouvelle étude et peut imposer un renforcement de la structure.";
-          return texteActuel.trim()
-            ? `${texteActuel.trim()}\n${phrase}`
-            : phrase;
-        })
-      }
-      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
-    >
-      Pergola sans couverture
-    </button>
+
   </div>
 
   <div className="grid gap-3 md:grid-cols-2">
