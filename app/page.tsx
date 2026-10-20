@@ -38,201 +38,445 @@ const CLE_DERNIERE_MODIFICATION_LOCALE_V26 = "derniereModificationLocaleV26";
 // Toute modification d’une prestation du catalogue actualise donc automatiquement les packs.
 const TARIFS_PRESTATIONS = TARIFS_PRESTATIONS_BASE;
 
-const PACKS_PRESTATIONS_V26 = [
+const PACKS_PRESTATIONS_V26: Array<{
+  id: string; nom: string; famille: string; description: string; lignes: [string, number][];
+}> = [
   {
-    id: "PACK-SDB-DOUCHE",
-    nom: "Réfection d’un espace douche",
-    description:
-      "Dépose de la paroi et de la faïence, reprise du support, protection à l’eau, faïence et finitions.",
-    lignes: [
-      ["PEINT-PROT", 1],
-      ["PLOMB-PAROI-DEP", 1],
-      ["CAR-DEPOSE", 1],
-      ["CAR-PREP", 1],
-      ["CAR-ETANCH", 1],
-      ["CAR-FAIENCE", 1],
-      ["CAR-JOINT", 1],
-      ["CAR-SILICONE", 1],
-      ["PLOMB-PAROI-POS", 1],
-      ["DEB-DECHETTERIE", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-LOGEMENT-RELOCATION",
+    "nom": "Remise en état d’un logement avant relocation",
+    "famille": "Rénovation de logement",
+    "description": "Base adaptable : débarras, peinture, rénovation du sol et nettoyage général du logement.",
+    "lignes": [
+      [
+        "DEB-ENCOMBRANTS",
+        1.0
+      ],
+      [
+        "DEB-DECHETTERIE",
+        1.0
+      ],
+      [
+        "PEINT-PROT",
+        1.0
+      ],
+      [
+        "SOL-DEPOSE",
+        1.0
+      ],
+      [
+        "SOL-PREP-MECA",
+        1.0
+      ],
+      [
+        "PEINT-PREP-LEG",
+        1.0
+      ],
+      [
+        "PEINT-PLAFOND-2C",
+        1.0
+      ],
+      [
+        "PEINT-MURS-2C",
+        1.0
+      ],
+      [
+        "SOL-PVC-CLIP",
+        1.0
+      ],
+      [
+        "SOL-PLINTHE-BOIS",
+        1.0
+      ],
+      [
+        "NET-LOGEMENT",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-SDB-RENOVATION",
-    nom: "Rénovation complète d’une salle de bain",
-    description:
-      "Base complète : déposes, douche, faïence, sol PVC, peintures, meuble vasque et finitions.",
-    lignes: [
-      ["PEINT-PROT", 1],
-      ["PLOMB-PAROI-DEP", 1],
-      ["PLOMB-DEPOSE-EQP", 1],
-      ["CAR-DEPOSE", 1],
-      ["DEB-DECHETTERIE", 1],
-      ["CAR-PREP", 1],
-      ["PLOMB-REC-DCH", 1],
-      ["CAR-ETANCH", 1],
-      ["CAR-FAIENCE", 1],
-      ["CAR-JOINT", 1],
-      ["CAR-SILICONE", 1],
-      ["SOL-PREP-MECA", 1],
-      ["SOL-PVC-CLIP", 1],
-      ["SOL-PLINTHE-BOIS", 1],
-      ["PEINT-PREP-RENF", 1],
-      ["PEINT-MURS-2C", 1],
-      ["PEINT-PLAFOND-2C", 1],
-      ["PLOMB-MEUBLE-VASQUE", 1],
-      ["PLOMB-ROBINET", 1],
-      ["PLOMB-PAROI-POS", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-SOUS-FACE-PVC",
+    "nom": "Remplacement d’une sous-face par du lambris PVC",
+    "famille": "Toiture et sous-faces",
+    "description": "Dépose complète de l’habillage existant, pose du PVC, évacuation et nettoyage.",
+    "lignes": [
+      [
+        "TOIT-HAB-DEPOSE-COMP",
+        1.0
+      ],
+      [
+        "TOIT-HAB-PVC",
+        1.0
+      ],
+      [
+        "DEB-DECHETTERIE",
+        1.0
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-PEINT-PIECE",
-    nom: "Remise en peinture complète d’une pièce",
-    description:
-      "Protection, préparation légère, deux couches sur murs et plafond, joints acryliques et nettoyage.",
-    lignes: [
-      ["PEINT-PROT", 1],
-      ["PEINT-PREP-LEG", 1],
-      ["PEINT-MURS-2C", 1],
-      ["PEINT-PLAFOND-2C", 1],
-      ["PEINT-ACRYLIQUE", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-SDB-DOUCHE",
+    "nom": "Réfection d’un espace douche",
+    "famille": "Salle de bain",
+    "description": "Dépose de la paroi et de la faïence, reprise du support, protection à l’eau, faïence et finitions.",
+    "lignes": [
+      [
+        "PEINT-PROT",
+        1.0
+      ],
+      [
+        "PLOMB-PAROI-DEP",
+        1.0
+      ],
+      [
+        "CAR-DEPOSE",
+        1.0
+      ],
+      [
+        "DEB-DECHETTERIE",
+        1.0
+      ],
+      [
+        "CAR-PREP",
+        1.0
+      ],
+      [
+        "CAR-ETANCH",
+        1.0
+      ],
+      [
+        "CAR-FAIENCE",
+        1.0
+      ],
+      [
+        "CAR-JOINT",
+        1.0
+      ],
+      [
+        "PLOMB-PAROI-POS",
+        1.0
+      ],
+      [
+        "CAR-SILICONE",
+        1.0
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-SOL-PVC",
-    nom: "Pose complète d’un sol PVC clipsable",
-    description:
-      "Dépose éventuelle, préparation du support, sous-couche, sol PVC, plinthes et nettoyage.",
-    lignes: [
-      ["SOL-DEPOSE", 1],
-      ["SOL-PREP-MECA", 1],
-      ["SOL-SOUS-COUCHE", 1],
-      ["SOL-PVC-CLIP", 1],
-      ["SOL-PLINTHE-BOIS", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-SDB-RENOVATION",
+    "nom": "Rénovation complète d’une salle de bain",
+    "famille": "Salle de bain",
+    "description": "Déposes, douche, faïence, sol au choix (PVC ou carrelage), peintures, meuble vasque et finitions. Les quantités sont à adapter au chantier.",
+    "lignes": [
+      [
+        "PEINT-PROT",
+        1.0
+      ],
+      [
+        "PLOMB-PAROI-DEP",
+        1.0
+      ],
+      [
+        "PLOMB-DEPOSE-EQP",
+        1.0
+      ],
+      [
+        "CAR-DEPOSE",
+        1.0
+      ],
+      [
+        "DEB-DECHETTERIE",
+        1.0
+      ],
+      [
+        "CAR-PREP",
+        1.0
+      ],
+      [
+        "SOL-PREP-MECA",
+        1.0
+      ],
+      [
+        "PLOMB-REC-DCH",
+        1.0
+      ],
+      [
+        "CAR-ETANCH",
+        1.0
+      ],
+      [
+        "CAR-FAIENCE",
+        1.0
+      ],
+      [
+        "CAR-SOL",
+        1
+      ],
+      [
+        "CAR-JOINT",
+        1.0
+      ],
+      [
+        "PEINT-PREP-RENF",
+        1.0
+      ],
+      [
+        "PEINT-PLAFOND-2C",
+        1.0
+      ],
+      [
+        "PEINT-MURS-2C",
+        1.0
+      ],
+      [
+        "SOL-PVC-CLIP",
+        1.0
+      ],
+      [
+        "SOL-PLINTHE-BOIS",
+        1.0
+      ],
+      [
+        "PLOMB-MEUBLE-VASQUE",
+        1.0
+      ],
+      [
+        "PLOMB-ROBINET",
+        1.0
+      ],
+      [
+        "PLOMB-PAROI-POS",
+        1.0
+      ],
+      [
+        "CAR-SILICONE",
+        1.0
+      ],
+      [
+        "SOL-PLINTHE-CARR",
+        1
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-BOITES-LETTRES",
-    nom: "Remplacement d’un bloc de boîtes aux lettres",
-    description:
-      "Dépose du bloc, préparation de la réservation, pose des boîtes, scellement et évacuation.",
-    lignes: [
-      ["BRI-BAL-DEPOSE-BLOC", 1],
-      ["BRI-BAL-PREP", 1],
-      ["BRI-BAL-POSE", 1],
-      ["BRI-BAL-FIN-MAC", 1],
-      ["DEB-DECHETTERIE", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-PEINT-PIECE",
+    "nom": "Remise en peinture complète d’une pièce",
+    "famille": "Revêtements intérieurs",
+    "description": "Protection, préparation légère, deux couches sur murs et plafond, joints acryliques et nettoyage.",
+    "lignes": [
+      [
+        "PEINT-PROT",
+        1.0
+      ],
+      [
+        "PEINT-PREP-LEG",
+        1.0
+      ],
+      [
+        "PEINT-ACRYLIQUE",
+        1.0
+      ],
+      [
+        "PEINT-PLAFOND-2C",
+        1.0
+      ],
+      [
+        "PEINT-MURS-2C",
+        1.0
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-SOUS-FACE-PVC",
-    nom: "Remplacement d’une sous-face par du lambris PVC",
-    description:
-      "Dépose complète de l’habillage existant, pose du PVC, évacuation et nettoyage.",
-    lignes: [
-      ["TOIT-HAB-DEPOSE-COMP", 1],
-      ["TOIT-HAB-PVC", 1],
-      ["DEB-DECHETTERIE", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-SOL-PVC",
+    "nom": "Pose complète d’un sol PVC clipsable",
+    "famille": "Revêtements intérieurs",
+    "description": "Dépose éventuelle, préparation du support, sous-couche, sol PVC, plinthes et nettoyage.",
+    "lignes": [
+      [
+        "SOL-DEPOSE",
+        1.0
+      ],
+      [
+        "SOL-PREP-MECA",
+        1.0
+      ],
+      [
+        "SOL-SOUS-COUCHE",
+        1.0
+      ],
+      [
+        "SOL-PVC-CLIP",
+        1.0
+      ],
+      [
+        "SOL-PLINTHE-BOIS",
+        1.0
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-TERRASSE-BOIS",
-    nom: "Rénovation d’une terrasse en bois",
-    description:
-      "Dépose des lames existantes, contrôle du support, pose des nouvelles lames, finitions et évacuation. Le saturateur reste une prestation optionnelle à ajouter séparément.",
-    lignes: [
-      ["TERR-PROT-CHEMINEMENT", 1],
-      ["TERR-DEPOSE-LAMES", 1],
-      ["TERR-MANUT-ACCES", 1],
-      ["TERR-CONTROLE-SUPPORT", 1],
-      ["TERR-POSE-LAMES-BOIS", 1],
-      ["TERR-COUPES-FINITIONS", 1],
-      ["TERR-TRI-EVAC", 1],
-      ["NET-FIN-CHANTIER", 1],
-    ] as [string, number][],
+    "id": "PACK-BOITES-LETTRES",
+    "nom": "Remplacement d’un bloc de boîtes aux lettres",
+    "famille": "Équipements extérieurs",
+    "description": "Dépose du bloc, préparation de la réservation, pose des boîtes, scellement et évacuation.",
+    "lignes": [
+      [
+        "BRI-BAL-DEPOSE-BLOC",
+        1.0
+      ],
+      [
+        "BRI-BAL-PREP",
+        1.0
+      ],
+      [
+        "BRI-BAL-POSE",
+        1.0
+      ],
+      [
+        "BRI-BAL-FIN-MAC",
+        1.0
+      ],
+      [
+        "DEB-DECHETTERIE",
+        1.0
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-TERRASSE-BOIS-CREATION",
-    nom: "Création complète d’une terrasse en bois",
-    description:
-      "Création sur terrain dégagé : implantation, géotextile, points d’appui, structure neuve en lambourdes, pose des lames et finitions courantes. Renseigner la surface réelle sur chaque ligne.",
-    lignes: [
-      ["TERR-IMPLANT-GEOTEXTILE", 1],
-      ["TERR-POINTS-APPUI", 1],
-      ["TERR-OSSATURE-NEUVE", 1],
-      ["TERR-POSE-LAMES-NEUF", 1],
-    ] as [string, number][],
+    "id": "PACK-TERRASSE-BOIS",
+    "nom": "Rénovation d’une terrasse en bois",
+    "famille": "Terrasses",
+    "description": "Dépose des lames existantes, contrôle du support, pose des nouvelles lames, finitions et évacuation. Le saturateur reste une prestation optionnelle à ajouter séparément.",
+    "lignes": [
+      [
+        "TERR-PROT-CHEMINEMENT",
+        1.0
+      ],
+      [
+        "TERR-MANUT-ACCES",
+        1.0
+      ],
+      [
+        "TERR-DEPOSE-LAMES",
+        1.0
+      ],
+      [
+        "TERR-CONTROLE-SUPPORT",
+        1.0
+      ],
+      [
+        "TERR-POSE-LAMES-BOIS",
+        1.0
+      ],
+      [
+        "TERR-COUPES-FINITIONS",
+        1.0
+      ],
+      [
+        "TERR-TRI-EVAC",
+        1.0
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-CAISSON-CLIM-EXT",
-    nom: "Caisson extérieur ventilé pour climatisation",
-    description:
-      "Fabrication d’un caisson habillé avec rangement inférieur, deux portes et partie haute largement ventilée et démontable.",
-    lignes: [
-      ["BRI-CAISSON-CLIM-EXT", 1],
-    ] as [string, number][],
+    "id": "PACK-TERRASSE-BOIS-CREATION",
+    "nom": "Création complète d’une terrasse en bois",
+    "famille": "Terrasses",
+    "description": "Création sur terrain dégagé : implantation, géotextile, points d’appui, structure neuve en lambourdes, pose des lames et finitions courantes. Renseigner la surface réelle sur chaque ligne.",
+    "lignes": [
+      [
+        "TERR-IMPLANT-GEOTEXTILE",
+        1.0
+      ],
+      [
+        "TERR-POINTS-APPUI",
+        1.0
+      ],
+      [
+        "TERR-OSSATURE-NEUVE",
+        1.0
+      ],
+      [
+        "TERR-POSE-LAMES-NEUF",
+        1.0
+      ]
+    ]
   },
   {
-    id: "PACK-PERGOLA-ACIER-PEINTE",
-    nom: "Pergola acier ouverte — finition peinte",
-    description:
-      "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention, préparation, anticorrosion et peinture. Sans couverture.",
-    lignes: [
-      ["EXT-PERGOLA-ACIER-FAB", 17.5],
-      ["EXT-PERGOLA-ACIER-POS", 10.5],
-      ["EXT-PERGOLA-RENFORT-POSE", 1],
-      ["EXT-METAL-PREP", 11.05],
-      ["EXT-ANTIROUILLE", 11.05],
-      ["EXT-METAL-PEINT", 11.05],
-    ] as [string, number][],
+    "id": "PACK-PERGOLA-ACIER-PEINTE",
+    "nom": "Pergola acier ouverte — finition peinte",
+    "famille": "Pergolas",
+    "description": "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention, préparation, anticorrosion et peinture. Sans couverture.",
+    "lignes": [
+      [
+        "EXT-PERGOLA-ACIER-FAB",
+        17.5
+      ],
+      [
+        "EXT-METAL-PREP",
+        11.05
+      ],
+      [
+        "EXT-ANTIROUILLE",
+        11.05
+      ],
+      [
+        "EXT-METAL-PEINT",
+        11.05
+      ],
+      [
+        "EXT-PERGOLA-RENFORT-POSE",
+        1.0
+      ],
+      [
+        "EXT-PERGOLA-ACIER-POS",
+        10.5
+      ]
+    ]
   },
   {
-    id: "PACK-PERGOLA-ACIER-THERMOLAQUEE",
-    nom: "Pergola acier ouverte — finition thermolaquée",
-    description:
-      "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention et logistique de thermolaquage. Le coût du prestataire reste à ajouter aux fournitures.",
-    lignes: [
-      ["EXT-PERGOLA-ACIER-FAB", 17.5],
-      ["EXT-PERGOLA-ACIER-POS", 10.5],
-      ["EXT-PERGOLA-RENFORT-POSE", 1],
-      ["EXT-THERMOLAQUAGE-LOG", 3.5],
-    ] as [string, number][],
-  },
-  {
-    id: "PACK-JARDIN-REMISE-ETAT",
-    nom: "Remise en état d’un jardin",
-    description:
-      "Entretien global d’un espace vert laissé sans entretien, avec nettoyage et évacuation.",
-    lignes: [
-      ["JAR-REMISE-ETAT", 1],
-      ["JAR-EVAC", 1],
-    ] as [string, number][],
-  },
-  {
-    id: "PACK-LOGEMENT-RELOCATION",
-    nom: "Remise en état d’un logement avant relocation",
-    description:
-      "Base adaptable : débarras, peinture, rénovation du sol et nettoyage général du logement.",
-    lignes: [
-      ["DEB-ENCOMBRANTS", 1],
-      ["DEB-DECHETTERIE", 1],
-      ["PEINT-PROT", 1],
-      ["PEINT-PREP-LEG", 1],
-      ["PEINT-MURS-2C", 1],
-      ["PEINT-PLAFOND-2C", 1],
-      ["SOL-DEPOSE", 1],
-      ["SOL-PREP-MECA", 1],
-      ["SOL-PVC-CLIP", 1],
-      ["SOL-PLINTHE-BOIS", 1],
-      ["NET-LOGEMENT", 1],
-    ] as [string, number][],
-  },
+    "id": "PACK-JARDIN-REMISE-ETAT",
+    "nom": "Remise en état d’un jardin",
+    "famille": "Jardin",
+    "description": "Entretien global d’un espace vert laissé sans entretien, avec nettoyage et évacuation.",
+    "lignes": [
+      [
+        "JAR-REMISE-ETAT",
+        1.0
+      ],
+      [
+        "JAR-EVAC",
+        1.0
+      ]
+    ]
+  }
 ];
 
 const formatDateInputVersFr = (dateIso: string) => {
@@ -462,11 +706,11 @@ fraisDeplacementManuel?: number;
 const prestations = TARIFS_PRESTATIONS;
 
 const categories = Array.from(
-  new Set(prestations.map((p) => p.categorie))
+  new Set(prestations.map((p) => p.categorieChantier || p.categorie))
 );
 
 const getPrestationsByCategorie = (categorie: string) => {
-  return prestations.filter((p) => p.categorie === categorie);
+  return prestations.filter((p) => (p.categorieChantier || p.categorie) === categorie);
 };
 
 const calculerPrix = (prestation: any, quantite: number) => {
@@ -1215,6 +1459,13 @@ const [depenseMontant, setDepenseMontant] = useState(0);
 const [depenseModePaiement, setDepenseModePaiement] = useState("CB");
 const [prestationSelectionnee, setPrestationSelectionnee] = useState("");
 const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
+const [sousCategorieSelectionnee, setSousCategorieSelectionnee] = useState("");
+const [solSalleDeBain, setSolSalleDeBain] = useState<"pvc" | "carrelage">("pvc");
+const sousCategoriesDisponibles = useMemo(() => Array.from(new Set(
+  TARIFS_PRESTATIONS.filter((p) => !categorieSelectionnee ||
+    (p.categorieChantier || p.categorie) === categorieSelectionnee)
+    .map((p) => p.sousCategorie).filter((nom): nom is string => Boolean(nom))
+)), [categorieSelectionnee]);
 
 const [recherchePrestation, setRecherchePrestation] = useState("");
 const [packSelectionne, setPackSelectionne] = useState("");
@@ -3431,7 +3682,9 @@ const prestationsFiltrees = useMemo(() => {
   return TARIFS_PRESTATIONS.filter((prestation: any) => {
     const correspondCategorie =
       !categorieSelectionnee ||
-      prestation.categorie === categorieSelectionnee;
+      (prestation.categorieChantier || prestation.categorie) === categorieSelectionnee;
+    const correspondSousCategorie = !sousCategorieSelectionnee ||
+      prestation.sousCategorie === sousCategorieSelectionnee;
 
     const correspondFavori =
       !afficherFavorisSeulement ||
@@ -3441,6 +3694,8 @@ const prestationsFiltrees = useMemo(() => {
       [
         getNomPrestation(prestation),
         prestation.categorie,
+        prestation.categorieChantier,
+        prestation.sousCategorie,
         prestation.unite,
         prestation.action,
         prestation.conditions,
@@ -3456,27 +3711,17 @@ const prestationsFiltrees = useMemo(() => {
 
     return (
       correspondCategorie &&
+      correspondSousCategorie &&
       correspondFavori &&
       correspondRecherche
     );
   }).sort((a: any, b: any) => {
-    const aFavori =
-      prestationsFavorites.includes(a.id);
-
-    const bFavori =
-      prestationsFavorites.includes(b.id);
-
-    if (aFavori !== bFavori) {
-      return aFavori ? -1 : 1;
-    }
-
-    return getNomPrestation(a).localeCompare(
-      getNomPrestation(b),
-      "fr"
-    );
+    const ordre = (a.ordreCatalogue ?? 9999) - (b.ordreCatalogue ?? 9999);
+    return ordre || getNomPrestation(a).localeCompare(getNomPrestation(b), "fr");
   });
 }, [
   categorieSelectionnee,
+  sousCategorieSelectionnee,
   recherchePrestation,
   afficherFavorisSeulement,
   prestationsFavorites,
@@ -3576,7 +3821,13 @@ const ajouterPackAuDevis = (idPack: string) => {
   const maintenant = Date.now();
   const instancePack = `${idPack}-${maintenant}-${Math.random().toString(36).slice(2)}`;
 
-  const nouvellesLignes = pack.lignes
+  const lignesChoisies = pack.lignes.filter(([idPrestation]) => {
+    if (pack.id !== "PACK-SDB-RENOVATION") return true;
+    return solSalleDeBain === "carrelage"
+      ? !["SOL-PVC-CLIP", "SOL-PLINTHE-BOIS"].includes(idPrestation)
+      : !["CAR-SOL", "SOL-PLINTHE-CARR"].includes(idPrestation);
+  });
+  const nouvellesLignes = lignesChoisies
     .map(([idPrestation, quantite], index) => {
       const prestation: any = TARIFS_PRESTATIONS.find(
         (element: any) => element.id === idPrestation
@@ -6328,10 +6579,12 @@ return (
         className="w-full rounded-xl border border-blue-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800"
       >
         <option value="">Choisir un pack de prestations</option>
-        {PACKS_PRESTATIONS_V26.map((pack) => (
-          <option key={pack.id} value={pack.id}>
-            {pack.nom}
-          </option>
+        {Array.from(new Set(PACKS_PRESTATIONS_V26.map((pack) => pack.famille))).map((famille) => (
+          <optgroup key={famille} label={famille}>
+            {PACKS_PRESTATIONS_V26.filter((pack) => pack.famille === famille).map((pack) => (
+              <option key={pack.id} value={pack.id}>{pack.nom}</option>
+            ))}
+          </optgroup>
         ))}
       </select>
 
@@ -6349,6 +6602,15 @@ return (
       </button>
     </div>
 
+    {packSelectionne === "PACK-SDB-RENOVATION" && (
+      <div className="mt-3">
+        <Select label="Revêtement de sol de la salle de bain" value={solSalleDeBain}
+          onChange={(valeur) => setSolSalleDeBain(valeur === "carrelage" ? "carrelage" : "pvc")}
+          options={[["pvc", "Sol PVC avec plinthes bois / MDF / PVC"], ["carrelage", "Carrelage au sol avec plinthes carrelées"]]} />
+        <p className="mt-1 text-xs text-slate-600">Seul le revêtement choisi sera ajouté au devis. Renseigner les surfaces de faïence, de sol et les joints selon le chantier.</p>
+      </div>
+    )}
+
     {packSelectionne && (
       <p className="mt-3 text-xs text-slate-600">
         {
@@ -6360,7 +6622,7 @@ return (
     )}
   </div>
 
-  <div className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
+  <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
     <div>
       <label className="text-xs font-semibold text-slate-700">
         Rechercher une prestation
@@ -6382,20 +6644,25 @@ return (
     </div>
 
     <Select
-      label="Catégorie"
+      label="Étape du chantier"
       value={categorieSelectionnee}
       onChange={(valeur) => {
         setCategorieSelectionnee(valeur);
+        setSousCategorieSelectionnee("");
         setPrestationSelectionnee("");
       }}
       options={[
-        ["", "Toutes les catégories"],
+        ["", "Toutes les étapes du chantier"],
         ...categories.map((categorie) => [
           categorie,
           categorie,
         ]),
       ]}
     />
+
+    <Select label="Sous-catégorie" value={sousCategorieSelectionnee}
+      onChange={(valeur) => { setSousCategorieSelectionnee(valeur); setPrestationSelectionnee(""); }}
+      options={[["", "Toutes les sous-catégories"], ...sousCategoriesDisponibles.map((nom) => [nom, nom])]} />
 
     <div className="flex items-end">
       <button
@@ -6421,6 +6688,7 @@ return (
 
   {(recherchePrestation ||
     categorieSelectionnee ||
+    sousCategorieSelectionnee ||
     afficherFavorisSeulement) && (
     <div className="mt-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -6440,6 +6708,7 @@ return (
           onClick={() => {
             setRecherchePrestation("");
             setCategorieSelectionnee("");
+            setSousCategorieSelectionnee("");
             setPrestationSelectionnee("");
             setAfficherFavorisSeulement(false);
           }}
@@ -6485,7 +6754,7 @@ return (
 
                         <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
                           {
-                            prestation.categorie
+                            [prestation.categorieChantier || prestation.categorie, prestation.sousCategorie].filter(Boolean).join(" › ")
                           }
                         </span>
                       </div>
