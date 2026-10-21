@@ -324,6 +324,23 @@ export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
 const TARIFS_PRESTATIONS_SOURCE: PrestationTarif[] = [
 
+// Réseaux d’eau : prestations générales, quantités et dimensions au devis.
+p("MAC-TRAVERSEE-PAROI-RESEAU", "Maçonnerie légère", "Création d’un passage de réseau à travers une paroi", "u", 1.1, ["Repérage de la zone et perçage adapté à la paroi après contrôle de l’absence de réseaux.","Mise en place d’un fourreau pour le passage prévu.","Rebouchage périphérique et finition extérieure étanche adaptée au support."], { conditions: "Diamètre, épaisseur et matériau à préciser au devis. Pour perçage courant sans atteinte structurelle. Hors carottage spécialisé, béton armé, peinture et reprise complète du revêtement. Fournitures séparées.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Création d’un passage de réseau à travers une paroi"] }),
+
+p("PLOMB-PIQUAGE-ALIMENTATION", "Plomberie / Sanitaires", "Raccordement d’une alimentation sur réseau existant accessible", "u", 0.5, ["Coupure de l’eau et préparation du point de raccordement accessible.","Raccordement sur nourrice ou canalisation existante compatible.","Contrôle local du raccordement."], { conditions: "Pour un raccordement simple accessible. Hors vanne facturée séparément, modification lourde, réseau encastré et fournitures. Ne pas cumuler avec un raccordement déjà inclus.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Raccordement d’une alimentation sur réseau existant accessible"] }),
+
+p("PLOMB-VANNE-ARRET", "Plomberie / Sanitaires", "Pose d’une vanne d’arrêt sur canalisation accessible", "u", 0.25, ["Préparation des raccords compatibles avec la canalisation.","Pose de la vanne d’arrêt, avec purge si prévue au devis.","Contrôle de la manœuvre et du raccordement."], { conditions: "Par vanne sur canalisation préparée et accessible. Diamètre, modèle et purge à préciser au devis. Hors création d’accès, modification lourde et fournitures. Ne pas cumuler avec une vanne déjà incluse.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Pose d’une vanne d’arrêt sur canalisation accessible"] }),
+
+p("PLOMB-CANALISATION-TRANCHEE", "Plomberie / Sanitaires", "Pose d’une canalisation d’eau en tranchée préparée", "ml", 0.04, ["Contrôle visuel du fond de pose préparé et du parcours.","Déroulage et mise en place de la canalisation adaptée à l’usage prévu.","Positionnement des extrémités pour les raccordements."], { conditions: "Longueur, matériau, diamètre, pression et conditions de protection à préciser au devis. Tranchée accessible, fond de pose adapté et profondeur suffisante pour le site. Hors terrassement, lit de pose à créer, remblaiement, raccords terminaux, grillage avertisseur et fournitures, à chiffrer selon répartition convenue.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Pose d’une canalisation d’eau en tranchée préparée"] }),
+
+p("PLOMB-REGARD-VISITE", "Plomberie / Sanitaires", "Pose d’un regard de visite pour réseau d’eau", "u", 0.75, ["Présentation du regard dans une réservation préparée.","Mise à niveau et adaptation des passages de canalisations.","Pose du couvercle et contrôle de l’accès aux raccordements."], { conditions: "Dimensions et classe du couvercle à adapter à l’emplacement. Pour petit regard préfabriqué sur assise préparée et stable. Hors terrassement, dalle ou ouvrage maçonné, vannes, raccordements, remblaiement et fournitures.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Pose d’un regard de visite pour réseau d’eau"] }),
+
+p("PLOMB-DERIVATION-ATTENTE", "Plomberie / Sanitaires", "Création d’une dérivation avec sortie bouchonnée en attente", "u", 0.25, ["Pose d’une dérivation sur canalisation accessible préparée.","Réalisation d’une sortie bouchonnée pour raccordement ultérieur.","Repérage de l’attente et contrôle local du raccordement."], { conditions: "Diamètre et destination à préciser au devis. Hors vanne supplémentaire, prolongement de réseau, branchement du futur équipement et fournitures. Attente courte et accessible, implantation à valider.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Création d’une dérivation avec sortie bouchonnée en attente"] }),
+
+p("PLOMB-ROBINET-PUISAGE-REMONTEE", "Plomberie / Sanitaires", "Pose d’un robinet de puisage avec remontée apparente", "u", 1, ["Pose et fixation d’une courte remontée de canalisation sur support existant adapté.","Installation du robinet de puisage et de la protection contre les retours d’eau adaptée à l’usage.","Contrôle des fixations et du fonctionnement."], { conditions: "Hauteur, longueur, protection contre le gel et type de robinet à préciser au devis. Hors création de potelet ou massif, terrassement, alimentation amont, vanne séparée et fournitures. Ne pas cumuler avec la pose d’un robinet déjà incluse.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Pose d’un robinet de puisage avec remontée apparente"] }),
+
+p("PLOMB-ESSAI-RESEAU-EAU", "Plomberie / Sanitaires", "Mise en eau et contrôle d’un réseau d’eau créé ou modifié", "forfait", 0.3, ["Remplissage progressif et rinçage du tronçon concerné.","Contrôle sous pression de service des raccordements accessibles avant fermeture ou remblaiement.","Essais des organes de coupure et points de puisage."], { conditions: "Pour petit réseau accessible, hors recherche de fuite destructive et essai instrumenté spécifique. Une seule fois par ensemble de travaux ; ne pas cumuler avec un essai global déjà inclus. Fournitures séparées.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Mise en eau et contrôle d’un réseau d’eau créé ou modifié"] }),
+
 // Prestations générales : ouvertures, évacuations et accès techniques.
 p(
   "MAC-OUVERTURE-CLOISON-LOCAL",
@@ -4947,6 +4964,14 @@ p(
 const CLASSEMENT_CHANTIER: Record<string, {
   categorieChantier: string; sousCategorie: string; ordreCatalogue: number;
 }> = {
+  "MAC-TRAVERSEE-PAROI-RESEAU": {"categorieChantier":"03. Maçonnerie et structure","sousCategorie":"Reprises maçonnées et réservations","ordreCatalogue":26.5},
+  "PLOMB-PIQUAGE-ALIMENTATION": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.1},
+  "PLOMB-VANNE-ARRET": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.2},
+  "PLOMB-CANALISATION-TRANCHEE": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.3},
+  "PLOMB-REGARD-VISITE": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.4},
+  "PLOMB-DERIVATION-ATTENTE": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.5},
+  "PLOMB-ROBINET-PUISAGE-REMONTEE": {"categorieChantier":"08. Équipements et finitions","sousCategorie":"Sanitaires : vasques et robinetterie","ordreCatalogue":126.5},
+  "PLOMB-ESSAI-RESEAU-EAU": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.6},
   "MAC-OUVERTURE-CLOISON-LOCAL": {"categorieChantier": "02. Déposes et démolition", "sousCategorie": "Cloisons, plafonds et menuiseries", "ordreCatalogue": 19},
   "PLOMB-EVAC-CREATION": {"categorieChantier": "05. Réseaux et équipements techniques", "sousCategorie": "Plomberie : raccordements et évacuations", "ordreCatalogue": 38},
   "BRI-TRAPPE-VISITE-SUR-MESURE": {"categorieChantier": "08. Équipements et finitions", "sousCategorie": "Menuiseries intérieures et accessoires", "ordreCatalogue": 111},
