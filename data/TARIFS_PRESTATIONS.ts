@@ -324,6 +324,37 @@ export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
 const TARIFS_PRESTATIONS_SOURCE: PrestationTarif[] = [
 
+// Prestations générales : ouvertures, évacuations et accès techniques.
+p(
+  "MAC-OUVERTURE-CLOISON-LOCAL",
+  "Maçonnerie légère",
+  "Création d’une ouverture localisée dans une cloison non porteuse",
+  "u",
+  1.5,
+  ["Repérage et protection locale ; traçage de l’ouverture après contrôle de la zone.", "Découpe et dépose contrôlée de la partie de cloison nécessaire à l’accès ou à la réservation.", "Régularisation courante des bords et regroupement des gravats."],
+  { conditions: "Pour petite ouverture dans une cloison non porteuse en matériau courant, sans réseau dans la zone de découpe. Dimensions, épaisseur et matériau à préciser au devis. Hors mur porteur, béton armé, linteau, déplacement des réseaux, fermeture, peinture et évacuation en déchèterie. Ne pas cumuler avec une dépose facturée pour la même zone.", rentabilite: "🟠 À adapter", tags: ["ouverture", "cloison", "brique", "réservation", "accès technique", "découpe"] }
+),
+
+p(
+  "PLOMB-EVAC-CREATION",
+  "Plomberie / Sanitaires",
+  "Création d’une évacuation sanitaire sur réseau existant",
+  "u",
+  2.5,
+  ["Repérage du parcours et contrôle de la compatibilité du réseau existant accessible.", "Pose et fixation de la canalisation d’évacuation ; réalisation du raccordement adapté au réseau existant.", "Essais d’écoulement et contrôle d’étanchéité des raccordements."],
+  { conditions: "Pour un parcours court et accessible : longueur, diamètre, pente et point de raccordement à préciser au devis après contrôle. Compatibilité du réseau et ventilation à vérifier avant intervention. Hors ouverture de paroi, terrassement, réseau encastré, dépose et repose d’équipement sanitaire, siphon, pose de l’appareil et fournitures. Ne pas cumuler avec un raccordement déjà compris pour les mêmes travaux.", rentabilite: "🟠 À adapter", tags: ["évacuation", "sanitaire", "PVC", "raccordement", "piquage", "canalisation", "lavabo", "évier", "WC"] }
+),
+
+p(
+  "BRI-TRAPPE-VISITE-SUR-MESURE",
+  "Bricolage / Menuiserie légère",
+  "Fabrication et pose d’une trappe de visite sur mesure",
+  "u",
+  2.5,
+  ["Prise de mesures de l’ouverture préparée ; fabrication et fixation d’un cadre adapté au support.", "Découpe et pose d’un panneau démontable avec système de maintien accessible.", "Ajustements, finitions périphériques courantes et contrôle de l’accès aux équipements."],
+  { conditions: "Pour une petite trappe simple sur ouverture préparée : dimensions, matériau, finition et système de fermeture à préciser au devis. Hors création de l’ouverture, peinture, carrelage, fournitures et exigence particulière de résistance au feu, d’isolation ou d’étanchéité. Une trappe prête à poser ou une fabrication complexe nécessite un ajustement du temps.", rentabilite: "🟠 À adapter", tags: ["trappe", "visite", "accès", "cadre", "panneau démontable", "sur mesure", "menuiserie"] }
+),
+
 // ================= INTERVENTION GLOBALE - TEMPS MANUEL =================
 p(
   "BRI-REMISE-ETAT-LOCAUX-MOBILIER",
@@ -4916,6 +4947,9 @@ p(
 const CLASSEMENT_CHANTIER: Record<string, {
   categorieChantier: string; sousCategorie: string; ordreCatalogue: number;
 }> = {
+  "MAC-OUVERTURE-CLOISON-LOCAL": {"categorieChantier": "02. Déposes et démolition", "sousCategorie": "Cloisons, plafonds et menuiseries", "ordreCatalogue": 19},
+  "PLOMB-EVAC-CREATION": {"categorieChantier": "05. Réseaux et équipements techniques", "sousCategorie": "Plomberie : raccordements et évacuations", "ordreCatalogue": 38},
+  "BRI-TRAPPE-VISITE-SUR-MESURE": {"categorieChantier": "08. Équipements et finitions", "sousCategorie": "Menuiseries intérieures et accessoires", "ordreCatalogue": 111},
   "deplacement_premier_jour_chantier": {
     "categorieChantier": "01. Installation du chantier",
     "sousCategorie": "Déplacements et installation",
@@ -5014,932 +5048,932 @@ const CLASSEMENT_CHANTIER: Record<string, {
   "BRI-BLOC-PORTE-DEPOSE": {
     "categorieChantier": "02. Déposes et démolition",
     "sousCategorie": "Cloisons, plafonds et menuiseries",
-    "ordreCatalogue": 19
+    "ordreCatalogue": 20
   },
   "TOIT-HAB-DEPOSE-COMP": {
     "categorieChantier": "02. Déposes et démolition",
     "sousCategorie": "Ouvrages extérieurs",
-    "ordreCatalogue": 20
+    "ordreCatalogue": 21
   },
   "TERR-DEPOSE-LAMES": {
     "categorieChantier": "02. Déposes et démolition",
     "sousCategorie": "Ouvrages extérieurs",
-    "ordreCatalogue": 21
+    "ordreCatalogue": 22
   },
   "BRI-BAL-DEPOSE-BLOC": {
     "categorieChantier": "02. Déposes et démolition",
     "sousCategorie": "Ouvrages extérieurs",
-    "ordreCatalogue": 22
+    "ordreCatalogue": 23
   },
   "MAC-ENCADREMENT-OUVERTURE-REP": {
     "categorieChantier": "03. Maçonnerie et structure",
     "sousCategorie": "Reprises maçonnées et réservations",
-    "ordreCatalogue": 23
+    "ordreCatalogue": 24
   },
   "BRI-BAL-PREP": {
     "categorieChantier": "03. Maçonnerie et structure",
     "sousCategorie": "Reprises maçonnées et réservations",
-    "ordreCatalogue": 24
+    "ordreCatalogue": 25
   },
   "BRI-BAL-FIN-MAC": {
     "categorieChantier": "03. Maçonnerie et structure",
     "sousCategorie": "Reprises maçonnées et réservations",
-    "ordreCatalogue": 25
+    "ordreCatalogue": 26
   },
   "TOIT-ELEM": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Couverture",
-    "ordreCatalogue": 26
+    "ordreCatalogue": 27
   },
   "TOIT-FINITION": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Couverture",
-    "ordreCatalogue": 27
+    "ordreCatalogue": 28
   },
   "TOIT-HABILLAGE": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Sous-faces et habillages",
-    "ordreCatalogue": 28
+    "ordreCatalogue": 29
   },
   "TOIT-HAB-REPOSE": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Sous-faces et habillages",
-    "ordreCatalogue": 29
+    "ordreCatalogue": 30
   },
   "TOIT-HAB-PVC": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Sous-faces et habillages",
-    "ordreCatalogue": 30
+    "ordreCatalogue": 31
   },
   "PEINT-EXT-NET-HP": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Façades et maçonneries extérieures",
-    "ordreCatalogue": 31
+    "ordreCatalogue": 32
   },
   "PEINT-FACADE-PREP-LEG": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Façades et maçonneries extérieures",
-    "ordreCatalogue": 32
+    "ordreCatalogue": 33
   },
   "PEINT-FACADE-1C": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Façades et maçonneries extérieures",
-    "ordreCatalogue": 33
+    "ordreCatalogue": 34
   },
   "PEINT-FACADE-2C": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Façades et maçonneries extérieures",
-    "ordreCatalogue": 34
+    "ordreCatalogue": 35
   },
   "PEINT-ENCADREMENT-EXT-2C": {
     "categorieChantier": "04. Toiture et enveloppe extérieure",
     "sousCategorie": "Façades et maçonneries extérieures",
-    "ordreCatalogue": 35
+    "ordreCatalogue": 36
   },
   "PLOMB-RACC": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Plomberie : raccordements et évacuations",
-    "ordreCatalogue": 36
+    "ordreCatalogue": 37
   },
   "PLOMB-SIPHON": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Plomberie : raccordements et évacuations",
-    "ordreCatalogue": 37
+    "ordreCatalogue": 39
   },
   "PLOMB-REC-DCH": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Douche : pose du receveur",
-    "ordreCatalogue": 38
+    "ordreCatalogue": 40
   },
   "PLOMB-REC-DCH-POS-SIMPLE": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Douche : pose du receveur",
-    "ordreCatalogue": 39
+    "ordreCatalogue": 41
   },
   "ELEC-SORTIE": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Électricité : connexions et appareillage",
-    "ordreCatalogue": 40
+    "ordreCatalogue": 42
   },
   "ELEC-PRISE": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Électricité : connexions et appareillage",
-    "ordreCatalogue": 41
+    "ordreCatalogue": 43
   },
   "ELEC-INT": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Électricité : connexions et appareillage",
-    "ordreCatalogue": 42
+    "ordreCatalogue": 44
   },
   "ELEC-APP": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Électricité : connexions et appareillage",
-    "ordreCatalogue": 43
+    "ordreCatalogue": 45
   },
   "VMC-TRAVERSEE-MUR": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Ventilation : passages et équipements",
-    "ordreCatalogue": 44
+    "ordreCatalogue": 46
   },
   "VMC-GROUPE": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Ventilation : passages et équipements",
-    "ordreCatalogue": 45
+    "ordreCatalogue": 47
   },
   "VMC-EXTRACTEUR": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Ventilation : passages et équipements",
-    "ordreCatalogue": 46
+    "ordreCatalogue": 48
   },
   "VMC-ENTREE-AIR": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Ventilation : passages et équipements",
-    "ordreCatalogue": 47
+    "ordreCatalogue": 49
   },
   "VMC-BOUCHE": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Ventilation : passages et équipements",
-    "ordreCatalogue": 48
+    "ordreCatalogue": 50
   },
   "VMC-GRILLE-EXT": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Ventilation : passages et équipements",
-    "ordreCatalogue": 49
+    "ordreCatalogue": 51
   },
   "CHAU-RADIATEUR": {
     "categorieChantier": "05. Réseaux et équipements techniques",
     "sousCategorie": "Chauffage électrique",
-    "ordreCatalogue": 50
+    "ordreCatalogue": 52
   },
   "MAC-CLOISON-CARREAUX-PLATRE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Cloisons maçonnées",
-    "ordreCatalogue": 51
+    "ordreCatalogue": 53
   },
   "MAC-CLOISON-REPRISE-LOCAL-HUMIDE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Cloisons maçonnées",
-    "ordreCatalogue": 52
+    "ordreCatalogue": 54
   },
   "PLAC-OSSATURE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Ossatures, cloisons et doublages",
-    "ordreCatalogue": 53
+    "ordreCatalogue": 55
   },
   "PLAC-CLOISON-RENFORT-PORTE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Ossatures, cloisons et doublages",
-    "ordreCatalogue": 54
+    "ordreCatalogue": 56
   },
   "PLAC-DOUBLAGE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Ossatures, cloisons et doublages",
-    "ordreCatalogue": 55
+    "ordreCatalogue": 57
   },
   "PLAC-PLAQUE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Ossatures, cloisons et doublages",
-    "ordreCatalogue": 56
+    "ordreCatalogue": 58
   },
   "PLAC-CLOISON-BA13": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Ossatures, cloisons et doublages",
-    "ordreCatalogue": 57
+    "ordreCatalogue": 59
   },
   "PLAC-CLOISON-SEPARATIVE-RENF": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Ossatures, cloisons et doublages",
-    "ordreCatalogue": 58
+    "ordreCatalogue": 60
   },
   "PLAC-FAUX-PLAFOND-POSE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Plafonds et réservations",
-    "ordreCatalogue": 59
+    "ordreCatalogue": 61
   },
   "PLAC-FAUX-PLAFOND-SPOT": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Plafonds et réservations",
-    "ordreCatalogue": 60
+    "ordreCatalogue": 62
   },
   "PLAC-BANDES": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Bandes, réparations et rebouchages",
-    "ordreCatalogue": 61
+    "ordreCatalogue": 63
   },
   "PLAC-REPARATION": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Bandes, réparations et rebouchages",
-    "ordreCatalogue": 62
+    "ordreCatalogue": 64
   },
   "BRI-REB-FIX-MURAL": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Bandes, réparations et rebouchages",
-    "ordreCatalogue": 63
+    "ordreCatalogue": 65
   },
   "DECO-PREP-LEG": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des murs et plafonds",
-    "ordreCatalogue": 64
+    "ordreCatalogue": 66
   },
   "DECO-PREP-RENF": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des murs et plafonds",
-    "ordreCatalogue": 65
+    "ordreCatalogue": 67
   },
   "PEINT-PREP-LEG": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des murs et plafonds",
-    "ordreCatalogue": 66
+    "ordreCatalogue": 68
   },
   "PEINT-PREP-RENF": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des murs et plafonds",
-    "ordreCatalogue": 67
+    "ordreCatalogue": 69
   },
   "PEINT-RATISSAGE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des murs et plafonds",
-    "ordreCatalogue": 68
+    "ordreCatalogue": 70
   },
   "PEINT-TOILE-PLAFOND-POS": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des murs et plafonds",
-    "ordreCatalogue": 69
+    "ordreCatalogue": 71
   },
   "SOL-PREP-MECA": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des sols et supports carrelés",
-    "ordreCatalogue": 70
+    "ordreCatalogue": 72
   },
   "SOL-RAGREAGE": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des sols et supports carrelés",
-    "ordreCatalogue": 71
+    "ordreCatalogue": 73
   },
   "CAR-PREP": {
     "categorieChantier": "06. Cloisons et préparation des supports",
     "sousCategorie": "Préparation des sols et supports carrelés",
-    "ordreCatalogue": 72
+    "ordreCatalogue": 74
   },
   "CAR-ETANCH": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Carrelage : protection à l’eau",
-    "ordreCatalogue": 73
+    "ordreCatalogue": 75
   },
   "CAR-SOL": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Carrelage et faïence : pose et joints",
-    "ordreCatalogue": 74
+    "ordreCatalogue": 76
   },
   "CAR-COMPLEXE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Carrelage et faïence : pose et joints",
-    "ordreCatalogue": 75
+    "ordreCatalogue": 77
   },
   "CAR-FAIENCE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Carrelage et faïence : pose et joints",
-    "ordreCatalogue": 76
+    "ordreCatalogue": 78
   },
   "CAR-JOINT": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Carrelage et faïence : pose et joints",
-    "ordreCatalogue": 77
+    "ordreCatalogue": 79
   },
   "CAR-REPRISE-SOL-LOCALISEE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Carrelage et faïence : pose et joints",
-    "ordreCatalogue": 78
+    "ordreCatalogue": 80
   },
   "PEINT-PRIMAIRE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : primaires",
-    "ordreCatalogue": 79
+    "ordreCatalogue": 81
   },
   "PEINT-ISOLANT": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : primaires",
-    "ordreCatalogue": 80
+    "ordreCatalogue": 82
   },
   "PEINT-PLAFOND": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : plafonds puis murs",
-    "ordreCatalogue": 81
+    "ordreCatalogue": 83
   },
   "PEINT-PLAFOND-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : plafonds puis murs",
-    "ordreCatalogue": 82
+    "ordreCatalogue": 84
   },
   "PEINT-MURS": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : plafonds puis murs",
-    "ordreCatalogue": 83
+    "ordreCatalogue": 85
   },
   "PEINT-MURS-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : plafonds puis murs",
-    "ordreCatalogue": 84
+    "ordreCatalogue": 86
   },
   "PEINT-FINITION-PAILLETTES": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : plafonds puis murs",
-    "ordreCatalogue": 85
+    "ordreCatalogue": 87
   },
   "DECO-POSE-MURAL": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Revêtements muraux décoratifs",
-    "ordreCatalogue": 86
+    "ordreCatalogue": 88
   },
   "PEINT-BOIS-SURF": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 87
+    "ordreCatalogue": 89
   },
   "PEINT-BOIS-SURF-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 88
+    "ordreCatalogue": 90
   },
   "PEINT-MENUISERIE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 89
+    "ordreCatalogue": 91
   },
   "PEINT-MENUISERIE-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 90
+    "ordreCatalogue": 92
   },
   "PEINT-PORTE-BOIS-RENOV-FACE-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 91
+    "ordreCatalogue": 93
   },
   "PEINT-VOLET-BOIS-RENOV-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 92
+    "ordreCatalogue": 94
   },
   "PEINT-VOLET-RENOV-SURFACE-2C": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Peinture : bois, portes et volets",
-    "ordreCatalogue": 93
+    "ordreCatalogue": 95
   },
   "SOL-SOUS-COUCHE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 94
+    "ordreCatalogue": 96
   },
   "SOL-FLOTTANT": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 95
+    "ordreCatalogue": 97
   },
   "SOL-PARQUET-COLLE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 96
+    "ordreCatalogue": 98
   },
   "SOL-PVC-CLIP": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 97
+    "ordreCatalogue": 99
   },
   "SOL-PVC-COLLE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 98
+    "ordreCatalogue": 100
   },
   "SOL-MOQUETTE": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 99
+    "ordreCatalogue": 101
   },
   "SOL-ROULEAU": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 100
+    "ordreCatalogue": 102
   },
   "SOL-DECOUPE-CPLX": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Sols : sous-couches et pose",
-    "ordreCatalogue": 101
+    "ordreCatalogue": 103
   },
   "SOL-PONCAGE-PARQUET": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Parquets : rénovation et finition",
-    "ordreCatalogue": 102
+    "ordreCatalogue": 104
   },
   "SOL-FINITION-PARQUET": {
     "categorieChantier": "07. Revêtements et peinture",
     "sousCategorie": "Parquets : rénovation et finition",
-    "ordreCatalogue": 103
+    "ordreCatalogue": 105
   },
   "BRI-BLOC-PORTE-REPOSE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Menuiseries intérieures et accessoires",
-    "ordreCatalogue": 104
+    "ordreCatalogue": 106
   },
   "BRI-MEUBLE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Menuiseries intérieures et accessoires",
-    "ordreCatalogue": 105
+    "ordreCatalogue": 107
   },
   "BRI-FIX-MURAL": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Menuiseries intérieures et accessoires",
-    "ordreCatalogue": 106
+    "ordreCatalogue": 108
   },
   "BRI-ETAGERE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Menuiseries intérieures et accessoires",
-    "ordreCatalogue": 107
+    "ordreCatalogue": 109
   },
   "BRI-TRINGLE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Menuiseries intérieures et accessoires",
-    "ordreCatalogue": 108
+    "ordreCatalogue": 110
   },
   "CUI-MEUBLE-MONT": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : meubles et plan de travail",
-    "ordreCatalogue": 109
+    "ordreCatalogue": 112
   },
   "CUI-MEUBLE-POS": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : meubles et plan de travail",
-    "ordreCatalogue": 110
+    "ordreCatalogue": 113
   },
   "CUI-DECOUPE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : meubles et plan de travail",
-    "ordreCatalogue": 111
+    "ordreCatalogue": 114
   },
   "CUI-PLAN": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : meubles et plan de travail",
-    "ordreCatalogue": 112
+    "ordreCatalogue": 115
   },
   "CUI-CREDENCE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : meubles et plan de travail",
-    "ordreCatalogue": 113
+    "ordreCatalogue": 116
   },
   "CUI-AJUST": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : meubles et plan de travail",
-    "ordreCatalogue": 114
+    "ordreCatalogue": 117
   },
   "CUI-EVIER": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : évier et équipements",
-    "ordreCatalogue": 115
+    "ordreCatalogue": 118
   },
   "CUI-EVIER-DEPOSE-REPOSE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : évier et équipements",
-    "ordreCatalogue": 116
+    "ordreCatalogue": 119
   },
   "CUI-MITIGEUR": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : évier et équipements",
-    "ordreCatalogue": 117
+    "ordreCatalogue": 120
   },
   "CUI-ENCASTRABLE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : évier et équipements",
-    "ordreCatalogue": 118
+    "ordreCatalogue": 121
   },
   "EQP-ELECTRO": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Cuisine : évier et équipements",
-    "ordreCatalogue": 119
+    "ordreCatalogue": 122
   },
   "PLOMB-MEUBLE-VASQUE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Sanitaires : vasques et robinetterie",
-    "ordreCatalogue": 120
+    "ordreCatalogue": 123
   },
   "PLOMB-MEUBLE-VASQUE-REEMPLOI": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Sanitaires : vasques et robinetterie",
-    "ordreCatalogue": 121
+    "ordreCatalogue": 124
   },
   "PLOMB-VASQUE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Sanitaires : vasques et robinetterie",
-    "ordreCatalogue": 122
+    "ordreCatalogue": 125
   },
   "PLOMB-ROBINET": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Sanitaires : vasques et robinetterie",
-    "ordreCatalogue": 123
+    "ordreCatalogue": 126
   },
   "PLOMB-WC": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Sanitaires : WC",
-    "ordreCatalogue": 124
+    "ordreCatalogue": 127
   },
   "PLOMB-WC-DEPOSE-REPOSE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Sanitaires : WC",
-    "ordreCatalogue": 125
+    "ordreCatalogue": 128
   },
   "PLOMB-COL-DCH-DEPOSE-REPOSE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Douche : colonne, accessoires et paroi",
-    "ordreCatalogue": 126
+    "ordreCatalogue": 129
   },
   "PLOMB-POMME-HAUTE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Douche : colonne, accessoires et paroi",
-    "ordreCatalogue": 127
+    "ordreCatalogue": 130
   },
   "PLOMB-PAROI-POS": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Douche : colonne, accessoires et paroi",
-    "ordreCatalogue": 128
+    "ordreCatalogue": 131
   },
   "ELEC-LUM": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Luminaires",
-    "ordreCatalogue": 129
+    "ordreCatalogue": 132
   },
   "SOL-PLINTHE-BOIS": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Plinthes, seuils et joints de finition",
-    "ordreCatalogue": 130
+    "ordreCatalogue": 133
   },
   "SOL-PLINTHE-CARR": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Plinthes, seuils et joints de finition",
-    "ordreCatalogue": 131
+    "ordreCatalogue": 134
   },
   "SOL-SEUIL-PORTE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Plinthes, seuils et joints de finition",
-    "ordreCatalogue": 132
+    "ordreCatalogue": 135
   },
   "PEINT-ACRYLIQUE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Plinthes, seuils et joints de finition",
-    "ordreCatalogue": 133
+    "ordreCatalogue": 136
   },
   "CAR-SILICONE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Plinthes, seuils et joints de finition",
-    "ordreCatalogue": 134
+    "ordreCatalogue": 137
   },
   "BRI-BAL-POSE": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Boîtes aux lettres et caissons extérieurs",
-    "ordreCatalogue": 135
+    "ordreCatalogue": 138
   },
   "BRI-CAISSON-CLIM-EXT": {
     "categorieChantier": "08. Équipements et finitions",
     "sousCategorie": "Boîtes aux lettres et caissons extérieurs",
-    "ordreCatalogue": 136
+    "ordreCatalogue": 139
   },
   "TERR-IMPLANT-GEOTEXTILE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : préparation et structure",
-    "ordreCatalogue": 137
+    "ordreCatalogue": 140
   },
   "TERR-POINTS-APPUI": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : préparation et structure",
-    "ordreCatalogue": 138
+    "ordreCatalogue": 141
   },
   "TERR-CONTROLE-SUPPORT": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : préparation et structure",
-    "ordreCatalogue": 139
+    "ordreCatalogue": 142
   },
   "TERR-OSSATURE-NEUVE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : préparation et structure",
-    "ordreCatalogue": 140
+    "ordreCatalogue": 143
   },
   "TERR-POSE-LAMES-NEUF": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : lames et finitions",
-    "ordreCatalogue": 141
+    "ordreCatalogue": 144
   },
   "TERR-POSE-LAMES-BOIS": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : lames et finitions",
-    "ordreCatalogue": 142
+    "ordreCatalogue": 145
   },
   "TERR-COUPES-FINITIONS": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : lames et finitions",
-    "ordreCatalogue": 143
+    "ordreCatalogue": 146
   },
   "TERR-SATURATEUR": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Terrasses : lames et finitions",
-    "ordreCatalogue": 144
+    "ordreCatalogue": 147
   },
   "EXT-PERGOLA-ACIER-FAB": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 145
+    "ordreCatalogue": 148
   },
   "EXT-PERGOLA-RENFORT-POSE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 146
+    "ordreCatalogue": 149
   },
   "EXT-PERGOLA-ACIER-POS": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 147
+    "ordreCatalogue": 150
   },
   "EXT-METAL-REP-H": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 148
+    "ordreCatalogue": 151
   },
   "EXT-SOUDURE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 149
+    "ordreCatalogue": 152
   },
   "EXT-METAL-PREP": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 150
+    "ordreCatalogue": 153
   },
   "EXT-ANTIROUILLE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 151
+    "ordreCatalogue": 154
   },
   "EXT-METAL-PEINT": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 152
+    "ordreCatalogue": 155
   },
   "EXT-THERMOLAQUAGE-LOG": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Pergolas et métallerie",
-    "ordreCatalogue": 153
+    "ordreCatalogue": 156
   },
   "EXT-CLOTURE-IMPLANT": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : implantation et fondations",
-    "ordreCatalogue": 154
+    "ordreCatalogue": 157
   },
   "EXT-CLOTURE-FONDATION-TERR": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : implantation et fondations",
-    "ordreCatalogue": 155
+    "ordreCatalogue": 158
   },
   "EXT-CLOTURE-MASSIF-BETON": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : implantation et fondations",
-    "ordreCatalogue": 156
+    "ordreCatalogue": 159
   },
   "EXT-CLOTURE-POTEAU-PLATINE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 157
+    "ordreCatalogue": 160
   },
   "EXT-CLOTURE-POTEAU-SCELLE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 158
+    "ordreCatalogue": 161
   },
   "EXT-CLOTURE-PANNEAU-POS": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 159
+    "ordreCatalogue": 162
   },
   "EXT-CLOTURE-ADAPT-PENTE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 160
+    "ordreCatalogue": 163
   },
   "EXT-CLOTURE-OCCULT-PVC": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 161
+    "ordreCatalogue": 164
   },
   "EXT-CLOTURE-PALISSADE-PVC": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 162
+    "ordreCatalogue": 165
   },
   "EXT-CLOTURE-PALISSADE-FINITIONS": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Clôtures : poteaux, panneaux et occultation",
-    "ordreCatalogue": 163
+    "ordreCatalogue": 166
   },
   "JAR-REMISE-ETAT": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Jardin : remise en état et entretien",
-    "ordreCatalogue": 164
+    "ordreCatalogue": 167
   },
   "JAR-DEBROU": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Jardin : remise en état et entretien",
-    "ordreCatalogue": 165
+    "ordreCatalogue": 168
   },
   "JAR-HAIE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Jardin : remise en état et entretien",
-    "ordreCatalogue": 166
+    "ordreCatalogue": 169
   },
   "JAR-ARBUSTE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Jardin : remise en état et entretien",
-    "ordreCatalogue": 167
+    "ordreCatalogue": 170
   },
   "JAR-TONTE": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Jardin : remise en état et entretien",
-    "ordreCatalogue": 168
+    "ordreCatalogue": 171
   },
   "JAR-H": {
     "categorieChantier": "09. Aménagements extérieurs et jardin",
     "sousCategorie": "Jardin : remise en état et entretien",
-    "ordreCatalogue": 169
+    "ordreCatalogue": 172
   },
   "DEB-ENCOMBRANTS": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Débarras, tri et manutention",
-    "ordreCatalogue": 170
+    "ordreCatalogue": 173
   },
   "DEB-TRI": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Débarras, tri et manutention",
-    "ordreCatalogue": 171
+    "ordreCatalogue": 174
   },
   "DEB-GRAVATS": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Débarras, tri et manutention",
-    "ordreCatalogue": 172
+    "ordreCatalogue": 175
   },
   "PLAC-FAUX-PLAFOND-EVAC": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Évacuation des déchets",
-    "ordreCatalogue": 173
+    "ordreCatalogue": 176
   },
   "TERR-TRI-EVAC": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Évacuation des déchets",
-    "ordreCatalogue": 174
+    "ordreCatalogue": 177
   },
   "DEB-DECHETTERIE": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Évacuation des déchets",
-    "ordreCatalogue": 175
+    "ordreCatalogue": 178
   },
   "JAR-RAMASSAGE": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Évacuation des déchets",
-    "ordreCatalogue": 176
+    "ordreCatalogue": 179
   },
   "JAR-EVAC": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Évacuation des déchets",
-    "ordreCatalogue": 177
+    "ordreCatalogue": 180
   },
   "NET-FIN-CHANTIER": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Nettoyage final et extérieur",
-    "ordreCatalogue": 178
+    "ordreCatalogue": 181
   },
   "NET-LOGEMENT": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Nettoyage final et extérieur",
-    "ordreCatalogue": 179
+    "ordreCatalogue": 182
   },
   "NET-VITRAGE": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Nettoyage final et extérieur",
-    "ordreCatalogue": 180
+    "ordreCatalogue": 183
   },
   "NET-EQUIPEMENT-LOCAL": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Nettoyage final et extérieur",
-    "ordreCatalogue": 181
+    "ordreCatalogue": 184
   },
   "JAR-NET-H": {
     "categorieChantier": "10. Évacuation et nettoyage",
     "sousCategorie": "Nettoyage final et extérieur",
-    "ordreCatalogue": 182
+    "ordreCatalogue": 185
   },
   "ELEC-DIAG": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Diagnostics",
-    "ordreCatalogue": 183
+    "ordreCatalogue": 186
   },
   "VMC-DIAG": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Diagnostics",
-    "ordreCatalogue": 184
+    "ordreCatalogue": 187
   },
   "TOIT-DIAG": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Diagnostics",
-    "ordreCatalogue": 185
+    "ordreCatalogue": 188
   },
   "PLOMB-FUITE-RECH": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Plomberie : fuites et petites réparations",
-    "ordreCatalogue": 186
+    "ordreCatalogue": 189
   },
   "PLOMB-FUITE-REP": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Plomberie : fuites et petites réparations",
-    "ordreCatalogue": 187
+    "ordreCatalogue": 190
   },
   "PLOMB-WC-MECA": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Plomberie : fuites et petites réparations",
-    "ordreCatalogue": 188
+    "ordreCatalogue": 191
   },
   "VMC-NET": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Ventilation : entretien",
-    "ordreCatalogue": 189
+    "ordreCatalogue": 192
   },
   "BRI-MENUISERIE-H": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 190
+    "ordreCatalogue": 193
   },
   "BRI-COULISSANTE": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 191
+    "ordreCatalogue": 194
   },
   "BRI-PORTE-REG": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 192
+    "ordreCatalogue": 195
   },
   "BRI-RABOT": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 193
+    "ordreCatalogue": 196
   },
   "BRI-FENETRE-REG": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 194
+    "ordreCatalogue": 197
   },
   "BRI-POIGNEE-PETITE-REP": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 195
+    "ordreCatalogue": 198
   },
   "BRI-POIGNEE-FENETRE-REMPL": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 196
+    "ordreCatalogue": 199
   },
   "BRI-BAL-BARILLET": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 197
+    "ordreCatalogue": 200
   },
   "BRI-BAL-PORTE-REG": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 198
+    "ordreCatalogue": 201
   },
   "BRI-MAIN-COURANTE-REP": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 199
+    "ordreCatalogue": 202
   },
   "SOL-PLINTHE-REFIX": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Portes, fenêtres et quincaillerie",
-    "ordreCatalogue": 200
+    "ordreCatalogue": 203
   },
   "ELEC-H": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Interventions courantes et forfait global",
-    "ordreCatalogue": 201
+    "ordreCatalogue": 204
   },
   "PLOMB-H": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Interventions courantes et forfait global",
-    "ordreCatalogue": 202
+    "ordreCatalogue": 205
   },
   "BRI-H": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Interventions courantes et forfait global",
-    "ordreCatalogue": 203
+    "ordreCatalogue": 206
   },
   "BRI-REMISE-ETAT-LOCAUX-MOBILIER": {
     "categorieChantier": "11. Entretien, dépannage et interventions globales",
     "sousCategorie": "Interventions courantes et forfait global",
-    "ordreCatalogue": 204
+    "ordreCatalogue": 207
   }
 };
 
