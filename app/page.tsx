@@ -610,6 +610,17 @@ type Depense = {
 
 type TypeEvenement = "devis" | "rdv" | "chantier" | "rappel";
 
+type BaseFacturation = {
+  lignes: LigneTravaux[];
+  montantsPDF: number[];
+  frais: number;
+  heures: number;
+  jours: number;
+  total: number;
+  fournitures: number;
+  modeClient: string;
+};
+
 type Dossier = {
   id: number;
 
@@ -647,6 +658,7 @@ type Dossier = {
   estBrouillonAuto?: boolean;
   // La copie de facturation garde le numéro et l'identité du devis original.
   devisOrigineId?: number;
+  baseFacturation?: BaseFacturation;
   total: number;
   acompte: number;
   reste: number;
@@ -705,6 +717,64 @@ fraisDeplacementManuel?: number;
 
   priorite?: string;
 };
+
+function repartirFraisDevis(lignes: LigneTravaux[], mode: string, frais: number): number[] {
+  const montants = lignes.map((l) => montantLigne(l, mode));
+  const total = montants.reduce((s, n) => s + n, 0);
+  if (total === 0) return montants;
+  const estTravail = (l: LigneTravaux) => !(l.prestationNom || nomTravaux(l.type)).toLowerCase().includes("fourniture");
+  const base = lignes.reduce((s, l, i) => s + (estTravail(l) ? montants[i] : 0), 0);
+  const resultat = montants.map((n, i) => n + (estTravail(lignes[i]) && base !== 0 ? Math.round(frais * n / base) : 0));
+  if (resultat.length) resultat[0] += total + frais - resultat.reduce((s, n) => s + n, 0);
+  return resultat;
+}
+
+function creerBaseFacturation(devis: Dossier): BaseFacturation {
+  const lignes: LigneTravaux[] = JSON.parse(JSON.stringify(devis.lignesTravaux || []));
+  const heures = lignes.reduce((s, l) => s + (l.heuresUnite || 0) * (l.q1 || 1), 0);
+  const jours = Math.max(1, Math.ceil(heures / 7));
+  const kmAR = (devis.kmAller || 0) * 2;
+  const tarif = (id: string) => TARIFS_PRESTATIONS.find((p) => p.id === id)?.prix220 || 0;
+  const vide = !lignes.length && !devis.achatFournitures && !devis.kmAller;
+  const frais = devis.fraisDeplacementManuelActif
+    ? Math.round(devis.fraisDeplacementManuel || 0)
+    : vide || kmAR <= 0 ? 0 : Math.round(
+        kmAR * tarif("deplacement_premier_jour_chantier") + tarif("forfait_mise_en_place_chantier") +
+        Math.max(0, jours - 1) * kmAR * tarif("deplacement_jours_suivants")
+      );
+  return {
+    lignes, montantsPDF: repartirFraisDevis(lignes, devis.modeClient, frais), frais,
+    heures, jours, total: devis.total || 0, fournitures: devis.reventeFournitures || 0,
+    modeClient: devis.modeClient,
+  };
+}
+
+// La répartition des frais supplémentaires n'utilise jamais les lignes du devis.
+function calculerSupplementsFacture(base: BaseFacturation, lignes: LigneTravaux[], mode: string, kmAR: number, tarifJourSuivant: number) {
+  const idsOrigine = new Set(base.lignes.map((l) => l.id));
+  const nouvelles = lignes.filter((l) => !idsOrigine.has(l.id));
+  const heuresSup = nouvelles.reduce((s, l) => s + (l.heuresUnite || 0) * (l.q1 || 1), 0);
+  const jours = Math.max(base.jours, Math.ceil((base.heures + heuresSup) / 7));
+  const joursSup = Math.max(0, jours - base.jours);
+  const fraisSup = Math.round(joursSup * Math.max(0, kmAR) * tarifJourSuivant * 100) / 100;
+  const eligibles = nouvelles.filter((l) => montantLigne(l, mode) > 0 &&
+    !(l.prestationNom || nomTravaux(l.type)).toLowerCase().includes("fourniture"));
+  const poids = eligibles.reduce((s, l) => s + montantLigne(l, mode), 0);
+  const parts = new Map<number, number>();
+  let resteCentimes = Math.round(fraisSup * 100);
+  eligibles.forEach((l, i) => {
+    const part = i === eligibles.length - 1 ? resteCentimes : Math.floor(fraisSup * 100 * montantLigne(l, mode) / poids);
+    parts.set(l.id, part / 100);
+    resteCentimes -= part;
+  });
+  const montants = lignes.map((l) => {
+    const i = base.lignes.findIndex((origine) => origine.id === l.id);
+    return i >= 0 ? base.montantsPDF[i] : Math.round((montantLigne(l, mode) + (parts.get(l.id) || 0)) * 100) / 100;
+  });
+  return { montants, jours, joursSup, fraisSup, heures: base.heures + heuresSup,
+    fraisNonRepartis: eligibles.length ? 0 : fraisSup,
+    travauxSup: nouvelles.reduce((s, l) => s + montantLigne(l, mode), 0) };
+}
 
 const prestations = TARIFS_PRESTATIONS;
 
@@ -1401,7 +1471,7 @@ const actionsRef = useRef<HTMLDivElement | null>(null);
 const inputClientRef = useRef<HTMLInputElement | null>(null);
 const ficheClientRef = useRef<HTMLDivElement | null>(null);
 const lignesTravauxRef = useRef<HTMLDivElement | null>(null);
-const derniereLigneRef = useRef<HTMLDivElement | null>(null);
+const derniereLigneRef = useRef<HTMLFieldSetElement | null>(null);
   const [montantEncaisse, setMontantEncaisse] = useState(0);
 const [datePaiement, setDatePaiement] = useState("");
 const [saisieDateAcompteOuverte, setSaisieDateAcompteOuverte] = useState(false);
@@ -1943,8 +2013,26 @@ acompteManuel,
   };
 };
 
+  const baseFacturation = useMemo(() => {
+    const courant = historique.find((d) => d.id === idDossierActuel);
+    if (courant?.devisOrigineId === undefined) return null;
+    if (courant.baseFacturation) return courant.baseFacturation;
+    const origine = historique.find((d) => d.id === courant.devisOrigineId);
+    return origine ? creerBaseFacturation(origine) : null;
+  }, [historique, idDossierActuel]);
+
+  useEffect(() => {
+    if (!baseFacturation) return;
+    setLignesTravaux((actuelles) => {
+      const initiales: LigneTravaux[] = JSON.parse(JSON.stringify(baseFacturation.lignes));
+      const nouvelles = actuelles.filter((l) => !initiales.some((origine) => origine.id === l.id));
+      const resultat = [...initiales, ...nouvelles];
+      return JSON.stringify(resultat) === JSON.stringify(actuelles) ? actuelles : resultat;
+    });
+  }, [baseFacturation]);
+
   const calcul = useMemo(() => {
-  const totalTravaux = lignesTravaux.reduce(
+  let totalTravaux = lignesTravaux.reduce(
     (somme, ligne) => somme + montantLigne(ligne, modeClient),
     0
   );
@@ -1957,14 +2045,14 @@ acompteManuel,
   const kmAR = kmAller * 2;
 
   // ================= TEMPS CHANTIER =================
-  const totalHeuresChantier = lignesTravaux.reduce((somme, ligne) => {
+  let totalHeuresChantier = lignesTravaux.reduce((somme, ligne) => {
     const heures = ligne.heuresUnite || 0;
     const quantite = ligne.q1 || 1;
 
     return somme + heures * quantite;
   }, 0);
 
-  const nombreJoursChantier =
+  let nombreJoursChantier =
     totalHeuresChantier <= 0
       ? 1
       : Math.ceil(totalHeuresChantier / 7);
@@ -1995,15 +2083,27 @@ const fraisLogistiqueAuto =
     ? 0
     : Math.round(prixPremierJour + prixJoursSuivants);
 
-const fraisLogistique =
+let fraisLogistique =
   fraisDeplacementManuelActif
     ? Math.round(fraisDeplacementManuel)
     : fraisLogistiqueAuto;
 
+  const supplements = baseFacturation ? calculerSupplementsFacture(
+    baseFacturation, lignesTravaux, modeClient, kmAR, prestationJoursSuivants?.prix220 || 0
+  ) : null;
+  if (baseFacturation && supplements) {
+    fraisLogistique = baseFacturation.frais + supplements.fraisSup;
+    totalHeuresChantier = supplements.heures;
+    nombreJoursChantier = supplements.jours;
+    totalTravaux = baseFacturation.lignes.reduce((s, l) => s + montantLigne(l, baseFacturation.modeClient), 0) + supplements.travauxSup;
+  }
+
   // ================= FOURNITURES =================
- const reventeFournitures = fournituresClient
+ let reventeFournitures = fournituresClient
   ? 0
   : Math.round(achatFournitures * coefficientFournitures * 100) / 100;
+
+if (baseFacturation) reventeFournitures = Math.max(baseFacturation.fournitures, reventeFournitures);
 
 const margeFournitures =
   fournituresClient || achatFournitures === 0
@@ -2011,6 +2111,12 @@ const margeFournitures =
     : Math.round((reventeFournitures - achatFournitures) * 100) / 100;
 
   let total = Math.round((totalTravaux + fraisLogistique + reventeFournitures) * 100) / 100;
+
+  if (baseFacturation && supplements) {
+    // Le total accepté est préservé ; seuls les ajouts font évoluer la facture.
+    total = Math.round((baseFacturation.total + supplements.travauxSup + supplements.fraisSup +
+      reventeFournitures - baseFacturation.fournitures) * 100) / 100;
+  }
 
   // ================= MINIMUM CHANTIER =================
   const minimumChantier = 80;
@@ -2056,6 +2162,10 @@ const margeFournitures =
   
 return {
   resteReel,
+  montantsFacture: supplements?.montants,
+  joursSupplementaires: supplements?.joursSup || 0,
+  fraisSupplementaires: supplements?.fraisSup || 0,
+  fraisNonRepartis: supplements?.fraisNonRepartis || 0,
   totalTravaux,
   kmAR,
   totalHeuresChantier,
@@ -2073,6 +2183,7 @@ return {
 
  };
 }, [
+  baseFacturation,
   lignesTravaux,
   modeClient,
   kmAller,
@@ -2326,6 +2437,7 @@ const modifierDetailPdf = (id: number, index: number, valeur: string) => {
 }; 
 
   const supprimerLigne = (id: number) => {
+  if (baseFacturation?.lignes.some((l) => l.id === id)) return;
   setLignesTravaux(lignesTravaux.filter((l) => l.id !== id));
 };
 
@@ -2499,6 +2611,7 @@ const enregistrerDossier = (
   const item: Dossier = {
     id: idFinal,
     devisOrigineId: historique.find((d) => d.id === idFinal)?.devisOrigineId,
+    baseFacturation: baseFacturation || undefined,
 
     typeEvenement: typeEvenementFinal,
 
@@ -2748,8 +2861,15 @@ const rechargerDossier = (d: Dossier) => {
 setClientFinalTelephone(d.clientFinalTelephone || "");
 setClientFinalAdresse(d.clientFinalAdresse || "");
 
+  const origine = d.devisOrigineId !== undefined ? historique.find((item) => item.id === d.devisOrigineId) : undefined;
+  const base = d.baseFacturation || (origine ? creerBaseFacturation(origine) : null);
+  const lignesRechargees = base ? [
+    ...JSON.parse(JSON.stringify(base.lignes)),
+    ...(d.lignesTravaux || []).filter((l) => !base.lignes.some((originale) => originale.id === l.id))
+      .map((l) => ({ ...l, travauxSupplementaires: true })),
+  ] : d.lignesTravaux;
   setLignesTravaux(
-    d.lignesTravaux || [
+    lignesRechargees || [
       {
         id: Date.now(),
         type: "plafond",
@@ -2846,17 +2966,13 @@ const preparerFactureDepuisDevis = (devis: Dossier) => {
     ...JSON.parse(JSON.stringify(devis)),
     id: Math.max(Date.now(), ...historique.map((d) => d.id + 1)),
     devisOrigineId: devis.id,
+    baseFacturation: creerBaseFacturation(devis),
     numeroFacture: "",
     estBrouillonAuto: false,
     facturePayee: false,
     date: new Date().toLocaleDateString("fr-FR"),
-    // Les frais convenus restent fixes, même si les suppléments ajoutent du temps.
-    fraisDeplacementManuelActif: true,
-    fraisDeplacementManuel: Math.round(
-      (devis.total || 0) -
-      devis.lignesTravaux.reduce((somme, ligne) => somme + montantLigne(ligne, devis.modeClient), 0) -
-      (devis.reventeFournitures || 0)
-    ),
+    fraisDeplacementManuelActif: false,
+    fraisDeplacementManuel: 0,
   };
   // Sauvegarder la copie et le brouillon ensemble dès cette action.
   const donnees = construireSauvegardeComplete();
@@ -3946,6 +4062,10 @@ const ajouterPackAuDevis = (idPack: string) => {
 
 const supprimerPackDuDevis = (instanceId: string) => {
   const lignesDuPack = lignesTravaux.filter(l => l.packInstanceId === instanceId);
+  if (baseFacturation?.lignes.some((l) => l.packInstanceId === instanceId)) {
+    alert("Ce pack appartient au devis initial et reste conservé. Ajoute de nouvelles prestations pour les suppléments.");
+    return;
+  }
   if (!lignesDuPack.length) return;
   if (!window.confirm(`Supprimer ce pack et ses ${lignesDuPack.length} prestations du devis ?`)) return;
   setLignesTravaux(ancien => ancien.filter(l => l.packInstanceId !== instanceId));
@@ -4168,6 +4288,22 @@ setFraisDeplacementManuel(
 };
 
   const lignesPDF = (): [string, number][] => {
+  if (baseFacturation && calcul.montantsFacture) {
+    const resultat: [string, number][] = lignesTravaux.map((l, i) => [
+      l.prestationNom || nomTravaux(l.type), calcul.montantsFacture![i]
+    ]);
+    if (baseFacturation.fournitures > 0) {
+      resultat.push(["Fournitures et approvisionnement", baseFacturation.fournitures]);
+    }
+    const fournituresSup = Math.round((calcul.reventeFournitures - baseFacturation.fournitures) * 100) / 100;
+    if (fournituresSup > 0) {
+      resultat.push(["Fournitures supplémentaires", fournituresSup]);
+    }
+    if (calcul.fraisNonRepartis > 0) {
+      resultat.push(["Déplacement pour jours supplémentaires", calcul.fraisNonRepartis]);
+    }
+    return resultat;
+  }
   // 1. lignes de base
   const lignesTravauxPDF = lignesTravaux.map((l) => ({
     designation: l.prestationNom || nomTravaux(l.type),
@@ -6457,7 +6593,7 @@ return (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
                 <p className="font-bold">Facture liée au devis {numeroDevis}</p>
                 <p>Le devis original est conservé dans l’historique. Les nouvelles prestations sont marquées « Travaux supplémentaires » sur la facture.</p>
-                <p>Les frais de déplacement sont repris du devis et restent modifiables.</p>
+                <p>Les prix des lignes initiales sont figés, déplacement compris. Les éventuels jours supplémentaires sont répartis uniquement sur les nouvelles prestations.</p>
               </div>
             )}
             <NumberInput
@@ -6914,12 +7050,16 @@ return (
   
 
   return (
-    <div
+    <fieldset
+      disabled={Boolean(baseFacturation?.lignes.some((l) => l.id === ligne.id))}
       key={ligne.id}
       id={`ligne-travaux-${ligne.id}`}
       ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
-      className="rounded-2xl border bg-slate-50 p-5 space-y-4"
+      className="min-w-0 rounded-2xl border bg-slate-50 p-5 space-y-4"
     >
+          {baseFacturation?.lignes.some((l) => l.id === ligne.id) && (
+            <p className="text-sm font-semibold text-blue-800">Ligne du devis initial conservée. Pour un ajout, crée une nouvelle prestation.</p>
+          )}
           <div className="flex items-center justify-between gap-3">
           <div>
   <h3 className="font-semibold text-slate-800">
@@ -7190,7 +7330,7 @@ return (
           <div className="rounded-xl border bg-white p-4 space-y-2">
             <Card
   titre="Prix ligne"
-  valeur={ligne.offert ? "Offert" : `${formatMontant(montantLigne(ligne, modeClient))} €`}
+  valeur={ligne.offert && !(calcul.montantsFacture?.[index]) ? "Offert" : `${formatMontant(calcul.montantsFacture?.[index] ?? montantLigne(ligne, modeClient))} €`}
 />
 
             {tarifAssocie && (
@@ -7214,7 +7354,7 @@ return (
               </p>
             )}
           </div>
-        </div>
+        </fieldset>
       );
     })}
   </div>
@@ -7238,7 +7378,7 @@ return (
     onChange={setKmAller}
   />
 
-  <label className="flex items-center gap-2 text-sm font-semibold">
+  {!baseFacturation && <label className="flex items-center gap-2 text-sm font-semibold">
     <input
       type="checkbox"
       checked={fraisDeplacementManuelActif}
@@ -7250,9 +7390,9 @@ return (
       }}
     />
     Modifier le prix du déplacement
-  </label>
+  </label>}
 
-  {fraisDeplacementManuelActif && (
+  {!baseFacturation && fraisDeplacementManuelActif && (
     <NumberInput
       label="Prix déplacement manuel"
       value={fraisDeplacementManuel}
@@ -7263,6 +7403,13 @@ return (
   <p className="text-xs text-slate-500">
     {calcul.kmAR} km A/R → {formatMontant(calcul.fraisLogistique)} €
   </p>
+  {baseFacturation && (
+    <p className="text-xs font-semibold text-emerald-800">
+      Déplacement initial conservé : {formatMontant(baseFacturation.frais)} €.
+      {" "}{calcul.joursSupplementaires} jour(s) supplémentaire(s) : {formatMontant(calcul.fraisSupplementaires)} €,
+      répartis uniquement sur les nouvelles prestations. Aucun nouveau forfait de mise en place.
+    </p>
+  )}
 </div>
 
  {/* Fournitures */}
