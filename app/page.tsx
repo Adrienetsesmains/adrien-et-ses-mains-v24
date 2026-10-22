@@ -4825,9 +4825,12 @@ if (estFactureMeurisse) {
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const ligneSource = lignesTravaux[index];
 
-  const designation = type === "facture" && ligneSource?.travauxSupplementaires && !estFactureMeurisse
-    ? `Travaux supplémentaires : ${designationBrute}`
-    : designationBrute;
+  const estSupplement = type === "facture" && !estFactureMeurisse && Boolean(
+    ligneSource?.travauxSupplementaires ||
+    (!ligneSource && /supplémentaires/i.test(designationBrute))
+  );
+  // La mention est un repère discret au-dessus du titre, jamais son préfixe.
+  const designation = designationBrute;
 
   const detailsLimites =
   estFactureMeurisse
@@ -4840,10 +4843,20 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
 
   const detail = detailsLimites.map((t) => `• ${t}`).join("\n");
 
-  const designationCoupe = doc.splitTextToSize(designation, 100);
+  if (estSupplement) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+  }
+  const designationCoupe = doc.splitTextToSize(designation, estSupplement ? 145 : 100);
+  if (estSupplement) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+  }
   const detailCoupe = doc.splitTextToSize(detail, 145);
 
-  const hauteur = 4 + designationCoupe.length * 4 + detailCoupe.length * 3 + 2;
+  const hauteur = estSupplement
+    ? 12 + designationCoupe.length * 3.8 + detailCoupe.length * 3.6
+    : 4 + designationCoupe.length * 4 + detailCoupe.length * 3 + 2;
 
   // Marge basse sûre : aucune ligne ne descend dans la zone non imprimable.
   if (y + hauteur > 274) {
@@ -4853,8 +4866,18 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
     enteteTableau();
   }
 
+  if (estSupplement) {
+    y += 2;
+    doc.setFillColor(238, 244, 245);
+    doc.roundedRect(15, y - 2, 45, 5.2, 1.3, 1.3, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(51, 88, 100);
+    doc.text("TRAVAUX SUPPLÉMENTAIRES", 17, y + 1.4);
+    y += 7;
+  }
   doc.setFont("helvetica", "bold");
-doc.setFontSize(10);
+doc.setFontSize(estSupplement ? 9.5 : 10);
 doc.setTextColor(0);
 doc.text(designationCoupe, 15, y);
 
@@ -4863,7 +4886,7 @@ doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);
 doc.text(`${formatMontant(montant)} €`, 190, y, { align: "right" });
 
- y += designationCoupe.length * 3.5;
+ y += designationCoupe.length * (estSupplement ? 3.8 : 3.5);
 
   if (detailCoupe.length > 0) {
     doc.setFont("helvetica", "normal");
@@ -4871,13 +4894,13 @@ doc.setFontSize(8);
 doc.setTextColor(120);
 doc.text(detailCoupe, 20, y);
 
-y += detailCoupe.length * 3.5;
+y += detailCoupe.length * (estSupplement ? 3.6 : 3.5);
   }
 
   doc.setDrawColor(230);
   doc.line(15, y - 2, 195, y - 2);
 
-  y += 2;
+  y += estSupplement ? 3 : 2;
 });
 
 // ================= BLOC TOTAL MIS EN VALEUR =================
