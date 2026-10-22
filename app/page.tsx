@@ -596,6 +596,7 @@ heuresUniteManuel?: boolean;
   offert?: boolean;
   packInstanceId?: string;
   packNom?: string;
+  travauxSupplementaires?: boolean;
 };
 
 type Depense = {
@@ -644,6 +645,8 @@ type Dossier = {
   conditionsChantier?: string;
   commentaireFournitures?: string;
   estBrouillonAuto?: boolean;
+  // La copie de facturation garde le numéro et l'identité du devis original.
+  devisOrigineId?: number;
   total: number;
   acompte: number;
   reste: number;
@@ -2114,7 +2117,7 @@ const joursCalendrier = useMemo(() => {
 
     const dateCase = new Date(anneeSelectionnee, moisSelectionne, numeroJour);
 
-    const dossiersJour = historique.filter((d) => {
+    const dossiersJour = historique.filter((d) => !historique.some((f) => f.devisOrigineId === d.id)).filter((d) => {
       const dateRdvObj = parseDateFr(d.dateRdv || "");
       const dateChantierObj = parseDateFr(d.dateChantier || "");
       const datePaiementObj = parseDateFr(d.datePaiement || "");
@@ -2209,6 +2212,7 @@ const ajouterLigne = () => {
     r1: 0,
     r2: 0,
     option: 0,
+    travauxSupplementaires: historique.some((d) => d.id === idDossierActuel && d.devisOrigineId !== undefined),
     tarifId: "",
     prestationNom: "",
     unite: "",
@@ -2494,6 +2498,7 @@ const enregistrerDossier = (
 
   const item: Dossier = {
     id: idFinal,
+    devisOrigineId: historique.find((d) => d.id === idFinal)?.devisOrigineId,
 
     typeEvenement: typeEvenementFinal,
 
@@ -2823,6 +2828,49 @@ if (d.typeEvenement === "rdv") {
       block: "start",
     });
   }, 100);
+};
+
+const preparerFactureDepuisDevis = (devis: Dossier) => {
+  if (!devis.numeroDevis || devis.numeroFacture || devis.devisOrigineId !== undefined) return;
+  const factureExistante = historique.find(
+    (d) => d.devisOrigineId === devis.id ||
+      (d.numeroFacture && d.numeroDevis === devis.numeroDevis)
+  );
+  if (factureExistante) {
+    rechargerDossier(factureExistante);
+    return;
+  }
+
+  // Copie profonde : modifier les prestations ne touche jamais le devis accepté.
+  const copie: Dossier = {
+    ...JSON.parse(JSON.stringify(devis)),
+    id: Math.max(Date.now(), ...historique.map((d) => d.id + 1)),
+    devisOrigineId: devis.id,
+    numeroFacture: "",
+    estBrouillonAuto: false,
+    facturePayee: false,
+    date: new Date().toLocaleDateString("fr-FR"),
+    // Les frais convenus restent fixes, même si les suppléments ajoutent du temps.
+    fraisDeplacementManuelActif: true,
+    fraisDeplacementManuel: Math.round(
+      (devis.total || 0) -
+      devis.lignesTravaux.reduce((somme, ligne) => somme + montantLigne(ligne, devis.modeClient), 0) -
+      (devis.reventeFournitures || 0)
+    ),
+  };
+  // Sauvegarder la copie et le brouillon ensemble dès cette action.
+  const donnees = construireSauvegardeComplete();
+  const donneesMisesAJour = {
+    ...donnees,
+    historique: [copie, ...historique],
+    numeroDevis: copie.numeroDevis,
+    numeroFacture: "",
+    brouillon: null,
+  };
+  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(donneesMisesAJour));
+  setHistorique(donneesMisesAJour.historique);
+  rechargerDossier(copie);
+  void envoyerDonneesCloud(donneesMisesAJour, false);
 };
 
 const transformerRdvEnDevis = (d: Dossier) => {
@@ -3197,8 +3245,16 @@ Merci pour la confiance accordée`;
 const moisActuel = moisSelectionne;
 const anneeActuelle = anneeSelectionnee;
 
+// Un devis conservé pour référence ne doit pas doubler les montants ou le planning.
+const dossiersActifs = useMemo(() => {
+  const devisArchives = new Set(
+    historique.map((d) => d.devisOrigineId).filter((id) => id !== undefined)
+  );
+  return historique.filter((d) => !devisArchives.has(d.id));
+}, [historique]);
+
 const tableauMensuel = useMemo(() => {
-  const dossiersDuMois = historique.filter((d) => {
+  const dossiersDuMois = dossiersActifs.filter((d) => {
     const dateReference =
       parseDateFr(d.datePaiement || "") ||
       parseDateFr(d.date || "");
@@ -3230,7 +3286,7 @@ const tableauMensuel = useMemo(() => {
     if ((d.montantEncaisse || 0) <= 0) return false;
 
     const factureLieeExiste = historique.some(
-      (f) => f.numeroFacture && f.numeroDevis === d.numeroDevis
+      (f) => f.id !== d.id && (f.numeroFacture || f.devisOrigineId !== undefined) && f.numeroDevis === d.numeroDevis
     );
 
     return !factureLieeExiste;
@@ -3299,7 +3355,7 @@ const tableauMensuel = useMemo(() => {
     encaissementsUniques,
     alerteFaible: totalEncaisse < objectifMensuel,
   };
-}, [historique, depenses, moisSelectionne, anneeSelectionnee]);
+}, [dossiersActifs, depenses, moisSelectionne, anneeSelectionnee]);
 
 <div className="rounded-xl border border-slate-200 bg-white p-3">
   <button
@@ -3376,15 +3432,15 @@ const resumeDepenses = useMemo(() => {
 const alertesIntelligentes = useMemo(() => {
   const aujourdHui = new Date();
 
-  const devisARelancer = historique.filter((d) => {
+  const devisARelancer = dossiersActifs.filter((d) => {
     return d.statutDevis === "envoye" && !d.facturePayee;
   });
 
-  const chantiersAPlanifier = historique.filter((d) => {
+  const chantiersAPlanifier = dossiersActifs.filter((d) => {
     return d.statutDevis === "accepte" && d.statutChantier === "a_planifier";
   });
 
-  const facturesEnRetard = historique.filter((d) => {
+  const facturesEnRetard = dossiersActifs.filter((d) => {
     const datePaiement = parseDateFr(d.datePaiement || "");
 
     return (
@@ -3395,7 +3451,7 @@ const alertesIntelligentes = useMemo(() => {
     );
   });
 
-  const chantiersEnCours = historique.filter((d) => {
+  const chantiersEnCours = dossiersActifs.filter((d) => {
     return d.statutChantier === "en_cours";
   });
 
@@ -3410,7 +3466,7 @@ const alertesIntelligentes = useMemo(() => {
       facturesEnRetard.length +
       chantiersEnCours.length,
   };
-}, [historique]);
+}, [dossiersActifs]);
 const donneesGraphique = useMemo(() => {
   const aujourdHui = new Date();
 
@@ -3445,7 +3501,7 @@ const donneesGraphique = useMemo(() => {
 
     let encaissements = 0;
 
-    historique.forEach((d) => {
+    dossiersActifs.forEach((d) => {
       if ((d.montantEncaisse || 0) <= 0) {
         return;
       }
@@ -3579,7 +3635,7 @@ const donneesGraphique = useMemo(() => {
   }
 
   return data;
-}, [historique, depenses]);
+}, [dossiersActifs, depenses]);
 
 const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
@@ -3779,6 +3835,7 @@ const ajouterPrestationAuDevis = (
       r2: 0,
       option: 0,
 
+      travauxSupplementaires: dossierActuel?.devisOrigineId !== undefined,
       tarifId: prestationTrouvee.id,
 
       prestationNom:
@@ -3849,6 +3906,7 @@ const ajouterPackAuDevis = (idPack: string) => {
         r1: 0,
         r2: 0,
         option: 0,
+        travauxSupplementaires: dossierActuel?.devisOrigineId !== undefined,
         tarifId: prestation.id,
         prestationNom: getNomPrestation(prestation),
         unite: prestation.unite,
@@ -4230,6 +4288,11 @@ const genererPDF = async (type: "devis" | "facture") => {
     return "";
   }
 
+  if (type === "devis" && dossierActuel?.devisOrigineId !== undefined) {
+    alert("Cette fiche prépare la facture. Pour retrouver le devis accepté, ouvre le devis original dans l’historique.");
+    return "";
+  }
+
   const doc = new jsPDF();
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
@@ -4413,7 +4476,7 @@ if (type === "facture") {
   doc.setTextColor(90, 90, 90);
 
   doc.text(
-    `Facture établie suite au devis signé n° ${numeroDevis}`,
+    numeroDevis ? `Facture suivant devis n° ${numeroDevis}` : "Facture de travaux réalisés",
     105,
     86,
     { align: "center" }
@@ -4626,7 +4689,9 @@ if (estFactureMeurisse) {
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const ligneSource = lignesTravaux[index];
 
-  const designation = designationBrute;
+  const designation = type === "facture" && ligneSource?.travauxSupplementaires && !estFactureMeurisse
+    ? `Travaux supplémentaires : ${designationBrute}`
+    : designationBrute;
 
   const detailsLimites =
   estFactureMeurisse
@@ -6388,6 +6453,13 @@ return (
           </Bloc>
 
           <Bloc titre="Dossier">
+            {dossierActuel?.devisOrigineId !== undefined && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                <p className="font-bold">Facture liée au devis {numeroDevis}</p>
+                <p>Le devis original est conservé dans l’historique. Les nouvelles prestations sont marquées « Travaux supplémentaires » sur la facture.</p>
+                <p>Les frais de déplacement sont repris du devis et restent modifiables.</p>
+              </div>
+            )}
             <NumberInput
   label="Montant déjà encaissé"
   value={montantEncaisse}
@@ -6395,7 +6467,7 @@ return (
 />
             {!estAndroid ? (
               <>
-                <Input label="Numéro devis" value={numeroDevis} onChange={setNumeroDevis} />
+                <Input label={dossierActuel?.devisOrigineId !== undefined ? "Devis d’origine de la facture" : "Numéro devis"} value={numeroDevis} onChange={setNumeroDevis} />
                 <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
               </>
             ) : (
@@ -6885,6 +6957,15 @@ return (
   </button>
 </div> 
 </div>
+          {(dossierActuel?.devisOrigineId !== undefined || numeroFacture || ligne.travauxSupplementaires) && (
+            <Check
+              label="Travaux supplémentaires (mention sur la facture)"
+              checked={ligne.travauxSupplementaires || false}
+              onChange={(checked) => setLignesTravaux((anciennes) => anciennes.map(
+                (l) => l.id === ligne.id ? { ...l, travauxSupplementaires: checked } : l
+              ))}
+            />
+          )}
           <div className="rounded-xl bg-white p-4 space-y-4">
            {ligne.tarifId ? (
   <div className="space-y-3">
@@ -7898,8 +7979,11 @@ return (
                   <div className="space-y-1 text-sm text-slate-500">
                     <p>
                       {item.numeroDevis || "Aucun devis"} /{" "}
-                      {item.numeroFacture || "Aucune facture"}
+                      {item.numeroFacture || (item.devisOrigineId !== undefined ? "Facture en préparation" : "Aucune facture")}
                     </p>
+                    {historique.some((d) => d.devisOrigineId === item.id) && (
+                      <p className="font-semibold text-emerald-700">Devis original conservé — facture liée préparée séparément</p>
+                    )}
                     <p>{nomChantier}</p>
                   </div>
                 </div>
@@ -7970,6 +8054,7 @@ return (
         item.lignesTravaux.map((ligne) => ({
           ...ligne,
           id: Date.now() + Math.random(),
+          travauxSupplementaires: false,
         }))
       );
 
@@ -7982,6 +8067,18 @@ return (
   >
     Dupliquer
   </button>
+
+  {item.numeroDevis && !item.numeroFacture && item.devisOrigineId === undefined && (
+    <button
+      type="button"
+      onClick={() => preparerFactureDepuisDevis(item)}
+      className="btn-emerald"
+    >
+      {historique.some((d) => d.devisOrigineId === item.id || (d.numeroFacture && d.numeroDevis === item.numeroDevis))
+        ? "Ouvrir la facture liée"
+        : "Préparer la facture"}
+    </button>
+  )}
 
   <button
     onClick={() => supprimerDossier(item.id)}
@@ -8022,7 +8119,7 @@ return (
       {(() => {
         const dateStr = dateSelectionnee.toLocaleDateString("fr-FR");
 
-        const evenementsJour = historique.filter((d) => {
+        const evenementsJour = dossiersActifs.filter((d) => {
           const dansPlanningChantier =
             d.planningChantier?.includes(dateStr) || false;
 
