@@ -33,6 +33,65 @@ const CLE_BACKUPS_V24 = "backupHistoriqueV24";
 const CLE_DERNIERE_SYNCHRO_CLOUD_V26 = "derniereSynchronisationCloudV26";
 const CLE_DERNIERE_MODIFICATION_LOCALE_V26 = "derniereModificationLocaleV26";
 
+// Une facture PDF peut remplir le petit quota local du navigateur.
+// Réduire uniquement les anciennes copies automatiques, jamais les dossiers actifs.
+function estErreurQuotaStockage(erreur: unknown): boolean {
+  const e = erreur as { name?: string; code?: number } | null;
+  return Boolean(e && (
+    e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+    e.code === 22 || e.code === 1014
+  ));
+}
+
+function ecrireStockageLocal(cle: string, valeur: string): void {
+  let derniereErreur: unknown;
+  const essayer = (texte: string) => {
+    try {
+      localStorage.setItem(cle, texte);
+      return true;
+    } catch (erreur) {
+      if (!estErreurQuotaStockage(erreur)) throw erreur;
+      derniereErreur = erreur;
+      return false;
+    }
+  };
+  if (essayer(valeur)) return;
+
+  const clesCopies = [CLE_BACKUPS_V24, CLE_BACKUPS_V25];
+  // Si ce sont les copies que l'on écrit, adapter le nombre à la place disponible.
+  // La plus récente reste toujours présente ; le maximum habituel reste dix.
+  if (clesCopies.includes(cle)) {
+    let copies: unknown;
+    try { copies = JSON.parse(valeur); } catch { throw derniereErreur; }
+    if (Array.isArray(copies)) {
+      const restantes = copies.slice();
+      while (restantes.length > 1) {
+        restantes.shift();
+        valeur = JSON.stringify(restantes);
+        if (essayer(valeur)) return;
+      }
+    }
+  }
+
+  // Libérer progressivement les versions les plus anciennes, avec au moins
+  // une copie conservée par génération de sauvegarde.
+  for (const cleCopies of clesCopies) {
+    if (cleCopies === cle) continue;
+    const texte = localStorage.getItem(cleCopies);
+    if (!texte) continue;
+    let copies: unknown;
+    try { copies = JSON.parse(texte); } catch { continue; }
+    if (!Array.isArray(copies)) continue;
+    const restantes = copies.slice();
+    while (restantes.length > 1) {
+      restantes.shift();
+      localStorage.setItem(cleCopies, JSON.stringify(restantes));
+      if (essayer(valeur)) return;
+    }
+  }
+  throw derniereErreur;
+}
+
 // Le catalogue officiel est l’unique source des temps, tarifs, unités et détails PDF.
 // Les packs ne conservent que des identifiants et des quantités de départ.
 // Toute modification d’une prestation du catalogue actualise donc automatiquement les packs.
@@ -1356,12 +1415,12 @@ const envoyerDonneesCloud = async (
     return false;
   }
 
-  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(data));
-  localStorage.setItem(
+  ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(data));
+  ecrireStockageLocal(
     CLE_DERNIERE_SYNCHRO_CLOUD_V26,
     dateSynchronisation
   );
-  localStorage.setItem(
+  ecrireStockageLocal(
     CLE_DERNIERE_MODIFICATION_LOCALE_V26,
     dateSynchronisation
   );
@@ -1399,17 +1458,17 @@ const recupererCloud = async () => {
   applicationCloudEnCoursRef.current = true;
   appliquerSauvegardeComplete(data.data);
 
-  localStorage.setItem(
+  ecrireStockageLocal(
     CLE_SAUVEGARDE_V25,
     JSON.stringify(data.data)
   );
   const dateSynchronisation =
     data.updated_at || new Date().toISOString();
-  localStorage.setItem(
+  ecrireStockageLocal(
     CLE_DERNIERE_SYNCHRO_CLOUD_V26,
     dateSynchronisation
   );
-  localStorage.setItem(
+  ecrireStockageLocal(
     CLE_DERNIERE_MODIFICATION_LOCALE_V26,
     dateSynchronisation
   );
@@ -1471,17 +1530,17 @@ const recupererCloudAutomatiquement = async () => {
 
     applicationCloudEnCoursRef.current = true;
     appliquerSauvegardeComplete(data.data);
-    localStorage.setItem(
+    ecrireStockageLocal(
       CLE_SAUVEGARDE_V25,
       JSON.stringify(data.data)
     );
 
     const dateSynchronisation = dateCloud || new Date().toISOString();
-    localStorage.setItem(
+    ecrireStockageLocal(
       CLE_DERNIERE_SYNCHRO_CLOUD_V26,
       dateSynchronisation
     );
-    localStorage.setItem(
+    ecrireStockageLocal(
       CLE_DERNIERE_MODIFICATION_LOCALE_V26,
       dateSynchronisation
     );
@@ -1673,7 +1732,7 @@ useEffect(() => {
   const sauvegarde = sauvegardeV25 || sauvegardeV24;
 
   if (!sauvegardeV25 && sauvegardeV24) {
-    localStorage.setItem(CLE_SAUVEGARDE_V25, sauvegardeV24);
+    ecrireStockageLocal(CLE_SAUVEGARDE_V25, sauvegardeV24);
   }
 
   if (sauvegarde) {
@@ -1806,7 +1865,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  localStorage.setItem(
+  ecrireStockageLocal(
     "prestationsFavoritesV25",
     JSON.stringify(prestationsFavorites)
   );
@@ -1816,12 +1875,12 @@ useEffect(() => {
   if (!sauvegardePrete) return;
 
   const donnees = construireSauvegardeComplete();
-  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(donnees));
+  ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(donnees));
 
   if (premiereSauvegardeLocaleRef.current) {
     premiereSauvegardeLocaleRef.current = false;
   } else if (!applicationCloudEnCoursRef.current) {
-    localStorage.setItem(
+    ecrireStockageLocal(
       CLE_DERNIERE_MODIFICATION_LOCALE_V26,
       new Date().toISOString()
     );
@@ -1910,7 +1969,14 @@ useEffect(() => {
   // 🔒 garde seulement les 10 dernières sauvegardes
   const backupsLimites = backups.slice(-10);
 
-  localStorage.setItem(CLE_BACKUPS_V25, JSON.stringify(backupsLimites));
+  try {
+    ecrireStockageLocal(CLE_BACKUPS_V25, JSON.stringify(backupsLimites));
+  } catch (erreur) {
+    // La sauvegarde courante est déjà écrite par l'effet précédent.
+    // En cas de quota, conserver l'ancienne copie plutôt que bloquer l'application.
+    if (!estErreurQuotaStockage(erreur)) throw erreur;
+    console.warn("Copie automatique différée : stockage local plein. La sauvegarde courante est conservée.");
+  }
 
 }, [
   sauvegardePrete,
@@ -2803,7 +2869,7 @@ fraisDeplacementManuel:
   };
 
   if (persisterImmediatement) {
-    localStorage.setItem(
+    ecrireStockageLocal(
       CLE_SAUVEGARDE_V25,
       JSON.stringify({
         ...donneesAvecDossier,
@@ -2859,7 +2925,7 @@ useEffect(() => {
     if (!dossierCommence) {
       const donnees = construireSauvegardeComplete();
 
-      localStorage.setItem(
+      ecrireStockageLocal(
         CLE_SAUVEGARDE_V25,
         JSON.stringify({
           ...donnees,
@@ -3018,7 +3084,7 @@ const preparerFactureDepuisDevis = (devis: Dossier) => {
     numeroFacture: "",
     brouillon: null,
   };
-  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(donneesMisesAJour));
+  ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(donneesMisesAJour));
   setHistorique(donneesMisesAJour.historique);
   rechargerDossier(copie);
   void envoyerDonneesCloud(donneesMisesAJour, false);
@@ -4434,7 +4500,10 @@ const genererPDF = async (type: "devis" | "facture" | "acompte") => {
     return await fabriquerPDF(type);
   } catch (erreur) {
     console.error("Création du PDF impossible :", erreur);
-    alert("Le PDF n'a pas pu être créé. Vérifie l'espace disponible puis réessaie.");
+    const detail = erreur instanceof Error ? erreur.message : String(erreur);
+    alert(estErreurQuotaStockage(erreur)
+      ? "Le stockage réservé à l'application dans ce navigateur est encore plein. Aucun nouveau numéro d'acompte n'a été validé. Fais un export de tes données et transmets-moi ce message ; ne vide pas les données du site."
+      : `Le PDF n'a pas pu être créé. Détail : ${detail}`);
     return "";
   } finally {
     generationPDFEnCoursRef.current = false;
@@ -4485,7 +4554,7 @@ const fabriquerPDF = async (type: "devis" | "facture" | "acompte") => {
   }
   const dateDocument = new Date().toLocaleDateString("fr-FR");
   const numeroSuivantAcompte = estAcompte ? prochainNumeroFactureDisponible() : 0;
-  const doc = new jsPDF();
+  const doc = new jsPDF({ compress: true });
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
   const estFactureMeurisse = modeClient === "jeremie" && type === "facture";
@@ -4508,7 +4577,7 @@ if (type === "devis" && !numeroDevis) {
   setCompteurDevis(numeroDevisAUtiliser + 1);
 
   if (!rattrapageDevis053DejaEffectue) {
-    localStorage.setItem(CLE_RATTRAPAGE_DEVIS_053, "oui");
+    ecrireStockageLocal(CLE_RATTRAPAGE_DEVIS_053, "oui");
   }
 
   if (idDossierActuel !== null) {
@@ -4544,7 +4613,7 @@ if (type === "facture" && !numeroFacture) {
   setCompteurFacture(numeroFactureAUtiliser + 1);
 
   if (!rattrapageFacture017DejaEffectue) {
-    localStorage.setItem(CLE_RATTRAPAGE_FACTURE_017, "oui");
+    ecrireStockageLocal(CLE_RATTRAPAGE_FACTURE_017, "oui");
   }
 
   if (idDossierActuel !== null) {
@@ -5435,9 +5504,9 @@ if (estAcompte && dossierOrigineAcompte) {
     compteurFacture: numeroSuivantAcompte + 1,
   };
   // Persister avant téléchargement : ni numéro final, ni encaissement ne changent.
-  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(sauvegarde));
-  localStorage.setItem(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
-  localStorage.setItem(CLE_RATTRAPAGE_FACTURE_017, "oui");
+  ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(sauvegarde));
+  ecrireStockageLocal(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
+  ecrireStockageLocal(CLE_RATTRAPAGE_FACTURE_017, "oui");
   setHistorique(historiqueMisAJour);
   setCompteurFacture(numeroSuivantAcompte + 1);
   void envoyerDonneesCloud(sauvegarde, false);
