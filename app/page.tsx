@@ -652,6 +652,15 @@ type Dossier = {
   lignesTravaux: LigneTravaux[];
   numeroDevis: string;
   numeroFacture: string;
+  // Document émis conservé à l'identique, distinct du paiement reçu.
+  factureAcompte?: {
+    numero: string;
+    date: string;
+    montant: number;
+    totalDevis: number;
+    pdfBase64: string;
+    nomFichier: string;
+  };
   conditionsGeneralesDevis?: string;
   conditionsChantier?: string;
   commentaireFournitures?: string;
@@ -1487,6 +1496,8 @@ const recupererCloudAutomatiquement = async () => {
 
   const importRef = useRef<HTMLInputElement | null>(null);
 const actionsRef = useRef<HTMLDivElement | null>(null);
+const generationPDFEnCoursRef = useRef(false);
+const [generationPDFEnCours, setGenerationPDFEnCours] = useState(false);
 const inputClientRef = useRef<HTMLInputElement | null>(null);
 const ficheClientRef = useRef<HTMLDivElement | null>(null);
 const lignesTravauxRef = useRef<HTMLDivElement | null>(null);
@@ -2634,6 +2645,7 @@ const enregistrerDossier = (
   const item: Dossier = {
     id: idFinal,
     devisOrigineId: historique.find((d) => d.id === idFinal)?.devisOrigineId,
+    factureAcompte: historique.find((d) => d.id === idFinal)?.factureAcompte,
     baseFacturation: baseFacturation || undefined,
 
     typeEvenement: typeEvenementFinal,
@@ -3780,6 +3792,21 @@ const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
 }, [historique, idDossierActuel]);
 
+// Le devis original reste la source de la facture d'acompte pour les deux fiches.
+const dossierOrigineAcompte = dossierActuel?.devisOrigineId !== undefined
+  ? historique.find((d) => d.id === dossierActuel.devisOrigineId) || dossierActuel
+  : dossierActuel;
+const factureAcompteCourante = dossierOrigineAcompte?.factureAcompte || dossierActuel?.factureAcompte;
+
+const prochainNumeroFactureDisponible = () => {
+  const numeros = historique.flatMap((d) => [d.numeroFacture, d.factureAcompte?.numero])
+    .concat(numeroFacture)
+    .map((n) => /^F-2026-(\d+)$/.exec(n || ""))
+    .filter((m): m is RegExpExecArray => Boolean(m))
+    .map((m) => Number(m[1]) + 1);
+  return Math.max(compteurFactureValide(compteurFacture), ...numeros);
+};
+
 const resumeExpress = useMemo(() => {
   const totalDevis = calcul.total || dossierActuel?.total || 0;
   const dejaEncaisse = montantEncaisse || dossierActuel?.montantEncaisse || 0;
@@ -4399,7 +4426,23 @@ const chargerBanniereV26 = async () => {
   });
 };
 
-const genererPDF = async (type: "devis" | "facture") => {
+const genererPDF = async (type: "devis" | "facture" | "acompte") => {
+  if (generationPDFEnCoursRef.current) return "";
+  generationPDFEnCoursRef.current = true;
+  setGenerationPDFEnCours(true);
+  try {
+    return await fabriquerPDF(type);
+  } catch (erreur) {
+    console.error("Création du PDF impossible :", erreur);
+    alert("Le PDF n'a pas pu être créé. Vérifie l'espace disponible puis réessaie.");
+    return "";
+  } finally {
+    generationPDFEnCoursRef.current = false;
+    setGenerationPDFEnCours(false);
+  }
+};
+
+const fabriquerPDF = async (type: "devis" | "facture" | "acompte") => {
   // Sur Android, aucun devis ni aucune facture ne doit être finalisé :
   // pas de PDF et surtout aucune attribution de numéro.
   if (estAndroid) {
@@ -4414,12 +4457,41 @@ const genererPDF = async (type: "devis" | "facture") => {
     return "";
   }
 
+  const estAcompte = type === "acompte";
+  if (estAcompte && factureAcompteCourante) {
+    const donnees = Uint8Array.from(atob(factureAcompteCourante.pdfBase64), (c) => c.charCodeAt(0));
+    const url = URL.createObjectURL(new Blob([donnees], { type: "application/pdf" }));
+    const lien = document.createElement("a");
+    lien.href = url;
+    lien.download = factureAcompteCourante.nomFichier;
+    lien.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return factureAcompteCourante.pdfBase64;
+  }
+  if (estAcompte && (!numeroDevis || !dossierActuel || !client.trim())) {
+    alert("Ouvre le devis enregistré du client avant de créer sa facture d'acompte.");
+    return "";
+  }
+  if (estAcompte && (numeroFacture || historique.some((d) =>
+    d.numeroDevis === numeroDevis && Boolean(d.numeroFacture)))) {
+    alert("Une facture finale existe déjà pour ce devis. Ouvre-la pour suivre son règlement.");
+    return "";
+  }
+  const montantDocumentAcompte = Math.round(calcul.acompte * 100) / 100;
+  if (estAcompte && (!Number.isFinite(montantDocumentAcompte) ||
+    montantDocumentAcompte <= 0 || montantDocumentAcompte > calcul.total)) {
+    alert("Indique un acompte supérieur à 0 € et inférieur ou égal au total du devis.");
+    return "";
+  }
+  const dateDocument = new Date().toLocaleDateString("fr-FR");
+  const numeroSuivantAcompte = estAcompte ? prochainNumeroFactureDisponible() : 0;
   const doc = new jsPDF();
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
   const estFactureMeurisse = modeClient === "jeremie" && type === "facture";
 
-let numero = type === "devis" ? numeroDevis : numeroFacture;
+let numero = estAcompte ? formatNumero("F", numeroSuivantAcompte)
+  : type === "devis" ? numeroDevis : numeroFacture;
 
 if (type === "devis" && !numeroDevis) {
   // Rattrapage demandé le 18/09/2026 : le prochain nouveau devis doit
@@ -4461,15 +4533,11 @@ if (type === "devis") {
   }
 }
 if (type === "facture" && !numeroFacture) {
-  // Rattrapage demandé le 11/09/2026 : les numéros 017 et 018 ont été sautés
-  // par le compteur alors qu'aucune facture correspondante n'existe.
-  // La première nouvelle facture après cette mise à jour prend donc 017,
-  // une seule fois, puis la numérotation reprend normalement à 018.
+  // Les factures finales et d'acompte partagent une numérotation continue.
   const rattrapageFacture017DejaEffectue =
     localStorage.getItem(CLE_RATTRAPAGE_FACTURE_017) === "oui";
-  const numeroFactureAUtiliser = rattrapageFacture017DejaEffectue
-    ? compteurFacture
-    : PROCHAIN_NUMERO_FACTURE;
+  // Acomptes et factures finales utilisent le même compteur, sans doublon.
+  const numeroFactureAUtiliser = prochainNumeroFactureDisponible();
 
   numero = formatNumero("F", numeroFactureAUtiliser);
   setNumeroFacture(numero);
@@ -4573,7 +4641,8 @@ doc.roundedRect(18, yCartoucheDocument + 1.25, 30, 7, 3.5, 3.5, "F");
 doc.setTextColor(255, 255, 255);
 doc.setFont("helvetica", "bold");
 doc.setFontSize(10.5);
-doc.text(type === "devis" ? "Devis" : "Facture", 33, yCartoucheDocument + 6, {
+doc.setFontSize(estAcompte ? 7.2 : 10.5);
+doc.text(estAcompte ? "Facture d'acompte" : type === "devis" ? "Devis" : "Facture", 33, yCartoucheDocument + 6, {
   align: "center",
 });
 
@@ -4591,20 +4660,21 @@ doc.text(
 );
 doc.setTextColor(0, 0, 0);
 
-if (type === "facture") {
+if (type === "facture" || estAcompte) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(90, 90, 90);
 
   doc.text(
-    numeroDevis ? `Facture suivant devis n° ${numeroDevis}` : "Facture de travaux réalisés",
+    estAcompte ? `Facture d'acompte sur devis n° ${numeroDevis}`
+      : numeroDevis ? `Facture suivant devis n° ${numeroDevis}` : "Facture de travaux réalisés",
     105,
     86,
     { align: "center" }
   );
 
   doc.text(
-    `Échéance de paiement : ${datePaiement || "À réception de facture"}`,
+    `Échéance de paiement : ${estAcompte ? "À réception de facture" : datePaiement || "À réception de facture"}`,
     105,
     90,
     { align: "center" }
@@ -4617,7 +4687,7 @@ if (type === "facture") {
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = type === "facture" ? 95 : 85.5;
+const yCadres = type === "facture" || estAcompte ? 95 : 85.5;
 
 const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
@@ -4799,6 +4869,12 @@ enteteTableau();
 // ================= TABLEAU COMPACT =================
 
 let lignesDevisPDF = lignesPDF();
+if (estAcompte) {
+  lignesDevisPDF = [[
+    `Acompte sur devis n° ${numeroDevis} — ${formatMontant(calcul.total)} € au total`,
+    montantDocumentAcompte,
+  ]];
+}
 
 // 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
 if (estFactureMeurisse) {
@@ -4808,7 +4884,7 @@ if (estFactureMeurisse) {
 }
 
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
-  const ligneSource = lignesTravaux[index];
+  const ligneSource = estAcompte ? undefined : lignesTravaux[index];
 
   const estSupplement = type === "facture" && !estFactureMeurisse && Boolean(
     ligneSource?.travauxSupplementaires ||
@@ -4818,7 +4894,7 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const designation = designationBrute;
 
   const detailsLimites =
-  estFactureMeurisse
+  estFactureMeurisse || estAcompte
     ? []
     : ligneSource
     ? detailsTravaux(ligneSource)
@@ -4900,10 +4976,11 @@ const formatEuroPDF = (valeur: number) => {
   return `${formatMontant((Math.round((valeur || 0) * 100) / 100))} €`;
 };
 
-const montantTotalPDF = Math.round((calcul.total || 0) * 100) / 100;
+const montantTotalPDF = estAcompte ? montantDocumentAcompte : Math.round((calcul.total || 0) * 100) / 100;
 
 const montantAcompteOuEncaissePDF =
-  type === "devis"
+  estAcompte ? Math.min(montantDocumentAcompte, Math.max(0, montantEncaisse))
+  : type === "devis"
     ? Math.round((calcul.acompte || 0) * 100) / 100
     : Math.round((montantEncaisse || 0) * 100) / 100;
 
@@ -4972,6 +5049,18 @@ doc.text(
 doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 25.5, { align: "right" });
 
 y += hauteurBlocTotal + 5;
+if (type === "facture" && factureAcompteCourante) {
+  const referenceAcompte = doc.splitTextToSize(
+    `Facture d'acompte n° ${factureAcompteCourante.numero} du ${factureAcompteCourante.date} : ${formatMontant(factureAcompteCourante.montant)} €. Les sommes reçues sont déduites ci-dessus.`, 174);
+  if (y + referenceAcompte.length * 3.5 > 250) {
+    doc.addPage(); y = 35;
+  }
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(60, 60, 60);
+  doc.text(referenceAcompte, 18, y + 3);
+  y += referenceAcompte.length * 3.5 + 6;
+}
 
 // ================= FOURNITURES + CONDITIONS MODIFIABLES =================
 // Le pied de page de la dernière page commence à 256 mm.
@@ -5029,6 +5118,7 @@ if (type === "devis" && commentaireFournituresPDF) {
 }
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
+if (!estAcompte) {
 doc.setFont("helvetica", "normal");
 doc.setFontSize(8.2);
 
@@ -5135,6 +5225,7 @@ doc.text("Signature client", 168, yConditions + 43.5, { align: "center" });
 // On repart après la hauteur réellement utilisée + une marge courte.
 y = yConditions + hauteurConditions + 5;
 
+}
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
   // Préparation des lignes avant de dessiner le cadre afin d'en calculer
@@ -5328,22 +5419,31 @@ doc.setTextColor(0, 0, 0);
 
   const nomFichier = `${numero}-${client || "client"}.pdf`;
 
-// ✅ garde le téléchargement PDF normal
-doc.save(nomFichier);
-
-// ✅ crée aussi le PDF pour la pièce jointe mail
-const pdfBlob = doc.output("blob");
-
-return new Promise<string>((resolve) => {
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    const base64 = (reader.result as string).split(",")[1];
-    resolve(base64);
+// Figer le PDF émis : un nouveau clic rend exactement le même document.
+const pdfBase64 = doc.output("datauristring").split(",")[1];
+if (estAcompte && dossierOrigineAcompte) {
+  const factureAcompte = {
+    numero, date: dateDocument, montant: montantDocumentAcompte,
+    totalDevis: calcul.total, pdfBase64, nomFichier,
   };
-
-  reader.readAsDataURL(pdfBlob);
-});
+  const historiqueMisAJour = historique.map((d) =>
+    d.id === dossierOrigineAcompte.id || d.devisOrigineId === dossierOrigineAcompte.id
+      ? { ...d, factureAcompte } : d);
+  const sauvegarde = {
+    ...construireSauvegardeComplete(),
+    historique: historiqueMisAJour,
+    compteurFacture: numeroSuivantAcompte + 1,
+  };
+  // Persister avant téléchargement : ni numéro final, ni encaissement ne changent.
+  localStorage.setItem(CLE_SAUVEGARDE_V25, JSON.stringify(sauvegarde));
+  localStorage.setItem(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
+  localStorage.setItem(CLE_RATTRAPAGE_FACTURE_017, "oui");
+  setHistorique(historiqueMisAJour);
+  setCompteurFacture(numeroSuivantAcompte + 1);
+  void envoyerDonneesCloud(sauvegarde, false);
+}
+doc.save(nomFichier);
+return pdfBase64;
 };
 
 // 🔥 FERMETURE PROPRE DE LA FONCTION genererPDF
@@ -5796,6 +5896,11 @@ return (
         <>
           <button onClick={() => genererPDF("facture")} className="btn-emerald px-2 py-1 text-[11px]">
             PDF facture
+          </button>
+          <button type="button" disabled={generationPDFEnCours}
+            onClick={() => genererPDF("acompte")}
+            className="btn-amber px-2 py-1 text-[11px] disabled:opacity-50">
+            {factureAcompteCourante ? "PDF acompte" : "Facture d'acompte"}
           </button>
 
           <button onClick={envoyerDevisMail} className="btn-green px-2 py-1 text-[11px]">
@@ -7761,6 +7866,27 @@ return (
 
   <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
     <h3 className="text-sm font-bold text-slate-800">Acompte et encaissement</h3>
+    {!estAndroid && (
+      <div className="rounded-lg border border-amber-200 bg-white p-3 space-y-2">
+        <p className="text-sm text-slate-700">
+          Choisis le pourcentage ou le montant manuel ci-dessous, puis crée la facture d'acompte.
+          Enregistre le règlement avec « Acompte reçu » lorsque le client a payé.
+        </p>
+        <button type="button" disabled={generationPDFEnCours}
+          onClick={() => genererPDF("acompte")}
+          className="btn-amber px-3 py-2 text-sm disabled:opacity-50">
+          {generationPDFEnCours ? "Création du PDF…" : factureAcompteCourante
+            ? "Télécharger la facture d'acompte" : "Créer une facture d'acompte"}
+        </button>
+        {factureAcompteCourante && (
+          <p className="text-sm font-semibold text-amber-800">
+            {factureAcompteCourante.numero} — {factureAcompteCourante.date} —
+            {" "}{formatMontant(factureAcompteCourante.montant)} €.
+            Le document émis est conservé à l'identique.
+          </p>
+        )}
+      </div>
+    )}
 
    <Select
   label="Acompte (%)"
@@ -7849,13 +7975,21 @@ return (
         return;
       }
 
-      const montantAcompteRecu = calcul.acompte;
+      const montantAcompteRecu = factureAcompteCourante?.montant ?? calcul.acompte;
+      if (!Number.isFinite(montantAcompteRecu) || montantAcompteRecu <= 0 || montantAcompteRecu > calcul.total) {
+        alert("Vérifie le montant de l'acompte avant d'enregistrer son règlement.");
+        return;
+      }
+      if (facturePayee || montantEncaisse > montantAcompteRecu) {
+        alert("Un règlement supérieur est déjà enregistré. Vérifie les encaissements du dossier.");
+        return;
+      }
 
       setMontantEncaisse(montantAcompteRecu);
 
       setHistorique((ancien) =>
         ancien.map((d) =>
-          d.id === idDossierActuel
+          (d.id === dossierOrigineAcompte?.id || d.devisOrigineId === dossierOrigineAcompte?.id) && Boolean(dossierOrigineAcompte)
             ? {
                 ...d,
 
@@ -7866,7 +8000,7 @@ return (
                   calcul.total - montantAcompteRecu
                 ),
                 total: calcul.total,
-                acompte: calcul.acompte,
+                acompte: montantAcompteRecu,
                 facturePayee: false,
 
                 // On conserve datePaiement pour ne rien casser
