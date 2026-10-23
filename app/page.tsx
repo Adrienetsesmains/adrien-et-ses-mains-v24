@@ -729,6 +729,25 @@ function repartirFraisDevis(lignes: LigneTravaux[], mode: string, frais: number)
   return resultat;
 }
 
+// Répartition au centime, uniquement sur les prestations payantes.
+function integrerMinimumPDF(lignes: LigneTravaux[], montants: number[], complement: number) {
+  const resultat = [...montants];
+  const indices = lignes.map((l, i) => i).filter((i) =>
+    !lignes[i].offert && resultat[i] > 0 &&
+    !(lignes[i].prestationNom || nomTravaux(lignes[i].type)).toLowerCase().includes("fourniture")
+  );
+  const poids = indices.reduce((s, i) => s + resultat[i], 0);
+  let reste = Math.max(0, Math.round(complement * 100));
+  const centimes = reste;
+  indices.forEach((i, position) => {
+    const part = position === indices.length - 1
+      ? reste : Math.floor(centimes * resultat[i] / poids);
+    resultat[i] = Math.round(resultat[i] * 100 + part) / 100;
+    reste -= part;
+  });
+  return { montants: resultat, nonReparti: reste / 100 };
+}
+
 function creerBaseFacturation(devis: Dossier): BaseFacturation {
   const lignes: LigneTravaux[] = JSON.parse(JSON.stringify(devis.lignesTravaux || []));
   const heures = lignes.reduce((s, l) => s + (l.heuresUnite || 0) * (l.q1 || 1), 0);
@@ -2121,6 +2140,9 @@ const margeFournitures =
   // ================= MINIMUM CHANTIER =================
   const minimumChantier = 80;
 
+  const complementMinimum = !dossierVide && total < minimumChantier
+    ? Math.round((minimumChantier - total) * 100) / 100 : 0;
+
   if (!dossierVide && total < minimumChantier) {
     total = minimumChantier;
   }
@@ -2162,6 +2184,7 @@ const margeFournitures =
   
 return {
   resteReel,
+  complementMinimum,
   montantsFacture: supplements?.montants,
   joursSupplementaires: supplements?.joursSup || 0,
   fraisSupplementaires: supplements?.fraisSup || 0,
@@ -4289,87 +4312,49 @@ setFraisDeplacementManuel(
 
   const lignesPDF = (): [string, number][] => {
   if (baseFacturation && calcul.montantsFacture) {
-    const resultat: [string, number][] = lignesTravaux.map((l, i) => [
-      l.prestationNom || nomTravaux(l.type), calcul.montantsFacture![i]
-    ]);
+    // Le minimum du devis initial est intégré à ses seules prestations.
+    // Les nouvelles lignes gardent leurs propres frais supplémentaires.
+    const manqueInitial = Math.max(0, Math.round((baseFacturation.total -
+      baseFacturation.montantsPDF.reduce((s, n) => s + n, 0) -
+      baseFacturation.fournitures) * 100) / 100);
+    const initial = integrerMinimumPDF(baseFacturation.lignes,
+      baseFacturation.montantsPDF, manqueInitial);
+    const resultat: [string, number][] = lignesTravaux.map((l, i) => {
+      const origine = baseFacturation.lignes.findIndex((b) => b.id === l.id);
+      return [l.prestationNom || nomTravaux(l.type),
+        origine >= 0 ? initial.montants[origine] : calcul.montantsFacture![i]];
+    });
+    if (initial.nonReparti > 0) resultat.push(["Forfait d’intervention du devis initial", initial.nonReparti]);
     if (baseFacturation.fournitures > 0) {
       resultat.push(["Fournitures et approvisionnement", baseFacturation.fournitures]);
     }
     const fournituresSup = Math.round((calcul.reventeFournitures - baseFacturation.fournitures) * 100) / 100;
-    if (fournituresSup > 0) {
-      resultat.push(["Fournitures supplémentaires", fournituresSup]);
-    }
-    if (calcul.fraisNonRepartis > 0) {
-      resultat.push(["Déplacement pour jours supplémentaires", calcul.fraisNonRepartis]);
+    if (fournituresSup > 0) resultat.push(["Fournitures supplémentaires", fournituresSup]);
+    if (calcul.fraisNonRepartis > 0) resultat.push(["Déplacement pour jours supplémentaires", calcul.fraisNonRepartis]);
+    // Cas d'un ancien devis accepté sous le minimum actuel : seuls les ajouts
+    // éventuels peuvent recevoir le complément, jamais les lignes initiales.
+    if (calcul.complementMinimum > 0) {
+      const eligibles = lignesTravaux.map((l) => baseFacturation.lignes.some((b) => b.id === l.id)
+        ? { ...l, offert: true } : l);
+      const reparti = integrerMinimumPDF(eligibles, resultat.slice(0, lignesTravaux.length).map((l) => l[1]), calcul.complementMinimum);
+      lignesTravaux.forEach((_, i) => { resultat[i][1] = reparti.montants[i]; });
+      if (reparti.nonReparti > 0) resultat.push(["Forfait d’intervention", reparti.nonReparti]);
     }
     return resultat;
   }
-  // 1. lignes de base
-  const lignesTravauxPDF = lignesTravaux.map((l) => ({
-    designation: l.prestationNom || nomTravaux(l.type),
-    montant: montantLigne(l, modeClient),
-  }));
-
-  const totalTravaux = lignesTravauxPDF.reduce(
-    (s, l) => s + l.montant,
-    0
-  );
-
-  const frais = calcul.fraisLogistique || 0;
-
-  // 2. Si pas de travaux → on affiche rien de spécial
-  if (totalTravaux === 0) {
-    return lignesTravauxPDF.map((l) => [l.designation, l.montant]);
+  const montantsAvecFrais = repartirFraisDevis(lignesTravaux, modeClient, calcul.fraisLogistique);
+  const repartition = integrerMinimumPDF(lignesTravaux, montantsAvecFrais, calcul.complementMinimum);
+  const resultat: [string, number][] = lignesTravaux.map((l, i) => [
+    l.prestationNom || nomTravaux(l.type), Math.round(repartition.montants[i] * 100) / 100
+  ]);
+  if (calcul.totalTravaux === 0 && calcul.fraisLogistique !== 0) {
+    resultat.push(["Déplacement et mise en place", calcul.fraisLogistique]);
   }
-
-// 1. Séparer lignes travaux / fournitures
-const lignesTravauxSeules = lignesTravauxPDF.filter(
-  (l) => !l.designation.toLowerCase().includes("fourniture")
-);
-
-const totalTravauxSansFourniture = lignesTravauxSeules.reduce(
-  (s, l) => s + l.montant,
-  0
-);
-
-// 2. Répartition uniquement sur travaux
-const lignesAvecFrais = lignesTravauxPDF.map((l) => {
-  const estFourniture = l.designation.toLowerCase().includes("fourniture");
-
-  if (estFourniture || totalTravauxSansFourniture === 0) {
-    return l; // pas de répartition
-  }
-
-  const ratio = l.montant / totalTravauxSansFourniture;
-  const partFrais = Math.round(frais * ratio);
-
-  return {
-    designation: l.designation,
-    montant: l.montant + partFrais,
-  };
-});
-
-  // 4. Ajustement pour éviter perte à cause des arrondis
-  const totalApres = lignesAvecFrais.reduce((s, l) => s + l.montant, 0);
-
-const totalAttendu =
-  totalTravaux + calcul.fraisLogistique;
-
-const ecart = totalAttendu - totalApres;
-
-  if (Math.abs(ecart) > 0 && lignesAvecFrais.length > 0) {
-    lignesAvecFrais[0].montant += ecart;
-  }
-
-  // 5. Fournitures (inchangé)
-  if (!fournituresClient && calcul.reventeFournitures > 0) {
-    lignesAvecFrais.push({
-      designation: "Fournitures et approvisionnement",
-      montant: calcul.reventeFournitures,
-    });
-  }
-
-  return lignesAvecFrais.map((l) => [l.designation, l.montant]);
+  if (calcul.reventeFournitures > 0) resultat.push(["Fournitures et approvisionnement", calcul.reventeFournitures]);
+  // En l'absence de prestation payante, ne jamais majorer une ligne offerte
+  // ou de fournitures : le forfait constitue alors une prestation distincte.
+  if (repartition.nonReparti > 0) resultat.push(["Forfait d’intervention", repartition.nonReparti]);
+  return resultat;
 };
 
 const chargerBanniereV26 = async () => {
@@ -7735,6 +7720,9 @@ return (
   valeur={`${calcul.nombreJoursChantier} j`}
 />
       <MiniResult titre="Fournitures" valeur={`${formatMontant(calcul.reventeFournitures)} €`} />
+      {calcul.complementMinimum > 0 && (
+        <MiniResult titre="Minimum intégré aux prestations" valeur={`${formatMontant(calcul.complementMinimum)} €`} />
+      )}
       <MiniResult titre="Total" valeur={`${formatMontant(calcul.total)} €`} couleur="text-blue-700" />
     </div>
 
@@ -7749,6 +7737,12 @@ return (
         <strong>{formatMontant(calcul.reventeFournitures)} €</strong>
       </div>
 
+      {calcul.complementMinimum > 0 && (
+        <div className="flex justify-between">
+          <span>Complément au minimum de 80 € (intégré aux prestations sur le PDF)</span>
+          <strong>{formatMontant(calcul.complementMinimum)} €</strong>
+        </div>
+      )}
       <div className="border-t pt-1 flex justify-between font-bold text-blue-700">
         <span>Total devis</span>
         <span>{formatMontant(calcul.total)} €</span>
