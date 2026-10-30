@@ -324,6 +324,26 @@ export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
 const TARIFS_PRESTATIONS_SOURCE: PrestationTarif[] = [
 
+// Remplacements complets : dimensions et modèles à préciser au devis.
+p("BRI-PLACARD-COULISSANT-REMPL", "Bricolage / Menuiserie légère", "Remplacement complet d’une façade de placard coulissante", "ensemble", 4, [
+  "Protection locale et dépose des vantaux, rails et accessoires existants ; contrôle des supports.",
+  "Pose des rails et des nouveaux vantaux avec fixations adaptées ; installation des dispositifs anti-déraillement et anti-soulèvement prévus par le fabricant.",
+  "Réglage de l’aplomb, du recouvrement et des butées ; contrôle du maintien et essais de coulissement."
+], {
+  conditions: "Base de main-d’œuvre pour un ensemble de deux vantaux prêt à poser, sur supports existants sains et adaptés. Dimensions, nombre de vantaux, finition et système de roulement à préciser au devis ; temps à adapter au poids et aux contraintes de manutention. Hors fabrication sur mesure, reprise des supports, ouverture bloquée, évacuation en déchetterie et fournitures. Ne pas cumuler avec la dépose, la pose des rails ou le réglage du même ensemble déjà compris.",
+  rentabilite: "🟠 À adapter",
+  tags: ["placard", "porte coulissante", "vantaux", "rail", "roulement à billes", "anti-déraillement", "remplacement"]
+}),
+p("BRI-SERRURE-ENCASTREE-REMPL", "Bricolage / Menuiserie légère", "Remplacement d’une serrure encastrée de porte intérieure", "u", 1, [
+  "Dépose des poignées si nécessaire et de la serrure encastrée défectueuse sur porte ouverte.",
+  "Pose d’une serrure compatible avec l’axe, l’entraxe et la têtière existants ; adaptations mineures de la gâche si nécessaire.",
+  "Remontage des poignées et essais du pêne, de la fermeture et du verrouillage selon le modèle."
+], {
+  conditions: "Base sur porte intérieure ouverte et accessible, pour remplacement compatible sans reprise importante de la mortaise. Fonction, axe, entraxe, carré et dimensions de têtière à vérifier avant commande. Hors ouverture de porte bloquée, réparation du bois, remplacement des poignées, peinture et fournitures. Ne pas cumuler avec un réglage déjà compris.",
+  tags: ["serrure", "encastrée", "à larder", "porte intérieure", "chambre", "pêne", "remplacement"]
+}),
+
+
 // Fermetures grillagées et équipements muraux : dimensions et modèles au devis.
 p("EXT-FERMETURE-GRILLAGE-SUR-MESURE", "Extérieur / Métal", "Pose d’une fermeture grillagée sur mesure", "u", 3, [
   "Relevé des dimensions et préparation ; découpe et ajustement du panneau grillagé et des supports latéraux.",
@@ -4984,6 +5004,8 @@ p(
 const CLASSEMENT_CHANTIER: Record<string, {
   categorieChantier: string; sousCategorie: string; ordreCatalogue: number;
 }> = {
+  "BRI-PLACARD-COULISSANT-REMPL": {"categorieChantier":"08. Équipements et finitions","sousCategorie":"Menuiseries intérieures et accessoires","ordreCatalogue":106.5},
+  "BRI-SERRURE-ENCASTREE-REMPL": {"categorieChantier":"11. Entretien, dépannage et interventions globales","sousCategorie":"Portes, fenêtres et quincaillerie","ordreCatalogue":195.5},
   "EXT-FERMETURE-GRILLAGE-SUR-MESURE": {"categorieChantier":"09. Aménagements extérieurs et jardin","sousCategorie":"Pergolas et métallerie","ordreCatalogue":156.5},
   "BRI-POUBELLE-MURALE-POS": {"categorieChantier":"08. Équipements et finitions","sousCategorie":"Menuiseries intérieures et accessoires","ordreCatalogue":108.5},
   "MAC-TRAVERSEE-PAROI-RESEAU": {"categorieChantier":"03. Maçonnerie et structure","sousCategorie":"Reprises maçonnées et réservations","ordreCatalogue":26.5},
