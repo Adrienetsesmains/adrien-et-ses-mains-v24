@@ -324,6 +324,26 @@ export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
 const TARIFS_PRESTATIONS_SOURCE: PrestationTarif[] = [
 
+// Fermetures grillagées et équipements muraux : dimensions et modèles au devis.
+p("EXT-FERMETURE-GRILLAGE-SUR-MESURE", "Extérieur / Métal", "Pose d’une fermeture grillagée sur mesure", "u", 3, [
+  "Relevé des dimensions et préparation ; découpe et ajustement du panneau grillagé et des supports latéraux.",
+  "Ébavurage et protection anticorrosion des coupes ; pose des supports et fixation soignée du panneau.",
+  "Réglage de l’aplomb, contrôle de la tenue et nettoyage de la zone d’intervention."
+], {
+  conditions: "Base pour une petite fermeture fixe sur supports existants sains et accessibles. Dimensions, type de grillage et supports à préciser au devis ; temps à adapter. Hors fabrication soudée d’un cadre complet, ouvrant, peinture complète, reprise de maçonnerie, moyens d’accès spécifiques et fournitures. Ne pas cumuler avec la pose des mêmes panneaux ou supports déjà comprise dans une autre prestation.",
+  rentabilite: "🟠 À adapter",
+  tags: ["grillage", "fermeture", "sur mesure", "panneau rigide", "cornière", "fixation"]
+}),
+p("BRI-POUBELLE-MURALE-POS", "Bricolage / Menuiserie légère", "Pose d’une poubelle murale", "u", 1, [
+  "Repérage de l’emplacement en préservant les passages et l’ouverture des portes.",
+  "Perçage du support adapté et pose des fixations ; installation du support et de la poubelle.",
+  "Contrôle de la tenue et du fonctionnement du système de vidage ; nettoyage de la zone."
+], {
+  conditions: "Pour une poubelle murale de dimensions courantes sur support sain et accessible. Modèle et capacité à préciser au devis. Hors dépose, reprise du support, création de poteau, poubelle, fixations et autres fournitures. Ne pas cumuler avec la pose du même équipement déjà comprise dans une autre prestation.",
+  tags: ["poubelle", "corbeille", "murale", "demi-lune", "équipement", "extérieur"]
+}),
+
+
 // Réseaux d’eau : prestations générales, quantités et dimensions au devis.
 p("MAC-TRAVERSEE-PAROI-RESEAU", "Maçonnerie légère", "Création d’un passage de réseau à travers une paroi", "u", 1.1, ["Repérage de la zone et perçage adapté à la paroi après contrôle de l’absence de réseaux.","Mise en place d’un fourreau pour le passage prévu.","Rebouchage périphérique et finition extérieure étanche adaptée au support."], { conditions: "Diamètre, épaisseur et matériau à préciser au devis. Pour perçage courant sans atteinte structurelle. Hors carottage spécialisé, béton armé, peinture et reprise complète du revêtement. Fournitures séparées.", rentabilite: "🟠 À adapter", tags: ["réseau d’eau","Création d’un passage de réseau à travers une paroi"] }),
 
@@ -4964,6 +4984,8 @@ p(
 const CLASSEMENT_CHANTIER: Record<string, {
   categorieChantier: string; sousCategorie: string; ordreCatalogue: number;
 }> = {
+  "EXT-FERMETURE-GRILLAGE-SUR-MESURE": {"categorieChantier":"09. Aménagements extérieurs et jardin","sousCategorie":"Pergolas et métallerie","ordreCatalogue":156.5},
+  "BRI-POUBELLE-MURALE-POS": {"categorieChantier":"08. Équipements et finitions","sousCategorie":"Menuiseries intérieures et accessoires","ordreCatalogue":108.5},
   "MAC-TRAVERSEE-PAROI-RESEAU": {"categorieChantier":"03. Maçonnerie et structure","sousCategorie":"Reprises maçonnées et réservations","ordreCatalogue":26.5},
   "PLOMB-PIQUAGE-ALIMENTATION": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.1},
   "PLOMB-VANNE-ARRET": {"categorieChantier":"05. Réseaux et équipements techniques","sousCategorie":"Plomberie : alimentations et distribution","ordreCatalogue":36.2},
