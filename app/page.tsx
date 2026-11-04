@@ -1635,7 +1635,26 @@ const [typeRdv, setTypeRdv] = useState("visite");
   const [historique, setHistorique] = useState<Dossier[]>([]);
   const [dateSelectionnee, setDateSelectionnee] = useState<Date | null>(null);
 const [showPopupCalendrier, setShowPopupCalendrier] = useState(false);
-const [ficheOuverte, setFicheOuverte] = useState(false);
+const [ficheOuverte, setFicheOuverte] = useState(true);
+const [versionParcoursDevis, setVersionParcoursDevis] = useState(0);
+const [ongletsDevis, setOngletsDevis] = useState({
+  client: true, prestations: true, resultat: false, conditions: false, acompte: false,
+});
+const progressionDevisRef = useRef({ resultat: false, conditions: false, acompte: false });
+const reglerOngletDevis = (cle: keyof typeof ongletsDevis, ouvert: boolean) => {
+  setOngletsDevis((actuels) => ({ ...actuels, [cle]: ouvert }));
+};
+const avancerParcoursDevis = (etape: "resultat" | "conditions" | "acompte") => {
+  // Une seule ouverture automatique par étape : ensuite, le choix manuel prime.
+  if (progressionDevisRef.current[etape]) return;
+  progressionDevisRef.current[etape] = true;
+  reglerOngletDevis(etape, true);
+};
+const reinitialiserParcoursDevis = () => {
+  progressionDevisRef.current = { resultat: false, conditions: false, acompte: false };
+  setOngletsDevis({ client: true, prestations: true, resultat: false, conditions: false, acompte: false });
+  setVersionParcoursDevis((version) => version + 1);
+};
 const [rdvEnCours, setRdvEnCours] = useState<Dossier | null>(null);
 const [ajoutRdvOuvert, setAjoutRdvOuvert] = useState(false);
   const [rechercheHistorique, setRechercheHistorique] = useState("");
@@ -1713,6 +1732,15 @@ const [numeroDevis, setNumeroDevis] = useState("");
 const [numeroFacture, setNumeroFacture] = useState("");
 
   const [lignesTravaux, setLignesTravaux] = useState<LigneTravaux[]>([]);
+  useEffect(() => {
+    const prestationRenseignee = lignesTravaux.some((ligne) =>
+      Boolean(ligne.tarifId?.trim() || ligne.prestationNom?.trim()) ||
+      Number(ligne.q1 || 0) > 0 || Number(ligne.prixUnitaire || 0) > 0
+    );
+    if (prestationRenseignee) avancerParcoursDevis("resultat");
+    else progressionDevisRef.current.resultat = false;
+  }, [lignesTravaux]);
+
   // Historique d'annulation limité au devis courant (prestations et conditions).
   const [historiqueAnnulation, setHistoriqueAnnulation] = useState<Array<{lignes: LigneTravaux[]; generales: string; chantier: string}>>([]);
   const annulationEnCoursRef = useRef(false);
@@ -2616,6 +2644,7 @@ const modifierDetailPdf = (id: number, index: number, valeur: string) => {
 };
 
   const nouveauDossier = () => {
+  reinitialiserParcoursDevis();
  setFicheOuverte(true);
   setIdDossierActuel(null);
 
@@ -2690,6 +2719,7 @@ setNumeroSap("");
 };
 
 const creerRDVDepuisCalendrier = (date: Date) => {
+  reinitialiserParcoursDevis();
   const dateFormatee = date.toLocaleDateString("fr-FR");
 
   setFicheOuverte(true);
@@ -3021,6 +3051,7 @@ useEffect(() => {
 });
 
 const rechargerDossier = (d: Dossier) => {
+  reinitialiserParcoursDevis();
  
  setFicheOuverte(true);
   setIdDossierActuel(d.id);
@@ -6393,7 +6424,7 @@ return (
     .atelier-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea) { min-height: 38px; font-size: 16px; }
   }
 `}</style>
-      <div className="mx-auto max-w-7xl space-y-3">
+      <div key={versionParcoursDevis} className="mx-auto max-w-7xl space-y-3">
         <section className="atelier-brand">
 
 <div className="atelier-backups">
@@ -6902,8 +6933,10 @@ return (
 
   
         {ficheOuverte && (
-<section ref={ficheClientRef} className="grid gap-6 lg:grid-cols-2">
-  <Bloc titre="Client">
+<section ref={ficheClientRef} className="grid gap-3">
+  <BlocRepliable titre="Nouveau client / coordonnées" ouvert={ongletsDevis.client}
+    onOuvertureChange={(ouvert) => reglerOngletDevis("client", ouvert)}>
+    <div className="grid gap-3 md:grid-cols-2">
             <Select
   label="Client enregistré"
   value={client}
@@ -7058,9 +7091,10 @@ return (
     <TextArea label="Notes" value={notes} onChange={setNotes} />
   </>
 )}
-          </Bloc>
+    </div>
+          </BlocRepliable>
 
-          <Bloc titre="Dossier">
+          <BlocRepliable titre="Dossier" ouvertParDefaut={false}>
             {dossierActuel?.devisOrigineId !== undefined && (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
                 <p className="font-bold">Facture liée au devis {numeroDevis}</p>
@@ -7217,10 +7251,11 @@ return (
     ["tres_urgente", "Très urgente"],
   ]}
 />
-          </Bloc>
+          </BlocRepliable>
         </section>
 )}
-<BlocRepliable titre="Lignes de travaux" ouvertParDefaut={true}>
+<BlocRepliable titre="Prestations / lignes de travaux" ouvert={ongletsDevis.prestations}
+  onOuvertureChange={(ouvert) => reglerOngletDevis("prestations", ouvert)}>
 <div
   ref={lignesTravauxRef}
   className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"
@@ -7833,13 +7868,18 @@ return (
 </BlocRepliable>
 
 
-  <Bloc titre="📈 Résultat devis">
+  <BlocRepliable titre="Résultat devis — déplacement et fournitures" ouvert={ongletsDevis.resultat}
+    onOuvertureChange={(ouvert) => reglerOngletDevis("resultat", ouvert)}>
   <p className="text-xs text-slate-500">
     Estimation et analyse en temps réel.
   </p>
 <div className="grid gap-3 md:grid-cols-2">
  {/* Déplacement */}
-<div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
+<div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2"
+  onChangeCapture={() => avancerParcoursDevis("conditions")}
+  onClickCapture={(event) => {
+    if ((event.target as HTMLElement).closest("button")) avancerParcoursDevis("conditions");
+  }}>
   <h3 className="text-sm font-bold text-slate-800">
     🚚 Déplacement
   </h3>
@@ -7885,7 +7925,11 @@ return (
 </div>
 
  {/* Fournitures */}
-<div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
+<div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2"
+  onChangeCapture={() => avancerParcoursDevis("conditions")}
+  onClickCapture={(event) => {
+    if ((event.target as HTMLElement).closest("button")) avancerParcoursDevis("conditions");
+  }}>
   <h3 className="text-sm font-bold text-slate-800">
     📦 Fournitures
   </h3>
@@ -8054,6 +8098,17 @@ return (
   </p>
 </div>
 
+
+</div>
+</BlocRepliable>
+
+<BlocRepliable titre="Conditions du devis et résumé financier" ouvert={ongletsDevis.conditions}
+  onOuvertureChange={(ouvert) => reglerOngletDevis("conditions", ouvert)}>
+  <div onChangeCapture={() => avancerParcoursDevis("acompte")}
+    onClickCapture={(event) => {
+      if ((event.target as HTMLElement).closest("button")) avancerParcoursDevis("acompte");
+    }}>
+    <div className="grid gap-3 md:grid-cols-2">
 {/* Conditions générales et conditions propres au chantier */}
 <div className="md:col-span-2 rounded-lg border bg-slate-50 px-3 py-2 space-y-3">
   <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -8223,8 +8278,20 @@ return (
     </p>
   </div>
 
-  <div className="rounded-lg border bg-slate-50 px-3 py-2 space-y-2">
-    <h3 className="text-sm font-bold text-slate-800">Acompte et encaissement</h3>
+
+    <button type="button" className="btn-amber mt-3"
+      onClick={() => {
+        progressionDevisRef.current.acompte = true;
+        reglerOngletDevis("acompte", true);
+      }}>
+      Continuer vers acompte et encaissement
+    </button>
+  </div>
+</BlocRepliable>
+
+<BlocRepliable titre="Acompte et encaissement" ouvert={ongletsDevis.acompte}
+  onOuvertureChange={(ouvert) => reglerOngletDevis("acompte", ouvert)}>
+  <div className="space-y-2">
     {!estAndroid && (
       <div className="rounded-lg border border-amber-200 bg-white p-3 space-y-2">
         <p className="text-sm text-slate-700">
@@ -8477,12 +8544,12 @@ return (
   </button>
 </div>
 </div>
-</Bloc>
+</BlocRepliable>
 
 
-        <Bloc titre="Recherche historique">
+        <BlocRepliable titre="Recherche historique" ouvertParDefaut={false}>
           <Input label="Recherche client / devis / facture" value={rechercheHistorique} onChange={setRechercheHistorique} />
-        </Bloc>
+        </BlocRepliable>
 
 <BlocRepliable titre="Historique" ouvertParDefaut={false}>
   {(() => {
@@ -9221,80 +9288,30 @@ const ficheClient: ClientEnregistre = {
   );
 
 }
-let blocsRepliablesOuvertsGlobal: string[] = [];
-
 function BlocRepliable({
-  titre,
-  children,
-  ouvertParDefaut = false,
+  titre, children, ouvertParDefaut = false,
+  ouvert: ouvertControle, onOuvertureChange,
 }: {
   titre: string;
   children: ReactNode;
   ouvertParDefaut?: boolean;
+  ouvert?: boolean;
+  onOuvertureChange?: (ouvert: boolean) => void;
 }) {
-  const idBloc = titre;
-  const [ouvert, setOuvert] = useState(ouvertParDefaut);
-
-  useEffect(() => {
-    const fermerBloc = (event: Event) => {
-      const detail = (event as CustomEvent).detail;
-
-      if (detail?.idBloc === idBloc) {
-        setOuvert(false);
-      }
-    };
-
-    window.addEventListener("fermer-bloc-repliable", fermerBloc);
-
-    return () => {
-      window.removeEventListener("fermer-bloc-repliable", fermerBloc);
-    };
-  }, [idBloc]);
-
+  const [ouvertureLocale, setOuvertureLocale] = useState(ouvertParDefaut);
+  const ouvert = ouvertControle ?? ouvertureLocale;
   const basculerBloc = () => {
-    if (ouvert) {
-      blocsRepliablesOuvertsGlobal = blocsRepliablesOuvertsGlobal.filter(
-        (id) => id !== idBloc
-      );
-
-      setOuvert(false);
-      return;
-    }
-
-    blocsRepliablesOuvertsGlobal = blocsRepliablesOuvertsGlobal.filter(
-      (id) => id !== idBloc
-    );
-
-    blocsRepliablesOuvertsGlobal.push(idBloc);
-
-    if (blocsRepliablesOuvertsGlobal.length > 2) {
-      const blocAFermer = blocsRepliablesOuvertsGlobal.shift();
-
-      if (blocAFermer) {
-        window.dispatchEvent(
-          new CustomEvent("fermer-bloc-repliable", {
-            detail: { idBloc: blocAFermer },
-          })
-        );
-      }
-    }
-
-    setOuvert(true);
+    const prochaineOuverture = !ouvert;
+    if (ouvertControle === undefined) setOuvertureLocale(prochaineOuverture);
+    onOuvertureChange?.(prochaineOuverture);
   };
-
   return (
     <section className="atelier-panel">
-      <button
-        type="button"
-        onClick={basculerBloc}
-        className="flex w-full items-center justify-between gap-3 text-left"
-      >
+      <button type="button" onClick={basculerBloc} aria-expanded={ouvert}
+        className="flex w-full items-center justify-between gap-3 text-left">
         <h2 className="text-base font-bold text-slate-900">{titre}</h2>
-        <span className="atelier-toggle">
-          {ouvert ? "▲ Masquer" : "▼ Afficher"}
-        </span>
+        <span className="atelier-toggle">{ouvert ? "▲ Masquer" : "▼ Afficher"}</span>
       </button>
-
       {ouvert && <div className="mt-3 space-y-3">{children}</div>}
     </section>
   );
