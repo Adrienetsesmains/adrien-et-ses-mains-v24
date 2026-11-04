@@ -658,6 +658,31 @@ heuresUniteManuel?: boolean;
   travauxSupplementaires?: boolean;
 };
 
+// Corrections de statistiques uniquement : aucune écriture dans les factures.
+type CorrectionsEncaissementsMensuels = Record<string, number>;
+const cleMoisStatistiques = (annee: number, mois: number) =>
+  `${annee}-${String(mois + 1).padStart(2, "0")}`;
+
+function normaliserCorrectionsMensuelles(valeur: unknown): CorrectionsEncaissementsMensuels {
+  if (!valeur || typeof valeur !== "object" || Array.isArray(valeur)) return {};
+  const resultat: CorrectionsEncaissementsMensuels = {};
+  for (const [cle, montant] of Object.entries(valeur)) {
+    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(cle) &&
+        typeof montant === "number" && Number.isFinite(montant) && montant >= 0) {
+      resultat[cle] = Math.round(montant * 100) / 100;
+    }
+  }
+  return resultat;
+}
+
+function lireMontantCorrection(texte: string): number | null {
+  const nettoye = texte.trim().replace(/[\s\u00a0\u202f]/g, "").replace(",", ".");
+  if (!/^\d+(?:\.\d{1,2})?$/.test(nettoye)) return null;
+  const montant = Number(nettoye);
+  return Number.isFinite(montant) && montant >= 0
+    ? Math.round(montant * 100) / 100 : null;
+}
+
 type Depense = {
   id: number;
   date: string;
@@ -1222,6 +1247,7 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
 
   setHistorique(d.historique || []);
   setDepenses(d.depenses || []);
+  setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(d.correctionsEncaissementsMensuels));
   setClientsEnregistres(d.clientsEnregistres || clientsBase);
   setCompteurDevis(compteurDevisValide(d.compteurDevis));
   setCompteurFacture(compteurFactureValide(d.compteurFacture));
@@ -1307,6 +1333,7 @@ const appliquerSauvegardeComplete = (data: any) => {
 
   setHistorique(data.historique || []);
   setDepenses(data.depenses || []);
+  setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(data.correctionsEncaissementsMensuels));
   setClientsEnregistres(data.clientsEnregistres || clientsBase);
 
   setCompteurDevis(compteurDevisValide(data.compteurDevis));
@@ -1614,6 +1641,10 @@ const [clientFinalTelephone, setClientFinalTelephone] = useState("");
 const [clientFinalAdresse, setClientFinalAdresse] = useState("");
 
 const [depenses, setDepenses] = useState<Depense[]>([]);
+const [correctionsEncaissementsMensuels, setCorrectionsEncaissementsMensuels] =
+  useState<CorrectionsEncaissementsMensuels>({});
+const [correctionMensuelleEnCours, setCorrectionMensuelleEnCours] = useState(false);
+
 const [depenseDate, setDepenseDate] = useState(new Date().toLocaleDateString("fr-FR"));
 const [depenseCategorie, setDepenseCategorie] = useState("Fournitures");
 const [depenseDescription, setDepenseDescription] = useState("");
@@ -1746,6 +1777,7 @@ setRibBanque(d.ribBanque || "");
 
       setHistorique(d.historique || []);
       setDepenses(d.depenses || []);
+      setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(d.correctionsEncaissementsMensuels));
 setClientsEnregistres(d.clientsEnregistres || clientsBase);
       setCompteurDevis(compteurDevisValide(d.compteurDevis));
       setCompteurFacture(compteurFactureValide(d.compteurFacture));
@@ -1887,6 +1919,7 @@ useEffect(() => {
   }
 }, [
   sauvegardePrete,
+  correctionsEncaissementsMensuels,
   historique,
   compteurDevis,
   compteurFacture,
@@ -1980,6 +2013,7 @@ useEffect(() => {
 
 }, [
   sauvegardePrete,
+  correctionsEncaissementsMensuels,
   historique,
   compteurDevis,
   compteurFacture,
@@ -2023,6 +2057,7 @@ const construireSauvegardeComplete = () => {
   return {
     historique,
     depenses,
+    correctionsEncaissementsMensuels,
     clientsEnregistres,
 
     compteurDevis,
@@ -3544,7 +3579,7 @@ const tableauMensuel = useMemo(() => {
     })
   );
 
-  const totalEncaisse = encaissementsUniques.reduce(
+  const totalEncaisseAutomatique = encaissementsUniques.reduce(
     (somme, e) => somme + e.montant,
     0
   );
@@ -3553,6 +3588,11 @@ const tableauMensuel = useMemo(() => {
     (somme, d) => somme + (d.montant || 0),
     0
   );
+
+  const correctionEncaissement = correctionsEncaissementsMensuels[
+    cleMoisStatistiques(anneeSelectionnee, moisSelectionne)
+  ];
+  const totalEncaisse = correctionEncaissement ?? totalEncaisseAutomatique;
 
   const soldeReel = totalEncaisse - totalDepenses;
 
@@ -3577,6 +3617,8 @@ const tableauMensuel = useMemo(() => {
 
   return {
     totalEncaisse,
+    totalEncaisseAutomatique,
+    correctionManuelle: correctionEncaissement !== undefined,
     totalDepenses,
     soldeReel,
     resteAEncaisser,
@@ -3586,7 +3628,7 @@ const tableauMensuel = useMemo(() => {
     encaissementsUniques,
     alerteFaible: totalEncaisse < objectifMensuel,
   };
-}, [dossiersActifs, depenses, moisSelectionne, anneeSelectionnee]);
+}, [dossiersActifs, depenses, moisSelectionne, anneeSelectionnee, correctionsEncaissementsMensuels]);
 
 <div className="rounded-xl border border-slate-200 bg-white p-3">
   <button
@@ -3845,6 +3887,10 @@ const donneesGraphique = useMemo(() => {
     // RÉSULTAT
     // ============================================================
 
+    encaissements = correctionsEncaissementsMensuels[
+      cleMoisStatistiques(annee, mois)
+    ] ?? encaissements;
+
     const resultat =
       encaissements - totalDepenses;
 
@@ -3866,7 +3912,36 @@ const donneesGraphique = useMemo(() => {
   }
 
   return data;
-}, [dossiersActifs, depenses]);
+}, [dossiersActifs, depenses, correctionsEncaissementsMensuels]);
+
+const enregistrerCorrectionMensuelle = async (montant: number | null) => {
+  if (correctionMensuelleEnCours) return;
+  const cle = cleMoisStatistiques(anneeSelectionnee, moisSelectionne);
+  const prochaines = { ...correctionsEncaissementsMensuels };
+  if (montant === null) delete prochaines[cle];
+  else prochaines[cle] = montant;
+  setCorrectionMensuelleEnCours(true);
+  let sauvegardeLocaleEffectuee = false;
+  try {
+    const donnees = {
+      ...construireSauvegardeComplete(),
+      correctionsEncaissementsMensuels: prochaines,
+    };
+    ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(donnees));
+    ecrireStockageLocal(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
+    sauvegardeLocaleEffectuee = true;
+    setCorrectionsEncaissementsMensuels(prochaines);
+    const succes = await envoyerDonneesCloud(donnees, false);
+    if (!succes) alert("Correction enregistrée sur cet appareil. La synchronisation a échoué : utilisez Forcer la sauvegarde cloud lorsque la connexion revient.");
+  } catch (erreur) {
+    console.error("Erreur sauvegarde correction mensuelle :", erreur);
+    alert(sauvegardeLocaleEffectuee
+      ? "Correction conservée sur cet appareil, mais synchronisation impossible. Réessayez la sauvegarde cloud."
+      : "La correction n’a pas pu être enregistrée. Réessayez.");
+  } finally {
+    setCorrectionMensuelleEnCours(false);
+  }
+};
 
 const dossierActuel = useMemo(() => {
   return historique.find((d) => d.id === idDossierActuel) || null;
@@ -4221,6 +4296,7 @@ const reinitialiserApplicationComplete = () => {
 
   setHistorique([]);
   setDepenses([]);
+  setCorrectionsEncaissementsMensuels({});
   setClientsEnregistres(clientsBase);
 
   setCompteurDevis(PROCHAIN_NUMERO_DEVIS);
@@ -4321,6 +4397,7 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
 
       setHistorique(data.historique || []);
       setDepenses(data.depenses || []);
+      setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(data.correctionsEncaissementsMensuels));
       setClientsEnregistres(data.clientsEnregistres || clientsBase);
 
       setCompteurDevis(compteurDevisValide(data.compteurDevis));
@@ -6317,6 +6394,67 @@ return (
 <MiniResult titre="Solde réel" valeur={`${formatMontant(tableauMensuel.soldeReel)} €`} couleur="text-blue-700" />
 <MiniResult titre="URSSAF" valeur={`${formatMontant(tableauMensuel.estimationUrssaf)} €`} />
   </div>
+
+  <BlocRepliable titre="Corriger exceptionnellement les encaissements du mois" ouvertParDefaut={false}>
+    <p className="text-sm text-slate-600">
+      Choisissez le mois avec les flèches ci-dessus, puis indiquez le chiffre d’affaires
+      réellement encaissé. Ce montant remplace le total du mois dans le graphique,
+      le solde et l’estimation URSSAF à 21,5 %. Vos factures restent intactes.
+    </p>
+    <p className="mt-2 text-sm">
+      Calcul automatique : <strong>{formatMontant(tableauMensuel.totalEncaisseAutomatique)} €</strong>
+      {tableauMensuel.correctionManuelle && (
+        <span className="ml-2 font-semibold text-amber-700">
+          Correction active : {formatMontant(tableauMensuel.totalEncaisse)} €
+        </span>
+      )}
+    </p>
+    <form
+      key={`${cleMoisStatistiques(anneeSelectionnee, moisSelectionne)}-${tableauMensuel.correctionManuelle ? tableauMensuel.totalEncaisse : "auto"}`}
+      className="mt-3 flex flex-wrap items-end gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const valeur = new FormData(event.currentTarget).get("encaissementCorrige");
+        const montant = lireMontantCorrection(String(valeur ?? ""));
+        if (montant === null) {
+          alert("Saisissez un montant positif ou nul, avec deux décimales maximum (exemple : 1990 ou 1990,50).");
+          return;
+        }
+        void enregistrerCorrectionMensuelle(montant);
+      }}
+    >
+      <label className="grid gap-1 text-sm font-medium">
+        Encaissements corrigés du mois (€)
+        <input
+          name="encaissementCorrige" type="text" inputMode="decimal" required
+          defaultValue={tableauMensuel.correctionManuelle ? formatMontant(tableauMensuel.totalEncaisse) : ""}
+          placeholder="Ex. : 1990,00"
+          disabled={correctionMensuelleEnCours}
+          className="rounded-lg border border-slate-300 px-3 py-2"
+        />
+      </label>
+      <button type="submit" disabled={correctionMensuelleEnCours}
+        className="btn-amber disabled:opacity-50">
+        {correctionMensuelleEnCours ? "Enregistrement…" : "Appliquer la correction"}
+      </button>
+      {tableauMensuel.correctionManuelle && (
+        <button type="button" disabled={correctionMensuelleEnCours}
+          onClick={() => { void enregistrerCorrectionMensuelle(null); }}
+          className="btn-outline disabled:opacity-50">
+          Revenir au calcul automatique
+        </button>
+      )}
+    </form>
+    <p className="mt-2 text-xs text-slate-500">
+      Un montant de 0 € est accepté. Les mois sans correction restent automatiques.
+    </p>
+  </BlocRepliable>
+
+  {tableauMensuel.correctionManuelle && (
+    <p className="mt-3 text-sm font-semibold text-amber-700" role="status">
+      Encaissements corrigés manuellement pour ce mois — URSSAF recalculée sur ce montant.
+    </p>
+  )}
 
   {tableauMensuel.alerteFaible && (
     <div className="mt-3 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm font-semibold text-orange-700">
