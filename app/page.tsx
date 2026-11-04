@@ -6507,7 +6507,7 @@ return (
 
 </BlocRepliable>
 
-<Bloc titre="Dépenses entreprise">
+<BlocRepliable titre="Dépenses entreprise" ouvertParDefaut={false}>
   <div className="grid gap-2 md:grid-cols-3">
     <MiniResult
       titre="Dépenses du mois"
@@ -6691,7 +6691,7 @@ return (
       </div>
     )}
   </BlocRepliable>
-</Bloc>
+</BlocRepliable>
 
 <BlocRepliable titre="Calendrier chantier" ouvertParDefaut={false}>
   <div className="rounded-xl border bg-slate-50 p-3 space-y-3">
