@@ -6238,12 +6238,12 @@ return (
 </div>
     <style jsx global>{`
   .atelier-app {
-    --atelier-encre: #284954;
+    --atelier-encre: #204d59;
     --atelier-texte: #354f57;
-    --atelier-discret: #65777c;
-    --atelier-bord: rgba(57, 89, 98, .15);
+    --atelier-discret: #58747d;
+    --atelier-bord: rgba(52, 134, 145, .23);
     color: var(--atelier-texte);
-    background: linear-gradient(135deg, #f1f5f4 0%, #f8f7f2 52%, #eef3f3 100%);
+    background: linear-gradient(135deg, #e6f3f1 0%, #fff7e8 52%, #e5f2f5 100%);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "DejaVu Sans", sans-serif;
     font-size: 13px;
     line-height: 1.45;
@@ -6252,36 +6252,50 @@ return (
   .atelier-app *, .atelier-app *::before, .atelier-app *::after { box-sizing: border-box; }
   .atelier-app .atelier-toolbar {
     max-width: 1280px; margin-left: auto; margin-right: auto;
-    background: rgba(250, 252, 250, .94);
+    background: rgba(246, 253, 250, .97);
     border-color: var(--atelier-bord);
     box-shadow: 0 3px 18px rgba(35, 64, 74, .045);
   }
   .atelier-app .atelier-panel {
     border: 1px solid var(--atelier-bord);
     border-radius: 12px;
-    background: rgba(255,255,255,.73);
+    background: rgba(255,255,255,.92);
     padding: 9px 12px;
     box-shadow: 0 2px 9px rgba(35,64,74,.025);
   }
-  .atelier-app .atelier-panel > button { min-height: 30px; }
+  .atelier-app .atelier-panel > button {
+    min-height: 30px; border-radius: 7px;
+    background: linear-gradient(100deg, rgba(94,183,188,.17), rgba(227,180,73,.09));
+    padding: 3px 7px;
+  }
+  .atelier-app .atelier-result:has(> p:is(.text-green-700,.text-emerald-700)) {
+    background: rgba(170,220,186,.35); border-color: rgba(105,176,133,.32);
+  }
+  .atelier-app .atelier-result:has(> p:is(.text-amber-700,.text-orange-600,.text-orange-700)) {
+    background: rgba(255,218,145,.32); border-color: rgba(208,162,62,.32);
+  }
+  .atelier-app .atelier-result:has(> p:is(.text-red-700,.text-red-600)) {
+    background: rgba(241,193,196,.27); border-color: rgba(212,138,149,.3);
+  }
+
   .atelier-app .atelier-panel h2 {
     font-size: 14px; line-height: 1.35; font-weight: 650;
     color: var(--atelier-encre); letter-spacing: -.015em;
   }
   .atelier-app .atelier-panel .atelier-panel {
-    background: rgba(239,245,243,.42); box-shadow: none;
+    background: rgba(217,240,238,.48); box-shadow: none;
   }
   .atelier-app .atelier-toggle {
-    background: rgba(80,121,130,.075); color: #526e76;
-    border: 1px solid rgba(80,121,130,.12);
+    background: rgba(69,152,165,.19); color: #315f6c;
+    border: 1px solid rgba(69,152,165,.3);
     border-radius: 7px; padding: 3px 8px;
     font-size: 10px; font-weight: 600; white-space: nowrap;
   }
   .atelier-app .atelier-brand {
-    border: 1px solid rgba(174,151,102,.26);
-    border-left: 3px solid rgba(174,151,102,.55);
+    border: 1px solid rgba(197,153,66,.4);
+    border-left: 3px solid rgba(197,153,66,.85);
     border-radius: 12px; padding: 11px 14px;
-    background: linear-gradient(105deg, rgba(215,232,232,.68), rgba(248,242,227,.65));
+    background: linear-gradient(105deg, rgba(171,220,221,.82), rgba(255,225,164,.72));
     box-shadow: none; color: var(--atelier-encre);
   }
   .atelier-app .atelier-brand h1 { font-size: 16px; line-height: 1.35; font-weight: 600; margin-top: 2px; }
@@ -6298,12 +6312,12 @@ return (
     box-shadow: none; transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
   }
   .atelier-app .atelier-toolbar [class*="btn-"] { min-height: 29px; padding: 5px 7px; font-size: 11px; }
-  .atelier-app .btn-blue { background: rgba(105,149,164,.13); color: #355b68; border-color: rgba(105,149,164,.25); }
-  .atelier-app .btn-green, .atelier-app .btn-emerald { background: rgba(133,166,146,.14); color: #486755; border-color: rgba(133,166,146,.27); }
-  .atelier-app .btn-amber { background: rgba(195,172,115,.15); color: #77643c; border-color: rgba(195,172,115,.3); }
-  .atelier-app .btn-orange { background: rgba(192,151,132,.14); color: #805e50; border-color: rgba(192,151,132,.26); }
-  .atelier-app .btn-purple { background: rgba(158,146,175,.13); color: #6b5e79; border-color: rgba(158,146,175,.25); }
-  .atelier-app .btn-dark, .atelier-app .btn-outline { background: rgba(89,117,127,.065); color: #4c6670; }
+  .atelier-app .btn-blue { background: rgba(59,152,173,.22); color: #355b68; border-color: rgba(59,152,173,.35); }
+  .atelier-app .btn-green, .atelier-app .btn-emerald { background: rgba(105,176,133,.23); color: #486755; border-color: rgba(105,176,133,.36); }
+  .atelier-app .btn-amber { background: rgba(227,180,73,.25); color: #77643c; border-color: rgba(208,162,62,.4); }
+  .atelier-app .btn-orange { background: rgba(224,154,117,.23); color: #805e50; border-color: rgba(213,143,106,.36); }
+  .atelier-app .btn-purple { background: rgba(174,142,201,.22); color: #6b5e79; border-color: rgba(174,142,201,.35); }
+  .atelier-app .btn-dark, .atelier-app .btn-outline { background: rgba(92,158,171,.13); color: #4c6670; }
   .atelier-app [class*="btn-"]:hover:not(:disabled) { filter: none; box-shadow: 0 2px 6px rgba(35,64,74,.07); border-color: rgba(61,95,105,.34); }
   .atelier-app button { cursor: pointer; }
   .atelier-app button:disabled { cursor: default; }
@@ -6320,8 +6334,8 @@ return (
   .atelier-app textarea { min-height: 58px; }
   .atelier-app label { font-size: 11px; color: #526b73; }
   .atelier-app .atelier-result {
-    border: 1px solid rgba(86,118,127,.12); border-radius: 9px;
-    background: rgba(242,247,245,.6); padding: 6px 10px;
+    border: 1px solid rgba(70,145,156,.24); border-radius: 9px;
+    background: rgba(213,237,239,.55); padding: 6px 10px;
   }
   .atelier-app .atelier-result > p:first-child { font-size: 10px; color: #6a7e83; }
   .atelier-app .atelier-result > p:last-child { font-size: 16px; line-height: 1.4; font-weight: 650; font-variant-numeric: tabular-nums; }
@@ -6337,35 +6351,35 @@ return (
   .atelier-app .text-white { color: var(--atelier-encre); }
   .atelier-app :is(.text-slate-900,.text-slate-800) { color: var(--atelier-encre); }
   .atelier-app :is(.text-slate-500,.text-slate-600) { color: var(--atelier-discret); }
-  .atelier-app :is(.bg-white,.bg-slate-50,.bg-slate-100) { background-color: rgba(247,250,248,.78); }
+  .atelier-app :is(.bg-white,.bg-slate-50,.bg-slate-100) { background-color: rgba(247,253,250,.9); }
   /* Couleurs d’état lisibles, sur des fonds pastel peu saturés. */
   .atelier-app :is(.text-blue-300,.text-blue-400,.text-blue-500,.text-blue-600,.text-blue-700,.text-blue-800,.text-blue-900) { color: #496c7a; }
-  .atelier-app :is(.bg-blue-50,.bg-blue-100,.bg-blue-200,.bg-blue-300,.bg-blue-400,.bg-blue-500,.bg-blue-600,.bg-blue-700) { background-color: rgba(105,149,164,.12); }
+  .atelier-app :is(.bg-blue-50,.bg-blue-100,.bg-blue-200,.bg-blue-300,.bg-blue-400,.bg-blue-500,.bg-blue-600,.bg-blue-700) { background-color: rgba(59,152,173,.2); }
   .atelier-app :is(.border-blue-100,.border-blue-200,.border-blue-300,.border-blue-400,.border-blue-500) { border-color: rgba(105,149,164,.28); }
   .atelier-app :is(.text-green-300,.text-green-400,.text-green-500,.text-green-600,.text-green-700,.text-green-800,.text-green-900) { color: #4e705c; }
-  .atelier-app :is(.bg-green-50,.bg-green-100,.bg-green-200,.bg-green-300,.bg-green-400,.bg-green-500,.bg-green-600,.bg-green-700) { background-color: rgba(133,166,146,.12); }
+  .atelier-app :is(.bg-green-50,.bg-green-100,.bg-green-200,.bg-green-300,.bg-green-400,.bg-green-500,.bg-green-600,.bg-green-700) { background-color: rgba(105,176,133,.21); }
   .atelier-app :is(.border-green-100,.border-green-200,.border-green-300,.border-green-400,.border-green-500) { border-color: rgba(133,166,146,.28); }
   .atelier-app :is(.text-emerald-300,.text-emerald-400,.text-emerald-500,.text-emerald-600,.text-emerald-700,.text-emerald-800,.text-emerald-900) { color: #4e705c; }
-  .atelier-app :is(.bg-emerald-50,.bg-emerald-100,.bg-emerald-200,.bg-emerald-300,.bg-emerald-400,.bg-emerald-500,.bg-emerald-600,.bg-emerald-700) { background-color: rgba(133,166,146,.12); }
+  .atelier-app :is(.bg-emerald-50,.bg-emerald-100,.bg-emerald-200,.bg-emerald-300,.bg-emerald-400,.bg-emerald-500,.bg-emerald-600,.bg-emerald-700) { background-color: rgba(105,176,133,.21); }
   .atelier-app :is(.border-emerald-100,.border-emerald-200,.border-emerald-300,.border-emerald-400,.border-emerald-500) { border-color: rgba(133,166,146,.28); }
   .atelier-app :is(.text-amber-300,.text-amber-400,.text-amber-500,.text-amber-600,.text-amber-700,.text-amber-800,.text-amber-900) { color: #7c6840; }
-  .atelier-app :is(.bg-amber-50,.bg-amber-100,.bg-amber-200,.bg-amber-300,.bg-amber-400,.bg-amber-500,.bg-amber-600,.bg-amber-700) { background-color: rgba(195,172,115,.12); }
+  .atelier-app :is(.bg-amber-50,.bg-amber-100,.bg-amber-200,.bg-amber-300,.bg-amber-400,.bg-amber-500,.bg-amber-600,.bg-amber-700) { background-color: rgba(227,180,73,.23); }
   .atelier-app :is(.border-amber-100,.border-amber-200,.border-amber-300,.border-amber-400,.border-amber-500) { border-color: rgba(195,172,115,.28); }
   .atelier-app :is(.text-yellow-300,.text-yellow-400,.text-yellow-500,.text-yellow-600,.text-yellow-700,.text-yellow-800,.text-yellow-900) { color: #7c6840; }
-  .atelier-app :is(.bg-yellow-50,.bg-yellow-100,.bg-yellow-200,.bg-yellow-300,.bg-yellow-400,.bg-yellow-500,.bg-yellow-600,.bg-yellow-700) { background-color: rgba(195,172,115,.12); }
+  .atelier-app :is(.bg-yellow-50,.bg-yellow-100,.bg-yellow-200,.bg-yellow-300,.bg-yellow-400,.bg-yellow-500,.bg-yellow-600,.bg-yellow-700) { background-color: rgba(227,180,73,.23); }
   .atelier-app :is(.border-yellow-100,.border-yellow-200,.border-yellow-300,.border-yellow-400,.border-yellow-500) { border-color: rgba(195,172,115,.28); }
   .atelier-app :is(.text-orange-300,.text-orange-400,.text-orange-500,.text-orange-600,.text-orange-700,.text-orange-800,.text-orange-900) { color: #876354; }
-  .atelier-app :is(.bg-orange-50,.bg-orange-100,.bg-orange-200,.bg-orange-300,.bg-orange-400,.bg-orange-500,.bg-orange-600,.bg-orange-700) { background-color: rgba(192,151,132,.12); }
+  .atelier-app :is(.bg-orange-50,.bg-orange-100,.bg-orange-200,.bg-orange-300,.bg-orange-400,.bg-orange-500,.bg-orange-600,.bg-orange-700) { background-color: rgba(224,154,117,.22); }
   .atelier-app :is(.border-orange-100,.border-orange-200,.border-orange-300,.border-orange-400,.border-orange-500) { border-color: rgba(192,151,132,.28); }
   .atelier-app :is(.text-red-300,.text-red-400,.text-red-500,.text-red-600,.text-red-700,.text-red-800,.text-red-900) { color: #94686a; }
-  .atelier-app :is(.bg-red-50,.bg-red-100,.bg-red-200,.bg-red-300,.bg-red-400,.bg-red-500,.bg-red-600,.bg-red-700) { background-color: rgba(188,137,140,.12); }
+  .atelier-app :is(.bg-red-50,.bg-red-100,.bg-red-200,.bg-red-300,.bg-red-400,.bg-red-500,.bg-red-600,.bg-red-700) { background-color: rgba(212,138,149,.18); }
   .atelier-app :is(.border-red-100,.border-red-200,.border-red-300,.border-red-400,.border-red-500) { border-color: rgba(188,137,140,.28); }
   .atelier-app :is(.text-purple-300,.text-purple-400,.text-purple-500,.text-purple-600,.text-purple-700,.text-purple-800,.text-purple-900) { color: #756582; }
-  .atelier-app :is(.bg-purple-50,.bg-purple-100,.bg-purple-200,.bg-purple-300,.bg-purple-400,.bg-purple-500,.bg-purple-600,.bg-purple-700) { background-color: rgba(158,146,175,.12); }
+  .atelier-app :is(.bg-purple-50,.bg-purple-100,.bg-purple-200,.bg-purple-300,.bg-purple-400,.bg-purple-500,.bg-purple-600,.bg-purple-700) { background-color: rgba(174,142,201,.2); }
   .atelier-app :is(.border-purple-100,.border-purple-200,.border-purple-300,.border-purple-400,.border-purple-500) { border-color: rgba(158,146,175,.28); }
 
   .atelier-app :is(.text-violet-600,.text-violet-700,.text-violet-800) { color: #756582; }
-  .atelier-app :is(.bg-violet-50,.bg-violet-100,.bg-violet-200) { background-color: rgba(158,146,175,.12); }
+  .atelier-app :is(.bg-violet-50,.bg-violet-100,.bg-violet-200) { background-color: rgba(174,142,201,.2); }
   .atelier-app :is(.border-violet-100,.border-violet-200,.border-violet-300) { border-color: rgba(158,146,175,.28); }
   .atelier-app :is(.bg-blue-600,.bg-green-600,.bg-emerald-600,.bg-red-600,.bg-purple-600,.bg-orange-600) { color: #344f58; }
   @media (prefers-reduced-motion: reduce) { .atelier-app * { transition: none !important; } }
