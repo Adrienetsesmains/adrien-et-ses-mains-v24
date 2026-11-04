@@ -7538,15 +7538,6 @@ return (
     </div>
   )}
 
-  {!recherchePrestation &&
-    !categorieSelectionnee &&
-    !afficherFavorisSeulement && (
-      <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm text-slate-500">
-        Commence à écrire le nom d’une
-        prestation ou sélectionne une
-        catégorie.
-      </div>
-    )}
 </div>
 
   <div className="space-y-5">
@@ -8179,9 +8170,6 @@ return (
     />
   </div>
 
-  <p className="text-xs text-slate-500">
-    Une phrase par ligne. Le cadre du PDF garde sa taille minimale actuelle et s’agrandit automatiquement si nécessaire, sans déplacer la zone date et signature à l’intérieur du cadre.
-  </p>
 </div>
 
   {/* ESTIMATIONS */}
@@ -8271,14 +8259,6 @@ return (
     </div>
   </div>
 
-  <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
-    <p className="text-xs font-medium text-blue-800">
-      ℹ️ Estimation indicative selon les éléments visibles lors de la visite.
-    </p>
-    <p className="text-xs text-blue-700">
-      Ajustable après étude détaillée et validation technique.
-    </p>
-  </div>
 
 
     <button type="button" className="btn-amber mt-3"
@@ -8296,10 +8276,6 @@ return (
   <div className="space-y-2">
     {!estAndroid && (
       <div className="rounded-lg border border-amber-200 bg-white p-3 space-y-2">
-        <p className="text-sm text-slate-700">
-          Choisis le pourcentage ou le montant manuel ci-dessous, puis crée la facture d'acompte.
-          Enregistre le règlement avec « Acompte reçu » lorsque le client a payé.
-        </p>
         <button type="button" disabled={generationPDFEnCours}
           onClick={() => genererPDF("acompte")}
           className="btn-amber px-3 py-2 text-sm disabled:opacity-50">
