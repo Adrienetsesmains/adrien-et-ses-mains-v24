@@ -1638,7 +1638,7 @@ const [showPopupCalendrier, setShowPopupCalendrier] = useState(false);
 const [ficheOuverte, setFicheOuverte] = useState(true);
 const [versionParcoursDevis, setVersionParcoursDevis] = useState(0);
 const [ongletsDevis, setOngletsDevis] = useState({
-  client: true, prestations: true, resultat: false, conditions: false, acompte: false,
+  client: false, prestations: false, resultat: false, conditions: false, acompte: false,
 });
 const progressionDevisRef = useRef({ resultat: false, conditions: false, acompte: false });
 const reglerOngletDevis = (cle: keyof typeof ongletsDevis, ouvert: boolean) => {
@@ -1917,6 +1917,11 @@ setTypeRdv(b.typeRdv || "visite");
   // À chaque nouvelle ouverture de l’application, on conserve l’historique
   // chargé mais on repart volontairement sur une fiche Nouveau vide.
   nouveauDossier();
+  // Sur téléphone, démarrer avec tous les onglets masqués.
+  // Le bouton Nouveau conserve ensuite l’ouverture habituelle du client et des prestations.
+  if (window.matchMedia("(max-width: 767px)").matches) {
+    setOngletsDevis({ client: false, prestations: false, resultat: false, conditions: false, acompte: false });
+  }
   setSauvegardePrete(true);
 }, []);
 
