@@ -3572,7 +3572,7 @@ const tableauMensuel = useMemo(() => {
     return somme;
   }, 0);
 
-  const estimationUrssaf = Math.round(totalEncaisse * 0.212);
+  const estimationUrssaf = Math.round(totalEncaisse * 0.215);
   const objectifMensuel = 4000;
 
   return {
