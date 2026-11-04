@@ -3418,46 +3418,60 @@ Merci pour la confiance accordée`;
 };
 
 
-const preparerRelance = async (d: Dossier) => {
-  const pdfBase64 = await genererPDF("facture");
+// Utilise les valeurs du dossier visé, même si un autre dossier est ouvert.
+const preparerRelance = (d: Pick<Dossier,
+  "numeroFacture" | "numeroDevis" | "client" | "email" | "total" |
+  "montantEncaisse" | "facturePayee" | "referenceChantier" |
+  "adresse" | "complementAdresse"
+>) => {
+  const resteDu = Math.max(0, Math.round(
+    ((d.total || 0) - (d.montantEncaisse || 0)) * 100
+  ) / 100);
 
-  const sujet = `Relance facture ${d.numeroFacture}`;
-
-  const corps = `Bonjour ${d.client},
-
-Je me permets de revenir vers vous concernant la facture ${d.numeroFacture}, établie suite au devis signé ${d.numeroDevis}.
-
-Le règlement prévu pour un montant restant de ${formatMontant(d.reste)} € semble ne pas avoir encore été réceptionné.
-
-Sauf erreur de ma part, pouvez-vous me confirmer la date de règlement prévue ?
-
-Je reste bien entendu disponible si besoin.
-
-Belle journée,
-
-Merci pour la confiance accordée`;
-
-  const reponse = await fetch("/api/envoyer-mail", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      to: d.email,
-      subject: sujet,
-      text: corps,
-      pdfBase64,
-      filename: `${d.numeroFacture || "facture"}-${d.client || "client"}.pdf`,
-    }),
-  });
-
-  if (!reponse.ok) {
-    alert("❌ Erreur lors de l’envoi de la relance.");
+  if (!d.numeroFacture?.trim()) {
+    alert("Créez d’abord la facture avant de préparer une relance.");
+    return;
+  }
+  if (d.facturePayee || resteDu <= 0) {
+    alert("Cette facture est déjà réglée : aucune relance à préparer.");
+    return;
+  }
+  const destinataire = d.email?.trim();
+  if (!destinataire || /[\r\n?&#]/.test(destinataire)) {
+    alert("Renseignez une adresse email valide dans le dossier, puis réessayez.");
     return;
   }
 
-  alert("✅ Relance envoyée avec la facture en pièce jointe.");
+  const chantier = [d.adresse, d.complementAdresse].filter(Boolean).join(", ");
+  const sujet = [
+    `Relance de paiement – Facture ${d.numeroFacture}`,
+    d.referenceChantier,
+    chantier,
+  ].filter(Boolean).join(" - ");
+  const coordonneesBancaires = ribIban.trim()
+    ? [
+        "Pour un règlement par virement :",
+        ribTitulaire.trim() ? `Titulaire : ${ribTitulaire.trim()}` : "",
+        `IBAN : ${ribIban.trim()}`,
+        ribBic.trim() ? `BIC : ${ribBic.trim()}` : "",
+        `Référence à indiquer : ${d.numeroFacture}`,
+      ].filter(Boolean).join("\n")
+    : "";
+  const corps = [
+    d.client?.trim() ? `Bonjour ${d.client.trim()},` : "Bonjour,",
+    `Je me permets de revenir vers vous concernant la facture ${d.numeroFacture}${d.numeroDevis ? `, relative au devis ${d.numeroDevis}` : ""}${chantier ? `, pour les travaux réalisés au ${chantier}` : ""}.`,
+    `Sauf erreur de ma part, le solde restant à régler s’élève à ${formatMontant(resteDu)} €.`,
+    "Pouvez-vous procéder au règlement ou me confirmer la date de paiement prévue ?",
+    "Si votre règlement a été effectué entre-temps, je vous remercie de ne pas tenir compte de ce message.",
+    coordonneesBancaires,
+    "Je reste disponible pour toute question.",
+    "Merci pour votre confiance.\n\nBien cordialement,\nAdrien Tournier\nAdrien et ses mains\n06 71 17 11 76\nadrienetsesmains@gmail.com",
+  ].filter(Boolean).join("\n\n");
+
+  // Ouvre un brouillon à vérifier : aucun envoi automatique ni PDF joint.
+  window.location.href = `mailto:${encodeURIComponent(destinataire)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
 };
+
 
 const moisActuel = moisSelectionne;
 const anneeActuelle = anneeSelectionnee;
@@ -5983,6 +5997,22 @@ return (
       )}
 
      
+      {numeroFacture.trim() && !facturePayee &&
+        Math.round((calcul.total - montantEncaisse) * 100) > 0 && (
+        <button
+          type="button"
+          onClick={() => preparerRelance({
+            numeroFacture, numeroDevis, client, email,
+            total: calcul.total, montantEncaisse, facturePayee,
+            referenceChantier, adresse, complementAdresse,
+          })}
+          className="btn-amber px-2 py-1 text-[11px]"
+          title="Ouvrir un mail de relance prérempli à vérifier avant envoi"
+        >
+          Mail de relance
+        </button>
+      )}
+
       <button type="button" onClick={annulerDerniereModification} disabled={!historiqueAnnulation.length} title="Annuler la dernière modification des prestations ou conditions" className="btn-outline px-2 py-1 text-[11px] disabled:opacity-40">↶ Retour</button>
 
       <button onClick={exporter} className="btn-purple px-2 py-1 text-[11px]">
@@ -8434,6 +8464,18 @@ return (
   >
     Dupliquer
   </button>
+
+  {item.numeroFacture?.trim() && !item.facturePayee &&
+    Math.round(((item.total || 0) - (item.montantEncaisse || 0)) * 100) > 0 && (
+    <button
+      type="button"
+      onClick={() => preparerRelance(item)}
+      className="btn-amber"
+      title="Ouvrir un mail de relance prérempli pour cette facture"
+    >
+      Mail de relance
+    </button>
+  )}
 
   {item.numeroDevis && !item.numeroFacture && item.devisOrigineId === undefined && (
     <button
