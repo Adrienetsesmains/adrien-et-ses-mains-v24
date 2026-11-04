@@ -1005,6 +1005,49 @@ const clientsBase = [
     modeClient: "agence",
   },
 ];
+// Repères prestations de services vérifiés sur impots.gouv.fr.
+// TVA : https://www.impots.gouv.fr/professionnel/questions/je-suis-micro-entrepreneur-ou-la-tete-dune-micro-entreprise-ai-je-des
+// Micro : https://www.impots.gouv.fr/professionnel/questions/pour-rester-micro-entrepreneur-quel-montant-de-chiffre-daffaires-ou-de
+const SEUILS_CA_SERVICES: Record<number, { tva: number; tvaMajore: number; micro: number }> = {
+  2025: { tva: 37500, tvaMajore: 41250, micro: 77700 },
+  2026: { tva: 37500, tvaMajore: 41250, micro: 83600 },
+};
+
+function calculerSuiviAnnuelCA(
+  dossiers: Dossier[], corrections: CorrectionsEncaissementsMensuels,
+  annee: number, aujourdHui = new Date()
+) {
+  const dernierMois = annee < aujourdHui.getFullYear() ? 11
+    : annee === aujourdHui.getFullYear() ? aujourdHui.getMonth() : -1;
+  const mois = Array.from({ length: Math.max(0, dernierMois + 1) }, (_, index) => {
+    let centimes = 0;
+    for (const dossier of dossiers) {
+      const encaisse = Number(dossier.montantEncaisse || 0);
+      if (!Number.isFinite(encaisse) || encaisse <= 0) continue;
+      let acompte = Number(dossier.montantAcompteEncaisse || 0);
+      let dateAcompte = parseDateFr(dossier.dateAcompte || "");
+      // Même compatibilité des anciens acomptes que le graphique mensuel.
+      if (acompte <= 0 && !dossier.facturePayee && dossier.datePaiement) {
+        acompte = encaisse;
+        dateAcompte = parseDateFr(dossier.datePaiement);
+      }
+      const dansLeMois = (date: Date | null) => Boolean(date &&
+        date.getFullYear() === annee && date.getMonth() === index);
+      if (Number.isFinite(acompte) && acompte > 0 && dansLeMois(dateAcompte)) {
+        centimes += Math.round(acompte * 100);
+      }
+      if (dossier.facturePayee && dossier.datePaiement && Number.isFinite(acompte)) {
+        const solde = Math.max(0, encaisse - acompte);
+        if (dansLeMois(parseDateFr(dossier.datePaiement))) centimes += Math.round(solde * 100);
+      }
+    }
+    const correction = corrections[cleMoisStatistiques(annee, index)];
+    return { mois: index, montant: correction ?? centimes / 100, corrige: correction !== undefined };
+  });
+  const total = mois.reduce((somme, ligne) => somme + Math.round(ligne.montant * 100), 0) / 100;
+  return { total, mois, seuils: SEUILS_CA_SERVICES[annee] ?? null };
+}
+
 type ClientEnregistre = {
   nom: string;
   telephone: string;
@@ -3595,6 +3638,11 @@ const dossiersActifs = useMemo(() => {
   );
   return historique.filter((d) => !devisArchives.has(d.id));
 }, [historique]);
+
+const suiviAnnuelCA = useMemo(
+  () => calculerSuiviAnnuelCA(dossiersActifs, correctionsEncaissementsMensuels, anneeSelectionnee),
+  [dossiersActifs, correctionsEncaissementsMensuels, anneeSelectionnee]
+);
 
 const tableauMensuel = useMemo(() => {
   const dossiersDuMois = dossiersActifs.filter((d) => {
@@ -6566,6 +6614,8 @@ return (
 <MiniResult titre="Solde réel" valeur={`${formatMontant(tableauMensuel.soldeReel)} €`} couleur="text-blue-700" />
 <MiniResult titre="URSSAF" valeur={`${formatMontant(tableauMensuel.estimationUrssaf)} €`} />
   </div>
+
+  <SuiviAnnuelCA annee={anneeSelectionnee} suivi={suiviAnnuelCA} />
 
   <BlocRepliable titre="Corriger exceptionnellement les encaissements du mois" ouvertParDefaut={false}>
     <p className="text-sm text-slate-600">
@@ -9974,5 +10024,69 @@ function GraphiqueDepensesCategories({ donnees, annee }: {
         </div>
       </details>
     </div>
+  );
+}
+
+function SuiviAnnuelCA({ annee, suivi }: {
+  annee: number; suivi: ReturnType<typeof calculerSuiviAnnuelCA>;
+}) {
+  const { total, seuils } = suivi;
+  const progression = (limite: number) => Math.min(100, Math.max(0, total / limite * 100));
+  const soldeAvantSeuil = (limite: number) => total > limite
+    ? `Dépassé de ${formatMontant(total - limite)} €`
+    : `${formatMontant(limite - total)} € restants`;
+  return (
+    <section className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3" aria-label={`Suivi annuel du chiffre d’affaires ${annee}`}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-bold text-slate-800">Depuis le 1er janvier {annee}</h3>
+        <strong className="text-lg text-blue-800">{formatMontant(total)} € de CA suivi</strong>
+      </div>
+      {seuils ? (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <MiniResult titre={`Avant le seuil TVA de ${formatMontant(seuils.tva)} €`}
+              valeur={soldeAvantSeuil(seuils.tva)} couleur={total > seuils.tva ? "text-orange-700" : "text-green-700"} />
+            <MiniResult titre={`Avant le seuil majoré (+10 %) de ${formatMontant(seuils.tvaMajore)} €`}
+              valeur={soldeAvantSeuil(seuils.tvaMajore)} couleur={total > seuils.tvaMajore ? "text-red-700" : "text-blue-700"} />
+          </div>
+          <div className="mt-3 space-y-1">
+            <div className="flex flex-wrap justify-between gap-1 text-xs font-semibold">
+              <span>Seuil majoré de TVA : {formatMontant(total / seuils.tvaMajore * 100)} % utilisés</span>
+              <span>{formatMontant(seuils.tvaMajore)} €</span>
+            </div>
+            <div className="relative h-3 overflow-hidden rounded-full border border-blue-200 bg-white"
+              role="progressbar" aria-label="Chiffre d’affaires par rapport au seuil majoré de TVA"
+              aria-valuemin={0} aria-valuemax={seuils.tvaMajore}
+              aria-valuenow={Math.min(total, seuils.tvaMajore)}
+              aria-valuetext={`${formatMontant(total)} € sur ${formatMontant(seuils.tvaMajore)} €`}>
+              <div className="h-full rounded-full" style={{ width: `${progression(seuils.tvaMajore)}%`,
+                backgroundColor: total > seuils.tvaMajore ? "#bd7b80" : total > seuils.tva ? "#c7a052" : "#6eaaa3" }} />
+              <span className="absolute inset-y-0 w-px bg-amber-800" style={{ left: `${seuils.tva / seuils.tvaMajore * 100}%` }} aria-hidden="true" />
+            </div>
+          </div>
+          {total > seuils.tvaMajore ? (
+            <p role="status" className="mt-2 text-xs font-semibold text-red-800">
+              Seuil majoré dépassé : la franchise de TVA cesse dès le dépassement.
+            </p>
+          ) : total > seuils.tva ? (
+            <p role="status" className="mt-2 text-xs font-semibold text-orange-800">
+              Seuil de base dépassé : TVA à prévoir au 1er janvier suivant si la franchise reste applicable cette année.
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-green-800">
+              CA suivi sous le seuil TVA de base. Le repère doré indique ce seuil.
+            </p>
+          )}
+          <p className="mt-2 text-xs text-slate-700">
+            Plafond micro services {annee} : <strong>{formatMontant(seuils.micro)} €</strong>
+            {" — "}{soldeAvantSeuil(seuils.micro)}.
+          </p>
+        </>
+      ) : <p className="text-xs text-slate-600">Repères de seuils à renseigner pour {annee}.</p>}
+      <p className="mt-2 text-xs text-slate-500">
+        Encaissements et corrections mensuelles de l’appli, à rapprocher du CA déclaré à l’URSSAF.
+        Repères prestations de services ; la franchise TVA dépend aussi du CA de l’année précédente.
+      </p>
+    </section>
   );
 }
