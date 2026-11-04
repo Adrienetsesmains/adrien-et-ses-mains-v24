@@ -692,6 +692,39 @@ type Depense = {
   modePaiement: string;
 };
 
+type MoisDepensesGraphique = {
+  label: string; essence: number; fournitures: number; materiel: number;
+};
+const SERIES_DEPENSES = [
+  { cle: "essence", nom: "Essence", couleur: "#b45309" },
+  { cle: "fournitures", nom: "Fournitures", couleur: "#2563eb" },
+  { cle: "materiel", nom: "Matériel", couleur: "#7c3aed" },
+] as const;
+
+function calculerGraphiqueDepenses(depenses: Depense[], annee: number): MoisDepensesGraphique[] {
+  const mois = Array.from({ length: 12 }, (_, index) => ({
+    label: new Date(annee, index, 1).toLocaleString("fr-FR", { month: "short" }),
+    essence: 0, fournitures: 0, materiel: 0,
+  }));
+  for (const depense of depenses) {
+    const date = parseDateFr(depense.date || "");
+    const montant = Number(depense.montant);
+    if (!date || !Number.isFinite(date.getTime()) || date.getFullYear() !== annee ||
+        !Number.isFinite(montant)) continue;
+    const categorie = (depense.categorie || "").trim().toLocaleLowerCase("fr-FR")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cle = categorie === "essence" ? "essence"
+      : categorie === "fournitures" ? "fournitures"
+      : categorie === "materiel" ? "materiel" : null;
+    if (cle) mois[date.getMonth()][cle] += Math.round(montant * 100);
+  }
+  return mois.map((ligne) => ({ ...ligne,
+    essence: ligne.essence / 100,
+    fournitures: ligne.fournitures / 100,
+    materiel: ligne.materiel / 100,
+  }));
+}
+
 type TypeEvenement = "devis" | "rdv" | "chantier" | "rappel";
 
 type BaseFacturation = {
@@ -1647,6 +1680,12 @@ const [correctionMensuelleEnCours, setCorrectionMensuelleEnCours] = useState(fal
 
 const [depenseDate, setDepenseDate] = useState(new Date().toLocaleDateString("fr-FR"));
 const [depenseCategorie, setDepenseCategorie] = useState("Fournitures");
+const [anneeGraphiqueDepenses, setAnneeGraphiqueDepenses] = useState(new Date().getFullYear());
+const donneesGraphiqueDepenses = useMemo(
+  () => calculerGraphiqueDepenses(depenses, anneeGraphiqueDepenses),
+  [depenses, anneeGraphiqueDepenses]
+);
+
 const [depenseDescription, setDepenseDescription] = useState("");
 const [depenseMontant, setDepenseMontant] = useState(0);
 const [depenseModePaiement, setDepenseModePaiement] = useState("CB");
@@ -6489,6 +6528,17 @@ return (
     />
   </div>
 
+  <BlocRepliable titre="Graphique des dépenses par catégorie" ouvertParDefaut={false}>
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <button type="button" className="btn-outline" aria-label="Année précédente des dépenses"
+        onClick={() => setAnneeGraphiqueDepenses((annee) => annee - 1)}>←</button>
+      <span className="font-semibold" aria-live="polite">{anneeGraphiqueDepenses}</span>
+      <button type="button" className="btn-outline" aria-label="Année suivante des dépenses"
+        onClick={() => setAnneeGraphiqueDepenses((annee) => annee + 1)}>→</button>
+    </div>
+    <GraphiqueDepensesCategories donnees={donneesGraphiqueDepenses} annee={anneeGraphiqueDepenses} />
+  </BlocRepliable>
+
   <div className="grid gap-3 md:grid-cols-5">
     <DateInput label="Date dépense" value={depenseDate} onChange={setDepenseDate} />
 
@@ -9754,6 +9804,79 @@ function GraphiqueCourbe({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function GraphiqueDepensesCategories({ donnees, annee }: {
+  donnees: MoisDepensesGraphique[]; annee: number;
+}) {
+  const largeur = 960, hauteur = 330;
+  const gauche = 90, droite = 30, haut = 25, bas = 50;
+  const valeurs = donnees.flatMap((mois) => SERIES_DEPENSES.map((serie) => mois[serie.cle]));
+  const maximum = Math.max(1, ...valeurs) * 1.1;
+  const minimum = Math.min(0, ...valeurs);
+  const x = (index: number) => gauche + index * (largeur - gauche - droite) / Math.max(1, donnees.length - 1);
+  const y = (valeur: number) => haut + (maximum - valeur) / (maximum - minimum) * (hauteur - haut - bas);
+  const totalSerie = (cle: typeof SERIES_DEPENSES[number]["cle"]) =>
+    donnees.reduce((total, mois) => total + Math.round(mois[cle] * 100), 0) / 100;
+  const vide = valeurs.every((valeur) => valeur === 0);
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-3">
+      <h3 className="text-lg font-bold text-slate-800">Dépenses mois par mois — {annee}</h3>
+      <p className="mt-1 text-sm text-slate-500">Montants TTC des dépenses enregistrées, regroupés par date et par catégorie.</p>
+      <div className="my-4 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
+        {SERIES_DEPENSES.map((serie) => (
+          <span key={serie.cle} className="flex items-center gap-2" style={{ color: serie.couleur }}>
+            <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: serie.couleur }} />
+            {serie.nom} : {formatMontant(totalSerie(serie.cle))} € sur l’année
+          </span>
+        ))}
+      </div>
+      {vide && <p className="mb-3 text-sm text-slate-500">Aucune dépense dans ces trois catégories pour cette année.</p>}
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${largeur} ${hauteur}`} className="w-full min-w-[760px]"
+          role="img" aria-label={`Dépenses mensuelles en essence, fournitures et matériel pour ${annee}`}>
+          {Array.from({ length: 5 }, (_, index) => {
+            const valeur = maximum - index * (maximum - minimum) / 4;
+            return <g key={index}>
+              <line x1={gauche} x2={largeur - droite} y1={y(valeur)} y2={y(valeur)} stroke="#e2e8f0" strokeDasharray="4 4" />
+              <text x={gauche - 10} y={y(valeur) + 4} textAnchor="end" fontSize="11" fill="#64748b">{formatMontant(valeur)} €</text>
+            </g>;
+          })}
+          <line x1={gauche} x2={largeur - droite} y1={y(0)} y2={y(0)} stroke="#94a3b8" />
+          {SERIES_DEPENSES.map((serie, indexSerie) => (
+            <g key={serie.cle}>
+              <polyline points={donnees.map((mois, index) => `${x(index)},${y(mois[serie.cle])}`).join(" ")}
+                fill="none" stroke={serie.couleur} strokeWidth="3" strokeLinejoin="round"
+                strokeDasharray={indexSerie === 1 ? "8 4" : indexSerie === 2 ? "3 3" : undefined} />
+              {donnees.map((mois, index) => (
+                <circle key={index} cx={x(index)} cy={y(mois[serie.cle])} r="4" fill={serie.couleur}>
+                  <title>{`${mois.label} ${annee} — ${serie.nom} : ${formatMontant(mois[serie.cle])} €`}</title>
+                </circle>
+              ))}
+            </g>
+          ))}
+          {donnees.map((mois, index) => (
+            <text key={index} x={x(index)} y={hauteur - 20} textAnchor="middle" fontSize="12" fill="#475569">{mois.label}</text>
+          ))}
+        </svg>
+      </div>
+      <details className="mt-3 text-sm">
+        <summary className="cursor-pointer font-semibold text-slate-700">Voir les montants mois par mois</summary>
+        <div className="mt-2 overflow-x-auto">
+          <table className="w-full text-right">
+            <caption className="sr-only">Dépenses mensuelles par catégorie en {annee}</caption>
+            <thead><tr><th scope="col" className="p-2 text-left">Mois</th>
+              {SERIES_DEPENSES.map((serie) => <th key={serie.cle} scope="col" className="p-2">{serie.nom}</th>)}
+            </tr></thead>
+            <tbody>{donnees.map((mois, index) => <tr key={index} className="border-t border-slate-100">
+              <th scope="row" className="p-2 text-left font-normal">{mois.label}</th>
+              {SERIES_DEPENSES.map((serie) => <td key={serie.cle} className="p-2">{formatMontant(mois[serie.cle])} €</td>)}
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </details>
     </div>
   );
 }
