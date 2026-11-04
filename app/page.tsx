@@ -6417,13 +6417,35 @@ return (
   .atelier-app :is(.bg-blue-600,.bg-green-600,.bg-emerald-600,.bg-red-600,.bg-purple-600,.bg-orange-600) { color: #344f58; }
   @media (prefers-reduced-motion: reduce) { .atelier-app * { transition: none !important; } }
   @media (max-width: 767px) {
-    .atelier-app { padding: 8px; }
-    .atelier-app .atelier-panel { padding: 8px 10px; }
-    .atelier-app .atelier-brand { padding: 10px 12px; }
-    .atelier-app .atelier-brand h1 { font-size: 15px; }
-    .atelier-app .atelier-backups { float: none; max-width: none; margin: 0 0 6px; }
-    .atelier-app [class*="btn-"] { min-height: 36px; }
-    .atelier-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea) { min-height: 38px; font-size: 16px; }
+    .atelier-app { padding: 6px; font-size: 12px; line-height: 1.35; }
+    .atelier-app .atelier-panel { padding: 6px 8px; }
+    .atelier-app .atelier-panel h2 { font-size: 13px; line-height: 1.3; }
+    .atelier-app .atelier-brand { padding: 8px 10px; }
+    .atelier-app .atelier-brand h1 { font-size: 14px; }
+    .atelier-app .atelier-brand > p:last-of-type { font-size: 10px; }
+    .atelier-app .atelier-backups { float: none; max-width: none; margin: 0 0 5px; }
+    .atelier-app .atelier-backups > button { font-size: 10px; padding: 5px 7px; }
+    .atelier-app .text-xs { font-size: 11px; line-height: 1.35; }
+    .atelier-app .text-sm { font-size: 12px; line-height: 1.35; }
+    .atelier-app .text-base { font-size: 13px; line-height: 1.35; }
+    .atelier-app .text-lg { font-size: 14px; line-height: 1.35; }
+    .atelier-app .text-xl { font-size: 16px; line-height: 1.35; }
+    .atelier-app .text-2xl { font-size: 18px; line-height: 1.3; }
+    .atelier-app label { font-size: 10px; }
+    .atelier-app [class*="btn-"] { min-height: 36px; padding: 5px 8px; font-size: 11px; }
+    .atelier-app .atelier-toggle { font-size: 10px; padding: 3px 6px; }
+    .atelier-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea) {
+      min-height: 36px; font-size: 13px; padding: 5px 8px;
+    }
+    .atelier-app textarea { min-height: 50px; }
+    .atelier-app .atelier-result { padding: 5px 7px; }
+    .atelier-app .atelier-result > p:first-child { font-size: 10px; }
+    .atelier-app .atelier-result > p:last-child { font-size: 14px; line-height: 1.3; }
+    .atelier-app :is(.gap-3,.gap-6) { gap: 7px; }
+    .atelier-app .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 7px; }
+    .atelier-app .mt-3 { margin-top: 7px; }
+    .atelier-app .mb-3 { margin-bottom: 7px; }
+    .atelier-app .p-4 { padding: 9px; }
   }
 `}</style>
       <div key={versionParcoursDevis} className="mx-auto max-w-7xl space-y-3">
