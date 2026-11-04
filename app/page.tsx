@@ -1651,6 +1651,7 @@ const avancerParcoursDevis = (etape: "resultat" | "conditions" | "acompte") => {
   reglerOngletDevis(etape, true);
 };
 const reinitialiserParcoursDevis = () => {
+  setHistoriqueOuvert(false);
   progressionDevisRef.current = { resultat: false, conditions: false, acompte: false };
   setOngletsDevis({ client: true, prestations: true, resultat: false, conditions: false, acompte: false });
   setVersionParcoursDevis((version) => version + 1);
@@ -1658,6 +1659,7 @@ const reinitialiserParcoursDevis = () => {
 const [rdvEnCours, setRdvEnCours] = useState<Dossier | null>(null);
 const [ajoutRdvOuvert, setAjoutRdvOuvert] = useState(false);
   const [rechercheHistorique, setRechercheHistorique] = useState("");
+  const [historiqueOuvert, setHistoriqueOuvert] = useState(false);
   const [rechercheCalendrier, setRechercheCalendrier] = useState("");
 const [clientsEnregistres, setClientsEnregistres] = useState<ClientEnregistre[]>(clientsBase);
   const [compteurDevis, setCompteurDevis] = useState(PROCHAIN_NUMERO_DEVIS);
@@ -8548,10 +8550,14 @@ return (
 
 
         <BlocRepliable titre="Recherche historique" ouvertParDefaut={false}>
-          <Input label="Recherche client / devis / facture" value={rechercheHistorique} onChange={setRechercheHistorique} />
+          <Input label="Recherche client / devis / facture" value={rechercheHistorique}
+            onChange={(valeur) => {
+              setRechercheHistorique(valeur);
+              if (valeur.trim()) setHistoriqueOuvert(true);
+            }} />
         </BlocRepliable>
 
-<BlocRepliable titre="Historique" ouvertParDefaut={false}>
+<BlocRepliable titre="Historique" ouvert={historiqueOuvert} onOuvertureChange={setHistoriqueOuvert}>
   {(() => {
     const extraireNumero = (numero?: string) => {
       if (!numero) return 0;
