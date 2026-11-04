@@ -696,9 +696,9 @@ type MoisDepensesGraphique = {
   label: string; essence: number; fournitures: number; materiel: number;
 };
 const SERIES_DEPENSES = [
-  { cle: "essence", nom: "Essence", couleur: "#b45309" },
-  { cle: "fournitures", nom: "Fournitures", couleur: "#2563eb" },
-  { cle: "materiel", nom: "Matériel", couleur: "#7c3aed" },
+  { cle: "essence", nom: "Essence", couleur: "#b29a70" },
+  { cle: "fournitures", nom: "Fournitures", couleur: "#698d9b" },
+  { cle: "materiel", nom: "Matériel", couleur: "#9a8ba5" },
 ] as const;
 
 function calculerGraphiqueDepenses(depenses: Depense[], annee: number): MoisDepensesGraphique[] {
@@ -6029,8 +6029,8 @@ const genererFicheChantier = () => {
 };
 
 return (
-  <main className="min-h-screen bg-slate-100 p-3 text-slate-900 md:p-4">
-<div className="sticky top-0 z-40 mb-2 rounded-xl border border-blue-200 bg-white/95 p-2 shadow-sm backdrop-blur">
+  <main className="atelier-app min-h-screen p-3 md:p-4">
+<div className="atelier-toolbar sticky top-0 z-40 mb-2 rounded-xl border p-2 backdrop-blur">
   <input
     ref={importRef}
     type="file"
@@ -6236,95 +6236,153 @@ return (
     </details>
   </div>
 </div>
-    <style jsx>{`
-
-  .btn-green {
-    background:#dcfce7;
-    color:#166534;
-    border:1px solid #bbf7d0;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+    <style jsx global>{`
+  .atelier-app {
+    --atelier-encre: #284954;
+    --atelier-texte: #354f57;
+    --atelier-discret: #65777c;
+    --atelier-bord: rgba(57, 89, 98, .15);
+    color: var(--atelier-texte);
+    background: linear-gradient(135deg, #f1f5f4 0%, #f8f7f2 52%, #eef3f3 100%);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "DejaVu Sans", sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    min-height: 100vh;
   }
-
-  .btn-orange {
-    background:#ffedd5;
-    color:#9a3412;
-    border:1px solid #fed7aa;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app *, .atelier-app *::before, .atelier-app *::after { box-sizing: border-box; }
+  .atelier-app .atelier-toolbar {
+    max-width: 1280px; margin-left: auto; margin-right: auto;
+    background: rgba(250, 252, 250, .94);
+    border-color: var(--atelier-bord);
+    box-shadow: 0 3px 18px rgba(35, 64, 74, .045);
   }
-
-  .btn-dark {
-    background:#e2e8f0;
-    color:#1e293b;
-    border:1px solid #cbd5e1;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app .atelier-panel {
+    border: 1px solid var(--atelier-bord);
+    border-radius: 12px;
+    background: rgba(255,255,255,.73);
+    padding: 9px 12px;
+    box-shadow: 0 2px 9px rgba(35,64,74,.025);
   }
-
-  .btn-amber {
-    background:#fef3c7;
-    color:#92400e;
-    border:1px solid #fde68a;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app .atelier-panel > button { min-height: 30px; }
+  .atelier-app .atelier-panel h2 {
+    font-size: 14px; line-height: 1.35; font-weight: 650;
+    color: var(--atelier-encre); letter-spacing: -.015em;
   }
-
-  .btn-blue {
-    background:#dbeafe;
-    color:#1e40af;
-    border:1px solid #bfdbfe;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app .atelier-panel .atelier-panel {
+    background: rgba(239,245,243,.42); box-shadow: none;
   }
-
-  .btn-emerald {
-    background:#d1fae5;
-    color:#065f46;
-    border:1px solid #a7f3d0;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app .atelier-toggle {
+    background: rgba(80,121,130,.075); color: #526e76;
+    border: 1px solid rgba(80,121,130,.12);
+    border-radius: 7px; padding: 3px 8px;
+    font-size: 10px; font-weight: 600; white-space: nowrap;
   }
-
-  .btn-purple {
-    background:#f3e8ff;
-    color:#6b21a8;
-    border:1px solid #e9d5ff;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app .atelier-brand {
+    border: 1px solid rgba(174,151,102,.26);
+    border-left: 3px solid rgba(174,151,102,.55);
+    border-radius: 12px; padding: 11px 14px;
+    background: linear-gradient(105deg, rgba(215,232,232,.68), rgba(248,242,227,.65));
+    box-shadow: none; color: var(--atelier-encre);
   }
-
-  .btn-outline {
-    background:#f8fafc;
-    color:#334155;
-    border:1px solid #cbd5e1;
-    padding:12px;
-    border-radius:12px;
-    font-weight:700;
+  .atelier-app .atelier-brand h1 { font-size: 16px; line-height: 1.35; font-weight: 600; margin-top: 2px; }
+  .atelier-app .atelier-brand > p:first-of-type {
+    color: #786844; font-size: 11px; letter-spacing: .08em; font-weight: 600;
   }
+  .atelier-app .atelier-brand > p:last-of-type { font-size: 11px; color: var(--atelier-discret); margin-top: 2px; }
+  .atelier-app .atelier-backups { float: right; padding: 0; margin-left: 12px; max-width: 55%; background: transparent; border: 0; }
+  .atelier-app .atelier-backups > button { padding: 6px 9px; font-size: 11px; font-weight: 600; }
+  .atelier-app [class*="btn-"] {
+    border: 1px solid var(--atelier-bord);
+    border-radius: 8px; padding: 6px 10px;
+    min-height: 32px; font-size: 12px; line-height: 1.35; font-weight: 600;
+    box-shadow: none; transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+  }
+  .atelier-app .atelier-toolbar [class*="btn-"] { min-height: 29px; padding: 5px 7px; font-size: 11px; }
+  .atelier-app .btn-blue { background: rgba(105,149,164,.13); color: #355b68; border-color: rgba(105,149,164,.25); }
+  .atelier-app .btn-green, .atelier-app .btn-emerald { background: rgba(133,166,146,.14); color: #486755; border-color: rgba(133,166,146,.27); }
+  .atelier-app .btn-amber { background: rgba(195,172,115,.15); color: #77643c; border-color: rgba(195,172,115,.3); }
+  .atelier-app .btn-orange { background: rgba(192,151,132,.14); color: #805e50; border-color: rgba(192,151,132,.26); }
+  .atelier-app .btn-purple { background: rgba(158,146,175,.13); color: #6b5e79; border-color: rgba(158,146,175,.25); }
+  .atelier-app .btn-dark, .atelier-app .btn-outline { background: rgba(89,117,127,.065); color: #4c6670; }
+  .atelier-app [class*="btn-"]:hover:not(:disabled) { filter: none; box-shadow: 0 2px 6px rgba(35,64,74,.07); border-color: rgba(61,95,105,.34); }
+  .atelier-app button { cursor: pointer; }
+  .atelier-app button:disabled { cursor: default; }
+  .atelier-app :is(button,input,select,textarea,summary):focus-visible {
+    outline: 2px solid #718f96; outline-offset: 2px;
+  }
+  .atelier-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea) {
+    background: rgba(255,255,255,.8); color: var(--atelier-texte);
+    border: 1px solid rgba(86,118,127,.22); border-radius: 8px;
+    padding: 6px 9px; font-size: 13px; line-height: 1.4; min-height: 33px;
+  }
+  .atelier-app :is(input,textarea)::placeholder { color: #8b989b; }
+  .atelier-app :is(input[type="checkbox"],input[type="radio"]) { accent-color: #678892; }
+  .atelier-app textarea { min-height: 58px; }
+  .atelier-app label { font-size: 11px; color: #526b73; }
+  .atelier-app .atelier-result {
+    border: 1px solid rgba(86,118,127,.12); border-radius: 9px;
+    background: rgba(242,247,245,.6); padding: 6px 10px;
+  }
+  .atelier-app .atelier-result > p:first-child { font-size: 10px; color: #6a7e83; }
+  .atelier-app .atelier-result > p:last-child { font-size: 16px; line-height: 1.4; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .atelier-app .gap-6 { gap: 14px; }
+  .atelier-app .gap-3 { gap: 9px; }
+  .atelier-app .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 9px; }
+  .atelier-app .mt-3 { margin-top: 9px; }
+  .atelier-app .mb-3 { margin-bottom: 9px; }
+  .atelier-app .mt-4 { margin-top: 12px; }
+  .atelier-app .p-4 { padding: 12px; }
+  .atelier-app .shadow-sm { box-shadow: 0 2px 8px rgba(35,64,74,.035); }
+  .atelier-app .border { border-color: var(--atelier-bord); }
+  .atelier-app .text-white { color: var(--atelier-encre); }
+  .atelier-app :is(.text-slate-900,.text-slate-800) { color: var(--atelier-encre); }
+  .atelier-app :is(.text-slate-500,.text-slate-600) { color: var(--atelier-discret); }
+  .atelier-app :is(.bg-white,.bg-slate-50,.bg-slate-100) { background-color: rgba(247,250,248,.78); }
+  /* Couleurs d’état lisibles, sur des fonds pastel peu saturés. */
+  .atelier-app :is(.text-blue-300,.text-blue-400,.text-blue-500,.text-blue-600,.text-blue-700,.text-blue-800,.text-blue-900) { color: #496c7a; }
+  .atelier-app :is(.bg-blue-50,.bg-blue-100,.bg-blue-200,.bg-blue-300,.bg-blue-400,.bg-blue-500,.bg-blue-600,.bg-blue-700) { background-color: rgba(105,149,164,.12); }
+  .atelier-app :is(.border-blue-100,.border-blue-200,.border-blue-300,.border-blue-400,.border-blue-500) { border-color: rgba(105,149,164,.28); }
+  .atelier-app :is(.text-green-300,.text-green-400,.text-green-500,.text-green-600,.text-green-700,.text-green-800,.text-green-900) { color: #4e705c; }
+  .atelier-app :is(.bg-green-50,.bg-green-100,.bg-green-200,.bg-green-300,.bg-green-400,.bg-green-500,.bg-green-600,.bg-green-700) { background-color: rgba(133,166,146,.12); }
+  .atelier-app :is(.border-green-100,.border-green-200,.border-green-300,.border-green-400,.border-green-500) { border-color: rgba(133,166,146,.28); }
+  .atelier-app :is(.text-emerald-300,.text-emerald-400,.text-emerald-500,.text-emerald-600,.text-emerald-700,.text-emerald-800,.text-emerald-900) { color: #4e705c; }
+  .atelier-app :is(.bg-emerald-50,.bg-emerald-100,.bg-emerald-200,.bg-emerald-300,.bg-emerald-400,.bg-emerald-500,.bg-emerald-600,.bg-emerald-700) { background-color: rgba(133,166,146,.12); }
+  .atelier-app :is(.border-emerald-100,.border-emerald-200,.border-emerald-300,.border-emerald-400,.border-emerald-500) { border-color: rgba(133,166,146,.28); }
+  .atelier-app :is(.text-amber-300,.text-amber-400,.text-amber-500,.text-amber-600,.text-amber-700,.text-amber-800,.text-amber-900) { color: #7c6840; }
+  .atelier-app :is(.bg-amber-50,.bg-amber-100,.bg-amber-200,.bg-amber-300,.bg-amber-400,.bg-amber-500,.bg-amber-600,.bg-amber-700) { background-color: rgba(195,172,115,.12); }
+  .atelier-app :is(.border-amber-100,.border-amber-200,.border-amber-300,.border-amber-400,.border-amber-500) { border-color: rgba(195,172,115,.28); }
+  .atelier-app :is(.text-yellow-300,.text-yellow-400,.text-yellow-500,.text-yellow-600,.text-yellow-700,.text-yellow-800,.text-yellow-900) { color: #7c6840; }
+  .atelier-app :is(.bg-yellow-50,.bg-yellow-100,.bg-yellow-200,.bg-yellow-300,.bg-yellow-400,.bg-yellow-500,.bg-yellow-600,.bg-yellow-700) { background-color: rgba(195,172,115,.12); }
+  .atelier-app :is(.border-yellow-100,.border-yellow-200,.border-yellow-300,.border-yellow-400,.border-yellow-500) { border-color: rgba(195,172,115,.28); }
+  .atelier-app :is(.text-orange-300,.text-orange-400,.text-orange-500,.text-orange-600,.text-orange-700,.text-orange-800,.text-orange-900) { color: #876354; }
+  .atelier-app :is(.bg-orange-50,.bg-orange-100,.bg-orange-200,.bg-orange-300,.bg-orange-400,.bg-orange-500,.bg-orange-600,.bg-orange-700) { background-color: rgba(192,151,132,.12); }
+  .atelier-app :is(.border-orange-100,.border-orange-200,.border-orange-300,.border-orange-400,.border-orange-500) { border-color: rgba(192,151,132,.28); }
+  .atelier-app :is(.text-red-300,.text-red-400,.text-red-500,.text-red-600,.text-red-700,.text-red-800,.text-red-900) { color: #94686a; }
+  .atelier-app :is(.bg-red-50,.bg-red-100,.bg-red-200,.bg-red-300,.bg-red-400,.bg-red-500,.bg-red-600,.bg-red-700) { background-color: rgba(188,137,140,.12); }
+  .atelier-app :is(.border-red-100,.border-red-200,.border-red-300,.border-red-400,.border-red-500) { border-color: rgba(188,137,140,.28); }
+  .atelier-app :is(.text-purple-300,.text-purple-400,.text-purple-500,.text-purple-600,.text-purple-700,.text-purple-800,.text-purple-900) { color: #756582; }
+  .atelier-app :is(.bg-purple-50,.bg-purple-100,.bg-purple-200,.bg-purple-300,.bg-purple-400,.bg-purple-500,.bg-purple-600,.bg-purple-700) { background-color: rgba(158,146,175,.12); }
+  .atelier-app :is(.border-purple-100,.border-purple-200,.border-purple-300,.border-purple-400,.border-purple-500) { border-color: rgba(158,146,175,.28); }
 
-  .btn-green:hover,
-  .btn-orange:hover,
-  .btn-dark:hover,
-  .btn-amber:hover,
-  .btn-blue:hover,
-  .btn-emerald:hover,
-  .btn-purple:hover,
-  .btn-outline:hover {
-    filter: brightness(0.97);
+  .atelier-app :is(.text-violet-600,.text-violet-700,.text-violet-800) { color: #756582; }
+  .atelier-app :is(.bg-violet-50,.bg-violet-100,.bg-violet-200) { background-color: rgba(158,146,175,.12); }
+  .atelier-app :is(.border-violet-100,.border-violet-200,.border-violet-300) { border-color: rgba(158,146,175,.28); }
+  .atelier-app :is(.bg-blue-600,.bg-green-600,.bg-emerald-600,.bg-red-600,.bg-purple-600,.bg-orange-600) { color: #344f58; }
+  @media (prefers-reduced-motion: reduce) { .atelier-app * { transition: none !important; } }
+  @media (max-width: 767px) {
+    .atelier-app { padding: 8px; }
+    .atelier-app .atelier-panel { padding: 8px 10px; }
+    .atelier-app .atelier-brand { padding: 10px 12px; }
+    .atelier-app .atelier-brand h1 { font-size: 15px; }
+    .atelier-app .atelier-backups { float: none; max-width: none; margin: 0 0 6px; }
+    .atelier-app [class*="btn-"] { min-height: 36px; }
+    .atelier-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea) { min-height: 38px; font-size: 16px; }
   }
 `}</style>
       <div className="mx-auto max-w-7xl space-y-3">
-        <section className="rounded-xl bg-slate-800 px-4 py-3 text-white shadow-sm">
+        <section className="atelier-brand">
 
-<div className="rounded-lg border bg-slate-50 p-3">
+<div className="atelier-backups">
   <button
     type="button"
     onClick={() => {
@@ -6378,7 +6436,7 @@ return (
             Tableau de bord entreprise {VERSION_APPLICATION}
           </h1>
           <p className="mt-1 text-sm text-slate-200">
-          Devis multi-lignes : plusieurs types de travaux dans un même devis.</p>
+          Devis, factures et suivi de votre activité.</p>
         {statutDevis === "estimation_rapide" && (
   <div className="mt-4 inline-block rounded-xl bg-yellow-400 px-4 py-2 font-bold text-slate-900">
     🟡 MODE ESTIMATION RAPIDE
@@ -6424,7 +6482,7 @@ return (
     </button>
   </div>
 
-  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5 mt-3">
+  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6 mt-3">
 
     <MiniResult titre="Encaisse" valeur={`${formatMontant(tableauMensuel.totalEncaisse)} €`} couleur="text-green-700" />
     <MiniResult titre="Reste" valeur={`${formatMontant(tableauMensuel.resteAEncaisser)} €`} couleur="text-orange-600" />
@@ -6508,7 +6566,7 @@ return (
 </BlocRepliable>
 
 <BlocRepliable titre="Dépenses entreprise" ouvertParDefaut={false}>
-  <div className="grid gap-2 md:grid-cols-3">
+  <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
     <MiniResult
       titre="Dépenses du mois"
       valeur={`${formatMontant(resumeDepenses.totalMois)} €`}
@@ -7872,7 +7930,7 @@ return (
 />
 </div>
 
-      <div className="grid gap-2 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
         <MiniResult titre="Achat" valeur={`${formatMontant(achatFournitures)} €`} />
         <MiniResult titre="Revente" valeur={`${formatMontant(calcul.reventeFournitures)} €`} couleur="text-blue-700" />
         <MiniResult titre="Marge" valeur={`${formatMontant(calcul.margeFournitures)} €`} couleur="text-green-700" />
@@ -8099,7 +8157,7 @@ return (
   <div className="rounded-lg border bg-white px-3 py-2 space-y-2">
     <h3 className="text-sm font-bold text-slate-800">🧾 Résumé financier</h3>
 
-    <div className="grid gap-2 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
       <MiniResult titre="Travaux" valeur={`${formatMontant(calcul.totalTravaux)} €`} />
       <MiniResult titre="Déplacement" valeur={`${formatMontant(calcul.fraisLogistique)} €`} />
       <MiniResult
@@ -8207,7 +8265,7 @@ return (
   )}
 </div>
 
-<div className="grid gap-2 md:grid-cols-3">
+<div className="grid grid-cols-2 gap-2 md:grid-cols-3">
   <MiniResult titre="Acompte" valeur={`${formatMontant(calcul.acompte)} €`} />
   <MiniResult titre="Encaissé" valeur={`${formatMontant(montantEncaisse)} €`} />
   <MiniResult
@@ -9211,14 +9269,14 @@ function BlocRepliable({
   };
 
   return (
-    <section className="rounded-xl border bg-white px-4 py-3 shadow-sm">
+    <section className="atelier-panel">
       <button
         type="button"
         onClick={basculerBloc}
         className="flex w-full items-center justify-between gap-3 text-left"
       >
         <h2 className="text-base font-bold text-slate-900">{titre}</h2>
-        <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+        <span className="atelier-toggle">
           {ouvert ? "▲ Masquer" : "▼ Afficher"}
         </span>
       </button>
@@ -9230,7 +9288,7 @@ function BlocRepliable({
 
 function Bloc({ titre, children }: { titre: string; children: ReactNode }) {
   return (
-    <section className="rounded-xl border bg-white px-4 py-3 shadow-sm">
+    <section className="atelier-panel">
       <h2 className="mb-3 text-base font-bold text-slate-900">{titre}</h2>
       <div className="space-y-3">{children}</div>
     </section>
@@ -9239,7 +9297,7 @@ function Bloc({ titre, children }: { titre: string; children: ReactNode }) {
 
 function Card({ titre, valeur }: { titre: string; valeur: string }) {
   return (
-    <div className="rounded-lg border bg-white px-3 py-2 text-slate-900">
+    <div className="atelier-result text-slate-900">
       <p className="text-xs text-slate-500">{titre}</p>
       <p className="text-lg font-bold text-slate-900">{valeur}</p>
     </div>
@@ -9256,7 +9314,7 @@ function MiniResult({
   couleur?: string;
 }) {
   return (
-    <div className="rounded-lg border bg-white px-3 py-2">
+    <div className="atelier-result">
       <p className="text-xs text-slate-500">{titre}</p>
       <p className={`text-lg font-bold ${couleur}`}>{valeur}</p>
     </div>
@@ -9278,16 +9336,13 @@ function DateInput({
 
       <input
         type="date"
+        title={value ? `Date sélectionnée : ${value}` : label}
         className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
         value={formatDateFrVersInput(value)}
         onChange={(e) => onChange(formatDateInputVersFr(e.target.value))}
       />
 
-      {value && (
-        <p className="mt-1 text-xs text-slate-500">
-          Date sélectionnée : {value}
-        </p>
-      )}
+
     </div>
   );
 }
@@ -9671,7 +9726,7 @@ function GraphiqueCourbe({
           <path
             d={cheminEncaissements}
             fill="none"
-            stroke="#2563EB"
+            stroke="#698d9b"
             strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -9682,7 +9737,7 @@ function GraphiqueCourbe({
           <path
             d={cheminDepenses}
             fill="none"
-            stroke="#DC2626"
+            stroke="#b18a8b"
             strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -9693,7 +9748,7 @@ function GraphiqueCourbe({
           <path
             d={cheminResultat}
             fill="none"
-            stroke="#059669"
+            stroke="#82a18f"
             strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -9722,7 +9777,7 @@ function GraphiqueCourbe({
                   cx={x}
                   cy={yEncaissements}
                   r="5"
-                  fill="#2563EB"
+                  fill="#698d9b"
                 >
                   <title>
                     {`${donnee.label} — Encaissements : ${formaterMontant(
@@ -9735,7 +9790,7 @@ function GraphiqueCourbe({
                   cx={x}
                   cy={yDepenses}
                   r="5"
-                  fill="#DC2626"
+                  fill="#b18a8b"
                 >
                   <title>
                     {`${donnee.label} — Dépenses : ${formaterMontant(
@@ -9748,7 +9803,7 @@ function GraphiqueCourbe({
                   cx={x}
                   cy={yResultat}
                   r="5"
-                  fill="#059669"
+                  fill="#82a18f"
                 >
                   <title>
                     {`${donnee.label} — Résultat : ${formaterMontant(
