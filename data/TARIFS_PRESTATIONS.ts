@@ -324,6 +324,18 @@ export const DETAILS_PDF_PAR_CATEGORIE: Record<string, string[]> = {
 
 const TARIFS_PRESTATIONS_SOURCE: PrestationTarif[] = [
 
+// Conservation des portes : remplacement du mécanisme de coulissement.
+p("BRI-PLACARD-RAILS-ROULETTES-REMPL", "Bricolage / Menuiserie légère", "Remplacement des rails et roulettes de placard avec conservation des portes", "ensemble", 3, [
+  "Protection locale ; dépose et mise à l’abri des portes existantes ; dépose des rails et roulettes à remplacer.",
+  "Pose d’un ensemble de rails et chariots compatible avec les portes et leur poids, avec fixations adaptées et dispositifs anti-déraillement ou anti-soulèvement prévus par le fabricant.",
+  "Repose des portes conservées ; réglage de l’aplomb, du recouvrement et des butées ; contrôle du maintien et essais de coulissement."
+], {
+  conditions: "Base de main-d’œuvre pour un ensemble de deux portes existantes conservées, en bon état, avec points de fixation sains, et des supports accessibles et adaptés. Compatibilité des rails, chariots, guides et sécurités à vérifier avant commande selon le profil, l’épaisseur et le poids des portes. Dimensions, matériel et nombre de portes à préciser au devis ; temps à adapter à la manutention. Hors remplacement ou réparation des portes, reprise des supports, transformation importante des profils, évacuation en déchetterie et fournitures. Dépose, repose et réglage compris : ne pas cumuler avec le remplacement complet de la façade ou le réglage du même ensemble.",
+  rentabilite: "🟠 À adapter",
+  tags: ["placard", "porte coulissante", "rail", "roulette", "galet", "chariot", "conservation des portes", "anti-déraillement"]
+}),
+
+
 // Remplacements complets : dimensions et modèles à préciser au devis.
 p("BRI-PLACARD-COULISSANT-REMPL", "Bricolage / Menuiserie légère", "Remplacement complet d’une façade de placard coulissante", "ensemble", 4, [
   "Protection locale et dépose des vantaux, rails et accessoires existants ; contrôle des supports.",
@@ -5004,6 +5016,7 @@ p(
 const CLASSEMENT_CHANTIER: Record<string, {
   categorieChantier: string; sousCategorie: string; ordreCatalogue: number;
 }> = {
+  "BRI-PLACARD-RAILS-ROULETTES-REMPL": {"categorieChantier":"11. Entretien, dépannage et interventions globales","sousCategorie":"Portes, fenêtres et quincaillerie","ordreCatalogue":194.5},
   "BRI-PLACARD-COULISSANT-REMPL": {"categorieChantier":"08. Équipements et finitions","sousCategorie":"Menuiseries intérieures et accessoires","ordreCatalogue":106.5},
   "BRI-SERRURE-ENCASTREE-REMPL": {"categorieChantier":"11. Entretien, dépannage et interventions globales","sousCategorie":"Portes, fenêtres et quincaillerie","ordreCatalogue":195.5},
   "EXT-FERMETURE-GRILLAGE-SUR-MESURE": {"categorieChantier":"09. Aménagements extérieurs et jardin","sousCategorie":"Pergolas et métallerie","ordreCatalogue":156.5},
