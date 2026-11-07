@@ -6096,6 +6096,181 @@ const CLASSEMENT_CHANTIER: Record<string, {
   }
 };
 
+
+// ================= COMPLÉMENTS NETTOYAGE / RÉNOVATION =================
+TARIFS_PRESTATIONS_SOURCE.push(
+  p("NET-LOGEMENT-INTENSIF",
+"Nettoyage",
+"Nettoyage approfondi d’un logement très encrassé",
+"h",
+1,
+[
+  "Dépoussiérage, décrassage et dégraissage des surfaces et équipements conservés prévus au devis.",
+  "Nettoyage des portes, huisseries, plinthes, rangements, radiateurs et surfaces extérieures des prises et interrupteurs.",
+  "Nettoyage de la cuisine, des meubles intérieurs et extérieurs et des équipements concernés selon le périmètre retenu.",
+  "Aspiration et lavage des sols conservés ; contrôle et nettoyage de finition."
+],
+{
+  "conditions": "Temps à renseigner selon l’état réel du logement. Pièces, équipements, faces traitées et exclusions à préciser au devis. Vitrages et menuiseries de fenêtres compris uniquement si expressément indiqués, avec temps intégré. Nettoyage extérieur des appareillages électriques sans projection de liquide ni intervention sur les connexions. Hors traitement de l’humidité, moisissures, nuisibles, déchets dangereux, débarras, démontage technique et fournitures. Les dégradations, rayures et taches incrustées peuvent rester visibles. Ne pas cumuler avec une autre prestation pour les mêmes surfaces et opérations.",
+  "action": "Renseigner le nombre total d’heures après estimation par poste. Adapter le périmètre si des meubles ou sols sont remplacés.",
+  "rentabilite": "🟠 Temps à renseigner",
+  "tags": [
+    "nettoyage",
+    "logement",
+    "intensif",
+    "décrassage",
+    "dégraissage",
+    "très sale",
+    "portes",
+    "prises",
+    "interrupteurs",
+    "cuisine"
+  ]
+}),
+  p("NET-FENETRE-INTENSIF",
+"Nettoyage",
+"Nettoyage approfondi d’une fenêtre et de ses vitrages",
+"u",
+1,
+[
+  "Dépoussiérage et nettoyage des cadres, ouvrants, feuillures et rainures accessibles.",
+  "Nettoyage des faces de vitrage accessibles depuis l’intérieur en sécurité.",
+  "Nettoyage de l’appui intérieur et essuyage de finition."
+],
+{
+  "conditions": "Base pour une fenêtre courante ; adapter le temps aux dimensions, au nombre de vantaux et à l’encrassement. Hors volets, démontage, accès extérieur en hauteur, grattage spécialisé et fournitures. Les rayures et altérations existantes ne sont pas réparées. Ne pas cumuler avec NET-VITRAGE ou un nettoyage global comprenant les mêmes opérations.",
+  "rentabilite": "🟠 À adapter",
+  "tags": [
+    "fenêtre",
+    "vitres",
+    "vitrage",
+    "cadre",
+    "rainures",
+    "nettoyage approfondi"
+  ]
+}),
+  p("PEINT-LESSIVAGE",
+"Peinture",
+"Lessivage et dégraissage d’un support avant peinture",
+"m²",
+0.12,
+[
+  "Essai préalable de tenue du revêtement et protection locale.",
+  "Lessivage et dégraissage du support compatible avec un produit adapté.",
+  "Rinçage si nécessaire selon le produit ; séchage avant préparation et mise en peinture."
+],
+{
+  "conditions": "Surface réellement traitée de mur ou plafond. Base à adapter au relief et au niveau d’encrassement. Hors grattage, enduit, ponçage, primaire, peinture, traitement des moisissures et de la cause d’une humidité. Fournitures séparées. Ne pas cumuler avec un nettoyage comprenant déjà le lessivage du même support.",
+  "rentabilite": "🟠 À adapter",
+  "tags": [
+    "peinture",
+    "préparation",
+    "lessivage",
+    "dégraissage",
+    "mur",
+    "plafond"
+  ]
+}),
+  p("CUI-MEUBLE-DEPOSE",
+"Cuisine",
+"Dépose d’un meuble de cuisine existant",
+"u",
+0.75,
+[
+  "Retrait des portes, tiroirs et tablettes nécessaires à la manutention.",
+  "Désolidarisation et dépose du meuble en préservant les éléments conservés.",
+  "Démontage sommaire et regroupement des éléments dans la zone prévue."
+],
+{
+  "conditions": "Base par caisson courant accessible. Adapter selon dimensions, poids et fixations. Meuble vidé et équipements déconnectés avant intervention. Hors dépose du plan de travail, évier, robinetterie, électroménager, crédence, réparation des supports, descente des étages et évacuation. Ne pas cumuler avec une dépose globale comprenant les mêmes opérations.",
+  "rentabilite": "🟠 À adapter",
+  "tags": [
+    "cuisine",
+    "meuble",
+    "caisson",
+    "dépose",
+    "démontage",
+    "remplacement"
+  ]
+}),
+  p("BRI-CHARNIERE-MEUBLE-REMPL",
+"Bricolage / Menuiserie légère",
+"Remplacement d’une charnière de meuble",
+"u",
+0.5,
+[
+  "Dépose de la charnière défectueuse et contrôle des points de fixation.",
+  "Pose d’une charnière compatible sur support réutilisable.",
+  "Réglage de la porte et essais d’ouverture et de fermeture."
+],
+{
+  "conditions": "Base par charnière sur meuble accessible et support sain. Hors reconstruction d’un panneau dégradé, reprise importante des ancrages, remplacement de porte et fournitures. Ne pas cumuler avec une réparation globale comprenant le même remplacement.",
+  "tags": [
+    "meuble",
+    "cuisine",
+    "charnière",
+    "porte",
+    "remplacement"
+  ]
+}),
+  p("BRI-POIGNEE-PORTE-REMPL",
+"Bricolage / Menuiserie légère",
+"Remplacement d’un ensemble de poignées de porte intérieure",
+"ensemble",
+0.75,
+[
+  "Dépose des poignées et plaques ou rosaces existantes.",
+  "Pose d’un ensemble compatible avec la porte et la serrure conservées.",
+  "Serrage des fixations et essais de fonctionnement."
+],
+{
+  "conditions": "Base pour un ensemble comprenant les deux côtés d’une porte intérieure. Hors dépose difficile d’éléments collés ou bloqués, réparation du support, remplacement de serrure, peinture et fournitures. Adapter le temps si présence de colle ou fixations détériorées.",
+  "rentabilite": "🟠 À adapter",
+  "tags": [
+    "porte",
+    "poignée",
+    "béquille",
+    "plaque",
+    "rosace",
+    "remplacement"
+  ]
+})
+);
+
+Object.assign(CLASSEMENT_CHANTIER, {
+  "NET-LOGEMENT-INTENSIF": {
+    "categorieChantier": "10. Évacuation et nettoyage",
+    "sousCategorie": "Nettoyage final et extérieur",
+    "ordreCatalogue": 182.1
+  },
+  "NET-FENETRE-INTENSIF": {
+    "categorieChantier": "10. Évacuation et nettoyage",
+    "sousCategorie": "Nettoyage final et extérieur",
+    "ordreCatalogue": 183.1
+  },
+  "PEINT-LESSIVAGE": {
+    "categorieChantier": "06. Cloisons et préparation des supports",
+    "sousCategorie": "Préparation des murs et plafonds",
+    "ordreCatalogue": 67.5
+  },
+  "CUI-MEUBLE-DEPOSE": {
+    "categorieChantier": "02. Déposes et démolition",
+    "sousCategorie": "Sanitaires et équipements",
+    "ordreCatalogue": 12.1
+  },
+  "BRI-CHARNIERE-MEUBLE-REMPL": {
+    "categorieChantier": "11. Entretien, dépannage et interventions globales",
+    "sousCategorie": "Portes, fenêtres et quincaillerie",
+    "ordreCatalogue": 198.1
+  },
+  "BRI-POIGNEE-PORTE-REMPL": {
+    "categorieChantier": "11. Entretien, dépannage et interventions globales",
+    "sousCategorie": "Portes, fenêtres et quincaillerie",
+    "ordreCatalogue": 198.2
+  }
+});
+
+
 export const TARIFS_PRESTATIONS: PrestationTarif[] = TARIFS_PRESTATIONS_SOURCE
   .map((prestation) => ({ ...prestation, ...CLASSEMENT_CHANTIER[prestation.id] }))
   .sort((a, b) => (a.ordreCatalogue ?? 9999) - (b.ordreCatalogue ?? 9999));
