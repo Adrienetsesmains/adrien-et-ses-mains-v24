@@ -2771,12 +2771,12 @@ p("CUI-PLAN-DEPOSE",
 "ml",
 0.4,
 [
-  "Déconnexion des équipements accessibles si prévue au devis ; découpe des joints et dépose soigneuse du plan de travail.",
+  "Découpe des joints et dépose soigneuse du plan de travail après déconnexion et retrait des équipements concernés, comptés séparément.",
   "Préservation des meubles et revêtements muraux conservés.",
   "Regroupement des éléments déposés.",
 ],
 { conditions:
-"Sous réserve d’une dépose possible sans détériorer la crédence ou les supports conservés. Hors évacuation en déchèterie et réparation des dommages cachés.",
+"Sous réserve d’une dépose possible sans détériorer la crédence ou les supports conservés. Hors déconnexion et dépose de l’évier, de la robinetterie et des appareils, évacuation en déchèterie et réparation des dommages cachés. Ne pas cumuler avec une dépose de plan déjà comprise dans un forfait global.",
 rentabilite:
 "🟠 À contrôler",
 tags:
@@ -2873,7 +2873,7 @@ p("CUI-EVIER",
   "Contrôle d’étanchéité.",
 ],
 { conditions:
-"Découpe du plan de travail comptée séparément si nécessaire.",
+"Découpe du plan de travail et pose du mitigeur comptées séparément si nécessaires. Vidage et étanchéité périphérique de l’évier compris dans la pose : ne pas compter deux fois ces opérations.",
 tags:
 ["évier"]
 }),

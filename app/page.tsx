@@ -393,6 +393,66 @@ const PACKS_PRESTATIONS_V26: Array<{
     ]
   },
   {
+    "id": "PACK-CUISINE-SIMPLE-REMPLACEMENT",
+    "nom": "Remplacement d’une cuisine simple",
+    "famille": "Équipements intérieurs",
+    "description": "Dépose, montage et pose des meubles, remplacement du plan de travail, évier et mitigeur sur réseaux existants, évacuation et nettoyage. Quantités de départ à adapter : nombre de meubles, mètres de plan et surface nettoyée. Fournitures à renseigner séparément ; hors électroménager, crédence et modification des réseaux. Adapter la manutention aux étages. Ne pas cumuler les mêmes déposes ou raccordements avec un forfait global.",
+    "lignes": [
+      [
+        "PEINT-PROT",
+        1
+      ],
+      [
+        "PLOMB-DEPOSE-EQP",
+        1
+      ],
+      [
+        "CUI-PLAN-DEPOSE",
+        1
+      ],
+      [
+        "CUI-MEUBLE-DEPOSE",
+        1
+      ],
+      [
+        "CUI-MEUBLE-MONT",
+        1
+      ],
+      [
+        "CUI-MEUBLE-POS",
+        1
+      ],
+      [
+        "CUI-PLAN",
+        1
+      ],
+      [
+        "CUI-DECOUPE",
+        1
+      ],
+      [
+        "CUI-EVIER",
+        1
+      ],
+      [
+        "CUI-MITIGEUR",
+        1
+      ],
+      [
+        "CUI-AJUST",
+        1
+      ],
+      [
+        "DEB-DECHETTERIE",
+        1
+      ],
+      [
+        "NET-FIN-CHANTIER",
+        1
+      ]
+    ]
+  },
+  {
     "id": "PACK-BOITES-LETTRES",
     "nom": "Remplacement d’un bloc de boîtes aux lettres",
     "famille": "Équipements extérieurs",
