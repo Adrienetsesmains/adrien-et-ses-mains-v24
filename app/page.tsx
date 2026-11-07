@@ -5115,7 +5115,7 @@ if (modeClient === "jeremie") {
     { label: "Tél. prop.", valeur: telephoneProprietaire || "", icone: "T" },
     {
       label: "Adresse",
-      valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+      valeur: [adresse?.trim(), complementAdresse?.trim()].filter(Boolean).join("\n"),
       icone: "A",
     },
   ];
@@ -5123,7 +5123,7 @@ if (modeClient === "jeremie") {
   lignesChantier = [
     {
       label: "Adresse",
-      valeur: `${adresse || ""} ${complementAdresse || ""}`.trim(),
+      valeur: [adresse?.trim(), complementAdresse?.trim()].filter(Boolean).join("\n"),
       icone: "A",
     },
   ];
