@@ -5010,13 +5010,17 @@ const dessinerCadreInfos = (
   // et la marge droite du cadre.
   const largeurTexte = largeur - decalageValeur - 5;
 
-  let nombreLignesVisuelles = 0;
-
-  lignesFiltrees.forEach((ligne) => {
-    const valeurPreparee = preparerValeurPDF(ligne.valeur);
-    const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
-    nombreLignesVisuelles += Math.max(1, texteCoupe.length);
-  });
+  // Figer le découpage en police normale avant de dessiner les labels en gras.
+  // La mesure et le rendu utilisent exactement les mêmes lignes.
+  const lignesPreparees = lignesFiltrees.map((ligne) => ({
+    ...ligne,
+    texteCoupe: doc.splitTextToSize(
+      preparerValeurPDF(ligne.valeur), largeurTexte
+    ) as string[],
+  }));
+  const nombreLignesVisuelles = lignesPreparees.reduce(
+    (total, ligne) => total + Math.max(1, ligne.texteCoupe.length), 0
+  );
 
   // Calcul exact jusqu'à la dernière ligne, sans interligne ajouté dessous.
   const hauteurTexte =
@@ -5026,7 +5030,7 @@ const dessinerCadreInfos = (
   // Cadre très compact tout en restant lisible à l'impression.
   const hauteurBloc = Math.max(
     24,
-    hauteurEnteteCadre + 3.8 + hauteurTexte + 1.5
+    hauteurEnteteCadre + 3.8 + hauteurTexte + 3
   );
 
   // Ombre très discrète.
@@ -5055,7 +5059,7 @@ const dessinerCadreInfos = (
 
   let yTexte = yDepart + hauteurEnteteCadre + 3.8;
 
-  lignesFiltrees.forEach((ligne) => {
+  lignesPreparees.forEach((ligne) => {
     // Repère de ligne minimaliste.
     doc.setFillColor(218, 164, 73);
     doc.circle(x + 6, yTexte - 1, 0.55, "F");
@@ -5067,14 +5071,15 @@ const dessinerCadreInfos = (
     doc.text(`${ligne.label} :`, x + 9, yTexte);
 
     // Valeur placée après la plus longue étiquette du bloc.
-    const valeurPreparee = preparerValeurPDF(ligne.valeur);
-    const texteCoupe = doc.splitTextToSize(valeurPreparee, largeurTexte);
+    const texteCoupe = ligne.texteCoupe;
     const nbLignes = Math.max(1, texteCoupe.length);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.2);
     doc.setTextColor(35, 35, 35);
-    doc.text(texteCoupe, x + decalageValeur, yTexte);
+    texteCoupe.forEach((texte: string, index: number) => {
+      doc.text(texte, x + decalageValeur, yTexte + index * interligne);
+    });
 
     yTexte += nbLignes * interligne + 0.4;
   });
