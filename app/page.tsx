@@ -1368,6 +1368,17 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
     Math.round((montantPrestation + montantFourniture) * 100) / 100
   );
 }
+// Ventilation interne des montants facturés ; les prix des lignes et du PDF restent inchangés.
+function totalFournituresIncluses(lignes: LigneTravaux[], modeClient: string): number {
+  const centimes = lignes.reduce((somme, ligne) => {
+    if (ligne.offert || !ligne.fournitureIncluse) return somme;
+    const montant = Math.max(0, Number(ligne.prixFournitureInclus) || 0);
+    const facture = Math.max(0, montantLigne(ligne, modeClient));
+    return somme + Math.round(Math.min(montant, facture) * 100);
+  }, 0);
+  return centimes / 100;
+}
+
   export default function Home() {
    const restaurerBackup = (index: number) => {
   const backups = JSON.parse(
@@ -2426,6 +2437,20 @@ const margeFournitures =
       reventeFournitures - baseFacturation.fournitures) * 100) / 100;
   }
 
+  // Distinguer les fournitures intégrées aux lignes sans modifier le total client.
+  // En facture, conserver la ventilation du devis accepté et ajouter les nouvelles lignes.
+  const idsLignesInitiales = new Set(baseFacturation?.lignes.map((ligne) => ligne.id) ?? []);
+  const fournituresIncluses = baseFacturation
+    ? Math.round((
+        totalFournituresIncluses(baseFacturation.lignes, baseFacturation.modeClient) +
+        totalFournituresIncluses(
+          lignesTravaux.filter((ligne) => !idsLignesInitiales.has(ligne.id)), modeClient
+        )
+      ) * 100) / 100
+    : totalFournituresIncluses(lignesTravaux, modeClient);
+  const mainOeuvreHorsFournitures = Math.round((totalTravaux - fournituresIncluses) * 100) / 100;
+  const totalFournituresFacturees = Math.round((fournituresIncluses + reventeFournitures) * 100) / 100;
+
   // ================= MINIMUM CHANTIER =================
   const minimumChantier = 80;
 
@@ -2479,6 +2504,9 @@ return {
   fraisSupplementaires: supplements?.fraisSup || 0,
   fraisNonRepartis: supplements?.fraisNonRepartis || 0,
   totalTravaux,
+  mainOeuvreHorsFournitures,
+  fournituresIncluses,
+  totalFournituresFacturees,
   kmAR,
   totalHeuresChantier,
   nombreJoursChantier,
@@ -7949,7 +7977,7 @@ return (
               {ligne.fournitureIncluse && (
                 <div className="rounded-lg border border-emerald-200 bg-white p-3 space-y-2">
                   <NumberInput
-                    label="Montant de la fourniture à ajouter (€)"
+                    label="Prix de vente des fournitures pour toute la ligne (€)"
                     value={ligne.prixFournitureInclus || 0}
                     onChange={(v) =>
                       modifierLigne(
@@ -7961,7 +7989,8 @@ return (
                   />
 
                   <p className="text-xs text-emerald-700">
-                    Ce montant est ajouté une seule fois au prix de la ligne.
+                    Ce montant est ajouté une seule fois au prix de la ligne, quelle que soit la quantité.
+                    Il est séparé de la main-d’œuvre dans ton résumé interne ; le client garde un prix unique.
                     La mention « Fournitures incluses » apparaîtra automatiquement
                     dans les sous-détails du devis.
                   </p>
@@ -8360,7 +8389,7 @@ return (
     <h3 className="text-sm font-bold text-slate-800">🧾 Résumé financier</h3>
 
     <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-      <MiniResult titre="Travaux" valeur={`${formatMontant(calcul.totalTravaux)} €`} />
+      <MiniResult titre="Main-d’œuvre hors fournitures" valeur={`${formatMontant(calcul.mainOeuvreHorsFournitures)} €`} />
       <MiniResult titre="Déplacement" valeur={`${formatMontant(calcul.fraisLogistique)} €`} />
       <MiniResult
   titre="Temps chantier"
@@ -8371,7 +8400,7 @@ return (
   titre="Jours calculés"
   valeur={`${calcul.nombreJoursChantier} j`}
 />
-      <MiniResult titre="Fournitures" valeur={`${formatMontant(calcul.reventeFournitures)} €`} />
+      <MiniResult titre="Fournitures facturées au total" valeur={`${formatMontant(calcul.totalFournituresFacturees)} €`} />
       {calcul.complementMinimum > 0 && (
         <MiniResult titre="Minimum intégré aux prestations" valeur={`${formatMontant(calcul.complementMinimum)} €`} />
       )}
@@ -8385,9 +8414,25 @@ return (
       </div>
 
       <div className="flex justify-between">
-        <span>Fournitures</span>
+        <span>Main-d’œuvre hors fournitures</span>
+        <strong>{formatMontant(calcul.mainOeuvreHorsFournitures)} €</strong>
+      </div>
+      <div className="flex justify-between">
+        <span>Fournitures incluses dans les prestations</span>
+        <strong>{formatMontant(calcul.fournituresIncluses)} €</strong>
+      </div>
+      <div className="flex justify-between">
+        <span>Fournitures facturées séparément</span>
         <strong>{formatMontant(calcul.reventeFournitures)} €</strong>
       </div>
+      <div className="flex justify-between font-semibold">
+        <span>Total des fournitures facturées</span>
+        <strong>{formatMontant(calcul.totalFournituresFacturees)} €</strong>
+      </div>
+      <p className="text-slate-500">
+        Répartition interne uniquement. La main-d’œuvre affichée est un montant facturé avant charges,
+        pas un bénéfice net. Les fournitures sont affichées à leur prix de vente.
+      </p>
 
       {calcul.complementMinimum > 0 && (
         <div className="flex justify-between">
