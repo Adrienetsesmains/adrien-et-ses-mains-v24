@@ -8724,9 +8724,13 @@ return (
 <BlocRepliable titre="Historique" ouvert={historiqueOuvert} onOuvertureChange={setHistoriqueOuvert}>
   {(() => {
     const extraireNumero = (numero?: string) => {
-      if (!numero) return 0;
-      const match = numero.match(/(\d+)$/);
-      return match ? Number(match[1]) : 0;
+      const match = (numero || "").match(/(?:^|-)(\d{4})-(\d+)$/);
+      if (match) {
+        return { annee: Number(match[1]), numero: Number(match[2]) };
+      }
+      // Compatibilité avec les anciens numéros dépourvus d’année.
+      const ancienNumero = (numero || "").match(/(\d+)$/);
+      return { annee: 0, numero: ancienNumero ? Number(ancienNumero[1]) : 0 };
     };
 
     const historiqueDocuments = historiqueFiltre
@@ -8764,25 +8768,31 @@ return (
           return aEstFacture ? -1 : 1;
         }
 
-        // Dans le groupe des factures, seul le numéro de facture détermine
+        // Dans le groupe des factures, l’année puis le numéro de facture déterminent
         // l’ordre : le numéro de devis peut être présent ou totalement absent.
         if (aEstFacture && bEstFacture) {
           const numeroFactureA = extraireNumero(a.numeroFacture);
           const numeroFactureB = extraireNumero(b.numeroFacture);
 
-          if (numeroFactureA !== numeroFactureB) {
-            return numeroFactureB - numeroFactureA;
+          if (numeroFactureA.annee !== numeroFactureB.annee) {
+            return numeroFactureB.annee - numeroFactureA.annee;
+          }
+          if (numeroFactureA.numero !== numeroFactureB.numero) {
+            return numeroFactureB.numero - numeroFactureA.numero;
           }
         }
 
         // Dans le second groupe, les devis non facturés sont classés du plus
-        // récent au plus ancien selon leur propre numéro de devis.
+        // récent au plus ancien selon l’année puis leur numéro de devis.
         if (!aEstFacture && !bEstFacture) {
           const numeroDevisA = extraireNumero(a.numeroDevis);
           const numeroDevisB = extraireNumero(b.numeroDevis);
 
-          if (numeroDevisA !== numeroDevisB) {
-            return numeroDevisB - numeroDevisA;
+          if (numeroDevisA.annee !== numeroDevisB.annee) {
+            return numeroDevisB.annee - numeroDevisA.annee;
+          }
+          if (numeroDevisA.numero !== numeroDevisB.numero) {
+            return numeroDevisB.numero - numeroDevisA.numero;
           }
         }
 
