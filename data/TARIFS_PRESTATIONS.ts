@@ -6271,30 +6271,31 @@ Object.assign(CLASSEMENT_CHANTIER, {
 });
 
 
-// Réparation partielle d’un portail bois : main-d’œuvre, fournitures séparées.
+// Prestations réutilisables facturées au temps : fournitures séparées.
+// Identifiants conservés pour la compatibilité avec les devis déjà enregistrés.
 TARIFS_PRESTATIONS_SOURCE.push(
   p("BRI-PORTAIL-BOIS-REPARATION-PARTIELLE", "Bricolage / Menuiserie légère",
-    "Réparation partielle du bas d’un portail en bois", "forfait", 5, [
-      "Dépose des parties basses dégradées et préparation des assemblages conservés.",
-      "Fabrication et ajustement des portions de montants, traverses basses et panneaux prévus au devis.",
-      "Assemblage et fixation des pièces neuves sur les parties conservées."
+    "Réparation et remplacement partiel d’éléments de menuiserie en bois", "h", 1, [
+      "Dépose des éléments dégradés prévus au devis et préparation des parties conservées.",
+      "Fabrication, découpe et ajustement des pièces de remplacement : montants, traverses, panneaux ou autres éléments prévus.",
+      "Assemblage et fixation des pièces neuves ; contrôle de la réparation."
     ], {
-      conditions: "Base de main-d’œuvre pour la reprise partielle du bas de deux vantaux, jusqu’à 65 cm de hauteur, avec remplacement de deux panneaux et des portions de montants et traverses concernées. Périmètre et dimensions à adapter au devis. Hors fournitures, peinture, remplacement ou réglage de la serrure et du mécanisme de fermeture, dépose complète du portail et évacuation en déchèterie. Toute extension de la réparation nécessite un accord chiffré préalable.",
-      action: "Adapter le temps et le périmètre au chantier. Saisir les fournitures séparément ; ajouter la préparation et peinture si prévues, sans double comptage.",
-      rentabilite: "🟠 À adapter",
-      tags: ["portail", "porte de garage", "bois", "réparation", "bas de porte", "montants", "traverses", "panneaux"]
+      conditions: "Main-d’œuvre facturée selon le nombre d’heures renseigné au devis. Éléments concernés, dimensions et périmètre à préciser pour chaque chantier. Hors fournitures, peinture, interventions sur les mécanismes de fermeture et évacuation en déchèterie, sauf mention au devis. Toute extension de la réparation nécessite un accord chiffré préalable.",
+      action: "Renseigner en quantité le nombre d’heures de réparation. Préciser les éléments remplacés dans le devis et saisir les fournitures séparément. Ne pas cumuler les mêmes opérations avec une autre ligne.",
+      rentabilite: "🟠 Temps à renseigner",
+      tags: ["portail", "porte", "porte de garage", "volet", "menuiserie", "bois", "réparation", "montants", "traverses", "panneaux"]
     }),
   p("PEI-PORTAIL-BOIS-DEUX-FACES", "Peinture",
-    "Préparation et peinture d’un portail en bois sur deux faces", "forfait", 16, [
-      "Protection des vitrages et abords ; grattage des parties écaillées, décapage localisé et ponçage des deux faces.",
-      "Dépoussiérage, préparation du bois et application de la sous-couche adaptée aux supports.",
-      "Application de deux couches de finition sur chaque face, selon les teintes prévues au devis.",
+    "Préparation et mise en peinture de menuiseries en bois", "h", 1, [
+      "Protection des vitrages éventuels et des abords ; grattage, décapage localisé et ponçage des surfaces prévues au devis.",
+      "Dépoussiérage et application d’une sous-couche adaptée selon les besoins du support et les travaux prévus.",
+      "Application des couches de finition selon le nombre, les faces et les teintes précisés au devis.",
       "Retrait des protections et nettoyage de fin d’intervention."
     ], {
-      conditions: "Base de main-d’œuvre pour un portail en bois de dimensions courantes, environ 2,52 × 2,20 m, avec vitrages conservés et deux faces à peindre. Teintes et surfaces à préciser au devis. Préparation par grattage, décapage localisé et ponçage, hors décapage intégral à bois nu. Temps de travail effectif hors séchage ; passages à organiser selon les produits et les conditions d’application. Hors réparation de menuiserie, fournitures, peinture et déplacements. Ne pas cumuler avec une autre préparation, protection ou mise en peinture des mêmes surfaces.",
-      action: "Adapter le temps aux dimensions et à l’état du support. Préciser les teintes de chaque face et saisir les fournitures séparément.",
-      rentabilite: "🟠 À adapter",
-      tags: ["portail", "porte de garage", "bois", "peinture", "deux faces", "ponçage", "décapage localisé", "bicolore"]
+      conditions: "Main-d’œuvre facturée selon le nombre d’heures renseigné au devis. Menuiseries concernées, surfaces, faces, niveau de préparation, sous-couche, nombre de couches et teintes à préciser pour chaque chantier. Décapage intégral à bois nu uniquement si prévu et chiffré au devis. Temps de travail effectif hors séchage. Hors réparation de menuiserie, fournitures et déplacements, sauf mention au devis. Ne pas cumuler les mêmes opérations de protection, préparation ou peinture avec une autre ligne.",
+      action: "Renseigner en quantité le nombre d’heures de préparation et peinture. Préciser les faces, teintes et couches dans le devis ; saisir les fournitures séparément.",
+      rentabilite: "🟠 Temps à renseigner",
+      tags: ["portail", "porte", "porte de garage", "volet", "boiserie", "menuiserie", "bois", "peinture", "ponçage", "décapage localisé"]
     })
 );
 
@@ -6305,9 +6306,9 @@ Object.assign(CLASSEMENT_CHANTIER, {
     ordreCatalogue: 193.1
   },
   "PEI-PORTAIL-BOIS-DEUX-FACES": {
-    categorieChantier: "11. Entretien, dépannage et interventions globales",
-    sousCategorie: "Portes, fenêtres et quincaillerie",
-    ordreCatalogue: 193.2
+    categorieChantier: "07. Revêtements et peinture",
+    sousCategorie: "Peinture : bois, portes et volets",
+    ordreCatalogue: 95.1
   }
 });
 
