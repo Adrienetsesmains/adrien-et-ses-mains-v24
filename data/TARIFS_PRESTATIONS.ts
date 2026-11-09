@@ -6327,6 +6327,28 @@ TARIFS_PRESTATIONS_SOURCE.push(
 
 Object.assign(CLASSEMENT_CHANTIER, {"MAC-SUPPORT-MACONNE-EQUIPEMENT": {"categorieChantier": "03. Maçonnerie et structure", "sousCategorie": "Reprises maçonnées et réservations", "ordreCatalogue": 26.6}, "REV-PANNEAUX-MURAUX-POSE": {"categorieChantier": "07. Revêtements et peinture", "sousCategorie": "Revêtements muraux : panneaux", "ordreCatalogue": 90.5}, "VMC-BOUCHE-DEPLACEMENT": {"categorieChantier": "05. Réseaux et équipements techniques", "sousCategorie": "Ventilation : passages et équipements", "ordreCatalogue": 50.5}, "PLAC-OUVERTURE-ACCES-REBOUCHAGE": {"categorieChantier": "06. Cloisons et préparation des supports", "sousCategorie": "Ossatures, cloisons et doublages", "ordreCatalogue": 60.5}, "PLAC-HABILLAGE-TECHNIQUE": {"categorieChantier": "06. Cloisons et préparation des supports", "sousCategorie": "Ossatures, cloisons et doublages", "ordreCatalogue": 60.6}, "BRI-MEUBLE-MONTAGE-ADAPTATION": {"categorieChantier": "08. Équipements et finitions", "sousCategorie": "Menuiseries intérieures et accessoires", "ordreCatalogue": 107.5}, "PLOMB-COLONNE-DOUCHE-POSE": {"categorieChantier": "08. Équipements et finitions", "sousCategorie": "Sanitaires et accessoires", "ordreCatalogue": 127.5}, "CAR-DEPOSE-SUPPORT-PRESERVE": {"categorieChantier": "02. Déposes et démolition", "sousCategorie": "Sols et revêtements", "ordreCatalogue": 17.5}, "PEINT-MOISISSURES-SUPERFICIELLES": {"categorieChantier": "06. Cloisons et préparation des supports", "sousCategorie": "Préparation des murs et plafonds", "ordreCatalogue": 67.6}});
 
+// Montage de kits préfabriqués, distinct de la création d’un habillage.
+TARIFS_PRESTATIONS_SOURCE.push(
+  p("PLOMB-KIT-HABILLAGE-WC-POS", "Plomberie / Sanitaires",
+    "Montage et fixation d’un kit d’habillage pour WC suspendu", "u", 1.5, [
+      "Déballage et contrôle du kit d’habillage compatible avec le bâti-support existant.",
+      "Assemblage des éléments préfabriqués, ajustements légers prévus par le fabricant et fixation.",
+      "Contrôle de l’alignement et maintien de l’accès à la commande et à l’entretien."
+    ], {
+      conditions: "Base pour un kit préfabriqué complet, compatible avec le bâti-support et prévu pour une pose sur l’existant. Hors fabrication d’un coffrage, modification du bâti-support ou des réseaux, dépose/repose de la cuvette, habillage complémentaire de tuyaux non compris dans le kit, enduit, carrelage, peinture et fournitures. Ajuster le temps en cas de découpes importantes ou d’accès difficile. Ne pas cumuler avec la création d’un habillage technique pour la même zone.",
+      action: "Renseigner le nombre de kits et vérifier leur compatibilité avant pose. Fourniture cliente ou achat séparé.",
+      rentabilite: "🟠 À adapter",
+      tags: ["WC suspendu", "kit", "habillage", "montage", "fixation", "bâti-support"]
+    })
+);
+Object.assign(CLASSEMENT_CHANTIER, {
+  "PLOMB-KIT-HABILLAGE-WC-POS": {
+    categorieChantier: "08. Équipements et finitions",
+    sousCategorie: "Sanitaires et accessoires",
+    ordreCatalogue: 127.6
+  }
+});
+
 export const TARIFS_PRESTATIONS: PrestationTarif[] = TARIFS_PRESTATIONS_SOURCE
   .map((prestation) => ({ ...prestation, ...CLASSEMENT_CHANTIER[prestation.id] }))
   .sort((a, b) => (a.ordreCatalogue ?? 9999) - (b.ordreCatalogue ?? 9999));
