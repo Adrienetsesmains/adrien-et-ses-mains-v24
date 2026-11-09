@@ -6349,6 +6349,28 @@ Object.assign(CLASSEMENT_CHANTIER, {
   }
 });
 
+// Caisson en plaques de plâtre mesuré suivant sa longueur réelle.
+TARIFS_PRESTATIONS_SOURCE.push(
+  p("PLAC-CAISSON-RESEAUX-ML", "Placo",
+    "Création d’un caisson en plaques de plâtre pour dissimuler des réseaux", "ml", 1.1, [
+      "Repérage des réseaux et implantation d’un caisson vertical ou horizontal.",
+      "Création et fixation de l’ossature ; découpe et pose des plaques adaptées à l’usage.",
+      "Pose des bandes de joints et renforts d’angles ; enduisage et ponçage local avant finition."
+    ], {
+      conditions: "Longueur mesurée suivant l’axe du caisson, une seule fois, sans multiplier par le nombre de faces. Base pour un caisson droit non structurel jusqu’à 60 cm de largeur développée cumulée des faces habillées (exemple : deux faces de 30 cm), sur supports sains et accessibles. Plaques hydrofuges lorsque nécessaires. Dimensions et forme à préciser au devis ; majorer pour grandes sections, nombreux retours, obstacles ou intervention en hauteur. Préserver les accès de maintenance ; aucune connexion électrique devant rester accessible ne doit être condamnée. Hors déplacement des réseaux, isolation, exigences feu/acoustiques particulières, trappe de visite, peinture, carrelage et fournitures. Temps effectif hors séchage. Ne pas cumuler ossature, plaques, bandes, angles, préparation locale ou habillage technique déjà compris sur le même caisson. Le ratissage des murs ne doit pas recompter cette préparation du caisson.",
+      action: "Renseigner la longueur réelle en ml et les dimensions de section. Chiffrer les fournitures et éventuelles trappes séparément. À utiliser à la place de l’habillage technique à l’heure pour les caissons courants.",
+      rentabilite: "🟠 À adapter à la section",
+      tags: ["caisson", "coffrage", "placo", "tuyaux", "câbles", "gaines", "réseaux", "habillage", "ml"]
+    })
+);
+Object.assign(CLASSEMENT_CHANTIER, {
+  "PLAC-CAISSON-RESEAUX-ML": {
+    categorieChantier: "06. Cloisons et préparation des supports",
+    sousCategorie: "Ossatures, cloisons et doublages",
+    ordreCatalogue: 60.7
+  }
+});
+
 export const TARIFS_PRESTATIONS: PrestationTarif[] = TARIFS_PRESTATIONS_SOURCE
   .map((prestation) => ({ ...prestation, ...CLASSEMENT_CHANTIER[prestation.id] }))
   .sort((a, b) => (a.ordreCatalogue ?? 9999) - (b.ordreCatalogue ?? 9999));
