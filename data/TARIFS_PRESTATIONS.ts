@@ -6371,6 +6371,27 @@ Object.assign(CLASSEMENT_CHANTIER, {
   }
 });
 
+// Dépose de papier peint, facturée au temps effectif estimé.
+TARIFS_PRESTATIONS_SOURCE.push(
+ p("PEINT-DETAPISSAGE-H", "Peinture", "Dépose de papier peint et retrait des résidus de colle", "h", 1, [
+   "Protection locale et essai de décollement sur le support existant.",
+   "Dépose du papier peint sur les zones prévues au devis, retrait des résidus de colle avec une méthode adaptée au support.",
+   "Regroupement des déchets sur place et séchage avant préparation."
+ ], {
+   conditions: "Quantité = nombre d’heures estimées au devis. Surface restante, nombre de couches et adhérence à préciser après essai. Travail effectif hors séchage. Hors réparation du support, ratissage, impression, peinture, évacuation en déchèterie et fournitures. Ne pas cumuler le retrait de colle ou les mêmes protections avec une autre ligne.",
+   action: "Estimer le temps selon la surface restant réellement à détapisser et le résultat de l’essai ; fournitures séparées.",
+   rentabilite: "🟠 Temps à renseigner",
+   tags: ["papier peint", "détapissage", "dépose", "colle", "murs"]
+ })
+);
+Object.assign(CLASSEMENT_CHANTIER, {
+ "PEINT-DETAPISSAGE-H": {
+   categorieChantier: "02. Déposes et démolition",
+   sousCategorie: "Sols et revêtements",
+   ordreCatalogue: 17.6
+ }
+});
+
 export const TARIFS_PRESTATIONS: PrestationTarif[] = TARIFS_PRESTATIONS_SOURCE
   .map((prestation) => ({ ...prestation, ...CLASSEMENT_CHANTIER[prestation.id] }))
   .sort((a, b) => (a.ordreCatalogue ?? 9999) - (b.ordreCatalogue ?? 9999));
