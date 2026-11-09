@@ -1837,6 +1837,8 @@ const sousCategoriesDisponibles = useMemo(() => Array.from(new Set(
 const [recherchePrestation, setRecherchePrestation] = useState("");
 const [packSelectionne, setPackSelectionne] = useState("");
 const [insertionApresId, setInsertionApresId] = useState<number | null>(null);
+// État visuel uniquement : une prestation ouverte à la fois.
+const [ligneTravauxOuverteId, setLigneTravauxOuverteId] = useState<number | null>(null);
 
 const [afficherFavorisSeulement, setAfficherFavorisSeulement] =
   useState(false);
@@ -1876,6 +1878,7 @@ const [numeroFacture, setNumeroFacture] = useState("");
 const [idDossierActuel, setIdDossierActuel] = useState<number | null>(null);
   useEffect(() => {
     setInsertionApresId(null);
+    setLigneTravauxOuverteId(null);
   }, [idDossierActuel]);
   useEffect(() => {
     if (insertionApresId !== null && !lignesTravaux.some(l => l.id === insertionApresId)) {
@@ -2689,6 +2692,7 @@ const ajouterLigne = () => {
   };
 
   setLignesTravaux((ancien) => [...ancien, nouvelleLigne]);
+  setLigneTravauxOuverteId(nouvelleLigne.id);
 };
 
 const modifierLigne = (
@@ -4409,6 +4413,7 @@ const ajouterPrestationAuDevis = (
     ];
   });
   setInsertionApresId(null);
+  setLigneTravauxOuverteId(nouvelleLigne.id);
 
   setPrestationSelectionnee("");
 
@@ -4480,6 +4485,7 @@ const ajouterPackAuDevis = (idPack: string) => {
   const premiereNouvelleLigneId = nouvellesLignes[0]?.id;
 
   if (!premiereNouvelleLigneId) return;
+  setLigneTravauxOuverteId(premiereNouvelleLigneId);
 
   setLignesTravaux((lignesActuelles) => [
     ...lignesActuelles,
@@ -7741,7 +7747,7 @@ return (
 
 </div>
 
-  <div className="space-y-5">
+  <div className="space-y-2">
     {lignesTravaux.map((ligne, index) => {
   const labels = champsTravaux(ligne.type);
 
@@ -7750,54 +7756,78 @@ return (
 );
   
 
+  const ligneVerrouillee = Boolean(baseFacturation?.lignes.some(l => l.id === ligne.id));
+  const ligneOuverte = ligneTravauxOuverteId === ligne.id;
+  const montantAffiche = calcul.montantsFacture?.[index] ?? montantLigne(ligne, modeClient);
+
   return (
-    <div key={ligne.id}>
-    <fieldset
-      disabled={Boolean(baseFacturation?.lignes.some((l) => l.id === ligne.id))}
-      id={`ligne-travaux-${ligne.id}`}
-      ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
-      className="min-w-0 rounded-2xl border bg-slate-50 p-5 space-y-4"
-    >
-          {baseFacturation?.lignes.some((l) => l.id === ligne.id) && (
-            <p className="text-sm font-semibold text-blue-800">Ligne du devis initial conservée. Pour un ajout, crée une nouvelle prestation.</p>
+    <div key={ligne.id} id={`ligne-travaux-${ligne.id}`} className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5">
+        <button
+          type="button"
+          aria-expanded={ligneOuverte}
+          aria-controls={`details-ligne-${ligne.id}`}
+          onClick={() => setLigneTravauxOuverteId(ligneOuverte ? null : ligne.id)}
+          className="min-w-0 flex-1 basis-48 text-left"
+        >
+          <span className="block text-sm font-semibold leading-snug text-slate-800 break-words">
+            {index + 1} — {ligne.prestationNom || "Prestation personnalisée"}
+          </span>
+          <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
+            {ligne.tarifId && ligne.tarifId !== ID_INTERVENTION_GLOBALE && (
+              <span>{ligne.q1 || 1} {ligne.unite || "u"}</span>
+            )}
+            {ligne.tarifId === ID_INTERVENTION_GLOBALE && <span>Forfait</span>}
+            {ligne.fournitureIncluse && <span>Fournitures incluses</span>}
+            {ligne.travauxSupplementaires && <span>Travaux supplémentaires</span>}
+            {ligneVerrouillee && <span>Devis initial conservé</span>}
+            <span className="font-medium text-blue-700">{ligneOuverte ? "▴ Replier" : "▾ Détails"}</span>
+          </span>
+        </button>
+        <span className="shrink-0 text-sm font-bold tabular-nums text-slate-900">
+          {ligne.offert && !montantAffiche ? "Offert" : `${formatMontant(montantAffiche)} €`}
+        </span>
+        <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setInsertionApresId(ligne.id);
+              setPrestationSelectionnee("");
+              lignesTravauxRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            title="Insérer une prestation après cette ligne"
+            aria-label={`Insérer une prestation après la ligne ${index + 1}`}
+            className="rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+          >
+            + Insérer
+          </button>
+          <button
+            type="button"
+            disabled={ligneVerrouillee}
+            onClick={() => setLignesTravaux(anciennes => anciennes.map(l => l.id === ligne.id ? { ...l, offert: !l.offert } : l))}
+            className={`rounded-lg border px-2.5 py-2 text-xs font-semibold disabled:opacity-40 ${ligne.offert ? "border-green-300 bg-green-100 text-green-800" : "bg-white text-slate-700"}`}
+          >
+            {ligne.offert ? "Offert ✓" : "Offrir"}
+          </button>
+          <button
+            type="button"
+            disabled={ligneVerrouillee}
+            onClick={() => supprimerLigne(ligne.id)}
+            className="rounded-lg border bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
+          >
+            Supprimer
+          </button>
+        </div>
+      </div>
+      <div id={`details-ligne-${ligne.id}`} hidden={!ligneOuverte}>
+      <fieldset
+        disabled={ligneVerrouillee}
+        ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
+        className="min-w-0 space-y-2 border-t border-slate-200 bg-slate-50 p-3"
+      >
+          {ligneVerrouillee && (
+            <p className="text-xs font-semibold text-blue-800">Ligne du devis initial conservée. Pour un ajout, crée une nouvelle prestation.</p>
           )}
-          <div className="flex items-center justify-between gap-3">
-          <div>
-  <h3 className="font-semibold text-slate-800">
-    {ligne.prestationNom
-      ? `${index + 1} — ${ligne.prestationNom}`
-      : `${index + 1} — Prestation personnalisée`}
-  </h3>
-
-</div>
-
-           <div className="flex gap-2">
-  <button
-    type="button"
-    onClick={() =>
-      setLignesTravaux(
-        lignesTravaux.map((l) =>
-          l.id === ligne.id ? { ...l, offert: !l.offert } : l
-        )
-      )
-    }
-    className={`rounded-xl border px-3 py-2 text-sm font-semibold ${
-      ligne.offert
-        ? "bg-green-100 text-green-800 border-green-300"
-        : "bg-white text-slate-700"
-    }`}
-  >
-    {ligne.offert ? "Offert ✓" : "Offrir"}
-  </button>
-
-  <button
-    onClick={() => supprimerLigne(ligne.id)}
-    className="rounded-xl border bg-white px-3 py-2 text-sm font-semibold"
-  >
-    Supprimer
-  </button>
-</div> 
-</div>
           {(dossierActuel?.devisOrigineId !== undefined || numeroFacture || ligne.travauxSupplementaires) && (
             <Check
               label="Travaux supplémentaires (mention sur la facture)"
@@ -7807,9 +7837,9 @@ return (
               ))}
             />
           )}
-          <div className="rounded-xl bg-white p-4 space-y-4">
+          <div className="rounded-lg bg-white p-3 space-y-2">
            {ligne.tarifId ? (
-  <div className="space-y-3">
+  <div className="space-y-2">
     {ligne.tarifId === ID_INTERVENTION_GLOBALE ? (
       <div className="grid gap-3 md:grid-cols-2">
         <NumberInput
@@ -7979,7 +8009,7 @@ return (
                   options={typesTravaux}
                 />
 
-                <div className="grid gap-4 md:grid-cols-5">
+                <div className="grid gap-2 md:grid-cols-5">
                   <NumberInput label={labels[0]} value={ligne.q1} onChange={(v) => modifierLigne(ligne.id, "q1", v)} />
                   <NumberInput label={labels[1]} value={ligne.q2} onChange={(v) => modifierLigne(ligne.id, "q2", v)} />
                   <NumberInput label={labels[2]} value={ligne.r1} onChange={(v) => modifierLigne(ligne.id, "r1", v)} />
@@ -8029,7 +8059,7 @@ return (
             </div>
           </div>
 
-          <div className="rounded-xl border bg-white p-4 space-y-2">
+          <div className="rounded-lg border bg-white p-3 space-y-1">
             <Card
   titre="Prix ligne"
   valeur={ligne.offert && !(calcul.montantsFacture?.[index]) ? "Offert" : `${formatMontant(calcul.montantsFacture?.[index] ?? montantLigne(ligne, modeClient))} €`}
@@ -8057,19 +8087,14 @@ return (
             )}
           </div>
         </fieldset>
-        <button
-          type="button"
-          onClick={() => {
-            setInsertionApresId(ligne.id);
-            setPrestationSelectionnee("");
-            lignesTravauxRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-          title="Insérer une prestation après cette ligne"
-          className="mt-2 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
-        >
-          + Insérer
-        </button>
+        <div className="border-t border-slate-200 bg-slate-50 px-3 pb-2 text-right">
+          <button type="button" onClick={() => {
+            setLigneTravauxOuverteId(null);
+            document.getElementById(`ligne-travaux-${ligne.id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }} className="rounded-lg px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Replier cette prestation ▴</button>
         </div>
+      </div>
+    </div>
       );
     })}
   </div>
