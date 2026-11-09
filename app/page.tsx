@@ -1836,6 +1836,7 @@ const sousCategoriesDisponibles = useMemo(() => Array.from(new Set(
 
 const [recherchePrestation, setRecherchePrestation] = useState("");
 const [packSelectionne, setPackSelectionne] = useState("");
+const [insertionApresId, setInsertionApresId] = useState<number | null>(null);
 
 const [afficherFavorisSeulement, setAfficherFavorisSeulement] =
   useState(false);
@@ -1873,6 +1874,14 @@ const [numeroFacture, setNumeroFacture] = useState("");
 
 
 const [idDossierActuel, setIdDossierActuel] = useState<number | null>(null);
+  useEffect(() => {
+    setInsertionApresId(null);
+  }, [idDossierActuel]);
+  useEffect(() => {
+    if (insertionApresId !== null && !lignesTravaux.some(l => l.id === insertionApresId)) {
+      setInsertionApresId(null);
+    }
+  }, [lignesTravaux, insertionApresId]);
   const [kmAller, setKmAller] = useState(37);
   const [fraisDeplacementManuelActif, setFraisDeplacementManuelActif] = useState(false);
 const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
@@ -4354,9 +4363,7 @@ const ajouterPrestationAuDevis = (
           "Nettoyage de fin d’intervention",
         ];
 
-  setLignesTravaux((lignesActuelles) => [
-    ...lignesActuelles,
-    {
+  const nouvelleLigne: LigneTravaux = {
       id: Date.now() + Math.floor(Math.random() * 1000),
 
       type:
@@ -4389,13 +4396,24 @@ const ajouterPrestationAuDevis = (
       detailsPdfOuvert: false,
       fournitureIncluse: false,
       prixFournitureInclus: 0,
-    },
-  ]);
+    };
+  setLignesTravaux((lignesActuelles) => {
+    const indexInsertion = insertionApresId === null
+      ? -1
+      : lignesActuelles.findIndex(l => l.id === insertionApresId);
+    const position = indexInsertion < 0 ? lignesActuelles.length : indexInsertion + 1;
+    return [
+      ...lignesActuelles.slice(0, position),
+      nouvelleLigne,
+      ...lignesActuelles.slice(position),
+    ];
+  });
+  setInsertionApresId(null);
 
   setPrestationSelectionnee("");
 
   setTimeout(() => {
-    derniereLigneRef.current?.scrollIntoView({
+    document.getElementById(`ligne-travaux-${nouvelleLigne.id}`)?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
@@ -7435,7 +7453,7 @@ return (
 >
   <div className="mb-4">
     <h3 className="text-base font-bold text-slate-800">
-      Ajouter une prestation
+      {insertionApresId === null ? "Ajouter une prestation" : "Insérer une prestation"}
     </h3>
 
     <p className="mt-1 text-sm text-slate-500">
@@ -7444,6 +7462,16 @@ return (
     </p>
   </div>
 
+  {insertionApresId !== null && (
+    <div className="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
+      <p>Choisis une prestation : elle sera insérée après la ligne {lignesTravaux.findIndex(l => l.id === insertionApresId) + 1}.</p>
+      <button type="button" onClick={() => setInsertionApresId(null)} className="mt-2 rounded-lg border border-emerald-300 bg-white px-3 py-2 font-semibold">
+        Annuler l’insertion
+      </button>
+    </div>
+  )}
+
+  {insertionApresId === null && (
   <div className="mb-5 rounded-2xl border border-blue-200 bg-blue-50 p-4">
     <div className="mb-3">
       <p className="text-sm font-bold text-blue-900">
@@ -7509,6 +7537,8 @@ return (
       </p>
     )}
   </div>
+
+  )}
 
   <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
     <div>
@@ -7721,9 +7751,9 @@ return (
   
 
   return (
+    <div key={ligne.id}>
     <fieldset
       disabled={Boolean(baseFacturation?.lignes.some((l) => l.id === ligne.id))}
-      key={ligne.id}
       id={`ligne-travaux-${ligne.id}`}
       ref={index === lignesTravaux.length - 1 ? derniereLigneRef : null}
       className="min-w-0 rounded-2xl border bg-slate-50 p-5 space-y-4"
@@ -8027,6 +8057,19 @@ return (
             )}
           </div>
         </fieldset>
+        <button
+          type="button"
+          onClick={() => {
+            setInsertionApresId(ligne.id);
+            setPrestationSelectionnee("");
+            lignesTravauxRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          title="Insérer une prestation après cette ligne"
+          className="mt-2 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
+        >
+          + Insérer
+        </button>
+        </div>
       );
     })}
   </div>
