@@ -798,6 +798,21 @@ type BaseFacturation = {
   modeClient: string;
 };
 
+type FactureIntermediaire = {
+  numero: string;
+  date: string;
+  montant: number;
+  cumulFacture: number;
+  totalDevis: number;
+  description: string;
+  dateTravaux: string;
+  pdfBase64: string;
+  nomFichier: string;
+  // Une facture émise n'est pas un encaissement : seule cette date valide son règlement.
+  datePaiement?: string;
+};
+type TypeDocumentPDF = "devis" | "facture" | "acompte" | "situation";
+
 type Dossier = {
   id: number;
 
@@ -838,6 +853,7 @@ type Dossier = {
     pdfBase64: string;
     nomFichier: string;
   };
+  facturesIntermediaires?: FactureIntermediaire[];
   conditionsGeneralesDevis?: string;
   conditionsChantier?: string;
   commentaireFournitures?: string;
@@ -1073,6 +1089,27 @@ const SEUILS_CA_SERVICES: Record<number, { tva: number; tvaMajore: number; micro
   2026: { tva: 37500, tvaMajore: 41250, micro: 83600 },
 };
 
+function decompteFacturation(dossier: Pick<Dossier,
+  "factureAcompte" | "facturesIntermediaires" | "montantAcompteEncaisse" |
+  "montantEncaisse" | "facturePayee" | "total"
+>) {
+  const intermediaires = dossier.facturesIntermediaires || [];
+  const centimes = (n: number) => Math.round((Number.isFinite(n) ? n : 0) * 100);
+  const facturesAvant = centimes(dossier.factureAcompte?.montant || 0) +
+    intermediaires.reduce((somme, f) => somme + centimes(f.montant), 0);
+  const intermediairesRecus = intermediaires.filter((f) => f.datePaiement)
+    .reduce((somme, f) => somme + centimes(f.montant), 0);
+  let acompteRecu = centimes(dossier.montantAcompteEncaisse || 0);
+  if (acompteRecu <= 0 && !dossier.facturePayee) {
+    acompteRecu = Math.max(0, centimes(dossier.montantEncaisse || 0) - intermediairesRecus);
+  }
+  const encaisseFinal = Math.max(0, centimes(dossier.montantEncaisse || 0) - acompteRecu - intermediairesRecus);
+  const montantFinal = Math.max(0, centimes(dossier.total || 0) - facturesAvant);
+  return { dejaFacture: facturesAvant / 100, intermediairesRecus: intermediairesRecus / 100,
+    acompteRecu: acompteRecu / 100, montantFinal: montantFinal / 100,
+    encaisseFinal: encaisseFinal / 100, resteFinal: Math.max(0, montantFinal - encaisseFinal) / 100 };
+}
+
 // Une entrée par règlement réel, commune au détail, au graphique et au suivi annuel.
 function encaissementsDuMois(dossiers: Dossier[], annee: number, mois: number) {
   const devisArchives = new Set(dossiers.map((d) => d.devisOrigineId).filter((id) => id !== undefined));
@@ -1082,17 +1119,20 @@ function encaissementsDuMois(dossiers: Dossier[], annee: number, mois: number) {
     if (devisArchives.has(d.id)) continue;
     const encaisse = Number(d.montantEncaisse || 0);
     if (!Number.isFinite(encaisse) || encaisse <= 0) continue;
+    const intermediaires = d.facturesIntermediaires || [];
+    const intermediairesRecus = intermediaires.filter((f) => f.datePaiement)
+      .reduce((somme, f) => somme + Math.round(f.montant * 100), 0) / 100;
     let acompte = Number(d.montantAcompteEncaisse || 0);
     let dateAcompte = d.dateAcompte || "";
     if (acompte <= 0 && !d.facturePayee && d.datePaiement) {
-      acompte = encaisse;
+      acompte = Math.max(0, Math.round((encaisse - intermediairesRecus) * 100) / 100);
       dateAcompte = d.datePaiement;
     }
     const ajouter = (nature: string, montant: number, date: string, numero: string) => {
       const dateReelle = parseDateFr(date);
       if (!Number.isFinite(montant) || montant <= 0 || !dateReelle ||
         dateReelle.getFullYear() !== annee || dateReelle.getMonth() !== mois) return;
-      resultat.push({ cle: `${d.id}-${nature}`, dossierId: d.id,
+      resultat.push({ cle: `${d.id}-${nature}-${numero}`, dossierId: d.id,
         numero: numero || d.numeroDevis || "Sans numéro", devis: d.numeroDevis || "",
         client: d.client || d.clientFinalNom || "Client non renseigné",
         chantier: [d.referenceChantier, d.clientFinalNom || d.locataire || d.proprietaire,
@@ -1100,8 +1140,11 @@ function encaissementsDuMois(dossiers: Dossier[], annee: number, mois: number) {
         date, nature, montant: Math.round(montant * 100) / 100 });
     };
     ajouter("Acompte", acompte, dateAcompte, d.factureAcompte?.numero || "");
+    for (const f of intermediaires) {
+      if (f.datePaiement) ajouter("Facture intermédiaire", f.montant, f.datePaiement, f.numero);
+    }
     if (d.facturePayee && Number.isFinite(acompte)) {
-      ajouter(acompte > 0 ? "Solde" : "Paiement complet", Math.max(0, encaisse - acompte),
+      ajouter(acompte > 0 ? "Solde" : "Paiement complet", Math.max(0, Math.round((encaisse - acompte - intermediairesRecus) * 100) / 100),
         d.datePaiement || "", d.numeroFacture || "");
     }
   }
@@ -1928,6 +1971,18 @@ const [sauvegardePrete, setSauvegardePrete] = useState(false);
 const [estAndroid, setEstAndroid] = useState(false);
 const [sauvegardesOuvertes, setSauvegardesOuvertes] = useState(false);
 const [detailsEncaissementsOuverts, setDetailsEncaissementsOuverts] = useState(false);
+const [montantSituation, setMontantSituation] = useState(0);
+const [descriptionSituation, setDescriptionSituation] = useState("");
+const [dateTravauxSituation, setDateTravauxSituation] = useState("");
+const [reglementSituationNumero, setReglementSituationNumero] = useState("");
+const [dateReglementSituation, setDateReglementSituation] = useState("");
+useEffect(() => {
+  setMontantSituation(0);
+  setDescriptionSituation("");
+  setDateTravauxSituation("");
+  setReglementSituationNumero("");
+  setDateReglementSituation("");
+}, [idDossierActuel]);
 const [listeBackups, setListeBackups] = useState<any[]>([]);
 const applicationCloudEnCoursRef = useRef(false);
 const synchronisationCloudEnCoursRef = useRef(false);
@@ -2983,6 +3038,7 @@ const enregistrerDossier = (
     id: idFinal,
     devisOrigineId: historique.find((d) => d.id === idFinal)?.devisOrigineId,
     factureAcompte: historique.find((d) => d.id === idFinal)?.factureAcompte,
+    facturesIntermediaires: historique.find((d) => d.id === idFinal)?.facturesIntermediaires,
     baseFacturation: baseFacturation || undefined,
 
     typeEvenement: typeEvenementFinal,
@@ -3674,7 +3730,7 @@ const envoyerFactureMail = () => {
 
 Veuillez trouver ci-joint la facture ${numeroFacture} concernant les travaux réalisés.
 
-Le reste à payer est de ${formatMontant(Math.max(0, calcul.total - montantEncaisse))} €.
+Le reste à payer est de ${formatMontant(facturesIntermediairesCourantes.length ? decompteCourant.resteFinal : Math.max(0, calcul.total - montantEncaisse))} €.
 
 Je reste disponible si besoin.
 
@@ -3694,11 +3750,10 @@ Merci pour la confiance accordée`;
 const preparerRelance = (d: Pick<Dossier,
   "numeroFacture" | "numeroDevis" | "client" | "email" | "total" |
   "montantEncaisse" | "facturePayee" | "referenceChantier" |
-  "adresse" | "complementAdresse"
+  "adresse" | "complementAdresse" | "factureAcompte" | "facturesIntermediaires" | "montantAcompteEncaisse"
 >) => {
-  const resteDu = Math.max(0, Math.round(
-    ((d.total || 0) - (d.montantEncaisse || 0)) * 100
-  ) / 100);
+  const resteDu = d.facturesIntermediaires?.length ? decompteFacturation(d).resteFinal
+    : Math.max(0, Math.round(((d.total || 0) - (d.montantEncaisse || 0)) * 100) / 100);
 
   if (!d.numeroFacture?.trim()) {
     alert("Créez d’abord la facture avant de préparer une relance.");
@@ -4030,9 +4085,85 @@ const dossierOrigineAcompte = dossierActuel?.devisOrigineId !== undefined
   ? historique.find((d) => d.id === dossierActuel.devisOrigineId) || dossierActuel
   : dossierActuel;
 const factureAcompteCourante = dossierOrigineAcompte?.factureAcompte || dossierActuel?.factureAcompte;
+const facturesIntermediairesCourantes = dossierOrigineAcompte?.facturesIntermediaires || dossierActuel?.facturesIntermediaires || [];
+const decompteCourant = decompteFacturation({
+  total: calcul.total, montantEncaisse, facturePayee,
+  montantAcompteEncaisse: dossierActuel?.montantAcompteEncaisse || dossierOrigineAcompte?.montantAcompteEncaisse,
+  factureAcompte: factureAcompteCourante, facturesIntermediaires: facturesIntermediairesCourantes,
+});
+const montantSituationCentimes = Math.round(montantSituation * 100);
+const cumulSituationCentimes = Math.round(decompteCourant.dejaFacture * 100) + montantSituationCentimes;
+const resteSituationCentimes = Math.round(calcul.total * 100) - cumulSituationCentimes;
+
+const telechargerDocumentEmis = (documentEmis: { pdfBase64: string; nomFichier: string }) => {
+  const donnees = Uint8Array.from(atob(documentEmis.pdfBase64), (c) => c.charCodeAt(0));
+  const url = URL.createObjectURL(new Blob([donnees], { type: "application/pdf" }));
+  const lien = document.createElement("a");
+  lien.href = url;
+  lien.download = documentEmis.nomFichier;
+  lien.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+// Les documents et règlements restent attachés au même chantier, sans nouvelle fiche.
+const sauvegarderFacturesIntermediaires = (
+  facturesIntermediaires: FactureIntermediaire[],
+  nouveauMontantEncaisse?: number,
+  prochainCompteur?: number,
+  reglementFinal?: { date: string; remiseAZero?: boolean }
+) => {
+  if (!dossierOrigineAcompte) throw new Error("Ouvre d'abord un devis enregistré.");
+  const historiqueMisAJour = historique.map((d) =>
+    d.id === dossierOrigineAcompte.id || d.devisOrigineId === dossierOrigineAcompte.id
+      ? { ...d, facturesIntermediaires,
+          ...(reglementFinal ? { facturePayee: !reglementFinal.remiseAZero,
+            datePaiement: reglementFinal.date,
+            ...(reglementFinal.remiseAZero ? { montantAcompteEncaisse: 0, dateAcompte: "" } : {}),
+          } : {}),
+          ...(nouveauMontantEncaisse === undefined ? {} : {
+            montantEncaisse: nouveauMontantEncaisse,
+            reste: Math.max(0, Math.round((d.total - nouveauMontantEncaisse) * 100) / 100),
+          }) } : d);
+  const donnees = construireSauvegardeComplete();
+  const sauvegarde = { ...donnees, historique: historiqueMisAJour,
+    compteurFacture: prochainCompteur ?? compteurFacture,
+    brouillon: donnees.brouillon && nouveauMontantEncaisse !== undefined
+      ? { ...donnees.brouillon, montantEncaisse: nouveauMontantEncaisse,
+          ...(reglementFinal ? { facturePayee: !reglementFinal.remiseAZero, datePaiement: reglementFinal.date } : {}),
+        } : donnees.brouillon,
+  };
+  ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(sauvegarde));
+  ecrireStockageLocal(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
+  setHistorique(historiqueMisAJour);
+  if (nouveauMontantEncaisse !== undefined) setMontantEncaisse(nouveauMontantEncaisse);
+  if (prochainCompteur !== undefined) setCompteurFacture(prochainCompteur);
+  void envoyerDonneesCloud(sauvegarde, false);
+};
+
+const enregistrerReglementSituation = () => {
+  const facture = facturesIntermediairesCourantes.find((f) => f.numero === reglementSituationNumero);
+  const dateReelle = parseDateFr(dateReglementSituation);
+  if (!facture || facture.datePaiement || !dateReelle || Number.isNaN(dateReelle.getTime())) {
+    alert("Sélectionne la date réelle de réception du règlement."); return;
+  }
+  const nouveauMontant = Math.round((montantEncaisse + facture.montant) * 100) / 100;
+  if (facturePayee || nouveauMontant > calcul.total + 0.001) {
+    alert("Ce règlement dépasserait le total du chantier. Vérifie les sommes déjà encaissées."); return;
+  }
+  try {
+    sauvegarderFacturesIntermediaires(facturesIntermediairesCourantes.map((f) =>
+      f.numero === facture.numero ? { ...f, datePaiement: dateReglementSituation } : f), nouveauMontant);
+    setReglementSituationNumero("");
+    setDateReglementSituation("");
+  } catch (erreur) {
+    console.error(erreur);
+    alert("Le règlement n'a pas pu être enregistré. Réessaie avant de poursuivre.");
+  }
+};
 
 const prochainNumeroFactureDisponible = () => {
-  const numeros = historique.flatMap((d) => [d.numeroFacture, d.factureAcompte?.numero])
+  const numeros = historique.flatMap((d) => [d.numeroFacture, d.factureAcompte?.numero,
+    ...(d.facturesIntermediaires || []).map((f) => f.numero)])
     .concat(numeroFacture)
     .map((n) => /^F-2026-(\d+)$/.exec(n || ""))
     .filter((m): m is RegExpExecArray => Boolean(m))
@@ -4066,6 +4197,7 @@ const historiqueFiltre = useMemo(() => {
       ${d.email || ""}
       ${d.numeroDevis || ""}
       ${d.numeroFacture || ""}
+      ${(d.facturesIntermediaires || []).map((f) => f.numero).join(" ")}
       ${d.clientFinalNom || ""}
       ${d.clientFinalTelephone || ""}
       ${d.clientFinalAdresse || ""}
@@ -4095,6 +4227,7 @@ const resultatsCalendrier = useMemo(() => {
       ${d.complementAdresse || ""}
       ${d.numeroDevis || ""}
       ${d.numeroFacture || ""}
+      ${(d.facturesIntermediaires || []).map((f) => f.numero).join(" ")}
       ${d.referenceChantier || ""}
       ${d.locataire || ""}
       ${d.proprietaire || ""}
@@ -4672,7 +4805,7 @@ const chargerBanniereV26 = async () => {
   });
 };
 
-const genererPDF = async (type: "devis" | "facture" | "acompte") => {
+const genererPDF = async (type: TypeDocumentPDF) => {
   if (generationPDFEnCoursRef.current) return "";
   generationPDFEnCoursRef.current = true;
   setGenerationPDFEnCours(true);
@@ -4682,7 +4815,7 @@ const genererPDF = async (type: "devis" | "facture" | "acompte") => {
     console.error("Création du PDF impossible :", erreur);
     const detail = erreur instanceof Error ? erreur.message : String(erreur);
     alert(estErreurQuotaStockage(erreur)
-      ? "Le stockage réservé à l'application dans ce navigateur est encore plein. Aucun nouveau numéro d'acompte n'a été validé. Fais un export de tes données et transmets-moi ce message ; ne vide pas les données du site."
+      ? "Le stockage réservé à l'application dans ce navigateur est encore plein. La facture n'a pas pu être enregistrée. Fais un export de tes données et transmets-moi ce message ; ne vide pas les données du site."
       : `Le PDF n'a pas pu être créé. Détail : ${detail}`);
     return "";
   } finally {
@@ -4691,7 +4824,7 @@ const genererPDF = async (type: "devis" | "facture" | "acompte") => {
   }
 };
 
-const fabriquerPDF = async (type: "devis" | "facture" | "acompte") => {
+const fabriquerPDF = async (type: TypeDocumentPDF) => {
   // Sur Android, aucun devis ni aucune facture ne doit être finalisé :
   // pas de PDF et surtout aucune attribution de numéro.
   if (estAndroid) {
@@ -4707,14 +4840,36 @@ const fabriquerPDF = async (type: "devis" | "facture" | "acompte") => {
   }
 
   const estAcompte = type === "acompte";
+  const estSituation = type === "situation";
+  const estDocumentPartiel = estAcompte || estSituation;
+  const estSoldeAvecSituations = type === "facture" && facturesIntermediairesCourantes.length > 0;
+  if (estSituation) {
+    if (!numeroDevis || !dossierActuel || !client.trim()) {
+      alert("Ouvre le devis enregistré du client avant de créer une facture intermédiaire."); return "";
+    }
+    if (numeroFacture || facturePayee || historique.some((d) =>
+      d.numeroDevis === numeroDevis && Boolean(d.numeroFacture))) {
+      alert("Une facture finale existe déjà ou le chantier est soldé."); return "";
+    }
+    if (!Number.isFinite(montantSituation) || montantSituationCentimes <= 0 || resteSituationCentimes < 0) {
+      alert("Indique un montant positif qui ne dépasse pas le reste à facturer."); return "";
+    }
+    const dateTravaux = parseDateFr(dateTravauxSituation);
+    if (!descriptionSituation.trim() || !dateTravaux || Number.isNaN(dateTravaux.getTime())) {
+      alert("Renseigne les travaux réalisés et leur date pour cette facture intermédiaire."); return "";
+    }
+    if (Math.round(calcul.total * 100) !== Math.round(dossierActuel.total * 100)) {
+      alert("Enregistre d'abord les modifications du devis avant de créer cette facture intermédiaire."); return "";
+    }
+    if (montantEncaisse > decompteCourant.dejaFacture + 0.001) {
+      alert("Des sommes déjà reçues n'ont pas encore de facture. Crée d'abord leur facture d'acompte."); return "";
+    }
+  }
+  if (estSoldeAvecSituations && decompteCourant.dejaFacture > calcul.total + 0.001) {
+    alert("Les factures déjà émises dépassent le total actuel du chantier. Vérifie le devis avant de créer le solde."); return "";
+  }
   if (estAcompte && factureAcompteCourante) {
-    const donnees = Uint8Array.from(atob(factureAcompteCourante.pdfBase64), (c) => c.charCodeAt(0));
-    const url = URL.createObjectURL(new Blob([donnees], { type: "application/pdf" }));
-    const lien = document.createElement("a");
-    lien.href = url;
-    lien.download = factureAcompteCourante.nomFichier;
-    lien.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    telechargerDocumentEmis(factureAcompteCourante);
     return factureAcompteCourante.pdfBase64;
   }
   if (estAcompte && (!numeroDevis || !dossierActuel || !client.trim())) {
@@ -4733,13 +4888,13 @@ const fabriquerPDF = async (type: "devis" | "facture" | "acompte") => {
     return "";
   }
   const dateDocument = new Date().toLocaleDateString("fr-FR");
-  const numeroSuivantAcompte = estAcompte ? prochainNumeroFactureDisponible() : 0;
+  const numeroSuivantAcompte = estDocumentPartiel ? prochainNumeroFactureDisponible() : 0;
   const doc = new jsPDF({ compress: true });
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
   const estFactureMeurisse = modeClient === "jeremie" && type === "facture";
 
-let numero = estAcompte ? formatNumero("F", numeroSuivantAcompte)
+let numero = estDocumentPartiel ? formatNumero("F", numeroSuivantAcompte)
   : type === "devis" ? numeroDevis : numeroFacture;
 
 if (type === "devis" && !numeroDevis) {
@@ -4890,8 +5045,8 @@ doc.roundedRect(18, yCartoucheDocument + 1.25, 30, 7, 3.5, 3.5, "F");
 doc.setTextColor(255, 255, 255);
 doc.setFont("helvetica", "bold");
 doc.setFontSize(10.5);
-doc.setFontSize(estAcompte ? 7.2 : 10.5);
-doc.text(estAcompte ? "Facture d'acompte" : type === "devis" ? "Devis" : "Facture", 33, yCartoucheDocument + 6, {
+doc.setFontSize(estDocumentPartiel ? 7.2 : 10.5);
+doc.text(estSituation ? "Facture partielle" : estAcompte ? "Facture d'acompte" : type === "devis" ? "Devis" : "Facture", 33, yCartoucheDocument + 6, {
   align: "center",
 });
 
@@ -4909,13 +5064,14 @@ doc.text(
 );
 doc.setTextColor(0, 0, 0);
 
-if (type === "facture" || estAcompte) {
+if (type === "facture" || estDocumentPartiel) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(90, 90, 90);
 
   doc.text(
-    estAcompte ? `Facture d'acompte sur devis n° ${numeroDevis}`
+    estSituation ? `Facture intermédiaire n° ${facturesIntermediairesCourantes.length + 1} sur devis ${numeroDevis}`
+      : estAcompte ? `Facture d'acompte sur devis n° ${numeroDevis}`
       : numeroDevis ? `Facture suivant devis n° ${numeroDevis}` : "Facture de travaux réalisés",
     105,
     86,
@@ -4923,7 +5079,7 @@ if (type === "facture" || estAcompte) {
   );
 
   doc.text(
-    `Échéance de paiement : ${estAcompte ? "À réception de facture" : datePaiement || "À réception de facture"}`,
+    `Échéance de paiement : ${estDocumentPartiel || estSoldeAvecSituations ? "À réception de facture" : datePaiement || "À réception de facture"}`,
     105,
     90,
     { align: "center" }
@@ -4936,7 +5092,7 @@ if (type === "facture" || estAcompte) {
 
 const xClient = 15;
 const xChantier = 105;
-const yCadres = type === "facture" || estAcompte ? 95 : 85.5;
+const yCadres = type === "facture" || estDocumentPartiel ? 95 : 85.5;
 
 const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
@@ -5130,15 +5286,26 @@ if (estAcompte) {
   ]];
 }
 
-// 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
-if (estFactureMeurisse) {
-  lignesDevisPDF = [
-    ["Main d'œuvre sous-traitance", calcul.total],
-  ];
+if (estSituation) {
+  lignesDevisPDF = [[
+    `Travaux réalisés à ce jour selon devis ${numeroDevis} (cumul) : ${descriptionSituation.trim()}`,
+    cumulSituationCentimes / 100,
+  ]];
+}
+// Cas sous-traitance : même décompte de facturation, avec une ligne de main d'œuvre.
+if (estFactureMeurisse) lignesDevisPDF = [["Main d'œuvre sous-traitance", calcul.total]];
+if (estSituation || estSoldeAvecSituations) {
+  if (factureAcompteCourante) lignesDevisPDF.push([
+    `À déduire : facture d'acompte ${factureAcompteCourante.numero} du ${factureAcompteCourante.date}`,
+    -factureAcompteCourante.montant,
+  ]);
+  for (const f of facturesIntermediairesCourantes) lignesDevisPDF.push([
+    `À déduire : facture intermédiaire ${f.numero} du ${f.date}`, -f.montant,
+  ]);
 }
 
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
-  const ligneSource = estAcompte ? undefined : lignesTravaux[index];
+  const ligneSource = estDocumentPartiel ? undefined : lignesTravaux[index];
 
   const estSupplement = type === "facture" && !estFactureMeurisse && Boolean(
     ligneSource?.travauxSupplementaires ||
@@ -5148,7 +5315,7 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const designation = designationBrute;
 
   const detailsLimites =
-  estFactureMeurisse || estAcompte
+  estFactureMeurisse || estDocumentPartiel
     ? []
     : ligneSource
     ? detailsTravaux(ligneSource)
@@ -5230,10 +5397,14 @@ const formatEuroPDF = (valeur: number) => {
   return `${formatMontant((Math.round((valeur || 0) * 100) / 100))} €`;
 };
 
-const montantTotalPDF = estAcompte ? montantDocumentAcompte : Math.round((calcul.total || 0) * 100) / 100;
+const montantTotalPDF = estSituation ? montantSituationCentimes / 100
+  : estAcompte ? montantDocumentAcompte
+  : estSoldeAvecSituations ? decompteCourant.montantFinal : Math.round((calcul.total || 0) * 100) / 100;
 
 const montantAcompteOuEncaissePDF =
-  estAcompte ? Math.min(montantDocumentAcompte, Math.max(0, montantEncaisse))
+  estSituation ? 0
+  : estSoldeAvecSituations ? Math.min(decompteCourant.montantFinal, decompteCourant.encaisseFinal)
+  : estAcompte ? Math.min(montantDocumentAcompte, Math.max(0, montantEncaisse))
   : type === "devis"
     ? Math.round((calcul.acompte || 0) * 100) / 100
     : Math.round((montantEncaisse || 0) * 100) / 100;
@@ -5303,7 +5474,7 @@ doc.text(
 doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 25.5, { align: "right" });
 
 y += hauteurBlocTotal + 5;
-if (type === "facture" && factureAcompteCourante) {
+if (type === "facture" && factureAcompteCourante && !estSoldeAvecSituations) {
   const referenceAcompte = doc.splitTextToSize(
     `Facture d'acompte n° ${factureAcompteCourante.numero} du ${factureAcompteCourante.date} : ${formatMontant(factureAcompteCourante.montant)} €. Les sommes reçues sont déduites ci-dessus.`, 174);
   if (y + referenceAcompte.length * 3.5 > 250) {
@@ -5314,6 +5485,22 @@ if (type === "facture" && factureAcompteCourante) {
   doc.setTextColor(60, 60, 60);
   doc.text(referenceAcompte, 18, y + 3);
   y += referenceAcompte.length * 3.5 + 6;
+}
+
+if (estSituation || estSoldeAvecSituations) {
+  const notesFacturation = [
+    ...(estSituation ? [`Date des travaux réalisés : ${dateTravauxSituation}.`] : []),
+    `Total du chantier : ${formatMontant(calcul.total)} €. Cumul facturé : ${formatMontant(estSituation ? cumulSituationCentimes / 100 : calcul.total)} €.`,
+    ...(estSituation ? [`Travaux restant à facturer ultérieurement : ${formatMontant(resteSituationCentimes / 100)} €. Chantier non terminé.`]
+      : ["Les factures précédentes sont déduites ci-dessus ; celles non réglées restent dues séparément."]),
+  ];
+  for (const note of notesFacturation) {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(60);
+    const lignes = doc.splitTextToSize(note, 174);
+    if (y + lignes.length * 3.8 + 4 > 250) { doc.addPage(); y = 35; }
+    doc.text(lignes, 18, y + 3);
+    y += lignes.length * 3.8 + 3;
+  }
 }
 
 // ================= FOURNITURES + CONDITIONS MODIFIABLES =================
@@ -5372,7 +5559,7 @@ if (type === "devis" && commentaireFournituresPDF) {
 }
 
 // ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
-if (!estAcompte) {
+if (!estDocumentPartiel) {
 doc.setFont("helvetica", "normal");
 doc.setFontSize(8.2);
 
@@ -5695,6 +5882,17 @@ if (estAcompte && dossierOrigineAcompte) {
   setHistorique(historiqueMisAJour);
   setCompteurFacture(numeroSuivantAcompte + 1);
   void envoyerDonneesCloud(sauvegarde, false);
+}
+if (estSituation) {
+  const facture: FactureIntermediaire = {
+    numero, date: dateDocument, montant: montantSituationCentimes / 100,
+    cumulFacture: cumulSituationCentimes / 100, totalDevis: calcul.total,
+    description: descriptionSituation.trim(), dateTravaux: dateTravauxSituation,
+    pdfBase64, nomFichier,
+  };
+  sauvegarderFacturesIntermediaires([...facturesIntermediairesCourantes, facture], undefined, numeroSuivantAcompte + 1);
+  setMontantSituation(0);
+  setDescriptionSituation("");
 }
 doc.save(nomFichier);
 return pdfBase64;
@@ -6175,6 +6373,8 @@ return (
           onClick={() => preparerRelance({
             numeroFacture, numeroDevis, client, email,
             total: calcul.total, montantEncaisse, facturePayee,
+            factureAcompte: factureAcompteCourante, facturesIntermediaires: facturesIntermediairesCourantes,
+            montantAcompteEncaisse: dossierActuel?.montantAcompteEncaisse,
             referenceChantier, adresse, complementAdresse,
           })}
           className="btn-amber px-2 py-1 text-[11px]"
@@ -8438,6 +8638,77 @@ return (
       </div>
     )}
 
+    <details key={`situations-${idDossierActuel ?? "nouveau"}`} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+      <summary className="cursor-pointer text-sm font-semibold text-slate-700">
+        Factures intermédiaires{facturesIntermediairesCourantes.length > 0 ? ` (${facturesIntermediairesCourantes.length})` : ""}
+      </summary>
+      <div className="mt-3 space-y-3 text-sm">
+        <p className="text-xs text-slate-500">
+          Pour facturer les travaux réalisés avant la fin du chantier. Le règlement s’enregistre séparément.
+        </p>
+        {!estAndroid && !numeroFacture && !facturePayee && (
+          <>
+            <p className="text-xs text-slate-600">
+              Déjà facturé : {formatMontant(decompteCourant.dejaFacture)} € · Reste à facturer : {formatMontant(decompteCourant.montantFinal)} €
+            </p>
+            <div className="grid gap-2 md:grid-cols-2">
+              <NumberInput label="À facturer maintenant (€)" value={montantSituation} onChange={setMontantSituation} />
+              <label className="block text-sm font-medium text-slate-700">Date des travaux réalisés
+                <input type="date" value={formatDateFrVersInput(dateTravauxSituation)}
+                  onChange={(e) => setDateTravauxSituation(formatDateInputVersFr(e.target.value))}
+                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm" />
+              </label>
+            </div>
+            <label className="block text-sm font-medium text-slate-700">Travaux réalisés à ce jour (cumul)
+              <textarea rows={2} maxLength={1000} value={descriptionSituation}
+                onChange={(e) => setDescriptionSituation(e.target.value)}
+                placeholder="Précise les prestations déjà réalisées selon le devis."
+                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm" />
+            </label>
+            {Number.isFinite(montantSituation) && montantSituation > 0 && (
+              <p className={`text-xs ${resteSituationCentimes < 0 ? "text-red-700" : "text-slate-600"}`}>
+                Cumul facturé : {formatMontant(cumulSituationCentimes / 100)} € · Restera à facturer : {formatMontant(resteSituationCentimes / 100)} €
+              </p>
+            )}
+            <button type="button" disabled={generationPDFEnCours || !dossierActuel || !numeroDevis}
+              onClick={() => genererPDF("situation")}
+              className="btn-blue px-3 py-2 text-sm disabled:opacity-50">
+              {generationPDFEnCours ? "Création du PDF…" : "Créer la facture intermédiaire"}
+            </button>
+          </>
+        )}
+        {facturesIntermediairesCourantes.map((f) => (
+          <div key={f.numero} className="border-t border-slate-100 pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="font-semibold text-slate-800">{f.numero} · {formatMontant(f.montant)} €</p>
+                <p className="text-xs text-slate-500">{f.date} · {f.datePaiement ? `Réglée le ${f.datePaiement}` : "À régler"}</p>
+              </div>
+              <div className="flex gap-2">
+                {!estAndroid && <button type="button" className="rounded border px-2 py-1 text-xs"
+                  onClick={() => telechargerDocumentEmis(f)}>PDF</button>}
+                {!f.datePaiement && !facturePayee && <button type="button" className="rounded border px-2 py-1 text-xs text-green-800"
+                  onClick={() => { setReglementSituationNumero(f.numero); setDateReglementSituation(""); }}>Règlement reçu</button>}
+              </div>
+            </div>
+            {reglementSituationNumero === f.numero && !f.datePaiement && (
+              <div className="mt-2 flex flex-wrap items-end gap-2">
+                <label className="text-xs text-slate-600">Date réelle du règlement
+                  <input type="date" value={formatDateFrVersInput(dateReglementSituation)}
+                    onChange={(e) => setDateReglementSituation(formatDateInputVersFr(e.target.value))}
+                    className="mt-1 block rounded border px-2 py-1 text-sm" />
+                </label>
+                <button type="button" className="rounded bg-green-700 px-2 py-1 text-xs text-white"
+                  onClick={enregistrerReglementSituation}>Valider {formatMontant(f.montant)} € reçus</button>
+                <button type="button" className="rounded border px-2 py-1 text-xs"
+                  onClick={() => setReglementSituationNumero("")}>Annuler</button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </details>
+
    <Select
   label="Acompte (%)"
   value={String(pourcentageAcompte)}
@@ -8530,7 +8801,7 @@ return (
         alert("Vérifie le montant de l'acompte avant d'enregistrer son règlement.");
         return;
       }
-      if (facturePayee || montantEncaisse > montantAcompteRecu) {
+      if (facturePayee || decompteCourant.intermediairesRecus > 0 || montantEncaisse > montantAcompteRecu) {
         alert("Un règlement supérieur est déjà enregistré. Vérifie les encaissements du dossier.");
         return;
       }
@@ -8590,6 +8861,17 @@ return (
         return;
       }
 
+      if (facturesIntermediairesCourantes.length > 0) {
+        try {
+          sauvegarderFacturesIntermediaires(facturesIntermediairesCourantes.map((f) =>
+            f.datePaiement ? f : { ...f, datePaiement }), calcul.total, undefined, { date: datePaiement });
+          setFacturePayee(true);
+          setSaisieDatePaiementCompletOuverte(false);
+        } catch (erreur) {
+          console.error(erreur); alert("Le paiement complet n'a pas pu être enregistré.");
+        }
+        return;
+      }
       setMontantEncaisse(calcul.total);
 
       setHistorique((ancien) =>
@@ -8634,6 +8916,20 @@ return (
   {/* ================= REMISE À ZÉRO ================= */}
   <button
     onClick={() => {
+      if (facturesIntermediairesCourantes.length > 0) {
+        try {
+          sauvegarderFacturesIntermediaires(facturesIntermediairesCourantes.map((f) =>
+            ({ ...f, datePaiement: undefined })), 0, undefined, { date: "", remiseAZero: true });
+          setFacturePayee(false);
+          setDatePaiement("");
+          setSaisieDateAcompteOuverte(false);
+          setSaisieDatePaiementCompletOuverte(false);
+          setReglementSituationNumero("");
+        } catch (erreur) {
+          console.error(erreur); alert("Les règlements n'ont pas pu être remis à zéro.");
+        }
+        return;
+      }
       setMontantEncaisse(0);
       setDatePaiement("");
 
