@@ -5288,7 +5288,7 @@ if (estAcompte) {
 
 if (estSituation) {
   lignesDevisPDF = [[
-    `Travaux réalisés à ce jour selon devis ${numeroDevis} (cumul) : ${descriptionSituation.trim()}`,
+    `Travaux réalisés à ce jour selon devis ${numeroDevis} (cumul)`,
     cumulSituationCentimes / 100,
   ]];
 }
@@ -5306,83 +5306,73 @@ if (estSituation || estSoldeAvecSituations) {
 
 lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const ligneSource = estDocumentPartiel ? undefined : lignesTravaux[index];
-
   const estSupplement = type === "facture" && !estFactureMeurisse && Boolean(
     ligneSource?.travauxSupplementaires ||
     (!ligneSource && /supplémentaires/i.test(designationBrute))
   );
-  // La mention est un repère discret au-dessus du titre, jamais son préfixe.
-  const designation = designationBrute;
-
-  const detailsLimites =
-  estFactureMeurisse || estDocumentPartiel
-    ? []
-    : ligneSource
-    ? detailsTravaux(ligneSource)
+  const precisionsSituation = estSituation && index === 0;
+  const detailsLimites = estFactureMeurisse || estDocumentPartiel ? []
+    : ligneSource ? detailsTravaux(ligneSource)
     : designationBrute.includes("déplacement")
-    ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`]
-    : [];
+      ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`] : [];
 
-  const detail = detailsLimites.map((t) => `• ${t}`).join("\n");
-
-  if (estSupplement) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
-  }
-  const designationCoupe = doc.splitTextToSize(designation, estSupplement ? 145 : 100);
-  if (estSupplement) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-  }
-  const detailCoupe = doc.splitTextToSize(detail, 145);
-
-  const hauteur = estSupplement
-    ? 12 + designationCoupe.length * 3.8 + detailCoupe.length * 3.6
-    : 4 + designationCoupe.length * 4 + detailCoupe.length * 3 + 2;
-
-  // Marge basse sûre : aucune ligne ne descend dans la zone non imprimable.
-  if (y + hauteur > 274) {
-    doc.addPage();
-    page += 1;
-    y = 35;
-    enteteTableau();
-  }
-
-  if (estSupplement) {
-    y += 2;
-    doc.setFillColor(238, 244, 245);
-    doc.roundedRect(15, y - 2, 45, 5.2, 1.3, 1.3, "F");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(51, 88, 100);
-    doc.text("TRAVAUX SUPPLÉMENTAIRES", 17, y + 1.4);
-    y += 7;
-  }
+  // Mesurer avec la police réellement utilisée, puis avancer d'un interligne explicite.
+  // Aucun tableau de lignes n'est dessiné avec l'interligne implicite de jsPDF.
+  const tailleTitre = estSupplement ? 9.5 : 10;
+  const interligneTitre = 4.3;
+  const tailleDetail = precisionsSituation ? 9 : 8;
+  const interligneDetail = precisionsSituation ? 3.9 : 3.6;
   doc.setFont("helvetica", "bold");
-doc.setFontSize(estSupplement ? 9.5 : 10);
-doc.setTextColor(0);
-doc.text(designationCoupe, 15, y);
+  doc.setFontSize(tailleTitre);
+  const designationCoupe: string[] = doc.splitTextToSize(designationBrute, 145);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(tailleDetail);
+  const texteDetail = precisionsSituation ? descriptionSituation.trim()
+    : detailsLimites.map((t) => `• ${t}`).join("\n");
+  const detailCoupe: string[] = texteDetail ? texteDetail.split(/\r?\n/).flatMap((paragraphe) =>
+    paragraphe ? doc.splitTextToSize(paragraphe, precisionsSituation ? 174 : 169) : [""]
+  ) : [];
+  const hauteur = (estSupplement ? 9 : 0) + designationCoupe.length * interligneTitre +
+    (detailCoupe.length ? 2 + detailCoupe.length * interligneDetail : 0) + 4;
+  const debutPageTableau = 35 + 10.8;
+  const nouvellePageLigne = () => {
+    doc.addPage(); page += 1; y = 35; enteteTableau();
+  };
+  if (y + hauteur > 250 && y > debutPageTableau + 0.1) nouvellePageLigne();
 
-// 👉 PRIX UNIQUE propre
-doc.setFont("helvetica", "normal");
-doc.setFontSize(9.5);
-doc.text(`${formatMontant(montant)} €`, 190, y, { align: "right" });
-
- y += designationCoupe.length * (estSupplement ? 3.8 : 3.5);
-
-  if (detailCoupe.length > 0) {
-    doc.setFont("helvetica", "normal");
-doc.setFontSize(8);
-doc.setTextColor(120);
-doc.text(detailCoupe, 20, y);
-
-y += detailCoupe.length * (estSupplement ? 3.6 : 3.5);
+  if (estSupplement) {
+    if (y + 9 + interligneTitre > 250) nouvellePageLigne();
+    doc.setFillColor(238, 244, 245);
+    doc.roundedRect(15, y, 45, 5.2, 1.3, 1.3, "F");
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+    doc.setTextColor(51, 88, 100);
+    doc.text("TRAVAUX SUPPLÉMENTAIRES", 17, y + 3.4);
+    y += 9;
   }
-
+  designationCoupe.forEach((texte, numeroLigne) => {
+    if (y + interligneTitre > 250) nouvellePageLigne();
+    doc.setFont("helvetica", "bold"); doc.setFontSize(tailleTitre); doc.setTextColor(0);
+    doc.text(texte, 15, y);
+    if (numeroLigne === 0) {
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+      doc.text(`${formatMontant(montant)} €`, 190, y, { align: "right" });
+    }
+    y += interligneTitre;
+  });
+  if (detailCoupe.length) {
+    y += 2;
+    detailCoupe.forEach((texte) => {
+      if (y + interligneDetail > 250) nouvellePageLigne();
+      doc.setFont("helvetica", "normal"); doc.setFontSize(tailleDetail);
+      doc.setTextColor(precisionsSituation ? 55 : 120);
+      if (texte) doc.text(texte, precisionsSituation ? 15 : 20, y);
+      y += interligneDetail;
+    });
+  }
+  // Séparateur après le dernier texte, puis marge avant la prochaine désignation.
   doc.setDrawColor(230);
-  doc.line(15, y - 2, 195, y - 2);
-
-  y += estSupplement ? 3 : 2;
+  doc.line(15, y + 0.5, 195, y + 0.5);
+  y += 4;
 });
 
 // ================= BLOC TOTAL MIS EN VALEUR =================
