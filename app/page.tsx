@@ -1073,6 +1073,41 @@ const SEUILS_CA_SERVICES: Record<number, { tva: number; tvaMajore: number; micro
   2026: { tva: 37500, tvaMajore: 41250, micro: 83600 },
 };
 
+// Une entrée par règlement réel, commune au détail, au graphique et au suivi annuel.
+function encaissementsDuMois(dossiers: Dossier[], annee: number, mois: number) {
+  const devisArchives = new Set(dossiers.map((d) => d.devisOrigineId).filter((id) => id !== undefined));
+  const resultat: { cle: string; dossierId: number; numero: string; devis: string;
+    client: string; chantier: string; date: string; nature: string; montant: number }[] = [];
+  for (const d of dossiers) {
+    if (devisArchives.has(d.id)) continue;
+    const encaisse = Number(d.montantEncaisse || 0);
+    if (!Number.isFinite(encaisse) || encaisse <= 0) continue;
+    let acompte = Number(d.montantAcompteEncaisse || 0);
+    let dateAcompte = d.dateAcompte || "";
+    if (acompte <= 0 && !d.facturePayee && d.datePaiement) {
+      acompte = encaisse;
+      dateAcompte = d.datePaiement;
+    }
+    const ajouter = (nature: string, montant: number, date: string, numero: string) => {
+      const dateReelle = parseDateFr(date);
+      if (!Number.isFinite(montant) || montant <= 0 || !dateReelle ||
+        dateReelle.getFullYear() !== annee || dateReelle.getMonth() !== mois) return;
+      resultat.push({ cle: `${d.id}-${nature}`, dossierId: d.id,
+        numero: numero || d.numeroDevis || "Sans numéro", devis: d.numeroDevis || "",
+        client: d.client || d.clientFinalNom || "Client non renseigné",
+        chantier: [d.referenceChantier, d.clientFinalNom || d.locataire || d.proprietaire,
+          d.clientFinalAdresse || d.adresse, d.complementAdresse].filter(Boolean).join(" — "),
+        date, nature, montant: Math.round(montant * 100) / 100 });
+    };
+    ajouter("Acompte", acompte, dateAcompte, d.factureAcompte?.numero || "");
+    if (d.facturePayee && Number.isFinite(acompte)) {
+      ajouter(acompte > 0 ? "Solde" : "Paiement complet", Math.max(0, encaisse - acompte),
+        d.datePaiement || "", d.numeroFacture || "");
+    }
+  }
+  return resultat.sort((a, b) => (parseDateFr(a.date)?.getTime() || 0) - (parseDateFr(b.date)?.getTime() || 0));
+}
+
 function calculerSuiviAnnuelCA(
   dossiers: Dossier[], corrections: CorrectionsEncaissementsMensuels,
   annee: number, aujourdHui = new Date()
@@ -1080,27 +1115,8 @@ function calculerSuiviAnnuelCA(
   const dernierMois = annee < aujourdHui.getFullYear() ? 11
     : annee === aujourdHui.getFullYear() ? aujourdHui.getMonth() : -1;
   const mois = Array.from({ length: Math.max(0, dernierMois + 1) }, (_, index) => {
-    let centimes = 0;
-    for (const dossier of dossiers) {
-      const encaisse = Number(dossier.montantEncaisse || 0);
-      if (!Number.isFinite(encaisse) || encaisse <= 0) continue;
-      let acompte = Number(dossier.montantAcompteEncaisse || 0);
-      let dateAcompte = parseDateFr(dossier.dateAcompte || "");
-      // Même compatibilité des anciens acomptes que le graphique mensuel.
-      if (acompte <= 0 && !dossier.facturePayee && dossier.datePaiement) {
-        acompte = encaisse;
-        dateAcompte = parseDateFr(dossier.datePaiement);
-      }
-      const dansLeMois = (date: Date | null) => Boolean(date &&
-        date.getFullYear() === annee && date.getMonth() === index);
-      if (Number.isFinite(acompte) && acompte > 0 && dansLeMois(dateAcompte)) {
-        centimes += Math.round(acompte * 100);
-      }
-      if (dossier.facturePayee && dossier.datePaiement && Number.isFinite(acompte)) {
-        const solde = Math.max(0, encaisse - acompte);
-        if (dansLeMois(parseDateFr(dossier.datePaiement))) centimes += Math.round(solde * 100);
-      }
-    }
+    const centimes = encaissementsDuMois(dossiers, annee, index)
+      .reduce((somme, e) => somme + Math.round(e.montant * 100), 0);
     const correction = corrections[cleMoisStatistiques(annee, index)];
     return { mois: index, montant: correction ?? centimes / 100, corrige: correction !== undefined };
   });
@@ -3769,46 +3785,10 @@ const tableauMensuel = useMemo(() => {
     );
   });
 
-  const facturesDuMois = dossiersDuMois.filter(
-    (d) => d.numeroFacture && (d.montantEncaisse || 0) > 0
-  );
-
-  const devisDuMoisSansFacture = dossiersDuMois.filter((d) => {
-    if (!d.numeroDevis || d.numeroFacture) return false;
-    if ((d.montantEncaisse || 0) <= 0) return false;
-
-    const factureLieeExiste = historique.some(
-      (f) => f.id !== d.id && (f.numeroFacture || f.devisOrigineId !== undefined) && f.numeroDevis === d.numeroDevis
-    );
-
-    return !factureLieeExiste;
-  });
-
-  const encaissementsUniques = [...facturesDuMois, ...devisDuMoisSansFacture].map(
-    (d) => ({
-      cle: `${d.numeroFacture || d.numeroDevis}-${d.montantEncaisse}`,
-      numero: d.numeroFacture || d.numeroDevis || "Sans numéro",
-      client:
-        d.clientFinalNom ||
-        d.locataire ||
-        d.proprietaire ||
-        d.client ||
-        "Client non renseigné",
-      chantier:
-        d.clientFinalAdresse ||
-        d.adresse ||
-        d.complementAdresse ||
-        d.referenceChantier ||
-        "",
-      date: d.datePaiement || d.date || "",
-      montant: d.montantEncaisse || 0,
-    })
-  );
-
+  const encaissementsUniques = encaissementsDuMois(dossiersActifs, anneeSelectionnee, moisSelectionne);
   const totalEncaisseAutomatique = encaissementsUniques.reduce(
-    (somme, e) => somme + e.montant,
-    0
-  );
+    (somme, e) => somme + Math.round(e.montant * 100), 0
+  ) / 100;
 
   const totalDepenses = depensesDuMois.reduce(
     (somme, d) => somme + (d.montant || 0),
@@ -3856,38 +3836,6 @@ const tableauMensuel = useMemo(() => {
   };
 }, [dossiersActifs, depenses, moisSelectionne, anneeSelectionnee, correctionsEncaissementsMensuels]);
 
-<div className="rounded-xl border border-slate-200 bg-white p-3">
-  <button
-    type="button"
-    onClick={() => setDetailsEncaissementsOuverts(!detailsEncaissementsOuverts)}
-    className="flex w-full items-center justify-between text-left font-semibold text-slate-800"
-  >
-    <span>Détail des encaissements</span>
-    <span>{detailsEncaissementsOuverts ? "▲ Masquer" : "▼ Afficher"}</span>
-  </button>
-
-  {detailsEncaissementsOuverts && (
-    <div className="mt-3 space-y-2 text-sm">
-      {tableauMensuel.encaissementsUniques.length === 0 ? (
-        <p className="text-slate-500">Aucun encaissement ce mois-ci.</p>
-      ) : (
-        tableauMensuel.encaissementsUniques.map((e: any) => (
-          <div
-            key={e.cleDoublon}
-            className="rounded-lg border border-slate-200 bg-slate-50 p-2"
-          >
-            <p className="font-semibold text-slate-900">
-              {e.numero} — {formatMontant(e.montant)} €
-            </p>
-            <p className="text-slate-600">{e.client}</p>
-            <p className="text-slate-500">{e.chantier}</p>
-            <p className="text-slate-400">Date : {e.date}</p>
-          </div>
-        ))
-      )}
-    </div>
-  )}
-</div>
 
 const depensesTriees = useMemo(() => {
   return [...depenses].sort((a, b) => {
@@ -3986,104 +3934,8 @@ const donneesGraphique = useMemo(() => {
     const mois = dateMois.getMonth();
     const annee = dateMois.getFullYear();
 
-    // ============================================================
-    // ENCAISSEMENTS RÉELS DU MOIS
-    //
-    // Chaque dossier peut maintenant générer :
-    //
-    // 1 - un acompte à sa vraie date
-    // 2 - un solde à sa vraie date
-    //
-    // montantEncaisse reste le TOTAL encaissé sur le dossier.
-    // On ne modifie donc pas le fonctionnement actuel.
-    // ============================================================
-
-    let encaissements = 0;
-
-    dossiersActifs.forEach((d) => {
-      if ((d.montantEncaisse || 0) <= 0) {
-        return;
-      }
-
-      // ==========================================================
-      // ACOMPTE
-      // ==========================================================
-
-      let montantAcompteReel =
-        Number(d.montantAcompteEncaisse || 0);
-
-      let dateAcompteReelle =
-        parseDateFr(d.dateAcompte || "");
-
-      /*
-       * COMPATIBILITÉ AVEC LES DOSSIERS EXISTANTS :
-       *
-       * Si le dossier n'est pas encore totalement payé,
-       * mais possède déjà un montant encaissé et une datePaiement,
-       * il s'agit très probablement de l'acompte enregistré
-       * avec l'ancien système.
-       *
-       * On peut donc encore le récupérer automatiquement.
-       */
-      if (
-        montantAcompteReel <= 0 &&
-        !d.facturePayee &&
-        (d.montantEncaisse || 0) > 0 &&
-        d.datePaiement
-      ) {
-        montantAcompteReel =
-          Number(d.montantEncaisse || 0);
-
-        dateAcompteReelle =
-          parseDateFr(d.datePaiement || "");
-      }
-
-      // Ajout de l'acompte dans SON mois réel
-      if (
-        montantAcompteReel > 0 &&
-        dateAcompteReelle &&
-        dateAcompteReelle.getMonth() === mois &&
-        dateAcompteReelle.getFullYear() === annee
-      ) {
-        encaissements += montantAcompteReel;
-      }
-
-      // ==========================================================
-      // SOLDE / PAIEMENT COMPLET
-      // ==========================================================
-
-      if (d.facturePayee && d.datePaiement) {
-        const dateSolde =
-          parseDateFr(d.datePaiement || "");
-
-        /*
-         * montantEncaisse contient le total reçu.
-         *
-         * Si acompte :
-         * 1500 total encaissé
-         * - 500 acompte
-         * = 1000 solde
-         *
-         * Si aucun acompte :
-         * 1500 - 0
-         * = 1500 paiement complet
-         */
-        const montantSolde = Math.max(
-          0,
-          Number(d.montantEncaisse || 0) -
-            montantAcompteReel
-        );
-
-        if (
-          montantSolde > 0 &&
-          dateSolde &&
-          dateSolde.getMonth() === mois &&
-          dateSolde.getFullYear() === annee
-        ) {
-          encaissements += montantSolde;
-        }
-      }
-    });
+    let encaissements = encaissementsDuMois(dossiersActifs, annee, mois)
+      .reduce((somme, e) => somme + Math.round(e.montant * 100), 0) / 100;
 
     // ============================================================
     // DÉPENSES RÉELLES DU MOIS
@@ -6730,6 +6582,44 @@ return (
     <MiniResult titre="Dépenses" valeur={`${formatMontant(tableauMensuel.totalDepenses)} €`} couleur="text-red-700" />
 <MiniResult titre="Solde réel" valeur={`${formatMontant(tableauMensuel.soldeReel)} €`} couleur="text-blue-700" />
 <MiniResult titre="URSSAF" valeur={`${formatMontant(tableauMensuel.estimationUrssaf)} €`} />
+  </div>
+
+  <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+    <button type="button" aria-expanded={detailsEncaissementsOuverts}
+      aria-controls="detail-encaissements-mois"
+      onClick={() => setDetailsEncaissementsOuverts((ouvert) => !ouvert)}
+      className="flex w-full items-center justify-between gap-2 text-left font-semibold text-slate-800">
+      <span>Détail des encaissements ({tableauMensuel.encaissementsUniques.length})</span>
+      <span>{detailsEncaissementsOuverts ? "▲ Masquer" : "▼ Afficher"}</span>
+    </button>
+    {detailsEncaissementsOuverts && (
+      <div id="detail-encaissements-mois" className="mt-3 space-y-2 text-sm">
+        {tableauMensuel.encaissementsUniques.length === 0 && (
+          <p className="text-slate-500">Aucun règlement daté enregistré pour ce mois.</p>
+        )}
+        {tableauMensuel.encaissementsUniques.map((e) => (
+          <div key={e.cle} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-100 py-2 last:border-0">
+            <div className="min-w-0 flex-1 basis-48">
+              <p className="truncate font-semibold text-slate-900" title={e.chantier || e.client}>{e.client}</p>
+              <p className="text-xs text-slate-500">{e.date} · {e.nature} · {e.numero}
+                {e.devis && e.devis !== e.numero ? ` · ${e.devis}` : ""}</p>
+            </div>
+            <span className="whitespace-nowrap font-semibold text-green-700">{formatMontant(e.montant)} €</span>
+            <button type="button" className="rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100" onClick={() => {
+              const dossier = historique.find((d) => d.id === e.dossierId);
+              if (dossier) rechargerDossier(dossier);
+            }}>Ouvrir</button>
+          </div>
+        ))}
+        <p className="font-semibold text-slate-800">Total des règlements : {formatMontant(tableauMensuel.totalEncaisseAutomatique)} €</p>
+        {tableauMensuel.correctionManuelle && (
+          <div className="rounded-lg bg-amber-50 p-3 text-amber-900">
+            <p>Correction manuelle : {formatMontant(tableauMensuel.totalEncaisse - tableauMensuel.totalEncaisseAutomatique)} € d’écart avec les règlements enregistrés.</p>
+            <p>Total retenu pour le mois : {formatMontant(tableauMensuel.totalEncaisse)} €. La correction n’est rattachée à aucun client.</p>
+          </div>
+        )}
+      </div>
+    )}
   </div>
 
   <SuiviAnnuelCA annee={anneeSelectionnee} suivi={suiviAnnuelCA} />
