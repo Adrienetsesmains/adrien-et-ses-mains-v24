@@ -1438,6 +1438,301 @@ function totalFournituresIncluses(lignes: LigneTravaux[], modeClient: string): n
   return centimes / 100;
 }
 
+// ================= PLANNING DES CHANTIERS =================
+type PlanningEdition = {
+  client?: string; prestation?: string; heures?: number; montant?: number;
+  acompte?: number; dateAcompte?: string; numero?: string; valide?: boolean;
+  commentaire?: string; pasAvant?: string; fixe?: string; termine?: boolean;
+};
+type PlanningLibre = PlanningEdition & { id: string };
+type PlanningDonnees = {
+  editions: Record<string, PlanningEdition>; libres: PlanningLibre[]; ordre: string[];
+  debut: string; heuresJour: number; heuresMois: number; indisponibles: string[];
+};
+type PlanningLigne = Required<Pick<PlanningEdition, "client" | "prestation" | "heures" | "montant" | "acompte" | "dateAcompte" | "numero" | "valide" | "commentaire" | "pasAvant" | "fixe" | "termine">> & {
+  id: string; manuel: boolean; dossierId?: number; encaisse: number;
+};
+type PlanningCreneau = { date: string; heures: number; id: string };
+const planningISO = (date: Date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+const planningDate = (date: string) => new Date(`${date}T12:00:00`);
+const planningDateValide = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(planningDate(v).getTime()) && planningISO(planningDate(v)) === v;
+const planningNombre = (v: unknown, defaut = 0) => typeof v === "number" && Number.isFinite(v) ? Math.max(0, v) : defaut;
+function normaliserPlanning(v: any): PlanningDonnees {
+  const nettoyer = (e: any): PlanningEdition => {
+    const r: PlanningEdition = {};
+    if (!e || typeof e !== "object") return r;
+    for (const k of ["client","prestation","numero","commentaire"] as const) if (typeof e[k] === "string") r[k] = e[k];
+    for (const k of ["heures","montant","acompte"] as const) if (typeof e[k] === "number" && Number.isFinite(e[k])) r[k] = planningNombre(e[k]);
+    for (const k of ["valide","termine"] as const) if (typeof e[k] === "boolean") r[k] = e[k];
+    for (const k of ["dateAcompte","pasAvant","fixe"] as const) if (e[k] === "" || planningDateValide(e[k])) r[k] = e[k];
+    return r;
+  };
+  return {
+    editions: Object.fromEntries(Object.entries(v?.editions || {}).filter(([k]) => /^d-\d+$/.test(k)).map(([k,e]) => [k,nettoyer(e)])),
+    libres: Array.isArray(v?.libres) ? v.libres.filter((e: any) => typeof e?.id === "string" && e.id.startsWith("m-")).map((e: any) => ({...nettoyer(e), id:e.id})) : [],
+    ordre: Array.isArray(v?.ordre) ? Array.from(new Set<string>(v.ordre.filter((s: unknown) => typeof s === "string"))) : [],
+    debut: planningDateValide(v?.debut) ? v.debut : planningISO(new Date()),
+    heuresJour: Math.min(12,Math.max(0.5,planningNombre(v?.heuresJour,7))),
+    heuresMois: Math.min(300,Math.max(1,planningNombre(v?.heuresMois,105))),
+    indisponibles: Array.isArray(v?.indisponibles) ? Array.from(new Set<string>(v.indisponibles.filter(planningDateValide))) : [],
+  };
+}
+function construireLignesPlanning(historique: Dossier[], p: PlanningDonnees): PlanningLigne[] {
+  const resultat: PlanningLigne[] = [];
+  const groupes = new Map<string,Dossier[]>();
+  for (const d of historique) {
+    if (!d.numeroDevis || ["rdv","rappel"].includes(d.typeEvenement || "") || ["rdv","rappel","estimation_rapide"].includes(d.statutDevis)) continue;
+    const k = String(d.devisOrigineId ?? d.id);
+    groupes.set(k,[...(groupes.get(k) || []), d]);
+  }
+  for (const [racine, groupe] of groupes) {
+    const origine = historique.find(d => String(d.id) === racine) || groupe[0];
+    const courant = groupe.find(d => d.devisOrigineId !== undefined) || origine;
+    if (origine.statutDevis === "refuse") continue;
+    const id = `d-${racine}`, e = p.editions[id] || {};
+    const acompte = Math.max(planningNombre(origine.montantAcompteEncaisse),planningNombre(courant.montantAcompteEncaisse));
+    resultat.push({
+      id, manuel:false, dossierId:origine.id,
+      client:e.client ?? origine.client, prestation:e.prestation ?? "",
+      heures:e.heures ?? (courant.lignesTravaux || []).reduce((s,l) => s + planningNombre(l.heuresUnite) * (l.q1 || 1),0),
+      montant:e.montant ?? origine.total ?? 0, acompte:e.acompte ?? acompte,
+      dateAcompte:e.dateAcompte ?? origine.dateAcompte ?? courant.dateAcompte ?? "",
+      numero:e.numero ?? origine.numeroDevis,
+      valide:e.valide ?? (acompte > 0 || origine.statutDevis === "accepte" || courant.facturePayee),
+      commentaire:e.commentaire ?? "", pasAvant:e.pasAvant ?? "", fixe:e.fixe ?? "",
+      termine:e.termine ?? (courant.statutChantier === "termine" || Boolean(courant.facturePayee && courant.numeroFacture)),
+      encaisse:Math.max(planningNombre(courant.montantEncaisse),planningNombre(origine.montantEncaisse)),
+    });
+  }
+  for (const e of p.libres) resultat.push({id:e.id,manuel:true,client:e.client ?? "Nouveau client",prestation:e.prestation ?? "",heures:e.heures ?? 7,montant:e.montant ?? 0,acompte:e.acompte ?? 0,dateAcompte:e.dateAcompte ?? "",numero:e.numero ?? "",valide:e.valide ?? (planningNombre(e.acompte)>0),commentaire:e.commentaire ?? "",pasAvant:e.pasAvant ?? "",fixe:e.fixe ?? "",termine:e.termine ?? false,encaisse:e.acompte ?? 0});
+  const rang = new Map(p.ordre.map((id,i) => [id,i]));
+  return resultat.sort((a,b) => (rang.get(a.id) ?? 1e9) - (rang.get(b.id) ?? 1e9) || (a.dossierId ?? 0) - (b.dossierId ?? 0));
+}
+function calculerPlanning(lignes: PlanningLigne[], p: PlanningDonnees, aujourdhui = planningISO(new Date())) {
+  const creneaux: PlanningCreneau[] = [], alertes: string[] = [];
+  const jourUtilise = new Map<string,number>(), moisUtilise = new Map<string,number>();
+  const indisponibles = new Set(p.indisponibles);
+  const debut = p.debut < aujourdhui ? aujourdhui : p.debut;
+  const limite = planningDate(debut); limite.setFullYear(limite.getFullYear()+10);
+  const dernierJour = planningISO(limite);
+  const ouvrable = (date: string) => { const j = planningDate(date).getDay(); return j >= 1 && j <= 4 && !indisponibles.has(date); };
+  const reserver = (l: PlanningLigne, date: string, heures: number) => {
+    creneaux.push({id:l.id,date,heures});
+    jourUtilise.set(date,(jourUtilise.get(date)||0)+heures);
+    const m = date.slice(0,7); moisUtilise.set(m,(moisUtilise.get(m)||0)+heures);
+  };
+  const actives = lignes.filter(l => l.valide && !l.termine);
+  // Les dates fixes sont réservées avant de placer les chantiers flexibles.
+  for (const l of actives.filter(l => l.fixe)) {
+    if (!l.heures) { alertes.push(`${l.client} : renseigner les heures prévues.`); continue; }
+    if (l.fixe < debut) alertes.push(`${l.client} : date fixe antérieure au début du planning.`);
+    if (!ouvrable(l.fixe)) alertes.push(`${l.client} : date fixe sur un jour non travaillé.`);
+    if (l.pasAvant && l.fixe < l.pasAvant) alertes.push(`${l.client} : date fixe avant la disponibilité indiquée.`);
+    let reste = l.heures, d = planningDate(l.fixe), n = 0;
+    while (reste > 0.001 && n++ < 3660) {
+      const date = planningISO(d);
+      if (n === 1 || ouvrable(date)) {
+        const h = Math.min(p.heuresJour,reste); reserver(l,date,h); reste -= h;
+      }
+      d.setDate(d.getDate()+1);
+    }
+    if (reste > 0.001) alertes.push(`${l.client} : durée supérieure à l'horizon de dix ans.`);
+  }
+  // La file garde son ordre, avec partage possible d'une journée entre deux petits chantiers.
+  let curseur = debut;
+  for (const l of actives.filter(l => !l.fixe)) {
+    if (!l.heures) { alertes.push(`${l.client} : renseigner les heures prévues.`); continue; }
+    let reste = l.heures, d = planningDate(l.pasAvant && l.pasAvant > curseur ? l.pasAvant : curseur);
+    while (reste > 0.001 && planningISO(d) <= dernierJour) {
+      const date = planningISO(d), mois = date.slice(0,7);
+      const place = Math.min(p.heuresJour-(jourUtilise.get(date)||0),p.heuresMois-(moisUtilise.get(mois)||0));
+      if (ouvrable(date) && place > 0.001) {
+        const h = Math.min(place,reste); reserver(l,date,h); reste -= h; curseur = date;
+      }
+      if (reste > 0.001) d.setDate(d.getDate()+1);
+    }
+    if (reste > 0.001) alertes.push(`${l.client} : placement incomplet, horizon de dix ans atteint.`);
+  }
+  for (const [date,h] of jourUtilise) if (h > p.heuresJour+0.001) alertes.push(`${date} : chevauchement des dates fixes (${h.toFixed(1)} h).`);
+  for (const [mois,h] of moisUtilise) if (h > p.heuresMois+0.001) alertes.push(`${mois} : dates fixes au-delà de la capacité mensuelle (${h.toFixed(1)} h).`);
+  const dates = creneaux.map(c => c.date).filter(d => d >= debut).sort();
+  return {creneaux,alertes,fin:dates.at(-1) || "",jourUtilise,moisUtilise};
+}
+
+function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
+  historique:Dossier[]; donnees:PlanningDonnees; onChange:(p:PlanningDonnees)=>void; ouvrir:(d:Dossier)=>void;
+}) {
+  const [ouvert,setOuvert] = useState(false);
+  const [vue,setVue] = useState<"tableau"|"annee"|"mois">("tableau");
+  const [annee,setAnnee] = useState(new Date().getFullYear());
+  const [mois,setMois] = useState(new Date().getMonth());
+  const [blocage,setBlocage] = useState("");
+  const [recherche,setRecherche] = useState("");
+  const [archives,setArchives] = useState(false);
+  const [selection,setSelection] = useState("");
+  const [glisse,setGlisse] = useState<string|null>(null);
+  const [precedent,setPrecedent] = useState<PlanningDonnees|null>(null);
+  const lignes = useMemo(()=>construireLignesPlanning(historique,donnees),[historique,donnees]);
+  const calcul = useMemo(()=>calculerPlanning(lignes,donnees),[lignes,donnees]);
+  const modifier = (p:PlanningDonnees) => {setPrecedent(donnees);onChange(p);};
+  const editer = (id:string,patch:PlanningEdition) => modifier(id.startsWith("m-")
+    ? {...donnees,libres:donnees.libres.map(l=>l.id===id?{...l,...patch}:l)}
+    : {...donnees,editions:{...donnees.editions,[id]:{...donnees.editions[id],...patch}}});
+  const deplacer = (id:string,cible:string) => {
+    if(id===cible) return;
+    const ordre=lignes.map(l=>l.id), a=ordre.indexOf(id), b=ordre.indexOf(cible);
+    if(a<0||b<0) return;
+    ordre.splice(a,1);ordre.splice(b,0,id);modifier({...donnees,ordre});
+  };
+  const euros=(n:number)=>`${formatMontant(n)} €`;
+  const heures=(n:number)=>n.toLocaleString("fr-FR",{maximumFractionDigits:1});
+  const dateFR=(d:string)=>d?planningDate(d).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
+  const periode=(l:PlanningLigne)=>{
+    const dates=calcul.creneaux.filter(c=>c.id===l.id).map(c=>c.date).sort();
+    return dates.length ? `${dateFR(dates[0])}${dates.at(-1)!==dates[0]?` → ${dateFR(dates.at(-1)!)}`:""}${l.fixe?" · fixe":" · estimé"}` : l.termine?"Terminé":l.valide?"À renseigner":"En attente d’accord";
+  };
+  const aFaire=lignes.filter(l=>l.valide&&!l.termine);
+  const totalH=aFaire.reduce((s,l)=>s+l.heures,0);
+  const total=aFaire.reduce((s,l)=>s+l.montant,0);
+  const dejaRecu=aFaire.reduce((s,l)=>s+Math.max(l.encaisse,l.acompte),0);
+  const solde=aFaire.reduce((s,l)=>s+Math.max(0,l.montant-Math.max(l.encaisse,l.acompte)),0);
+  const filtrees=lignes.filter(l=>(archives||!l.termine)&&`${l.client} ${l.prestation} ${l.numero}`.toLowerCase().includes(recherche.toLowerCase()));
+  const calendrierJour = (date:string) => calcul.creneaux.filter(c=>c.date===date);
+  const couleur=(l:PlanningLigne)=>l.manuel?"#fff0da":l.fixe?"#ede9fe":"#dceee9";
+  const resumeDate = (date:string) => calendrierJour(date).map(c=>{
+    const l=lignes.find(l=>l.id===c.id)!;return `${l.client} — ${l.prestation || l.numero} (${heures(c.heures)} h)`;
+  }).join("\n");
+  const moisCalendrier=(m:number,compact=false)=>{
+    const nb=new Date(annee,m+1,0).getDate(), decalage=(new Date(annee,m,1).getDay()+6)%7;
+    return <div key={m} className="planning-month rounded-xl border bg-white p-3">
+      <button type="button" className="mb-2 font-bold capitalize" onClick={()=>{setMois(m);setVue("mois");}}>{new Date(annee,m,1).toLocaleDateString("fr-FR",{month:"long"})} {annee}</button>
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-500">{["L","M","M","J","V","S","D"].map((j,i)=><span key={i}>{j}</span>)}</div>
+      <div className="grid grid-cols-7 gap-1">{Array.from({length:decalage},(_,i)=><span key={`vide-${i}`}/>)}
+      {Array.from({length:nb},(_,i)=>{
+        const date=`${annee}-${String(m+1).padStart(2,"0")}-${String(i+1).padStart(2,"0")}`;
+        const cs=calendrierJour(date), ferme=planningDate(date).getDay()===5||[0,6].includes(planningDate(date).getDay())||donnees.indisponibles.includes(date);
+        const manuel=cs.some(c=>lignes.find(l=>l.id===c.id)?.manuel), fixe=cs.some(c=>lignes.find(l=>l.id===c.id)?.fixe);
+        const surcharge=(calcul.jourUtilise.get(date)||0)>donnees.heuresJour+.001;
+        return <button type="button" key={date} title={resumeDate(date)|| (ferme?"Indisponible / hors chantier":"Disponible")}
+          onClick={()=>setSelection(date)} style={{background:surcharge?"#fee2e2":cs.length?(manuel?"#fff0da":fixe?"#ede9fe":"#dceee9"):ferme?"#f1f5f9":"white",outline:selection===date?"2px solid #0f766e":undefined}}
+          className={`rounded border p-1 text-left ${compact?"min-h-7 text-[10px]":"min-h-24 text-xs"}`}>
+          <span className="font-semibold">{i+1}</span>
+          {!compact&&cs.map((c,k)=>{const l=lignes.find(l=>l.id===c.id)!;return <div key={k} className="mt-1 break-words rounded px-1" style={{background:couleur(l)}}>{l.client}<br/>{heures(c.heures)} h {l.fixe?"· fixe":""}</div>;})}
+          {compact&&cs.length>0&&<span className="block text-[8px]">{heures(cs.reduce((s,c)=>s+c.heures,0))}h</span>}
+        </button>;
+      })}</div>
+      <p className="mt-2 text-xs text-slate-500">{heures(calcul.moisUtilise.get(`${annee}-${String(m+1).padStart(2,"0")}`)||0)} / {donnees.heuresMois} h</p>
+    </div>;
+  };
+  const imprimer=()=>{
+    const textePDF=(t:string)=>t.replace(/[\u202f\u00a0]/g," ").replace(/→/g,"au");
+    const doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
+    const titre=()=>{doc.setFontSize(16);doc.setTextColor(20,70,65);doc.text("Adrien et ses mains — Planning des chantiers",10,13);doc.setFontSize(9);doc.setTextColor(60);doc.text(`Édité le ${dateFR(planningISO(new Date()))} · ${donnees.heuresJour} h/j · lundi à jeudi · ${donnees.heuresMois} h/mois`,10,20);};
+    titre();doc.setFontSize(10);doc.text(`${aFaire.length} chantiers validés · ${heures(totalH)} h · ${euros(total)} · Reste à encaisser : ${euros(solde)}`,10,28);
+    doc.text(`Fin prévisionnelle : ${dateFR(calcul.fin)}. Les dates estimées peuvent évoluer.`,10,34);
+    const largeurs=[35,36,12,17,26,23,27,22,31,48];
+    const entetes=["Client","Prestation","Heures","Statut","Devis","Total","Acompte reçu","Date acompte","Période prévue","Commentaire"];
+    let y=41;
+    const entete=()=>{let x=10;doc.setFillColor(25,80,75);doc.rect(10,y,277,8,"F");doc.setTextColor(255);doc.setFontSize(8);entetes.forEach((t,i)=>{doc.text(t,x+1,y+5);x+=largeurs[i];});doc.setTextColor(30);y+=8;};
+    entete();
+    for(const l of filtrees){
+      const valeurs=[l.client,l.prestation,heures(l.heures),l.termine?"Terminé":l.valide?"Validé":"En cours",l.numero,euros(l.montant),euros(l.acompte),dateFR(l.dateAcompte),periode(l),l.commentaire];
+      const textes=valeurs.map((v,i)=>doc.splitTextToSize(textePDF(v||"—"),largeurs[i]-2));
+      const nbLignes=Math.max(...textes.map(t=>t.length));
+      let ligneTexte=0;
+      while(ligneTexte<nbLignes){
+        if(y+9>197){doc.addPage();titre();y=27;entete();}
+        const capacite=Math.max(1,Math.floor((197-y-3)/3.4));
+        const prises=Math.min(capacite,nbLignes-ligneTexte),hauteur=Math.max(9,prises*3.4+3);
+        doc.setFillColor(l.manuel?255:245,l.manuel?240:249,l.manuel?218:248);doc.rect(10,y,277,hauteur,"F");
+        let x=10;doc.setFontSize(8);textes.forEach((t,i)=>{const part=t.slice(ligneTexte,ligneTexte+prises);if(part.length)doc.text(part,x+1,y+4);x+=largeurs[i];});y+=hauteur;ligneTexte+=prises;
+      }
+    }
+    if(vue==="annee"){
+      doc.addPage();titre();doc.setFontSize(12);doc.text(`Calendrier annuel ${annee}`,10,29);
+      doc.setFontSize(8);doc.text("Vert : prévisionnel. Orange : hors application. Violet : date fixe. Détail des clients dans le tableau.",10,35);
+      for(let m=0;m<12;m++){
+        const x0=10+(m%4)*70,y0=41+Math.floor(m/4)*51,w=9.3,h=5.5;
+        doc.setTextColor(25,80,75);doc.setFontSize(9);doc.text(new Date(annee,m,1).toLocaleDateString("fr-FR",{month:"long"}),x0,y0);
+        doc.setFontSize(6);doc.setTextColor(70);["L","M","M","J","V","S","D"].forEach((j,i)=>doc.text(j,x0+i*w+2,y0+5));
+        const decal=(new Date(annee,m,1).getDay()+6)%7,nb=new Date(annee,m+1,0).getDate();
+        for(let n=1;n<=nb;n++){
+          const k=decal+n-1,x=x0+(k%7)*w,yc=y0+7+Math.floor(k/7)*h,date=`${annee}-${String(m+1).padStart(2,"0")}-${String(n).padStart(2,"0")}`;
+          const cs=calendrierJour(date),ls=cs.map(c=>lignes.find(l=>l.id===c.id)!);
+          const ferme=[0,5,6].includes(planningDate(date).getDay())||donnees.indisponibles.includes(date);
+          if(ls.some(l=>l.manuel))doc.setFillColor(255,240,218);else if(ls.some(l=>l.fixe))doc.setFillColor(237,233,254);else if(cs.length)doc.setFillColor(220,238,233);else doc.setFillColor(ferme?238:255,ferme?238:255,ferme?238:255);
+          doc.rect(x,yc,w-.5,h-.5,"F");doc.setTextColor(35);doc.text(String(n),x+1,yc+3.5);
+        }
+      }
+    }
+    if(vue==="mois"){
+      const lesMois=[mois];
+      for(const m of lesMois){doc.addPage();titre();doc.setFontSize(14);doc.text(new Date(annee,m,1).toLocaleDateString("fr-FR",{month:"long",year:"numeric"}),10,31);
+        const depart=(new Date(annee,m,1).getDay()+6)%7, nb=new Date(annee,m+1,0).getDate();
+        const rangs=Math.ceil((depart+nb)/7), h=150/rangs,w=277/7;
+        doc.setFontSize(9);["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"].forEach((j,i)=>doc.text(j,11+i*w,39));
+        for(let n=1;n<=nb;n++){const k=depart+n-1,x=10+(k%7)*w,yc=43+Math.floor(k/7)*h,date=`${annee}-${String(m+1).padStart(2,"0")}-${String(n).padStart(2,"0")}`;
+          doc.setDrawColor(210);doc.rect(x,yc,w,h);doc.setFontSize(9);doc.text(String(n),x+1,yc+4);
+          const texte=resumeDate(date);doc.setFontSize(7);const ls=doc.splitTextToSize(texte,w-3);doc.text(ls.slice(0,Math.floor((h-7)/3)),x+1,yc+8);
+        }
+      }
+    }
+    if(calcul.alertes.length){doc.addPage();titre();doc.setFontSize(10);let ay=30;for(const a of calcul.alertes){const t=doc.splitTextToSize(a,270);if(ay+t.length*5>195){doc.addPage();titre();ay=30;}doc.text(t,10,ay);ay+=t.length*5+3;}}
+    doc.save(`Planning-chantiers-${planningISO(new Date())}.pdf`);
+  };
+  const input="w-full min-w-0 rounded border border-slate-200 bg-white/80 px-1.5 py-1 text-xs text-slate-900";
+  const bouton="rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold disabled:opacity-35";
+  return <section className="my-3 rounded-2xl border border-teal-200 bg-slate-50 p-3">
+    <button type="button" onClick={()=>setOuvert(!ouvert)} className="flex w-full items-center justify-between text-left"><span className="text-lg font-bold text-teal-950">Planning des chantiers <span className="ml-2 text-xs font-normal">{aFaire.length} validés · {heures(totalH)} h</span></span><span>{ouvert?"Masquer ▲":"Afficher ▼"}</span></button>
+    {ouvert&&<div className="mt-3 space-y-3">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">{[
+        ["Travaux validés à réaliser",euros(total)],["Déjà encaissé",euros(dejaRecu)],["Reste à encaisser",euros(solde)],["Charge restante",`${heures(totalH)} h · ${heures(totalH/donnees.heuresJour)} j`],["Fin prévisionnelle",dateFR(calcul.fin)]
+      ].map(([t,v])=><div key={t} className="rounded-xl border bg-white p-3"><p className="text-[11px] text-slate-500">{t}</p><p className="mt-1 text-base font-bold text-teal-950">{v}</p></div>)}</div>
+      <p className="text-xs text-slate-600">Charge : environ {heures(totalH/donnees.heuresMois)} mois de capacité. Les encaissements restent prévisionnels et dépendent des règlements clients. Orange : hors application. Violet : date fixe. Vert : estimé.</p>
+      <details className="rounded-xl border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold">Disponibilités et réglages</summary><div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <label className="text-xs">Début des prévisions<input aria-label="Début des prévisions" type="date" value={donnees.debut} className={input} onChange={e=>{if(planningDateValide(e.target.value))modifier({...donnees,debut:e.target.value});}}/></label>
+        <label className="text-xs">Heures par jour<input type="number" min="0.5" max="12" step="0.5" value={donnees.heuresJour} className={input} onChange={e=>modifier({...donnees,heuresJour:Math.min(12,Math.max(.5,Number(e.target.value)||7))})}/></label>
+        <label className="text-xs">Capacité mensuelle (h)<input type="number" min="1" max="300" value={donnees.heuresMois} className={input} onChange={e=>modifier({...donnees,heuresMois:Math.min(300,Math.max(1,Number(e.target.value)||105))})}/></label>
+        <label className="text-xs">Bloquer une journée<input type="date" value={blocage} className={input} onChange={e=>setBlocage(e.target.value)}/><button type="button" disabled={!blocage} className={bouton} onClick={()=>{modifier({...donnees,indisponibles:Array.from(new Set([...donnees.indisponibles,blocage]))});setBlocage("");}}>Ajouter l’absence</button></label>
+      </div><p className="mt-2 text-xs text-slate-500">Chantiers du lundi au jeudi. Vendredi réservé aux devis. Week-ends exclus. Les prévisions flexibles partent au plus tôt d’aujourd’hui. Les rendez-vous de l’ancien calendrier ne bloquent pas automatiquement une journée : ajoute ici tes indisponibilités.</p>
+      <div className="mt-2 flex flex-wrap gap-2">{[...donnees.indisponibles].sort().map(d=><button key={d} className={bouton} onClick={()=>modifier({...donnees,indisponibles:donnees.indisponibles.filter(x=>x!==d)})}>{dateFR(d)} · Libérer</button>)}</div></details>
+      <div className="flex flex-wrap items-center gap-2">
+        {(["tableau","annee","mois"] as const).map(v=><button key={v} className={`${bouton} ${vue===v?"!bg-teal-800 !text-white":""}`} onClick={()=>setVue(v)}>{v==="tableau"?"Tableau":v==="annee"?"Calendrier annuel":"Vue mensuelle"}</button>)}
+        <button className={bouton} onClick={()=>{const id=`m-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;modifier({...donnees,libres:[...donnees.libres,{id,client:"Nouveau client",prestation:"",heures:7,valide:false}],ordre:[...lignes.map(l=>l.id),id]});setVue("tableau");}}>+ Ligne hors application</button>
+        <button className={bouton} onClick={imprimer}>PDF / Imprimer</button>
+        <button className={bouton} disabled={!precedent} onClick={()=>{if(precedent){onChange(precedent);setPrecedent(null);}}}>Annuler</button>
+        <label className="text-xs"><input type="checkbox" checked={archives} onChange={e=>setArchives(e.target.checked)}/> Afficher les terminés</label>
+      </div>
+      {calcul.alertes.length>0&&<div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">{calcul.alertes.map((a,i)=><p key={i}>{a}</p>)}</div>}
+      {vue==="tableau"?<><input aria-label="Rechercher dans le planning" placeholder="Rechercher un client, une prestation ou un devis…" value={recherche} onChange={e=>setRecherche(e.target.value)} className={`${input} max-w-md`}/>
+        <p className="text-xs text-slate-500">Déplace une ligne avec ↥ / ↧ ou la poignée ⋮⋮. Les corrections sont propres au planning. « Auto » rétablit les valeurs du devis. Un chantier commencé peut être suivi en corrigeant ses heures restantes.</p>
+        <div className="overflow-x-auto rounded-xl border bg-white"><table className="w-full min-w-[1500px] table-fixed text-xs"><thead className="bg-teal-950 text-white"><tr>{["Ordre","Client","Prestation","Heures restantes","En cours","Validé","Acompte reçu","Date acompte","N° devis","Total devis","Commentaire","Pas avant","Début fixe","Prévision","Actions"].map((t,i)=><th key={t} className="px-2 py-2 text-left font-medium" style={{width:[72,150,145,82,58,58,90,116,105,90,160,116,116,152,116][i]}}>{t}</th>)}</tr></thead>
+        <tbody>{filtrees.map(l=>{const i=lignes.findIndex(x=>x.id===l.id);return <tr key={l.id} style={{background:l.termine?"#f1f5f9":l.manuel?"#fff0da":"white"}} className={`border-b align-top ${glisse===l.id?"opacity-50":""}`} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();if(glisse)deplacer(glisse,l.id);setGlisse(null);}}>
+          <td className="p-1"><span draggable onDragStart={e=>{setGlisse(l.id);e.dataTransfer.setData("text/plain",l.id);}} onDragEnd={()=>setGlisse(null)} className="cursor-grab px-1" title="Déplacer ce chantier">⋮⋮</span><button disabled={i===0} title="Monter" onClick={()=>deplacer(l.id,lignes[i-1].id)}>↥</button><button disabled={i===lignes.length-1} title="Descendre" onClick={()=>deplacer(l.id,lignes[i+1].id)}>↧</button></td>
+          <td className="p-1"><input aria-label={`Client ${l.id}`} value={l.client} className={input} onChange={e=>editer(l.id,{client:e.target.value})}/></td>
+          <td className="p-1"><input aria-label={`Prestation ${l.id}`} placeholder="À renseigner" value={l.prestation} className={input} onChange={e=>editer(l.id,{prestation:e.target.value})}/></td>
+          <td className="p-1"><input aria-label={`Heures ${l.id}`} type="number" min="0" step="0.5" value={l.heures} className={input} onChange={e=>editer(l.id,{heures:Math.max(0,Number(e.target.value)||0)})}/></td>
+          <td className="p-2 text-center"><input aria-label={`En cours ${l.id}`} type="checkbox" checked={!l.valide} onChange={e=>editer(l.id,{valide:!e.target.checked})}/></td>
+          <td className="p-2 text-center"><input aria-label={`Validé ${l.id}`} type="checkbox" checked={l.valide} onChange={e=>editer(l.id,{valide:e.target.checked})}/></td>
+          <td className="p-1"><input aria-label={`Acompte ${l.id}`} type="number" min="0" step="0.01" value={l.acompte} className={input} onChange={e=>editer(l.id,{acompte:Math.max(0,Number(e.target.value)||0)})}/></td>
+          <td className="p-1"><input aria-label={`Date acompte ${l.id}`} type="date" value={l.dateAcompte} className={input} onChange={e=>editer(l.id,{dateAcompte:e.target.value})}/></td>
+          <td className="p-1"><input aria-label={`Numéro devis ${l.id}`} value={l.numero} className={input} onChange={e=>editer(l.id,{numero:e.target.value})}/></td>
+          <td className="p-1"><input aria-label={`Montant ${l.id}`} type="number" min="0" step="0.01" value={l.montant} className={input} onChange={e=>editer(l.id,{montant:Math.max(0,Number(e.target.value)||0)})}/></td>
+          <td className="p-1"><textarea aria-label={`Commentaire ${l.id}`} rows={1} value={l.commentaire} className={input} onChange={e=>editer(l.id,{commentaire:e.target.value})}/></td>
+          <td className="p-1"><input aria-label={`Pas avant ${l.id}`} type="date" value={l.pasAvant} className={input} onChange={e=>editer(l.id,{pasAvant:e.target.value})}/></td>
+          <td className="p-1"><input aria-label={`Date fixe ${l.id}`} type="date" value={l.fixe} className={input} onChange={e=>editer(l.id,{fixe:e.target.value})}/><span className="text-[9px] text-slate-500">Effacer pour déverrouiller</span></td>
+          <td className="p-2 text-[11px] font-medium text-teal-900">{periode(l)}</td>
+          <td className="space-y-1 p-1"><label className="block"><input type="checkbox" checked={l.termine} onChange={e=>editer(l.id,{termine:e.target.checked})}/> Terminé</label>{l.manuel?<button className="text-red-700" onClick={()=>{if(window.confirm(`Supprimer la ligne manuelle ${l.client} ?`))modifier({...donnees,libres:donnees.libres.filter(e=>e.id!==l.id),ordre:donnees.ordre.filter(id=>id!==l.id)});}}>Supprimer</button>:<><button className="mr-2 text-teal-800 underline" onClick={()=>{const d=historique.find(d=>d.id===l.dossierId);if(d)ouvrir(d);}}>Ouvrir</button><button className="underline" title="Rétablir client, heures, montants, numéro et validation du devis. Conserver les notes et dates du planning." onClick={()=>{const e=donnees.editions[l.id]||{};modifier({...donnees,editions:{...donnees.editions,[l.id]:{prestation:e.prestation,commentaire:e.commentaire,pasAvant:e.pasAvant,fixe:e.fixe,termine:e.termine}}});}}>Auto</button></>}</td>
+        </tr>;})}</tbody></table>{!filtrees.length&&<p className="p-5 text-sm text-slate-500">Aucun chantier à afficher. Les devis enregistrés apparaîtront ici. Tu peux aussi ajouter une ligne hors application.</p>}</div>
+      </>:<><div className="flex items-center gap-3"><button className={bouton} onClick={()=>setAnnee(annee-1)}>←</button><span className="font-bold">{annee}</span><button className={bouton} onClick={()=>setAnnee(annee+1)}>→</button>{vue==="mois"&&<select className={input+" max-w-44"} value={mois} onChange={e=>setMois(Number(e.target.value))}>{Array.from({length:12},(_,m)=><option key={m} value={m}>{new Date(annee,m,1).toLocaleDateString("fr-FR",{month:"long"})}</option>)}</select>}</div>
+        <div className={vue==="annee"?"grid gap-3 sm:grid-cols-2 xl:grid-cols-4":""}>{vue==="annee"?Array.from({length:12},(_,m)=>moisCalendrier(m,true)):moisCalendrier(mois)}</div>
+        {selection&&<div className="rounded-xl border bg-white p-3"><p className="font-bold">{dateFR(selection)}</p><p className="whitespace-pre-line text-sm">{resumeDate(selection)||"Aucun chantier prévu."}</p></div>}
+      </>}
+    </div>}
+  </section>;
+}
+
+
   export default function Home() {
    const restaurerBackup = (index: number) => {
   const backups = JSON.parse(
@@ -1452,6 +1747,8 @@ function totalFournituresIncluses(lignes: LigneTravaux[], modeClient: string): n
   const d = sauvegarde.data;
 
   setHistorique(d.historique || []);
+  planningModifieRef.current = false;
+  setPlanningDonnees(normaliserPlanning(d.planningDonnees));
   setDepenses(d.depenses || []);
   setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(d.correctionsEncaissementsMensuels));
   setClientsEnregistres(d.clientsEnregistres || clientsBase);
@@ -1538,6 +1835,8 @@ const appliquerSauvegardeComplete = (data: any) => {
   if (!data) return;
 
   setHistorique(data.historique || []);
+  planningModifieRef.current = false;
+  setPlanningDonnees(normaliserPlanning(data.planningDonnees));
   setDepenses(data.depenses || []);
   setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(data.correctionsEncaissementsMensuels));
   setClientsEnregistres(data.clientsEnregistres || clientsBase);
@@ -1806,6 +2105,10 @@ const [motifRdv, setMotifRdv] = useState("");
 const [typeRdv, setTypeRdv] = useState("visite");
   const [priorite, setPriorite] = useState("normale");
   const [historique, setHistorique] = useState<Dossier[]>([]);
+  const [planningDonnees, setPlanningDonnees] = useState<PlanningDonnees>(() => normaliserPlanning(null));
+  const planningModifieRef = useRef(false);
+  const sauvegardePlanningRef = useRef<() => any>(() => null);
+  const [etatPlanningCloud, setEtatPlanningCloud] = useState("");
   const [dateSelectionnee, setDateSelectionnee] = useState<Date | null>(null);
 const [showPopupCalendrier, setShowPopupCalendrier] = useState(false);
 const [ficheOuverte, setFicheOuverte] = useState(true);
@@ -2042,6 +2345,8 @@ setRibBic(d.ribBic || "");
 setRibBanque(d.ribBanque || "");
 
       setHistorique(d.historique || []);
+  planningModifieRef.current = false;
+  setPlanningDonnees(normaliserPlanning(d.planningDonnees));
       setDepenses(d.depenses || []);
       setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(d.correctionsEncaissementsMensuels));
 setClientsEnregistres(d.clientsEnregistres || clientsBase);
@@ -2190,6 +2495,7 @@ useEffect(() => {
   }
 }, [
   sauvegardePrete,
+  planningDonnees,
   correctionsEncaissementsMensuels,
   historique,
   compteurDevis,
@@ -2284,6 +2590,7 @@ useEffect(() => {
 
 }, [
   sauvegardePrete,
+  planningDonnees,
   correctionsEncaissementsMensuels,
   historique,
   compteurDevis,
@@ -2326,6 +2633,7 @@ ribBanque,
 
 const construireSauvegardeComplete = () => {
   return {
+    planningDonnees,
     historique,
     depenses,
     correctionsEncaissementsMensuels,
@@ -2414,6 +2722,22 @@ acompteManuel,
     },
   };
 };
+
+// Seules les saisies du planning déclenchent cet envoi différé : une restauration
+// locale/cloud ne doit jamais réexpédier un état vide au démarrage.
+sauvegardePlanningRef.current = construireSauvegardeComplete;
+useEffect(() => {
+  if (!sauvegardePrete || !planningModifieRef.current) return;
+  const timer = window.setTimeout(() => {
+    planningModifieRef.current = false;
+    setEtatPlanningCloud("Synchronisation du planning…");
+    void envoyerDonneesCloud(sauvegardePlanningRef.current(), false)
+      .then(ok => setEtatPlanningCloud(ok ? "Planning enregistré et synchronisé" : "Planning enregistré sur cet appareil. Synchronisation à réessayer."))
+      .catch(() => setEtatPlanningCloud("Planning enregistré sur cet appareil. Synchronisation à réessayer."));
+  }, 1500);
+  return () => window.clearTimeout(timer);
+}, [planningDonnees, sauvegardePrete]);
+
 
   const baseFacturation = useMemo(() => {
     const courant = historique.find((d) => d.id === idDossierActuel);
@@ -4517,6 +4841,8 @@ const reinitialiserApplicationComplete = () => {
   localStorage.removeItem(CLE_BACKUPS_V24);
 
   setHistorique([]);
+  setPlanningDonnees(normaliserPlanning(null));
+  planningModifieRef.current = false;
   setDepenses([]);
   setCorrectionsEncaissementsMensuels({});
   setClientsEnregistres(clientsBase);
@@ -4618,6 +4944,8 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
       const data = JSON.parse(String(reader.result));
 
       setHistorique(data.historique || []);
+  planningModifieRef.current = false;
+  setPlanningDonnees(normaliserPlanning(data.planningDonnees));
       setDepenses(data.depenses || []);
       setCorrectionsEncaissementsMensuels(normaliserCorrectionsMensuelles(data.correctionsEncaissementsMensuels));
       setClientsEnregistres(data.clientsEnregistres || clientsBase);
@@ -6273,6 +6601,13 @@ const genererFicheChantier = () => {
 
 return (
   <main className="atelier-app min-h-screen p-3 md:p-4">
+<PlanningChantiers historique={historique} donnees={planningDonnees}
+  onChange={(p) => { planningModifieRef.current = true; setEtatPlanningCloud("Enregistrement…"); setPlanningDonnees(p); }}
+  ouvrir={rechargerDossier} />
+{etatPlanningCloud && <div className="mb-2 flex items-center gap-2 text-xs text-slate-600" role="status">{etatPlanningCloud}
+  {etatPlanningCloud.includes("réessayer") && <button type="button" className="underline" onClick={envoyerCloud}>Réessayer la synchronisation</button>}
+</div>}
+
 <div className="atelier-toolbar sticky top-0 z-40 mb-2 rounded-xl border p-2 backdrop-blur">
   <input
     ref={importRef}
@@ -8797,6 +9132,16 @@ return (
       }
 
       setMontantEncaisse(montantAcompteRecu);
+      if (dossierOrigineAcompte) {
+        const clePlanning = `d-${dossierOrigineAcompte.id}`;
+        setPlanningDonnees(p => {
+          const e = { ...p.editions[clePlanning] };
+          delete e.valide; delete e.acompte; delete e.dateAcompte;
+          return { ...p, editions: { ...p.editions, [clePlanning]: e } };
+        });
+        planningModifieRef.current = true;
+      }
+
 
       setHistorique((ancien) =>
         ancien.map((d) =>

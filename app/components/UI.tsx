@@ -33,7 +33,13 @@ export function BlocRepliable({
   );
 }
 
-export function Bloc({ titre, children }: { titre: string; children: ReactNode }) {
+export function Bloc({
+  titre,
+  children,
+}: {
+  titre: string;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-xl border bg-white px-4 py-3 shadow-sm">
       <h2 className="mb-3 text-base font-bold text-slate-900">{titre}</h2>
@@ -46,7 +52,7 @@ export function Bloc({ titre, children }: { titre: string; children: ReactNode }
 
 export function Card({ titre, valeur }: { titre: string; valeur: string }) {
   return (
-    <div className="rounded-lg border bg-white px-3 py-2 text-slate-900">
+    <div className="rounded-lg border bg-white px-3 py-2">
       <p className="text-xs text-slate-500">{titre}</p>
       <p className="text-lg font-bold text-slate-900">{valeur}</p>
     </div>
@@ -134,18 +140,31 @@ export function NumberInput({
   );
 }
 
+// 🔥 DateInput corrigé
+function formatDateInputVersFr(dateIso: string) {
+  if (!dateIso) return "";
+  const [annee, mois, jour] = dateIso.split("-");
+  return `${jour}/${mois}/${annee}`;
+}
+
+function formatDateFrVersInput(dateFr: string) {
+  if (!dateFr) return "";
+  if (dateFr.includes("-")) return dateFr;
+
+  const [jour, mois, annee] = dateFr.split("/");
+  if (!jour || !mois || !annee) return "";
+
+  return `${annee}-${mois.padStart(2, "0")}-${jour.padStart(2, "0")}`;
+}
+
 export function DateInput({
   label,
   value,
   onChange,
-  formatDateFrVersInput,
-  formatDateInputVersFr,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
-  formatDateFrVersInput: (v: string) => string;
-  formatDateInputVersFr: (v: string) => string;
 }) {
   return (
     <div>
@@ -214,70 +233,5 @@ export function Check({
       />
       <span>{label}</span>
     </label>
-  );
-}
-
-export function GraphiqueCourbe({
-  donnees,
-}: {
-  donnees: { label: string; total: number }[];
-}) {
-  const largeur = 900;
-  const hauteur = 260;
-  const margeX = 45;
-  const margeY = 35;
-
-  const max = Math.max(...donnees.map((d) => d.total), 1);
-
-  const points = donnees.map((d, index) => {
-    const x =
-      margeX +
-      (index * (largeur - margeX * 2)) / Math.max(donnees.length - 1, 1);
-
-    const y = hauteur - margeY - (d.total / max) * (hauteur - margeY * 2);
-
-    return { x, y, ...d };
-  });
-
-  const chemin = points
-    .map((p, index) => `${index === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ");
-
-  return (
-    <div className="rounded-2xl border bg-white p-4">
-      <h3 className="mb-4 text-lg font-bold text-slate-800">
-        Courbe des encaissements sur 12 mois
-      </h3>
-
-      <div className="overflow-x-auto">
-        <svg viewBox={`0 0 ${largeur} ${hauteur}`} className="min-w-[850px]">
-          <line x1={margeX} y1={hauteur - margeY} x2={largeur - margeX} y2={hauteur - margeY} stroke="#CBD5E1" strokeWidth="2" />
-          <line x1={margeX} y1={margeY} x2={margeX} y2={hauteur - margeY} stroke="#CBD5E1" strokeWidth="2" />
-
-          <path
-            d={chemin}
-            fill="none"
-            stroke="#2563EB"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-
-          {points.map((p, index) => (
-            <g key={index}>
-              <circle cx={p.x} cy={p.y} r="5" fill="#2563EB" />
-
-              <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="12" fill="#334155">
-                {p.total}€
-              </text>
-
-              <text x={p.x} y={hauteur - 10} textAnchor="middle" fontSize="12" fill="#475569">
-                {p.label}
-              </text>
-            </g>
-          ))}
-        </svg>
-      </div>
-    </div>
   );
 }

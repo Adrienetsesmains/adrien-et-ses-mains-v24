@@ -126,6 +126,69 @@ const PACKS_PRESTATIONS_V25 = [
     ] as [string, number][],
   },
   {
+    id: "PACK-TERRASSE-BOIS",
+    nom: "Rénovation d’une terrasse en bois",
+    description:
+      "Dépose des lames existantes, contrôle du support, pose des nouvelles lames, finitions et évacuation. Le saturateur reste une prestation optionnelle à ajouter séparément.",
+    lignes: [
+      ["TERR-PROT-CHEMINEMENT", 1],
+      ["TERR-DEPOSE-LAMES", 1],
+      ["TERR-MANUT-ACCES", 1],
+      ["TERR-CONTROLE-SUPPORT", 1],
+      ["TERR-POSE-LAMES-BOIS", 1],
+      ["TERR-COUPES-FINITIONS", 1],
+      ["TERR-TRI-EVAC", 1],
+      ["NET-FIN-CHANTIER", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-TERRASSE-BOIS-CREATION",
+    nom: "Création complète d’une terrasse en bois",
+    description:
+      "Création sur terrain dégagé : implantation, géotextile, points d’appui, structure neuve en lambourdes, pose des lames et finitions courantes. Renseigner la surface réelle sur chaque ligne.",
+    lignes: [
+      ["TERR-IMPLANT-GEOTEXTILE", 1],
+      ["TERR-POINTS-APPUI", 1],
+      ["TERR-OSSATURE-NEUVE", 1],
+      ["TERR-POSE-LAMES-NEUF", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-CAISSON-CLIM-EXT",
+    nom: "Caisson extérieur ventilé pour climatisation",
+    description:
+      "Fabrication d’un caisson habillé avec rangement inférieur, deux portes et partie haute largement ventilée et démontable.",
+    lignes: [
+      ["BRI-CAISSON-CLIM-EXT", 1],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-PERGOLA-ACIER-PEINTE",
+    nom: "Pergola acier ouverte — finition peinte",
+    description:
+      "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention, préparation, anticorrosion et peinture. Sans couverture.",
+    lignes: [
+      ["EXT-PERGOLA-ACIER-FAB", 17.5],
+      ["EXT-PERGOLA-ACIER-POS", 10.5],
+      ["EXT-PERGOLA-RENFORT-POSE", 1],
+      ["EXT-METAL-PREP", 11.05],
+      ["EXT-ANTIROUILLE", 11.05],
+      ["EXT-METAL-PEINT", 11.05],
+    ] as [string, number][],
+  },
+  {
+    id: "PACK-PERGOLA-ACIER-THERMOLAQUEE",
+    nom: "Pergola acier ouverte — finition thermolaquée",
+    description:
+      "Base adaptable pour une pergola acier ouverte d’environ 4 × 4 m : fabrication, pose, renfort de manutention et logistique de thermolaquage. Le coût du prestataire reste à ajouter aux fournitures.",
+    lignes: [
+      ["EXT-PERGOLA-ACIER-FAB", 17.5],
+      ["EXT-PERGOLA-ACIER-POS", 10.5],
+      ["EXT-PERGOLA-RENFORT-POSE", 1],
+      ["EXT-THERMOLAQUAGE-LOG", 3.5],
+    ] as [string, number][],
+  },
+  {
     id: "PACK-JARDIN-REMISE-ETAT",
     nom: "Remise en état d’un jardin",
     description:
@@ -310,6 +373,9 @@ type Dossier = {
   lignesTravaux: LigneTravaux[];
   numeroDevis: string;
   numeroFacture: string;
+  conditionsGeneralesDevis?: string;
+  conditionsChantier?: string;
+  commentaireFournitures?: string;
   estBrouillonAuto?: boolean;
   total: number;
   acompte: number;
@@ -490,6 +556,15 @@ function formatNumero(prefix: string, numero: number) {
 // les compteurs, tout en conservant automatiquement une valeur plus élevée.
 const PROCHAIN_NUMERO_DEVIS = 36;
 const PROCHAIN_NUMERO_FACTURE = 17;
+const CLE_RATTRAPAGE_FACTURE_017 = "rattrapageFacture017EffectueV25";
+
+const CONDITIONS_GENERALES_DEVIS_DEFAUT = [
+  "Le présent devis est établi sous réserve de l’état réel des supports existants.",
+  "Toute dégradation cachée, humidité, support friable ou anomalie non visible pourra entraîner un ajustement.",
+  "Les travaux supplémentaires non prévus feront l’objet d’un accord préalable du client.",
+  "Les fournitures non mentionnées au devis ne sont pas incluses.",
+  "Le client reconnaît que les quantités et prix sont basés sur les éléments visibles au moment de l’estimation.",
+].join("\n");
 
 function compteurDevisValide(valeur: unknown) {
   const numero = Number(valeur);
@@ -715,6 +790,11 @@ setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
 setDetailsFournitures(b.detailsFournitures || "");
+setConditionsGeneralesDevis(
+  b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+);
+setConditionsChantier(b.conditionsChantier || "");
+setCommentaireFournitures(b.commentaireFournitures || "");
     setLignesTravaux(b.lignesTravaux || []);
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
@@ -807,6 +887,11 @@ const appliquerSauvegardeComplete = (data: any) => {
     setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
     setFournituresClient(b.fournituresClient ?? true);
     setDetailsFournitures(b.detailsFournitures || "");
+    setConditionsGeneralesDevis(
+      b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+    );
+    setConditionsChantier(b.conditionsChantier || "");
+    setCommentaireFournitures(b.commentaireFournitures || "");
 
     setMontantEncaisse(b.montantEncaisse ?? 0);
     setPourcentageAcompte(b.pourcentageAcompte ?? 30);
@@ -981,6 +1066,11 @@ const [fraisDeplacementManuel, setFraisDeplacementManuel] = useState(0);
   const [coefficientFournitures, setCoefficientFournitures] = useState(1.22);
   const [fournituresClient, setFournituresClient] = useState(true);
   const [detailsFournitures, setDetailsFournitures] = useState("");
+  const [conditionsGeneralesDevis, setConditionsGeneralesDevis] = useState(
+    CONDITIONS_GENERALES_DEVIS_DEFAUT
+  );
+  const [conditionsChantier, setConditionsChantier] = useState("");
+  const [commentaireFournitures, setCommentaireFournitures] = useState("");
 
   const [statutDevis, setStatutDevis] = useState("envoye");
   const [pourcentageAcompte, setPourcentageAcompte] = useState(30);
@@ -1069,6 +1159,11 @@ setAchatFournitures(b.achatFournitures ?? 0);
 setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
 setFournituresClient(b.fournituresClient ?? true);
 setDetailsFournitures(b.detailsFournitures || "");
+setConditionsGeneralesDevis(
+  b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+);
+setConditionsChantier(b.conditionsChantier || "");
+setCommentaireFournitures(b.commentaireFournitures || "");
         setLignesTravaux(b.lignesTravaux || [
           { id: Date.now(), type: "plafond", q1: 0, q2: 0, r1: 0, r2: 0, option: 0 },
         ]);
@@ -1191,6 +1286,9 @@ achatFournitures,
 coefficientFournitures,
 fournituresClient,
 detailsFournitures,
+conditionsGeneralesDevis,
+conditionsChantier,
+commentaireFournitures,
 ribTitulaire,
 ribIban,
 ribBic,
@@ -1253,6 +1351,9 @@ useEffect(() => {
   agence,
   referenceChantier,
   complementAdresse,
+  conditionsGeneralesDevis,
+  conditionsChantier,
+  commentaireFournitures,
   ribTitulaire,
 ribIban,
 ribBic,
@@ -1308,6 +1409,9 @@ achatFournitures,
       coefficientFournitures,
       fournituresClient,
       detailsFournitures,
+      conditionsGeneralesDevis,
+      conditionsChantier,
+      commentaireFournitures,
 
      montantEncaisse,
 pourcentageAcompte,
@@ -1751,6 +1855,9 @@ setFraisDeplacementManuel(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
   setDetailsFournitures("");
+  setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
+  setConditionsChantier("");
+  setCommentaireFournitures("");
 
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
@@ -1822,6 +1929,9 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   setFournituresClient(true);
   setCoefficientFournitures(1.22);
   setDetailsFournitures("");
+  setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
+  setConditionsChantier("");
+  setCommentaireFournitures("");
 
   setFactureSap(false);
   setNumeroSap("");
@@ -1908,6 +2018,9 @@ fraisDeplacementManuel:
     coefficientFournitures,
     fournituresClient,
     detailsFournitures: estEvenementSimple ? "" : detailsFournitures,
+    conditionsGeneralesDevis: estEvenementSimple ? "" : conditionsGeneralesDevis,
+    conditionsChantier: estEvenementSimple ? "" : conditionsChantier,
+    commentaireFournitures: estEvenementSimple ? "" : commentaireFournitures,
     reventeFournitures: estEvenementSimple ? 0 : calcul.reventeFournitures,
     margeFournitures: estEvenementSimple ? 0 : calcul.margeFournitures,
 
@@ -2055,6 +2168,8 @@ useEffect(() => {
       numeroFacture ||
       lignesTravaux.length > 0 ||
       notes.trim() ||
+      conditionsChantier.trim() ||
+      commentaireFournitures.trim() ||
       dateRdv ||
       dateChantier
     );
@@ -2145,6 +2260,11 @@ setAchatFournitures(d.achatFournitures ?? 0);
 setCoefficientFournitures(d.coefficientFournitures ?? 1.22);
 setFournituresClient(d.fournituresClient ?? true);
 setDetailsFournitures(d.detailsFournitures || "");
+setConditionsGeneralesDevis(
+  d.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+);
+setConditionsChantier(d.conditionsChantier || "");
+setCommentaireFournitures(d.commentaireFournitures || "");
   setDateChantier(d.dateChantier || "");
   setHeureChantier(d.heureChantier || "");
   setDatePaiement(d.datePaiement || "");
@@ -2347,6 +2467,9 @@ const creerRappelDepuisCalendrier = (date: Date) => {
     coefficientFournitures: 1.22,
     fournituresClient: true,
     detailsFournitures: "",
+    conditionsGeneralesDevis: "",
+    conditionsChantier: "",
+    commentaireFournitures: "",
     reventeFournitures: 0,
     margeFournitures: 0,
 
@@ -3283,6 +3406,9 @@ setFraisDeplacementManuel(0);
   setCoefficientFournitures(1.22);
   setFournituresClient(true);
   setDetailsFournitures("");
+  setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT);
+  setConditionsChantier("");
+  setCommentaireFournitures("");
 
   setMontantEncaisse(0);
   setPourcentageAcompte(30);
@@ -3392,6 +3518,11 @@ setFraisDeplacementManuel(
         setCoefficientFournitures(b.coefficientFournitures ?? 1.22);
         setFournituresClient(b.fournituresClient ?? true);
         setDetailsFournitures(b.detailsFournitures || "");
+        setConditionsGeneralesDevis(
+          b.conditionsGeneralesDevis ?? CONDITIONS_GENERALES_DEVIS_DEFAUT
+        );
+        setConditionsChantier(b.conditionsChantier || "");
+        setCommentaireFournitures(b.commentaireFournitures || "");
 
         setMontantEncaisse(b.montantEncaisse ?? 0);
         setPourcentageAcompte(b.pourcentageAcompte ?? 30);
@@ -3507,6 +3638,7 @@ const genererPDF = async (type: "devis" | "facture") => {
   const doc = new jsPDF();
 
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
+  const estFactureMeurisse = modeClient === "jeremie" && type === "facture";
 
 let numero = type === "devis" ? numeroDevis : numeroFacture;
 
@@ -3537,9 +3669,23 @@ if (type === "devis") {
   }
 }
 if (type === "facture" && !numeroFacture) {
-  numero = formatNumero("F", compteurFacture);
+  // Rattrapage demandé le 11/09/2026 : les numéros 017 et 018 ont été sautés
+  // par le compteur alors qu'aucune facture correspondante n'existe.
+  // La première nouvelle facture après cette mise à jour prend donc 017,
+  // une seule fois, puis la numérotation reprend normalement à 018.
+  const rattrapageFacture017DejaEffectue =
+    localStorage.getItem(CLE_RATTRAPAGE_FACTURE_017) === "oui";
+  const numeroFactureAUtiliser = rattrapageFacture017DejaEffectue
+    ? compteurFacture
+    : PROCHAIN_NUMERO_FACTURE;
+
+  numero = formatNumero("F", numeroFactureAUtiliser);
   setNumeroFacture(numero);
-  setCompteurFacture((ancien) => ancien + 1);
+  setCompteurFacture(numeroFactureAUtiliser + 1);
+
+  if (!rattrapageFacture017DejaEffectue) {
+    localStorage.setItem(CLE_RATTRAPAGE_FACTURE_017, "oui");
+  }
 
   if (idDossierActuel !== null) {
     setHistorique((ancien) =>
@@ -3580,7 +3726,9 @@ let y = modeClient === "agence" || modeClient === "jeremie" ? 160 : 138;
   };
 
   try {
-    doc.addImage("/Logo banderole.png", "PNG", 0, 0, 210, 42);
+    // Marge de sécurité pour les imprimantes qui ne peuvent pas imprimer à bord perdu.
+    // Le bandeau reste centré et conserve ses proportions sans rogner le SIRET ni le QR code.
+    doc.addImage("/Logo banderole.png", "PNG", 6, 5, 198, 39.6);
   } catch {
     doc.setFontSize(18);
     doc.text("Adrien et ses mains", 20, 20);
@@ -3624,7 +3772,7 @@ const xClient = 15;
 const xChantier = 105;
 const yCadres = 80;
 
-const largeurClient = 85;
+const largeurClient = estFactureMeurisse ? 180 : 85;
 const largeurChantier = 90;
 
 const hauteurEnteteCadre = 12;
@@ -3783,14 +3931,16 @@ const hauteurClientAuto = dessinerCadreInfos(
   31
 );
 
-const hauteurChantierAuto = dessinerCadreInfos(
-  "CHANTIER",
-  xChantier,
-  yCadres,
-  largeurChantier,
-  lignesChantier,
-  modeClient === "agence" ? 35 : 31
-);
+const hauteurChantierAuto = estFactureMeurisse
+  ? 0
+  : dessinerCadreInfos(
+      "CHANTIER",
+      xChantier,
+      yCadres,
+      largeurChantier,
+      lignesChantier,
+      modeClient === "agence" ? 35 : 31
+    );
 
 doc.setFont("helvetica", "normal");
 doc.setTextColor(0, 0, 0);
@@ -3804,12 +3954,9 @@ enteteTableau();
 let lignesDevisPDF = lignesPDF();
 
 // 🔥 CAS SPÉCIAL FACTURE JÉRÉMIE / SAS MEURISSE COUVERTURE
-if (modeClient === "jeremie" && type === "facture") {
+if (estFactureMeurisse) {
   lignesDevisPDF = [
-    [
-      "Prestation de service Main d'œuvre uniquement\nForfait main d'œuvre global",
-      calcul.total,
-    ],
+    ["Main d'œuvre sous-traitance", calcul.total],
   ];
 }
 
@@ -3819,7 +3966,9 @@ lignesDevisPDF.forEach(([designationBrute, montant], index) => {
   const designation = designationBrute;
 
   const detailsLimites =
-  ligneSource
+  estFactureMeurisse
+    ? []
+    : ligneSource
     ? detailsTravaux(ligneSource)
     : designationBrute.includes("déplacement")
     ? [`Déplacement aller-retour estimé : ${calcul.kmAR} km`]
@@ -3866,8 +4015,9 @@ y += detailCoupe.length * 3.5;
   y += 2;
 });
 
-// ================= BLOC TOTAL COMPACT =================
-if (y + 38 > 292) {
+// ================= BLOC TOTAL MIS EN VALEUR =================
+// On garde aussi une marge basse imprimable pour éviter tout chevauchement.
+if (y + 52 > 250) {
   doc.addPage();
   page += 1;
   y = 35;
@@ -3889,38 +4039,146 @@ const resteAPayerPDF = Math.max(
   Math.round((montantTotalPDF - montantAcompteOuEncaissePDF) * 100) / 100
 );
 
+const xBlocTotal = 80;
+const largeurBlocTotal = 115;
+const hauteurBlocTotal = 44;
+
 doc.setFillColor(248, 244, 236);
 doc.setDrawColor(190, 145, 55);
-doc.roundedRect(95, y, 100, 34, 3, 3, "FD");
+doc.roundedRect(
+  xBlocTotal,
+  y,
+  largeurBlocTotal,
+  hauteurBlocTotal,
+  3,
+  3,
+  "FD"
+);
+
+// Bandeau principal : le montant total est volontairement le plus visible.
+doc.setFillColor(52, 63, 79);
+doc.roundedRect(xBlocTotal, y, largeurBlocTotal, 15, 3, 3, "F");
+doc.rect(xBlocTotal, y + 10, largeurBlocTotal, 5, "F");
+
+doc.setFont("helvetica", "bold");
+doc.setFontSize(9.5);
+doc.setTextColor(255, 255, 255);
+doc.text(
+  type === "devis" ? "MONTANT TOTAL DU DEVIS" : "TOTAL DE LA FACTURE",
+  xBlocTotal + 7,
+  y + 10
+);
+
+doc.setFontSize(13.5);
+doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10.5, { align: "right" });
 
 doc.setFont("helvetica", "normal");
-doc.setFontSize(10);
+doc.setFontSize(9.5);
 doc.setTextColor(0, 0, 0);
-
-doc.text("Montant total", 103, y + 10);
-doc.text(formatEuroPDF(montantTotalPDF), 188, y + 10, { align: "right" });
-
-doc.text(type === "devis" ? "Acompte demandé" : "Déjà encaissé", 103, y + 19);
-doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 19, {
+doc.text(
+  type === "devis" ? "Acompte demandé" : "Déjà encaissé",
+  xBlocTotal + 8,
+  y + 25
+);
+doc.text(formatEuroPDF(montantAcompteOuEncaissePDF), 188, y + 25, {
   align: "right",
 });
 
-doc.setDrawColor(180);
-doc.line(103, y + 23, 190, y + 23);
+doc.setDrawColor(200);
+doc.line(xBlocTotal + 8, y + 30, 188, y + 30);
 
 doc.setFont("helvetica", "bold");
-doc.text("Reste à payer", 103, y + 31);
-doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 31, { align: "right" });
+doc.setFontSize(10);
+doc.setTextColor(0, 0, 0);
+doc.text(
+  type === "devis" ? "Solde après acompte" : "RESTE À PAYER",
+  xBlocTotal + 8,
+  y + 39
+);
+doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 39, { align: "right" });
 
-y += 42;
+y += hauteurBlocTotal + 8;
 
-
-// ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
+// ================= FOURNITURES + CONDITIONS MODIFIABLES =================
 // Le pied de page de la dernière page commence à 256 mm.
 // On arrête donc tous les blocs de contenu à 250 mm pour garder une marge sûre.
 const limiteBasseContenu = 250;
 
-if (y + 72 > limiteBasseContenu) {
+const preparerListePDF = (texte: string) =>
+  texte
+    .split(/\r?\n/)
+    .map((ligne) => ligne.trim())
+    .filter(Boolean);
+
+const commentaireFournituresPDF = commentaireFournitures.trim();
+
+if (type === "devis" && commentaireFournituresPDF) {
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+
+  const lignesFournituresCommentaire = commentaireFournituresPDF
+    .split(/\r?\n/)
+    .flatMap((paragraphe) => {
+      const texte = paragraphe.trim();
+      return texte ? doc.splitTextToSize(texte, 164) : [""];
+    });
+
+  const hauteurCommentaireFournitures = Math.max(
+    25,
+    18 + Math.max(1, lignesFournituresCommentaire.length) * 4.2
+  );
+
+  if (y + hauteurCommentaireFournitures > limiteBasseContenu) {
+    doc.addPage();
+    page += 1;
+    y = 35;
+  }
+
+  doc.setFillColor(248, 244, 236);
+  doc.setDrawColor(190, 145, 55);
+  doc.roundedRect(15, y, 180, hauteurCommentaireFournitures, 3, 3, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(52, 63, 79);
+  doc.text("INFORMATION FOURNITURES", 23, y + 8);
+
+  doc.setDrawColor(190, 145, 55);
+  doc.line(23, y + 11, 64, y + 11);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(45, 45, 45);
+  doc.text(lignesFournituresCommentaire, 23, y + 18);
+
+  y += hauteurCommentaireFournitures + 8;
+}
+
+// ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
+doc.setFont("helvetica", "normal");
+doc.setFontSize(8.2);
+
+const conditions = preparerListePDF(conditionsGeneralesDevis);
+const conditionsPropresChantier = preparerListePDF(conditionsChantier);
+
+const hauteurListeConditions = (liste: string[]) =>
+  liste.reduce((hauteur, ligne) => {
+    const coupe = doc.splitTextToSize(ligne, 105);
+    return hauteur + coupe.length * 3.7 + 2;
+  }, 0);
+
+// Le cadre conserve toujours sa hauteur d'origine de 72 mm.
+// Il grandit uniquement si les textes ajoutés ont besoin de plus de place.
+const hauteurConditions = Math.max(
+  72,
+  27 +
+    hauteurListeConditions(conditions) +
+    (conditionsPropresChantier.length > 0
+      ? 7 + hauteurListeConditions(conditionsPropresChantier)
+      : 0)
+);
+
+if (y + hauteurConditions > limiteBasseContenu) {
   doc.addPage();
   page += 1;
   y = 35;
@@ -3930,7 +4188,7 @@ if (y + 72 > limiteBasseContenu) {
 const yConditions = y;
 
 doc.setDrawColor(60);
-doc.roundedRect(15, yConditions, 180, 72, 2, 2);
+doc.roundedRect(15, yConditions, 180, hauteurConditions, 2, 2);
 
 doc.setFont("helvetica", "bold");
 doc.setFontSize(11);
@@ -3939,14 +4197,6 @@ doc.text("CONDITIONS PARTICULIERES ET PROTECTIONS CHANTIER", 25, yConditions + 8
 
 doc.setDrawColor(190, 145, 55);
 doc.line(25, yConditions + 12, 67, yConditions + 12);
-
-const conditions = [
-  "Le présent devis est établi sous réserve de l’état réel des supports existants.",
-  "Toute dégradation cachée, humidité, support friable ou anomalie non visible pourra entraîner un ajustement.",
-  "Les travaux supplémentaires non prévus feront l’objet d’un accord préalable du client.",
-  "Les fournitures non mentionnées au devis ne sont pas incluses.",
-  "Le client reconnaît que les quantités et prix sont basés sur les éléments visibles au moment de l’estimation.",
-];
 
 let cy = yConditions + 19;
 doc.setFont("helvetica", "normal");
@@ -3964,9 +4214,38 @@ conditions.forEach((ligne) => {
   cy += coupe.length * 3.7 + 2;
 });
 
+if (conditionsPropresChantier.length > 0) {
+  cy += 1;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.4);
+  doc.setTextColor(52, 63, 79);
+  doc.text("CONDITIONS PROPRES A CE CHANTIER", 28, cy);
+  cy += 6;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.2);
+  doc.setTextColor(50, 50, 50);
+
+  conditionsPropresChantier.forEach((ligne) => {
+    doc.setDrawColor(190, 145, 55);
+    doc.circle(22, cy - 1.5, 1.8);
+    doc.line(21.2, cy - 1.5, 22, cy - 0.3);
+    doc.line(22, cy - 0.3, 23.3, cy - 3);
+
+    const coupe = doc.splitTextToSize(ligne, 105);
+    doc.text(coupe, 28, cy);
+    cy += coupe.length * 3.7 + 2;
+  });
+}
+
 if (type === "devis" || type === "facture") {
   doc.setDrawColor(80);
-  doc.line(140, yConditions + 15, 140, yConditions + 52);
+  doc.line(
+    140,
+    yConditions + 15,
+    140,
+    yConditions + hauteurConditions - 20
+  );
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -3980,9 +4259,8 @@ doc.setFontSize(8);
 doc.text("Signature client", 168, yConditions + 50, { align: "center" });
 }
 
-// Le cadre conditions mesure réellement 72 mm de haut.
-// On repart après ses 72 mm + 8 mm de marge.
-y = yConditions + 72 + 8;
+// On repart après la hauteur réellement utilisée + 8 mm de marge.
+y = yConditions + hauteurConditions + 8;
 
 // ================= RIB / MODALITES DE PAIEMENT PREMIUM =================
 if (ribIban || ribTitulaire || ribBic || ribBanque) {
@@ -4170,11 +4448,52 @@ const genererFicheChantier = () => {
   const largeurUtile = largeurPage - marge * 2;
   let y = 18;
 
-  const texteChantier = normaliserTexte(
-    lignesTravaux
-      .map((ligne) => `${ligne.prestationNom || ""} ${detailsTravaux(ligne).join(" ")}`)
-      .join(" ")
+  // La détection du matériel et des vigilances repose uniquement sur le nom
+  // des prestations. Les détails PDF peuvent contenir des mots génériques
+  // (SPEC, carrelage, douche...) qui déclenchaient auparavant des conseils
+  // sans rapport avec le chantier réel.
+  const textePrestations = normaliserTexte(
+    lignesTravaux.map((ligne) => ligne.prestationNom || "").join(" ")
   );
+
+  const outils = new Set<string>([
+    "Protections, bâches, ruban de masquage et sacs à gravats",
+    "Mètre, crayon, niveau et petit outillage à main",
+    "Aspirateur de chantier et matériel de nettoyage",
+  ]);
+
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
+    outils.add("Perforateur, burineur et équipements de protection");
+    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
+    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
+  }
+  if (/plomberie|receveur|vasque|robinet|mitigeur|siphon|vidage|evacuation/.test(textePrestations)) {
+    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
+    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
+  }
+  if (/peinture|enduit|ratissage|poncage/.test(textePrestations)) {
+    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
+  }
+  if (/sol pvc|revetement de sol|plinthe/.test(textePrestations)) {
+    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    outils.add("Scie circulaire, scie sauteuse, tréteaux, serre-joints et guide de coupe");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    outils.add("Perforateur, scie-cloche ou carotteuse adaptée au support");
+    outils.add("Détecteur de matériaux et matériel de calfeutrement");
+  }
+
+  const lignesFournitures = (detailsFournitures?.trim() || "")
+    .split(/\r?\n/)
+    .map((ligne) => ligne.trim())
+    .filter(Boolean)
+    .map((ligne) =>
+      ligne
+        .replace(/(\d+)€(\d{2})\b/g, "$1,$2 €")
+        .replace(/(\d+(?:[.,]\d+)?)\s*€/g, "$1 €")
+    );
 
   const ajouterPiedDePage = () => {
     const totalPages = doc.getNumberOfPages();
@@ -4198,21 +4517,21 @@ const genererFicheChantier = () => {
   };
 
   const nouvellePageSiBesoin = (hauteurNecessaire = 18) => {
-    if (y + hauteurNecessaire <= 278) return;
+    if (y + hauteurNecessaire <= 281) return;
 
     doc.addPage();
     y = 18;
   };
 
   const ajouterTitreSection = (titre: string) => {
-    nouvellePageSiBesoin(16);
+    nouvellePageSiBesoin(13);
     doc.setFillColor(52, 63, 79);
-    doc.roundedRect(marge, y, largeurUtile, 9, 2, 2, "F");
+    doc.roundedRect(marge, y, largeurUtile, 7.5, 2, 2, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(255, 255, 255);
-    doc.text(titre.toUpperCase(), marge + 4, y + 6);
-    y += 14;
+    doc.text(titre.toUpperCase(), marge + 4, y + 5.2);
+    y += 10;
   };
 
   const ajouterTexte = (
@@ -4222,7 +4541,7 @@ const genererFicheChantier = () => {
     const retrait = options?.retrait || 0;
     const taille = options?.taille || 9;
     const lignes = doc.splitTextToSize(texte || "-", largeurUtile - retrait);
-    const hauteur = lignes.length * 4.5 + 1;
+    const hauteur = lignes.length * 3.6 + 0.5;
 
     nouvellePageSiBesoin(hauteur);
     doc.setFont("helvetica", options?.gras ? "bold" : "normal");
@@ -4235,7 +4554,7 @@ const genererFicheChantier = () => {
 
   const ajouterListe = (elements: string[]) => {
     elements.filter(Boolean).forEach((element) => {
-      ajouterTexte(`- ${element}`, { retrait: 3, taille: 8.5 });
+      ajouterTexte(`- ${element}`, { retrait: 3, taille: 7.7 });
     });
   };
 
@@ -4257,28 +4576,174 @@ const genererFicheChantier = () => {
   y = 41;
 
   ajouterTitreSection("Identification du chantier");
-  ajouterTexte(`Client / agence : ${client || agence || "Non renseigné"}`, {
-    gras: true,
-  });
-  if (clientFinalNom) ajouterTexte(`Client final : ${clientFinalNom}`);
-  if (proprietaire) ajouterTexte(`Propriétaire : ${proprietaire}`);
-  if (locataire) ajouterTexte(`Locataire : ${locataire}`);
-  if (adresseAgence || adresse) {
-    ajouterTexte(`Adresse agence / client : ${adresseAgence || adresse}`);
-  }
-  ajouterTexte(
-    `Adresse chantier : ${clientFinalAdresse || complementAdresse || adresse || "Non renseignée"}`
-  );
-  if (referenceChantier) ajouterTexte(`Référence : ${referenceChantier}`);
-  if (dateChantier) ajouterTexte(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
-  if (telephoneLocataire) ajouterTexte(`Téléphone sur place : ${telephoneLocataire}`);
+  const yIdentification = y;
+  const largeurColonneGauche = 108;
+  const xEncadre = marge + largeurColonneGauche + 5;
+  const largeurEncadre = largeurUtile - largeurColonneGauche - 5;
+  let yGauche = yIdentification;
 
-  ajouterTitreSection("Travaux prévus");
+  const ajouterInfoGauche = (texte: string, gras = false) => {
+    doc.setFont("helvetica", gras ? "bold" : "normal");
+    doc.setFontSize(8.4);
+    doc.setTextColor(30, 41, 59);
+    const lignes = doc.splitTextToSize(texte, largeurColonneGauche);
+    doc.text(lignes, marge, yGauche);
+    yGauche += lignes.length * 4.1 + 0.8;
+  };
+
+  if (modeClient === "agence") {
+    ajouterInfoGauche(`Agence : ${agence || client || "Non renseignée"}`, true);
+    ajouterInfoGauche(
+      `Adresse chantier : ${`${adresse || ""} ${complementAdresse || ""}`.trim() || "Non renseignée"}`
+    );
+    if (referenceChantier) ajouterInfoGauche(`Référence : ${referenceChantier}`);
+    if (locataire) {
+      ajouterInfoGauche(
+        `Locataire / contact : ${locataire}${telephoneLocataire ? ` - ${telephoneLocataire}` : ""}`
+      );
+    } else if (telephoneLocataire) {
+      ajouterInfoGauche(`Téléphone locataire : ${telephoneLocataire}`);
+    }
+    if (proprietaire) {
+      ajouterInfoGauche(
+        `Propriétaire : ${proprietaire}${telephoneProprietaire ? ` - ${telephoneProprietaire}` : ""}`
+      );
+    } else if (telephoneProprietaire) {
+      ajouterInfoGauche(`Téléphone propriétaire : ${telephoneProprietaire}`);
+    }
+  } else if (modeClient === "jeremie") {
+    ajouterInfoGauche(`Donneur d’ordre : ${client || "Jérémie Meurisse"}`, true);
+    ajouterInfoGauche(`Client chantier : ${clientFinalNom || "Non renseigné"}`);
+    ajouterInfoGauche(`Adresse chantier : ${clientFinalAdresse || "Non renseignée"}`);
+    if (clientFinalTelephone) ajouterInfoGauche(`Téléphone client : ${clientFinalTelephone}`);
+  } else {
+    ajouterInfoGauche(`Client : ${client || "Non renseigné"}`, true);
+    ajouterInfoGauche(
+      `Adresse : ${`${adresse || ""} ${complementAdresse || ""}`.trim() || "Non renseignée"}`
+    );
+    if (telephone) ajouterInfoGauche(`Téléphone : ${telephone}`);
+    if (email) ajouterInfoGauche(`Email : ${email}`);
+  }
+
+  if (dateChantier) {
+    ajouterInfoGauche(`Date prévue : ${dateChantier}${heureChantier ? ` à ${heureChantier}` : ""}`);
+  }
+
+  const infosPratiques = [
+    ["Trajet", `${Number(kmAller || 0).toFixed(1)} km aller`],
+    ["Aller-retour", `${Number(calcul.kmAR || 0).toFixed(1)} km`],
+    ["Déplacement", `${Number(calcul.fraisLogistique || 0).toFixed(2)} €`],
+    ["Temps prévu", `${Number(calcul.totalHeuresChantier || 0).toFixed(1)} h`],
+    ["Durée estimée", `${calcul.nombreJoursChantier} jour${calcul.nombreJoursChantier > 1 ? "s" : ""}`],
+    ["Achat fournitures", `${Number(achatFournitures || 0).toFixed(2)} € TTC`],
+  ];
+  const hauteurEncadre = 9 + infosPratiques.length * 5.2;
+
+  doc.setFillColor(241, 245, 249);
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(xEncadre, yIdentification - 3.5, largeurEncadre, hauteurEncadre, 2, 2, "FD");
+  doc.setFillColor(71, 85, 105);
+  doc.roundedRect(xEncadre, yIdentification - 3.5, largeurEncadre, 7.5, 2, 2, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text("INFOS PRATIQUES", xEncadre + 3, yIdentification + 1.5);
+
+  infosPratiques.forEach(([libelle, valeur], index) => {
+    const yInfo = yIdentification + 7 + index * 5.2;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.8);
+    doc.setTextColor(71, 85, 105);
+    doc.text(`${libelle} :`, xEncadre + 3, yInfo);
+    doc.setTextColor(15, 23, 42);
+    doc.text(valeur, xEncadre + largeurEncadre - 3, yInfo, { align: "right" });
+  });
+
+  y = Math.max(yGauche, yIdentification - 3.5 + hauteurEncadre) + 4;
+
+  const largeurBloc = (largeurUtile - 5) / 2;
+  const xBlocDroit = marge + largeurBloc + 5;
+  const outilsListe = Array.from(outils);
+  const fournituresListe = fournituresClient
+    ? ["Fournitures à la charge du client"]
+    : lignesFournitures.filter((ligne) => !/^total\b/i.test(normaliserTexte(ligne)));
+
+  const hauteurListeCompacte = (elements: string[], largeur: number) =>
+    elements.reduce((total, element) => {
+      const lignes = doc.splitTextToSize(`- ${element}`, largeur - 6);
+      return total + Math.max(3.6, lignes.length * 3.35);
+    }, 0);
+
+  const hauteurOutils = 11 + hauteurListeCompacte(outilsListe, largeurBloc);
+  const hauteurFournitures =
+    16 + hauteurListeCompacte(
+      fournituresListe.length > 0
+        ? fournituresListe
+        : ["Vérifier la liste, les quantités, les références et la disponibilité"],
+      largeurBloc
+    );
+  const hauteurBlocs = Math.max(hauteurOutils, hauteurFournitures);
+  nouvellePageSiBesoin(hauteurBlocs + 5);
+  const yBlocs = y;
+
+  const dessinerBlocCompact = (
+    titre: string,
+    elements: string[],
+    x: number,
+    largeur: number,
+    sousTitre?: string
+  ) => {
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, yBlocs, largeur, hauteurBlocs, 2, 2, "FD");
+    doc.setFillColor(71, 85, 105);
+    doc.roundedRect(x, yBlocs, largeur, 7.5, 2, 2, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.4);
+    doc.setTextColor(255, 255, 255);
+    doc.text(titre.toUpperCase(), x + 3, yBlocs + 5.1);
+
+    let yLigne = yBlocs + 11;
+    if (sousTitre) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.7);
+      doc.setTextColor(15, 23, 42);
+      doc.text(sousTitre, x + 3, yLigne);
+      yLigne += 4.5;
+    }
+
+    elements.forEach((element) => {
+      const lignes = doc.splitTextToSize(`- ${element}`, largeur - 6);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.1);
+      doc.setTextColor(30, 41, 59);
+      doc.text(lignes, x + 3, yLigne);
+      yLigne += Math.max(3.6, lignes.length * 3.35);
+    });
+  };
+
+  dessinerBlocCompact("Outils à prendre", outilsListe, marge, largeurBloc);
+  dessinerBlocCompact(
+    "Fournitures",
+    fournituresListe.length > 0
+      ? fournituresListe
+      : ["Vérifier la liste, les quantités, les références et la disponibilité"],
+    xBlocDroit,
+    largeurBloc,
+    fournituresClient
+      ? undefined
+      : `Coût matériaux : ${Number(achatFournitures || 0).toFixed(2)} € TTC`
+  );
+  y = yBlocs + hauteurBlocs + 5;
+
+  ajouterTitreSection("Prestations dans l’ordre du devis");
   lignesTravaux.forEach((ligne, index) => {
     const quantite = ligne.q1 || 1;
     ajouterTexte(
-      `${index + 1}. ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
-      { gras: true, taille: 9.5 }
+      `Étape ${index + 1} - ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
+      { gras: true, taille: 8.5 }
     );
     ajouterListe(
       (ligne.detailsPdfPersonnalises?.length
@@ -4286,47 +4751,8 @@ const genererFicheChantier = () => {
         : detailsTravaux(ligne)
       ).filter((detail) => detail.trim())
     );
-    y += 2;
+    y += 0.5;
   });
-
-  ajouterTitreSection("Fournitures et approvisionnement");
-  if (fournituresClient) {
-    ajouterTexte("Fournitures à la charge du client.", { gras: true });
-  } else {
-    ajouterTexte(`Budget d’achat prévu : ${Number(achatFournitures || 0).toFixed(2)} € TTC`, {
-      gras: true,
-    });
-    ajouterTexte(`Coefficient de revente : x${coefficientFournitures}`);
-    ajouterTexte(
-      detailsFournitures?.trim() ||
-        "Vérifier la liste, les quantités, les références et la disponibilité avant le départ."
-    );
-  }
-
-  const outils = new Set<string>([
-    "Protections, bâches, ruban de masquage et sacs à gravats",
-    "Mètre, crayon, niveau et petit outillage à main",
-    "Aspirateur de chantier et matériel de nettoyage",
-  ]);
-
-  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
-    outils.add("Perforateur, burineur et équipements de protection");
-    outils.add("Coupe-carreaux, meuleuse, peignes, croisillons et malaxeur");
-    outils.add("Rouleaux, pinceaux et accessoires d’application du SPEC");
-  }
-  if (/plomberie|receveur|vasque|robinet|evacuation/.test(texteChantier)) {
-    outils.add("Clés de plomberie, pince multiprise et matériel de raccordement");
-    outils.add("Matériel de contrôle d’écoulement et d’étanchéité");
-  }
-  if (/peinture|enduit|ratissage|poncage/.test(texteChantier)) {
-    outils.add("Couteaux à enduire, ponceuse, abrasifs, rouleaux et pinceaux");
-  }
-  if (/sol pvc|revetement de sol|plinthe/.test(texteChantier)) {
-    outils.add("Cutter, règle, cale de frappe et outils de découpe du revêtement");
-  }
-
-  ajouterTitreSection("Outils et matériel à prévoir");
-  ajouterListe(Array.from(outils));
 
   const vigilance = new Set<string>([
     "Photographier les lieux et les équipements avant toute intervention",
@@ -4335,22 +4761,30 @@ const genererFicheChantier = () => {
     "Faire valider toute anomalie ou prestation supplémentaire avant exécution",
   ]);
 
-  if (/faience|carrelage|spec|etancheite|douche/.test(texteChantier)) {
+  if (/faience|carrelage|spec|etancheite|receveur/.test(textePrestations)) {
     vigilance.add("Contrôler l’humidité, la solidité et la planéité des supports après dépose");
     vigilance.add("Respecter les temps de séchage du support, du SPEC, de la colle et des joints");
     vigilance.add("Soigner les angles, traversées, liaisons avec le receveur et joints sanitaires");
   }
-  if (/paroi|cabine/.test(texteChantier)) {
+  if (/paroi|cabine/.test(textePrestations)) {
     vigilance.add("Manipuler les vitrages à deux personnes et contrôler les pièces avant réemploi");
   }
-  if (/peinture/.test(texteChantier)) {
+  if (/peinture/.test(textePrestations)) {
     vigilance.add("Vérifier le fonctionnement de la ventilation avant remise en peinture");
+  }
+  if (/plan de travail/.test(textePrestations)) {
+    vigilance.add("Contrôler les dimensions, l’équerrage, les découpes et la position de l’évier avant coupe");
+    vigilance.add("Protéger et étancher soigneusement tous les chants découpés");
+  }
+  if (/ventilation|entree d air|grille exterieure|traversee murale/.test(textePrestations)) {
+    vigilance.add("Contrôler l’absence de réseau dans la zone avant tout percement");
+    vigilance.add("Vérifier le diamètre, la pente vers l’extérieur et l’étanchéité du passage");
   }
 
   ajouterTitreSection("Points de vigilance");
   ajouterListe(Array.from(vigilance));
 
-  ajouterTitreSection("Check-list avant départ");
+  ajouterTitreSection("Contrôles du chantier");
   ajouterListe([
     "Photos avant travaux réalisées",
     "Implantation et dimensions contrôlées",
@@ -4360,6 +4794,12 @@ const genererFicheChantier = () => {
     "Photos de fin de chantier réalisées",
     "Déchets évacués et zone nettoyée",
   ]);
+
+  ajouterTitreSection("Suivi réel et imprévus");
+  ajouterTexte(`Heures réellement effectuées : ____________________`, { taille: 8.5 });
+  ajouterTexte(`Travaux supplémentaires validés : ______________________________________________`, { taille: 8.5 });
+  ajouterTexte(`Imprévus / anomalies constatés : _______________________________________________`, { taille: 8.5 });
+  ajouterTexte(`______________________________________________________________________________`, { taille: 8.5 });
 
   if (notes?.trim()) {
     ajouterTitreSection("Notes du dossier");
@@ -6010,6 +6450,184 @@ return (
   )}
 </div>
 
+{/* Commentaire spécifique aux fournitures */}
+<div className="md:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 space-y-2">
+  <h3 className="text-sm font-bold text-slate-800">
+    📦 Commentaire à afficher sur les fournitures
+  </h3>
+
+  <div className="flex gap-2 flex-wrap">
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "La fourniture est encore à définir : à la charge du client ou fournie par l’entreprise.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Charge à définir
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "Le prix des fournitures est estimé entre ... € et ... €.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Prix estimé
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "Les fournitures seront choisies, commandées et réglées séparément par le client. Elles ne sont pas comprises dans le montant du présent devis.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Fournitures client
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setCommentaireFournitures((texteActuel) => {
+          const phrase =
+            "Les quantités définitives seront confirmées après dépose des éléments existants et contrôle des supports.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-amber-800 border border-amber-300 text-xs font-semibold"
+    >
+      Quantités après dépose
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setCommentaireFournitures("")}
+      className="px-3 py-1 rounded-lg bg-white text-slate-600 border text-xs font-semibold"
+    >
+      Effacer
+    </button>
+  </div>
+
+  <TextArea
+    label="Information fournitures propre à ce devis"
+    value={commentaireFournitures}
+    onChange={setCommentaireFournitures}
+  />
+
+  <p className="text-xs text-slate-500">
+    Facultatif : un encadré « Information fournitures » est ajouté au PDF uniquement si cette zone est remplie.
+  </p>
+</div>
+
+{/* Conditions générales et conditions propres au chantier */}
+<div className="md:col-span-2 rounded-lg border bg-slate-50 px-3 py-2 space-y-3">
+  <div className="flex items-center justify-between gap-2 flex-wrap">
+    <h3 className="text-sm font-bold text-slate-800">
+      📝 Conditions du devis
+    </h3>
+
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsGeneralesDevis(CONDITIONS_GENERALES_DEVIS_DEFAUT)
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Remettre les phrases générales
+    </button>
+  </div>
+
+  <div className="flex gap-2 flex-wrap">
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsChantier((texteActuel) => {
+          const phrase =
+            "La dépose et l’évacuation des éléments existants sont réalisées par le client avant le commencement des travaux. La zone doit être dégagée et accessible.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Dépose par le client
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsChantier((texteActuel) => {
+          const phrase =
+            "Les quantités et réglages définitifs seront confirmés après dépose et contrôle de l’état ainsi que des niveaux du support.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Contrôle après dépose
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setConditionsChantier((texteActuel) => {
+          const phrase =
+            "La pergola est prévue comme une structure ouverte, sans canisse, couverture ni étanchéité. Toute couverture ultérieure nécessite une nouvelle étude et peut imposer un renforcement de la structure.";
+          return texteActuel.trim()
+            ? `${texteActuel.trim()}\n${phrase}`
+            : phrase;
+        })
+      }
+      className="px-3 py-1 rounded-lg bg-white text-slate-700 border text-xs font-semibold"
+    >
+      Pergola sans couverture
+    </button>
+  </div>
+
+  <div className="grid gap-3 md:grid-cols-2">
+    <TextArea
+      label="Phrases générales — modifiables pour ce devis"
+      value={conditionsGeneralesDevis}
+      onChange={setConditionsGeneralesDevis}
+    />
+
+    <TextArea
+      label="Conditions propres à ce chantier"
+      value={conditionsChantier}
+      onChange={setConditionsChantier}
+    />
+  </div>
+
+  <p className="text-xs text-slate-500">
+    Une phrase par ligne. Le cadre du PDF garde sa taille minimale actuelle et s’agrandit automatiquement si nécessaire, sans déplacer la zone date et signature à l’intérieur du cadre.
+  </p>
+</div>
+
   {/* ESTIMATIONS */}
   {statutDevis === "estimation_rapide" && (
     <>
@@ -6968,6 +7586,9 @@ ${d.notes || ""}`,
       coefficientFournitures: 1.22,
       fournituresClient: true,
       detailsFournitures: "",
+      conditionsGeneralesDevis: "",
+      conditionsChantier: "",
+      commentaireFournitures: "",
       reventeFournitures: 0,
       margeFournitures: 0,
 
@@ -7697,5 +8318,3 @@ function GraphiqueCourbe({
     </div>
   );
 }
-
-
