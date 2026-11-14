@@ -1442,14 +1442,14 @@ function totalFournituresIncluses(lignes: LigneTravaux[], modeClient: string): n
 type PlanningEdition = {
   client?: string; prestation?: string; heures?: number; montant?: number;
   acompte?: number; dateAcompte?: string; numero?: string; valide?: boolean;
-  commentaire?: string; pasAvant?: string; fixe?: string; termine?: boolean;
+  commentaire?: string; pasAvant?: string; fixe?: string; termine?: boolean; groupeParallele?: string;
 };
 type PlanningLibre = PlanningEdition & { id: string };
 type PlanningDonnees = {
   editions: Record<string, PlanningEdition>; libres: PlanningLibre[]; ordre: string[];
   debut: string; heuresJour: number; heuresMois: number; indisponibles: string[];
 };
-type PlanningLigne = Required<Pick<PlanningEdition, "client" | "prestation" | "heures" | "montant" | "acompte" | "dateAcompte" | "numero" | "valide" | "commentaire" | "pasAvant" | "fixe" | "termine">> & {
+type PlanningLigne = Required<Pick<PlanningEdition, "client" | "prestation" | "heures" | "montant" | "acompte" | "dateAcompte" | "numero" | "valide" | "commentaire" | "pasAvant" | "fixe" | "termine" | "groupeParallele">> & {
   id: string; manuel: boolean; dossierId?: number; encaisse: number;
 };
 type PlanningCreneau = { date: string; heures: number; id: string };
@@ -1465,6 +1465,7 @@ function normaliserPlanning(v: any): PlanningDonnees {
     for (const k of ["heures","montant","acompte"] as const) if (typeof e[k] === "number" && Number.isFinite(e[k])) r[k] = planningNombre(e[k]);
     for (const k of ["valide","termine"] as const) if (typeof e[k] === "boolean") r[k] = e[k];
     for (const k of ["dateAcompte","pasAvant","fixe"] as const) if (e[k] === "" || planningDateValide(e[k])) r[k] = e[k];
+    if (typeof e.groupeParallele === "string" && (e.groupeParallele === "" || /^g[1-9]$/.test(e.groupeParallele))) r.groupeParallele = e.groupeParallele;
     return r;
   };
   return {
@@ -1499,12 +1500,12 @@ function construireLignesPlanning(historique: Dossier[], p: PlanningDonnees): Pl
       dateAcompte:e.dateAcompte ?? origine.dateAcompte ?? courant.dateAcompte ?? "",
       numero:e.numero ?? origine.numeroDevis,
       valide:e.valide ?? (acompte > 0 || origine.statutDevis === "accepte" || courant.facturePayee),
-      commentaire:e.commentaire ?? "", pasAvant:e.pasAvant ?? "", fixe:e.fixe ?? "",
+      commentaire:e.commentaire ?? "", pasAvant:e.pasAvant ?? "", fixe:e.fixe ?? "", groupeParallele:e.fixe ? "" : e.groupeParallele ?? "",
       termine:e.termine ?? (courant.statutChantier === "termine" || Boolean(courant.facturePayee && courant.numeroFacture)),
       encaisse:Math.max(planningNombre(courant.montantEncaisse),planningNombre(origine.montantEncaisse)),
     });
   }
-  for (const e of p.libres) resultat.push({id:e.id,manuel:true,client:e.client === "Nouveau client" ? "" : e.client ?? "",prestation:e.prestation ?? "",heures:e.heures ?? 7,montant:e.montant ?? 0,acompte:e.acompte ?? 0,dateAcompte:e.dateAcompte ?? "",numero:e.numero ?? "",valide:e.valide ?? (planningNombre(e.acompte)>0),commentaire:e.commentaire ?? "",pasAvant:e.pasAvant ?? "",fixe:e.fixe ?? "",termine:e.termine ?? false,encaisse:e.acompte ?? 0});
+  for (const e of p.libres) resultat.push({id:e.id,manuel:true,client:e.client === "Nouveau client" ? "" : e.client ?? "",prestation:e.prestation ?? "",heures:e.heures ?? 7,montant:e.montant ?? 0,acompte:e.acompte ?? 0,dateAcompte:e.dateAcompte ?? "",numero:e.numero ?? "",valide:e.valide ?? (planningNombre(e.acompte)>0),commentaire:e.commentaire ?? "",pasAvant:e.pasAvant ?? "",fixe:e.fixe ?? "",termine:e.termine ?? false,groupeParallele:e.fixe ? "" : e.groupeParallele ?? "",encaisse:e.acompte ?? 0});
   const rang = new Map(p.ordre.map((id,i) => [id,i]));
   return resultat.sort((a,b) => (rang.get(a.id) ?? 1e9) - (rang.get(b.id) ?? 1e9) || (a.dossierId ?? 0) - (b.dossierId ?? 0));
 }
@@ -1517,7 +1518,8 @@ function calculerPlanning(lignes: PlanningLigne[], p: PlanningDonnees, aujourdhu
   const dernierJour = planningISO(limite);
   const ouvrable = (date: string) => { const j = planningDate(date).getDay(); return j >= 1 && j <= 4 && !indisponibles.has(date); };
   const reserver = (l: PlanningLigne, date: string, heures: number) => {
-    creneaux.push({id:l.id,date,heures});
+    const existant=creneaux.find(c=>c.id===l.id&&c.date===date);
+    if(existant)existant.heures+=heures;else creneaux.push({id:l.id,date,heures});
     jourUtilise.set(date,(jourUtilise.get(date)||0)+heures);
     const m = date.slice(0,7); moisUtilise.set(m,(moisUtilise.get(m)||0)+heures);
   };
@@ -1538,20 +1540,36 @@ function calculerPlanning(lignes: PlanningLigne[], p: PlanningDonnees, aujourdhu
     }
     if (reste > 0.001) alertes.push(`${l.client} : durée supérieure à l'horizon de dix ans.`);
   }
-  // La file garde son ordre, avec partage possible d'une journée entre deux petits chantiers.
+  // Un groupe occupe la place de son premier chantier dans la file.
+  // Ses membres alternent sur les mêmes journées ; leur somme reste limitée
+  // à la capacité journalière et mensuelle, après réservation des dates fixes.
   let curseur = debut;
-  for (const l of actives.filter(l => !l.fixe)) {
-    if (!l.heures) { alertes.push(`${l.client} : renseigner les heures prévues.`); continue; }
-    let reste = l.heures, d = planningDate(l.pasAvant && l.pasAvant > curseur ? l.pasAvant : curseur);
-    while (reste > 0.001 && planningISO(d) <= dernierJour) {
-      const date = planningISO(d), mois = date.slice(0,7);
-      const place = Math.min(p.heuresJour-(jourUtilise.get(date)||0),p.heuresMois-(moisUtilise.get(mois)||0));
-      if (ouvrable(date) && place > 0.001) {
-        const h = Math.min(place,reste); reserver(l,date,h); reste -= h; curseur = date;
+  const flexibles=actives.filter(l=>!l.fixe),traites=new Set<string>();
+  for(const premier of flexibles){
+    if(traites.has(premier.id))continue;
+    const groupe=premier.groupeParallele?flexibles.filter(l=>l.groupeParallele===premier.groupeParallele):[premier];
+    for(const l of groupe){traites.add(l.id);if(!l.heures)alertes.push(`${l.client} : renseigner les heures prévues.`);}
+    const restes=new Map(groupe.map(l=>[l.id,l.heures]));
+    let d=planningDate(curseur);
+    while(groupe.some(l=>(restes.get(l.id)||0)>.001)&&planningISO(d)<=dernierJour){
+      const date=planningISO(d),mois=date.slice(0,7);
+      let place=Math.max(0,Math.min(p.heuresJour-(jourUtilise.get(date)||0),p.heuresMois-(moisUtilise.get(mois)||0)));
+      if(ouvrable(date)&&place>.001){
+        let eligibles=groupe.filter(l=>(restes.get(l.id)||0)>.001&&(!l.pasAvant||l.pasAvant<=date));
+        while(place>.001&&eligibles.length){
+          let nombre=eligibles.length;
+          for(const l of eligibles){
+            const part=nombre===1?place:Math.floor((place/nombre)*10)/10||place/nombre;
+            const h=Math.min(part,restes.get(l.id)||0);
+            if(h>0){reserver(l,date,h);restes.set(l.id,Math.max(0,(restes.get(l.id)||0)-h));place-=h;curseur=date;}
+            nombre--;
+          }
+          eligibles=eligibles.filter(l=>(restes.get(l.id)||0)>.001);
+        }
       }
-      if (reste > 0.001) d.setDate(d.getDate()+1);
+      if(groupe.some(l=>(restes.get(l.id)||0)>.001))d.setDate(d.getDate()+1);
     }
-    if (reste > 0.001) alertes.push(`${l.client} : placement incomplet, horizon de dix ans atteint.`);
+    for(const l of groupe)if((restes.get(l.id)||0)>.001)alertes.push(`${l.client} : placement incomplet, horizon de dix ans atteint.`);
   }
   for (const [date,h] of jourUtilise) if (h > p.heuresJour+0.001) alertes.push(`${date} : chevauchement des dates fixes (${h.toFixed(1)} h).`);
   for (const [mois,h] of moisUtilise) if (h > p.heuresMois+0.001) alertes.push(`${mois} : dates fixes au-delà de la capacité mensuelle (${h.toFixed(1)} h).`);
@@ -1825,23 +1843,24 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
           <button type="button" className={bouton} onClick={()=>{setRecherche("");setFiltreStatut("tous");setFiltreOrigine("tous");setFiltreAcompte("tous");setTriPlanning("ordre");setTriInverse(false);setArchives(false);}}>Réinitialiser les filtres</button>
         </div>
         <p className="text-xs text-slate-500">{filtrees.length} ligne{filtrees.length>1?"s":""} affichée{filtrees.length>1?"s":""}. {triPlanning==="ordre"?"Déplace les chantiers avec ↥ / ↧ ou la poignée ⋮⋮.":"Le tri change uniquement l’affichage. Choisis « Ordre du planning » pour déplacer les chantiers."} Clique sur le nom, la prestation ou le numéro pour les modifier. « Auto » rétablit les valeurs du devis.</p>
+        <p className="text-xs text-slate-500">Pour alterner entre deux ou trois chantiers, choisis le même groupe dans « En parallèle ». Le groupe prend la place de son premier chantier ; les heures sont réparties sur les mêmes journées, dans la limite de {donnees.heuresJour} h/jour et {donnees.heuresMois} h/mois. Les dates fixes restent prioritaires. Le temps de séchage n’est pas calculé automatiquement.</p>
         <div className="planning-table-wrap rounded-xl border bg-white">
           {/* Le bandeau reste hors du conteneur à défilement horizontal pour
               que position:sticky suive le défilement vertical de la page. */}
           <div ref={entetePlanningRef} className="planning-sticky-heading rounded-t-xl"
             style={{position:"sticky",top:0,zIndex:45,overflowX:"hidden",background:"#173e42",boxShadow:"0 2px 4px rgba(0,0,0,.12)"}}
             onScroll={e=>synchroniserColonnesPlanning(e.currentTarget,corpsPlanningRef.current)}>
-            <table aria-label="Colonnes du planning" className="planning-table w-full table-fixed text-xs" style={{minWidth:1330}}>
-            <colgroup>{[58,82,56,56,94,112,98,170,112,112,170,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
+            <table aria-label="Colonnes du planning" className="planning-table w-full table-fixed text-xs" style={{minWidth:1380}}>
+            <colgroup>{[58,82,56,56,94,112,98,220,170,112,112,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
             <thead><tr>{[
-              ["Ordre","ordre"],["Heures restantes","heures"],["En cours",""],["Validé",""],["Acompte reçu","acompte"],["Date acompte","dateAcompte"],["Total devis","montant"],["Commentaire",""],["Pas avant","pasAvant"],["Début fixe","fixe"],["Prévision","prevision"],["Actions",""]
+              ["Ordre","ordre"],["Heures restantes","heures"],["En cours",""],["Validé",""],["Acompte reçu","acompte"],["Date acompte","dateAcompte"],["Total devis","montant"],["Prévision","prevision"],["Commentaire",""],["Pas avant","pasAvant"],["Début fixe","fixe"],["Actions",""]
             ].map(([t,k])=><th key={t} className="px-2 py-2 text-left font-semibold" style={{background:"#173e42",color:"#ffffff"}}>{k?<button type="button" style={{color:"#ffffff"}} className="text-left" onClick={()=>{if(k==="ordre"){setTriPlanning("ordre");setTriInverse(false);}else if(triPlanning===k)setTriInverse(!triInverse);else{setTriPlanning(k as TriPlanning);setTriInverse(false);}}}>{t}{triPlanning===k?(triInverse?" ↓":" ↑"):" ↕"}</button>:t}</th>)}</tr></thead>
             </table>
           </div>
           <div ref={corpsPlanningRef} className="overflow-x-auto rounded-b-xl"
             onScroll={e=>synchroniserColonnesPlanning(e.currentTarget,entetePlanningRef.current)}>
-          <table aria-label="Chantiers planifiés" className="planning-table w-full table-fixed text-xs" style={{minWidth:1330}}>
-            <colgroup>{[58,82,56,56,94,112,98,170,112,112,170,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
+          <table aria-label="Chantiers planifiés" className="planning-table w-full table-fixed text-xs" style={{minWidth:1380}}>
+            <colgroup>{[58,82,56,56,94,112,98,220,170,112,112,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
             {filtrees.map((l,index)=>{
               const rangVisible=filtrees.map(l=>l.id), deplacementPossible=triPlanning==="ordre";
               const fond=l.termine?"#f1f5f9":l.manuel?"#fff1d9":"#f0f7f7";
@@ -1869,11 +1888,23 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
                   <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Acompte ${l.id}`} valeur={l.acompte} className={input} onChange={v=>editer(l.id,{acompte:v})}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date acompte ${l.id}`} type="date" value={l.dateAcompte} className={input} onChange={e=>editer(l.id,{dateAcompte:e.target.value})}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Montant ${l.id}`} valeur={l.montant} className={input} onChange={v=>editer(l.id,{montant:v})}/></td>
+                  <td className="planning-prevision-cell px-2 py-1">
+                    <div className="planning-date-badge" style={{borderLeft:"3px solid #227873",background:l.fixe?"#ede9fe":"#e3f2ee",borderRadius:5,padding:"4px 7px",color:"#123f40"}}>
+                      <div style={{fontSize:14,fontWeight:700,lineHeight:"20px"}}>{periode(l).split(" · ")[0]}</div>
+                      {(l.valide&&!l.termine)&&<div style={{fontSize:10,fontWeight:400,lineHeight:"14px"}}>{l.fixe?"Date fixe":"Dates prévisionnelles"}{l.groupeParallele?` · Groupe ${l.groupeParallele.slice(1)}`:""}</div>}
+                    </div>
+                    <label className="mt-1 flex items-center gap-1" style={{fontSize:10}}>En parallèle
+                      <select aria-label={`Groupe parallèle ${l.id}`} title={l.fixe?"La date fixe reste prioritaire. Effacer cette date pour regrouper ce chantier.":"Choisir le même groupe pour alterner entre plusieurs chantiers."}
+                        disabled={Boolean(l.fixe)} value={l.groupeParallele} onChange={e=>editer(l.id,{groupeParallele:e.target.value})}
+                        style={{fontSize:10,minHeight:22,lineHeight:"14px",padding:"1px 3px",width:"auto",maxWidth:110}}>
+                        <option value="">{l.fixe?"Date fixe":"Seul"}</option>{Array.from({length:9},(_,i)=><option key={i} value={`g${i+1}`}>Groupe {i+1}</option>)}
+                      </select>
+                    </label>
+                  </td>
                   <td className="px-1 pb-1.5 pt-0.5"><PlanningTexteAuto ariaLabel={`Commentaire ${l.id}`} placeholder="Commentaire…" value={l.commentaire} onChange={v=>editer(l.id,{commentaire:v})} className={input}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Pas avant ${l.id}`} type="date" value={l.pasAvant} className={input} onChange={e=>editer(l.id,{pasAvant:e.target.value})}/></td>
-                  <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date fixe ${l.id}`} title="Effacer cette date pour déverrouiller le chantier" type="date" value={l.fixe} className={input} onChange={e=>editer(l.id,{fixe:e.target.value})}/></td>
-                  <td className="px-2 py-1 text-[11px] font-medium text-teal-900">{periode(l)}</td>
-                  <td className="px-1 py-1 text-[11px]"><label className="block whitespace-nowrap"><input aria-label={`Terminé ${l.id}`} type="checkbox" checked={l.termine} onChange={e=>editer(l.id,{termine:e.target.checked})}/> Terminé</label>{l.manuel?<button type="button" className="text-red-700" onClick={()=>{if(window.confirm(`Supprimer la ligne manuelle ${l.client} ?`))modifier({...donnees,libres:donnees.libres.filter(e=>e.id!==l.id),ordre:donnees.ordre.filter(id=>id!==l.id)});}}>Supprimer</button>:<div className="flex gap-2"><button type="button" className="text-teal-800 underline" onClick={()=>{const d=historique.find(d=>d.id===l.dossierId);if(d)ouvrir(d);}}>Ouvrir</button><button type="button" className="underline" title="Rétablir les valeurs du devis en conservant prestation, notes et dates du planning" onClick={()=>{const e=donnees.editions[l.id]||{};modifier({...donnees,editions:{...donnees.editions,[l.id]:{prestation:e.prestation,commentaire:e.commentaire,pasAvant:e.pasAvant,fixe:e.fixe,termine:e.termine}}});}}>Auto</button></div>}</td>
+                  <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date fixe ${l.id}`} title="Effacer cette date pour déverrouiller le chantier" type="date" value={l.fixe} className={input} onChange={e=>editer(l.id,{fixe:e.target.value,groupeParallele:e.target.value?"":l.groupeParallele})}/></td>
+                  <td className="px-1 py-1 text-[11px]"><label className="block whitespace-nowrap"><input aria-label={`Terminé ${l.id}`} type="checkbox" checked={l.termine} onChange={e=>editer(l.id,{termine:e.target.checked})}/> Terminé</label>{l.manuel?<button type="button" className="text-red-700" onClick={()=>{if(window.confirm(`Supprimer la ligne manuelle ${l.client} ?`))modifier({...donnees,libres:donnees.libres.filter(e=>e.id!==l.id),ordre:donnees.ordre.filter(id=>id!==l.id)});}}>Supprimer</button>:<div className="flex gap-2"><button type="button" className="text-teal-800 underline" onClick={()=>{const d=historique.find(d=>d.id===l.dossierId);if(d)ouvrir(d);}}>Ouvrir</button><button type="button" className="underline" title="Rétablir les valeurs du devis en conservant prestation, notes et dates du planning" onClick={()=>{const e=donnees.editions[l.id]||{};modifier({...donnees,editions:{...donnees.editions,[l.id]:{prestation:e.prestation,commentaire:e.commentaire,pasAvant:e.pasAvant,fixe:e.fixe,termine:e.termine,groupeParallele:e.groupeParallele}}});}}>Auto</button></div>}</td>
                 </tr>
               </tbody>;
             })}
