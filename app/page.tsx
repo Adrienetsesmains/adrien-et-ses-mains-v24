@@ -1493,7 +1493,7 @@ function construireLignesPlanning(historique: Dossier[], p: PlanningDonnees): Pl
     const acompte = Math.max(planningNombre(origine.montantAcompteEncaisse),planningNombre(courant.montantAcompteEncaisse));
     resultat.push({
       id, manuel:false, dossierId:origine.id,
-      client:e.client ?? origine.client, prestation:e.prestation ?? "",
+      client:e.client ?? nomClientHistorique(origine), prestation:e.prestation ?? "",
       heures:e.heures ?? (courant.lignesTravaux || []).reduce((s,l) => s + planningNombre(l.heuresUnite) * (l.q1 || 1),0),
       montant:e.montant ?? origine.total ?? 0, acompte:e.acompte ?? acompte,
       dateAcompte:e.dateAcompte ?? origine.dateAcompte ?? courant.dateAcompte ?? "",
@@ -1504,7 +1504,7 @@ function construireLignesPlanning(historique: Dossier[], p: PlanningDonnees): Pl
       encaisse:Math.max(planningNombre(courant.montantEncaisse),planningNombre(origine.montantEncaisse)),
     });
   }
-  for (const e of p.libres) resultat.push({id:e.id,manuel:true,client:e.client ?? "Nouveau client",prestation:e.prestation ?? "",heures:e.heures ?? 7,montant:e.montant ?? 0,acompte:e.acompte ?? 0,dateAcompte:e.dateAcompte ?? "",numero:e.numero ?? "",valide:e.valide ?? (planningNombre(e.acompte)>0),commentaire:e.commentaire ?? "",pasAvant:e.pasAvant ?? "",fixe:e.fixe ?? "",termine:e.termine ?? false,encaisse:e.acompte ?? 0});
+  for (const e of p.libres) resultat.push({id:e.id,manuel:true,client:e.client === "Nouveau client" ? "" : e.client ?? "",prestation:e.prestation ?? "",heures:e.heures ?? 7,montant:e.montant ?? 0,acompte:e.acompte ?? 0,dateAcompte:e.dateAcompte ?? "",numero:e.numero ?? "",valide:e.valide ?? (planningNombre(e.acompte)>0),commentaire:e.commentaire ?? "",pasAvant:e.pasAvant ?? "",fixe:e.fixe ?? "",termine:e.termine ?? false,encaisse:e.acompte ?? 0});
   const rang = new Map(p.ordre.map((id,i) => [id,i]));
   return resultat.sort((a,b) => (rang.get(a.id) ?? 1e9) - (rang.get(b.id) ?? 1e9) || (a.dossierId ?? 0) - (b.dossierId ?? 0));
 }
@@ -1559,6 +1559,82 @@ function calculerPlanning(lignes: PlanningLigne[], p: PlanningDonnees, aujourdhu
   return {creneaux,alertes,fin:dates.at(-1) || "",jourUtilise,moisUtilise};
 }
 
+// Même libellé dans l'historique et le planning, sans tronquer le bénéficiaire.
+function nomClientHistorique(d: Dossier): string {
+  if (d.modeClient === "jeremie") return `${d.client || "SAS Meurisse Couverture"}${d.clientFinalNom ? " / " + d.clientFinalNom : ""}`;
+  if (d.modeClient === "agence") {
+    const beneficiaire = d.locataire || d.proprietaire || d.clientFinalNom;
+    return `${d.agence || d.client || "Agence immobilière"}${beneficiaire ? " / " + beneficiaire : ""}`;
+  }
+  return d.client || "Client non renseigné";
+}
+
+function PlanningTexteAuto({value,onChange,ariaLabel,placeholder,className}: {
+  value:string; onChange:(v:string)=>void; ariaLabel:string; placeholder?:string; className?:string;
+}) {
+  const ref = useRef<HTMLTextAreaElement|null>(null);
+  useEffect(()=>{
+    const champ=ref.current;
+    if(!champ) return;
+    const ajuster=()=>{champ.style.height="0px";champ.style.height=`${Math.max(28,champ.scrollHeight)}px`;};
+    ajuster();
+    if(typeof ResizeObserver==="undefined") return;
+    let largeur=champ.clientWidth;
+    const observer=new ResizeObserver(()=>{if(champ.clientWidth!==largeur){largeur=champ.clientWidth;ajuster();}});
+    observer.observe(champ);return()=>observer.disconnect();
+  },[value]);
+  return <textarea ref={ref} aria-label={ariaLabel} placeholder={placeholder} rows={1} value={value}
+    className={className} style={{resize:"none",overflow:"hidden",minHeight:28,lineHeight:"18px",whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}
+    onChange={e=>onChange(e.target.value)}/>;
+}
+
+function PlanningNombre({valeur,onChange,ariaLabel,className}: {
+  valeur:number; onChange:(n:number)=>void; ariaLabel:string; className?:string;
+}) {
+  const [actif,setActif]=useState(false);
+  const [saisie,setSaisie]=useState("");
+  return <input aria-label={ariaLabel} type="text" inputMode="decimal" autoComplete="off" className={className}
+    value={actif?saisie:String(valeur).replace(".",",")}
+    onFocus={e=>{setActif(true);setSaisie(valeur===0?"":String(valeur).replace(".",","));if(valeur!==0)e.currentTarget.select();}}
+    onChange={e=>{const texte=e.target.value;if(!/^\d*(?:[.,]\d*)?$/.test(texte))return;setSaisie(texte);const n=Number(texte.replace(",","."));if(Number.isFinite(n))onChange(Math.max(0,n));}}
+    onBlur={()=>setActif(false)}/>;
+}
+
+type TriPlanning = "ordre" | "client" | "prestation" | "numero" | "heures" | "acompte" | "dateAcompte" | "montant" | "pasAvant" | "fixe" | "prevision";
+const optionsTriPlanning = [
+  ["ordre","Ordre du planning"],["client","Client (A–Z)"],["prestation","Prestation"],["numero","N° devis"],
+  ["heures","Heures restantes"],["montant","Total du devis"],["acompte","Acompte reçu"],
+  ["dateAcompte","Date de l’acompte"],["pasAvant","Pas avant"],["fixe","Date fixe"],["prevision","Début prévu"],
+] as const;
+
+function filtrerTrierPlanning(lignes:PlanningLigne[],creneaux:PlanningCreneau[],options:{
+  archives:boolean; recherche:string; statut:string; origine:string; acompte:string; tri:TriPlanning; inverse:boolean;
+}):PlanningLigne[] {
+  const texte=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("fr");
+  const q=texte(options.recherche.trim());
+  const resultat=lignes.filter(l=>{
+    if(options.statut==="termine") {if(!l.termine)return false;}
+    else {
+      if(!options.archives&&l.termine)return false;
+      if(options.statut==="valide"&&(!l.valide||l.termine))return false;
+      if(options.statut==="en_cours"&&(l.valide||l.termine))return false;
+    }
+    if(options.origine==="manuel"&&!l.manuel||options.origine==="appli"&&l.manuel)return false;
+    if(options.acompte==="recu"&&l.acompte<=0||options.acompte==="aucun"&&l.acompte>0)return false;
+    return !q||texte(`${l.client} ${l.prestation} ${l.numero}`).includes(q);
+  });
+  if(options.tri==="ordre")return resultat;
+  const debuts=new Map<string,string>();
+  for(const c of creneaux)if(!debuts.has(c.id)||c.date<debuts.get(c.id)!)debuts.set(c.id,c.date);
+  const cle=(l:PlanningLigne):string|number=>options.tri==="prevision"?debuts.get(l.id)||"":l[options.tri as Exclude<TriPlanning,"ordre"|"prevision">];
+  return resultat.sort((a,b)=>{
+    const av=cle(a),bv=cle(b);
+    if(av===""||bv==="")return av===bv?0:av===""?1:-1;
+    const cmp=typeof av==="number"&&typeof bv==="number"?av-bv:String(av).localeCompare(String(bv),"fr",{numeric:true,sensitivity:"base"});
+    return options.inverse?-cmp:cmp;
+  });
+}
+
 function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   historique:Dossier[]; donnees:PlanningDonnees; onChange:(p:PlanningDonnees)=>void; ouvrir:(d:Dossier)=>void;
 }) {
@@ -1569,6 +1645,11 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   const [blocage,setBlocage] = useState("");
   const [recherche,setRecherche] = useState("");
   const [archives,setArchives] = useState(false);
+  const [filtreStatut,setFiltreStatut] = useState("tous");
+  const [filtreOrigine,setFiltreOrigine] = useState("tous");
+  const [filtreAcompte,setFiltreAcompte] = useState("tous");
+  const [triPlanning,setTriPlanning] = useState<TriPlanning>("ordre");
+  const [triInverse,setTriInverse] = useState(false);
   const [selection,setSelection] = useState("");
   const [glisse,setGlisse] = useState<string|null>(null);
   const [precedent,setPrecedent] = useState<PlanningDonnees|null>(null);
@@ -1596,7 +1677,9 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   const total=aFaire.reduce((s,l)=>s+l.montant,0);
   const dejaRecu=aFaire.reduce((s,l)=>s+Math.max(l.encaisse,l.acompte),0);
   const solde=aFaire.reduce((s,l)=>s+Math.max(0,l.montant-Math.max(l.encaisse,l.acompte)),0);
-  const filtrees=lignes.filter(l=>(archives||!l.termine)&&`${l.client} ${l.prestation} ${l.numero}`.toLowerCase().includes(recherche.toLowerCase()));
+  const filtrees=useMemo(()=>filtrerTrierPlanning(lignes,calcul.creneaux,{
+    archives,recherche,statut:filtreStatut,origine:filtreOrigine,acompte:filtreAcompte,tri:triPlanning,inverse:triInverse,
+  }),[lignes,calcul.creneaux,archives,recherche,filtreStatut,filtreOrigine,filtreAcompte,triPlanning,triInverse]);
   const calendrierJour = (date:string) => calcul.creneaux.filter(c=>c.date===date);
   const couleur=(l:PlanningLigne)=>l.manuel?"#fff0da":l.fixe?"#ede9fe":"#dceee9";
   const resumeDate = (date:string) => calendrierJour(date).map(c=>{
@@ -1682,7 +1765,7 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   };
   const input="w-full min-w-0 rounded border border-slate-200 bg-white/80 px-1.5 py-1 text-xs text-slate-900";
   const bouton="rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold disabled:opacity-35";
-  return <section className="my-3 rounded-2xl border border-teal-200 bg-slate-50 p-3">
+  return <section className="planning-chantiers my-3 rounded-2xl border border-teal-200 bg-slate-50 p-3">
     <button type="button" onClick={()=>setOuvert(!ouvert)} className="flex w-full items-center justify-between text-left"><span className="text-lg font-bold text-teal-950">Planning des chantiers <span className="ml-2 text-xs font-normal">{aFaire.length} validés · {heures(totalH)} h</span></span><span>{ouvert?"Masquer ▲":"Afficher ▼"}</span></button>
     {ouvert&&<div className="mt-3 space-y-3">
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">{[
@@ -1691,39 +1774,73 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
       <p className="text-xs text-slate-600">Charge : environ {heures(totalH/donnees.heuresMois)} mois de capacité. Les encaissements restent prévisionnels et dépendent des règlements clients. Orange : hors application. Violet : date fixe. Vert : estimé.</p>
       <details className="rounded-xl border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold">Disponibilités et réglages</summary><div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
         <label className="text-xs">Début des prévisions<input aria-label="Début des prévisions" type="date" value={donnees.debut} className={input} onChange={e=>{if(planningDateValide(e.target.value))modifier({...donnees,debut:e.target.value});}}/></label>
-        <label className="text-xs">Heures par jour<input type="number" min="0.5" max="12" step="0.5" value={donnees.heuresJour} className={input} onChange={e=>modifier({...donnees,heuresJour:Math.min(12,Math.max(.5,Number(e.target.value)||7))})}/></label>
-        <label className="text-xs">Capacité mensuelle (h)<input type="number" min="1" max="300" value={donnees.heuresMois} className={input} onChange={e=>modifier({...donnees,heuresMois:Math.min(300,Math.max(1,Number(e.target.value)||105))})}/></label>
+        <label className="text-xs">Heures par jour<PlanningNombre ariaLabel="Heures par jour" valeur={donnees.heuresJour} className={input} onChange={v=>modifier({...donnees,heuresJour:Math.min(12,Math.max(.5,v||7))})}/></label>
+        <label className="text-xs">Capacité mensuelle (h)<PlanningNombre ariaLabel="Capacité mensuelle" valeur={donnees.heuresMois} className={input} onChange={v=>modifier({...donnees,heuresMois:Math.min(300,Math.max(1,v||105))})}/></label>
         <label className="text-xs">Bloquer une journée<input type="date" value={blocage} className={input} onChange={e=>setBlocage(e.target.value)}/><button type="button" disabled={!blocage} className={bouton} onClick={()=>{modifier({...donnees,indisponibles:Array.from(new Set([...donnees.indisponibles,blocage]))});setBlocage("");}}>Ajouter l’absence</button></label>
       </div><p className="mt-2 text-xs text-slate-500">Chantiers du lundi au jeudi. Vendredi réservé aux devis. Week-ends exclus. Les prévisions flexibles partent au plus tôt d’aujourd’hui. Les rendez-vous de l’ancien calendrier ne bloquent pas automatiquement une journée : ajoute ici tes indisponibilités.</p>
       <div className="mt-2 flex flex-wrap gap-2">{[...donnees.indisponibles].sort().map(d=><button key={d} className={bouton} onClick={()=>modifier({...donnees,indisponibles:donnees.indisponibles.filter(x=>x!==d)})}>{dateFR(d)} · Libérer</button>)}</div></details>
       <div className="flex flex-wrap items-center gap-2">
         {(["tableau","annee","mois"] as const).map(v=><button key={v} className={`${bouton} ${vue===v?"!bg-teal-800 !text-white":""}`} onClick={()=>setVue(v)}>{v==="tableau"?"Tableau":v==="annee"?"Calendrier annuel":"Vue mensuelle"}</button>)}
-        <button className={bouton} onClick={()=>{const id=`m-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;modifier({...donnees,libres:[...donnees.libres,{id,client:"Nouveau client",prestation:"",heures:7,valide:false}],ordre:[...lignes.map(l=>l.id),id]});setVue("tableau");}}>+ Ligne hors application</button>
+        <button className={bouton} onClick={()=>{const id=`m-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;modifier({...donnees,libres:[...donnees.libres,{id,client:"",prestation:"",heures:7,valide:false}],ordre:[...lignes.map(l=>l.id),id]});setVue("tableau");}}>+ Ligne hors application</button>
         <button className={bouton} onClick={imprimer}>PDF / Imprimer</button>
         <button className={bouton} disabled={!precedent} onClick={()=>{if(precedent){onChange(precedent);setPrecedent(null);}}}>Annuler</button>
         <label className="text-xs"><input type="checkbox" checked={archives} onChange={e=>setArchives(e.target.checked)}/> Afficher les terminés</label>
       </div>
       {calcul.alertes.length>0&&<div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">{calcul.alertes.map((a,i)=><p key={i}>{a}</p>)}</div>}
-      {vue==="tableau"?<><input aria-label="Rechercher dans le planning" placeholder="Rechercher un client, une prestation ou un devis…" value={recherche} onChange={e=>setRecherche(e.target.value)} className={`${input} max-w-md`}/>
-        <p className="text-xs text-slate-500">Déplace une ligne avec ↥ / ↧ ou la poignée ⋮⋮. Les corrections sont propres au planning. « Auto » rétablit les valeurs du devis. Un chantier commencé peut être suivi en corrigeant ses heures restantes.</p>
-        <div className="overflow-x-auto rounded-xl border bg-white"><table className="w-full min-w-[1500px] table-fixed text-xs"><thead className="bg-teal-950 text-white"><tr>{["Ordre","Client","Prestation","Heures restantes","En cours","Validé","Acompte reçu","Date acompte","N° devis","Total devis","Commentaire","Pas avant","Début fixe","Prévision","Actions"].map((t,i)=><th key={t} className="px-2 py-2 text-left font-medium" style={{width:[72,150,145,82,58,58,90,116,105,90,160,116,116,152,116][i]}}>{t}</th>)}</tr></thead>
-        <tbody>{filtrees.map(l=>{const i=lignes.findIndex(x=>x.id===l.id);return <tr key={l.id} style={{background:l.termine?"#f1f5f9":l.manuel?"#fff0da":"white"}} className={`border-b align-top ${glisse===l.id?"opacity-50":""}`} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();if(glisse)deplacer(glisse,l.id);setGlisse(null);}}>
-          <td className="p-1"><span draggable onDragStart={e=>{setGlisse(l.id);e.dataTransfer.setData("text/plain",l.id);}} onDragEnd={()=>setGlisse(null)} className="cursor-grab px-1" title="Déplacer ce chantier">⋮⋮</span><button disabled={i===0} title="Monter" onClick={()=>deplacer(l.id,lignes[i-1].id)}>↥</button><button disabled={i===lignes.length-1} title="Descendre" onClick={()=>deplacer(l.id,lignes[i+1].id)}>↧</button></td>
-          <td className="p-1"><input aria-label={`Client ${l.id}`} value={l.client} className={input} onChange={e=>editer(l.id,{client:e.target.value})}/></td>
-          <td className="p-1"><input aria-label={`Prestation ${l.id}`} placeholder="À renseigner" value={l.prestation} className={input} onChange={e=>editer(l.id,{prestation:e.target.value})}/></td>
-          <td className="p-1"><input aria-label={`Heures ${l.id}`} type="number" min="0" step="0.5" value={l.heures} className={input} onChange={e=>editer(l.id,{heures:Math.max(0,Number(e.target.value)||0)})}/></td>
-          <td className="p-2 text-center"><input aria-label={`En cours ${l.id}`} type="checkbox" checked={!l.valide} onChange={e=>editer(l.id,{valide:!e.target.checked})}/></td>
-          <td className="p-2 text-center"><input aria-label={`Validé ${l.id}`} type="checkbox" checked={l.valide} onChange={e=>editer(l.id,{valide:e.target.checked})}/></td>
-          <td className="p-1"><input aria-label={`Acompte ${l.id}`} type="number" min="0" step="0.01" value={l.acompte} className={input} onChange={e=>editer(l.id,{acompte:Math.max(0,Number(e.target.value)||0)})}/></td>
-          <td className="p-1"><input aria-label={`Date acompte ${l.id}`} type="date" value={l.dateAcompte} className={input} onChange={e=>editer(l.id,{dateAcompte:e.target.value})}/></td>
-          <td className="p-1"><input aria-label={`Numéro devis ${l.id}`} value={l.numero} className={input} onChange={e=>editer(l.id,{numero:e.target.value})}/></td>
-          <td className="p-1"><input aria-label={`Montant ${l.id}`} type="number" min="0" step="0.01" value={l.montant} className={input} onChange={e=>editer(l.id,{montant:Math.max(0,Number(e.target.value)||0)})}/></td>
-          <td className="p-1"><textarea aria-label={`Commentaire ${l.id}`} rows={1} value={l.commentaire} className={input} onChange={e=>editer(l.id,{commentaire:e.target.value})}/></td>
-          <td className="p-1"><input aria-label={`Pas avant ${l.id}`} type="date" value={l.pasAvant} className={input} onChange={e=>editer(l.id,{pasAvant:e.target.value})}/></td>
-          <td className="p-1"><input aria-label={`Date fixe ${l.id}`} type="date" value={l.fixe} className={input} onChange={e=>editer(l.id,{fixe:e.target.value})}/><span className="text-[9px] text-slate-500">Effacer pour déverrouiller</span></td>
-          <td className="p-2 text-[11px] font-medium text-teal-900">{periode(l)}</td>
-          <td className="space-y-1 p-1"><label className="block"><input type="checkbox" checked={l.termine} onChange={e=>editer(l.id,{termine:e.target.checked})}/> Terminé</label>{l.manuel?<button className="text-red-700" onClick={()=>{if(window.confirm(`Supprimer la ligne manuelle ${l.client} ?`))modifier({...donnees,libres:donnees.libres.filter(e=>e.id!==l.id),ordre:donnees.ordre.filter(id=>id!==l.id)});}}>Supprimer</button>:<><button className="mr-2 text-teal-800 underline" onClick={()=>{const d=historique.find(d=>d.id===l.dossierId);if(d)ouvrir(d);}}>Ouvrir</button><button className="underline" title="Rétablir client, heures, montants, numéro et validation du devis. Conserver les notes et dates du planning." onClick={()=>{const e=donnees.editions[l.id]||{};modifier({...donnees,editions:{...donnees.editions,[l.id]:{prestation:e.prestation,commentaire:e.commentaire,pasAvant:e.pasAvant,fixe:e.fixe,termine:e.termine}}});}}>Auto</button></>}</td>
-        </tr>;})}</tbody></table>{!filtrees.length&&<p className="p-5 text-sm text-slate-500">Aucun chantier à afficher. Les devis enregistrés apparaîtront ici. Tu peux aussi ajouter une ligne hors application.</p>}</div>
+      {vue==="tableau"?<>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="min-w-[230px] flex-1 text-[11px] font-semibold">Recherche<input aria-label="Rechercher dans le planning" placeholder="Client, prestation ou devis…" value={recherche} onChange={e=>setRecherche(e.target.value)} className={input}/></label>
+          <label className="text-[11px] font-semibold">Statut<select aria-label="Filtrer par statut" className={input} value={filtreStatut} onChange={e=>setFiltreStatut(e.target.value)}><option value="tous">Tous les statuts</option><option value="valide">Validés</option><option value="en_cours">En cours</option><option value="termine">Terminés</option></select></label>
+          <label className="text-[11px] font-semibold">Origine<select aria-label="Filtrer par origine" className={input} value={filtreOrigine} onChange={e=>setFiltreOrigine(e.target.value)}><option value="tous">Toutes les lignes</option><option value="appli">Devis de l’application</option><option value="manuel">Hors application</option></select></label>
+          <label className="text-[11px] font-semibold">Acompte<select aria-label="Filtrer par acompte" className={input} value={filtreAcompte} onChange={e=>setFiltreAcompte(e.target.value)}><option value="tous">Avec ou sans acompte</option><option value="recu">Acompte reçu</option><option value="aucun">Sans acompte</option></select></label>
+          <label className="text-[11px] font-semibold">Trier par<select aria-label="Trier le planning" className={input} value={triPlanning} onChange={e=>{setTriPlanning(e.target.value as TriPlanning);if(e.target.value==="ordre")setTriInverse(false);}}>{optionsTriPlanning.map(([k,t])=><option key={k} value={k}>{t}</option>)}</select></label>
+          <button type="button" className={bouton} disabled={triPlanning==="ordre"} onClick={()=>setTriInverse(!triInverse)}>{triInverse?"Décroissant ↓":"Croissant ↑"}</button>
+          <button type="button" className={bouton} onClick={()=>{setRecherche("");setFiltreStatut("tous");setFiltreOrigine("tous");setFiltreAcompte("tous");setTriPlanning("ordre");setTriInverse(false);setArchives(false);}}>Réinitialiser les filtres</button>
+        </div>
+        <p className="text-xs text-slate-500">{filtrees.length} ligne{filtrees.length>1?"s":""} affichée{filtrees.length>1?"s":""}. {triPlanning==="ordre"?"Déplace les chantiers avec ↥ / ↧ ou la poignée ⋮⋮.":"Le tri change uniquement l’affichage. Choisis « Ordre du planning » pour déplacer les chantiers."} Les champs restent modifiables. « Auto » rétablit les valeurs du devis.</p>
+        <div className="planning-table-wrap overflow-x-auto rounded-xl border bg-white">
+          <table className="planning-table w-full table-fixed text-xs" style={{minWidth:1300}}>
+            <colgroup>{[58,82,56,56,94,112,98,170,112,112,170,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
+            <thead><tr>{[
+              ["Ordre","ordre"],["Heures restantes","heures"],["En cours",""],["Validé",""],["Acompte reçu","acompte"],["Date acompte","dateAcompte"],["Total devis","montant"],["Commentaire",""],["Pas avant","pasAvant"],["Début fixe","fixe"],["Prévision","prevision"],["Actions",""]
+            ].map(([t,k])=><th key={t} className="px-2 py-2 text-left font-semibold" style={{background:"#173e42",color:"#ffffff"}}>{k?<button type="button" style={{color:"#ffffff"}} className="text-left" onClick={()=>{if(k==="ordre"){setTriPlanning("ordre");setTriInverse(false);}else if(triPlanning===k)setTriInverse(!triInverse);else{setTriPlanning(k as TriPlanning);setTriInverse(false);}}}>{t}{triPlanning===k?(triInverse?" ↓":" ↑"):" ↕"}</button>:t}</th>)}</tr></thead>
+            {filtrees.map((l,index)=>{
+              const rangVisible=filtrees.map(l=>l.id), deplacementPossible=triPlanning==="ordre";
+              const fond=l.termine?"#f1f5f9":l.manuel?"#fff1d9":"#f0f7f7";
+              return <tbody key={l.id} data-planning-id={l.id} className={glisse===l.id?"opacity-50":""}
+                onDragOver={e=>{if(deplacementPossible)e.preventDefault();}} onDrop={e=>{e.preventDefault();if(glisse&&deplacementPossible)deplacer(glisse,l.id);setGlisse(null);}}>
+                <tr className="planning-identity" style={{background:fond}}>
+                  <td rowSpan={2} className="border-b border-slate-300 px-1 py-2 align-top text-center">
+                    <span draggable={deplacementPossible} onDragStart={e=>{setGlisse(l.id);e.dataTransfer.setData("text/plain",l.id);}} onDragEnd={()=>setGlisse(null)} className={deplacementPossible?"cursor-grab":"opacity-40"} title="Déplacer ce chantier">⋮⋮</span>
+                    <div className="flex justify-center gap-1"><button type="button" aria-label={`Monter ${l.id}`} disabled={!deplacementPossible||index===0} className="disabled:opacity-25" onClick={()=>deplacer(l.id,rangVisible[index-1])}>↥</button><button type="button" aria-label={`Descendre ${l.id}`} disabled={!deplacementPossible||index===filtrees.length-1} className="disabled:opacity-25" onClick={()=>deplacer(l.id,rangVisible[index+1])}>↧</button></div>
+                  </td>
+                  <td colSpan={11} className="px-2 pb-0.5 pt-1.5">
+                    <div className="grid items-start gap-2" style={{gridTemplateColumns:"minmax(340px,1.2fr) minmax(260px,1fr) 155px"}}>
+                      <PlanningTexteAuto ariaLabel={`Client ${l.id}`} placeholder="Nouveau client" value={l.client} onChange={v=>editer(l.id,{client:v})} className={`${input} font-semibold`} />
+                      <PlanningTexteAuto ariaLabel={`Prestation ${l.id}`} placeholder="À renseigner" value={l.prestation} onChange={v=>editer(l.id,{prestation:v})} className={input}/>
+                      <input aria-label={`Numéro devis ${l.id}`} placeholder="N° devis" value={l.numero} className={input} onChange={e=>editer(l.id,{numero:e.target.value})}/>
+                    </div>
+                  </td>
+                </tr>
+                <tr className="planning-values border-b border-slate-300 align-top" style={{background:l.termine?"#f1f5f9":l.manuel?"#fff8ec":"white"}}>
+                  <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Heures ${l.id}`} valeur={l.heures} className={input} onChange={v=>editer(l.id,{heures:v})}/></td>
+                  <td className="px-1 py-2 text-center"><input aria-label={`En cours ${l.id}`} type="checkbox" checked={!l.valide} onChange={e=>editer(l.id,{valide:!e.target.checked})}/></td>
+                  <td className="px-1 py-2 text-center"><input aria-label={`Validé ${l.id}`} type="checkbox" checked={l.valide} onChange={e=>editer(l.id,{valide:e.target.checked})}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Acompte ${l.id}`} valeur={l.acompte} className={input} onChange={v=>editer(l.id,{acompte:v})}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date acompte ${l.id}`} type="date" value={l.dateAcompte} className={input} onChange={e=>editer(l.id,{dateAcompte:e.target.value})}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Montant ${l.id}`} valeur={l.montant} className={input} onChange={v=>editer(l.id,{montant:v})}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><PlanningTexteAuto ariaLabel={`Commentaire ${l.id}`} value={l.commentaire} onChange={v=>editer(l.id,{commentaire:v})} className={input}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Pas avant ${l.id}`} type="date" value={l.pasAvant} className={input} onChange={e=>editer(l.id,{pasAvant:e.target.value})}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date fixe ${l.id}`} title="Effacer cette date pour déverrouiller le chantier" type="date" value={l.fixe} className={input} onChange={e=>editer(l.id,{fixe:e.target.value})}/></td>
+                  <td className="px-2 py-1 text-[11px] font-medium text-teal-900">{periode(l)}</td>
+                  <td className="px-1 py-1 text-[11px]"><label className="block whitespace-nowrap"><input aria-label={`Terminé ${l.id}`} type="checkbox" checked={l.termine} onChange={e=>editer(l.id,{termine:e.target.checked})}/> Terminé</label>{l.manuel?<button type="button" className="text-red-700" onClick={()=>{if(window.confirm(`Supprimer la ligne manuelle ${l.client} ?`))modifier({...donnees,libres:donnees.libres.filter(e=>e.id!==l.id),ordre:donnees.ordre.filter(id=>id!==l.id)});}}>Supprimer</button>:<div className="flex gap-2"><button type="button" className="text-teal-800 underline" onClick={()=>{const d=historique.find(d=>d.id===l.dossierId);if(d)ouvrir(d);}}>Ouvrir</button><button type="button" className="underline" title="Rétablir les valeurs du devis en conservant prestation, notes et dates du planning" onClick={()=>{const e=donnees.editions[l.id]||{};modifier({...donnees,editions:{...donnees.editions,[l.id]:{prestation:e.prestation,commentaire:e.commentaire,pasAvant:e.pasAvant,fixe:e.fixe,termine:e.termine}}});}}>Auto</button></div>}</td>
+                </tr>
+              </tbody>;
+            })}
+          </table>
+          {!filtrees.length&&<p className="p-5 text-sm text-slate-500">Aucun chantier ne correspond aux filtres.</p>}
+        </div>
+
       </>:<><div className="flex items-center gap-3"><button className={bouton} onClick={()=>setAnnee(annee-1)}>←</button><span className="font-bold">{annee}</span><button className={bouton} onClick={()=>setAnnee(annee+1)}>→</button>{vue==="mois"&&<select className={input+" max-w-44"} value={mois} onChange={e=>setMois(Number(e.target.value))}>{Array.from({length:12},(_,m)=><option key={m} value={m}>{new Date(annee,m,1).toLocaleDateString("fr-FR",{month:"long"})}</option>)}</select>}</div>
         <div className={vue==="annee"?"grid gap-3 sm:grid-cols-2 xl:grid-cols-4":""}>{vue==="annee"?Array.from({length:12},(_,m)=>moisCalendrier(m,true)):moisCalendrier(mois)}</div>
         {selection&&<div className="rounded-xl border bg-white p-3"><p className="font-bold">{dateFR(selection)}</p><p className="whitespace-pre-line text-sm">{resumeDate(selection)||"Aucun chantier prévu."}</p></div>}
@@ -6830,6 +6947,17 @@ return (
     min-height: 100vh;
   }
   .atelier-app *, .atelier-app *::before, .atelier-app *::after { box-sizing: border-box; }
+  .atelier-app .planning-table thead th,
+  .atelier-app .planning-table thead th button { color: #fff !important; }
+  .atelier-app .planning-table thead th { background: #173e42 !important; }
+  .atelier-app .planning-chantiers .planning-table :is(input:not([type="checkbox"]),textarea) {
+    min-height: 28px; padding: 3px 6px; font-size: 12px; line-height: 18px;
+    color: #173e42; background: rgba(255,255,255,.92);
+  }
+  .atelier-app .planning-chantiers .planning-table textarea { resize: none; }
+  .atelier-app .planning-chantiers .planning-table textarea::placeholder { color: #687b82; font-weight: 400; }
+  .atelier-app .planning-chantiers .planning-table tbody .planning-identity { border-top: 1px solid #a8c2c5; }
+
   .atelier-app .atelier-toolbar {
     max-width: 1280px; margin-left: auto; margin-right: auto;
     background: rgba(246, 253, 250, .97);
@@ -9452,21 +9580,7 @@ return (
                 <div>
                   <p className="text-lg font-bold text-slate-800">
                     
-              {item.modeClient === "jeremie"
-  ? `${item.client || "SAS Meurisse Couverture"}${
-      item.clientFinalNom ? " / " + item.clientFinalNom : ""
-    }`
-  : item.modeClient === "agence"
-  ? `${item.agence || item.client || "Agence immobilière"}${
-      item.locataire
-        ? " / " + item.locataire
-        : item.proprietaire
-        ? " / " + item.proprietaire
-        : item.clientFinalNom
-        ? " / " + item.clientFinalNom
-        : ""
-    }`
-  : item.client || "Client non renseigné"}
+              {nomClientHistorique(item)}
                   </p>
 
                   <div className="space-y-1 text-sm text-slate-500">
