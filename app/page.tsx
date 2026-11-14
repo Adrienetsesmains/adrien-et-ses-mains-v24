@@ -1588,6 +1588,28 @@ function PlanningTexteAuto({value,onChange,ariaLabel,placeholder,className}: {
     onChange={e=>onChange(e.target.value)}/>;
 }
 
+// Lecture comme une ligne d'historique ; la saisie n'apparaît qu'au clic.
+function PlanningIdentiteTexte({value,onChange,ariaLabel,placeholder,gras=false}: {
+  value:string; onChange:(v:string)=>void; ariaLabel:string; placeholder:string; gras?:boolean;
+}) {
+  const [edition,setEdition]=useState(false);
+  const valeurInitiale=useRef(value);
+  const ref=useRef<HTMLTextAreaElement|null>(null);
+  useEffect(()=>{
+    const champ=ref.current;
+    if(!edition||!champ)return;
+    champ.style.height="0px";champ.style.height=`${Math.max(26,champ.scrollHeight)}px`;
+  },[edition,value]);
+  const style={fontWeight:gras?700:400,fontSize:gras?15:13,lineHeight:"21px",textAlign:"left" as const};
+  if(!edition)return <button type="button" aria-label={ariaLabel} className="planning-identity-text"
+    title="Cliquer pour modifier" style={{...style,color:value?"#244e5b":"#687b82",whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}
+    onClick={()=>{valeurInitiale.current=value;setEdition(true);}}>{value||placeholder}</button>;
+  return <textarea autoFocus ref={ref} aria-label={ariaLabel} placeholder={placeholder} rows={1} value={value}
+    className="planning-identity-editor" style={{...style,width:`${Math.min(85,Math.max(14,value.length+3))}ch`,maxWidth:"100%",minHeight:26,resize:"none",overflow:"hidden"}}
+    onChange={e=>onChange(e.target.value)} onBlur={()=>setEdition(false)}
+    onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();e.currentTarget.blur();}else if(e.key==="Escape"){e.preventDefault();onChange(valeurInitiale.current);setEdition(false);}}}/>;
+}
+
 function PlanningNombre({valeur,onChange,ariaLabel,className}: {
   valeur:number; onChange:(n:number)=>void; ariaLabel:string; className?:string;
 }) {
@@ -1652,6 +1674,11 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   const [triInverse,setTriInverse] = useState(false);
   const [selection,setSelection] = useState("");
   const [glisse,setGlisse] = useState<string|null>(null);
+  const entetePlanningRef=useRef<HTMLDivElement|null>(null);
+  const corpsPlanningRef=useRef<HTMLDivElement|null>(null);
+  const synchroniserColonnesPlanning=(source:HTMLDivElement,cible:HTMLDivElement|null)=>{
+    if(cible&&cible.scrollLeft!==source.scrollLeft)cible.scrollLeft=source.scrollLeft;
+  };
   const [precedent,setPrecedent] = useState<PlanningDonnees|null>(null);
   const lignes = useMemo(()=>construireLignesPlanning(historique,donnees),[historique,donnees]);
   const calcul = useMemo(()=>calculerPlanning(lignes,donnees),[lignes,donnees]);
@@ -1797,13 +1824,24 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
           <button type="button" className={bouton} disabled={triPlanning==="ordre"} onClick={()=>setTriInverse(!triInverse)}>{triInverse?"Décroissant ↓":"Croissant ↑"}</button>
           <button type="button" className={bouton} onClick={()=>{setRecherche("");setFiltreStatut("tous");setFiltreOrigine("tous");setFiltreAcompte("tous");setTriPlanning("ordre");setTriInverse(false);setArchives(false);}}>Réinitialiser les filtres</button>
         </div>
-        <p className="text-xs text-slate-500">{filtrees.length} ligne{filtrees.length>1?"s":""} affichée{filtrees.length>1?"s":""}. {triPlanning==="ordre"?"Déplace les chantiers avec ↥ / ↧ ou la poignée ⋮⋮.":"Le tri change uniquement l’affichage. Choisis « Ordre du planning » pour déplacer les chantiers."} Les champs restent modifiables. « Auto » rétablit les valeurs du devis.</p>
-        <div className="planning-table-wrap overflow-x-auto rounded-xl border bg-white">
-          <table className="planning-table w-full table-fixed text-xs" style={{minWidth:1300}}>
+        <p className="text-xs text-slate-500">{filtrees.length} ligne{filtrees.length>1?"s":""} affichée{filtrees.length>1?"s":""}. {triPlanning==="ordre"?"Déplace les chantiers avec ↥ / ↧ ou la poignée ⋮⋮.":"Le tri change uniquement l’affichage. Choisis « Ordre du planning » pour déplacer les chantiers."} Clique sur le nom, la prestation ou le numéro pour les modifier. « Auto » rétablit les valeurs du devis.</p>
+        <div className="planning-table-wrap rounded-xl border bg-white">
+          {/* Le bandeau reste hors du conteneur à défilement horizontal pour
+              que position:sticky suive le défilement vertical de la page. */}
+          <div ref={entetePlanningRef} className="planning-sticky-heading rounded-t-xl"
+            style={{position:"sticky",top:0,zIndex:45,overflowX:"hidden",background:"#173e42",boxShadow:"0 2px 4px rgba(0,0,0,.12)"}}
+            onScroll={e=>synchroniserColonnesPlanning(e.currentTarget,corpsPlanningRef.current)}>
+            <table aria-label="Colonnes du planning" className="planning-table w-full table-fixed text-xs" style={{minWidth:1330}}>
             <colgroup>{[58,82,56,56,94,112,98,170,112,112,170,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
             <thead><tr>{[
               ["Ordre","ordre"],["Heures restantes","heures"],["En cours",""],["Validé",""],["Acompte reçu","acompte"],["Date acompte","dateAcompte"],["Total devis","montant"],["Commentaire",""],["Pas avant","pasAvant"],["Début fixe","fixe"],["Prévision","prevision"],["Actions",""]
             ].map(([t,k])=><th key={t} className="px-2 py-2 text-left font-semibold" style={{background:"#173e42",color:"#ffffff"}}>{k?<button type="button" style={{color:"#ffffff"}} className="text-left" onClick={()=>{if(k==="ordre"){setTriPlanning("ordre");setTriInverse(false);}else if(triPlanning===k)setTriInverse(!triInverse);else{setTriPlanning(k as TriPlanning);setTriInverse(false);}}}>{t}{triPlanning===k?(triInverse?" ↓":" ↑"):" ↕"}</button>:t}</th>)}</tr></thead>
+            </table>
+          </div>
+          <div ref={corpsPlanningRef} className="overflow-x-auto rounded-b-xl"
+            onScroll={e=>synchroniserColonnesPlanning(e.currentTarget,entetePlanningRef.current)}>
+          <table aria-label="Chantiers planifiés" className="planning-table w-full table-fixed text-xs" style={{minWidth:1330}}>
+            <colgroup>{[58,82,56,56,94,112,98,170,112,112,170,110].map((w,i)=><col key={i} style={{width:w}}/>)}</colgroup>
             {filtrees.map((l,index)=>{
               const rangVisible=filtrees.map(l=>l.id), deplacementPossible=triPlanning==="ordre";
               const fond=l.termine?"#f1f5f9":l.manuel?"#fff1d9":"#f0f7f7";
@@ -1815,10 +1853,12 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
                     <div className="flex justify-center gap-1"><button type="button" aria-label={`Monter ${l.id}`} disabled={!deplacementPossible||index===0} className="disabled:opacity-25" onClick={()=>deplacer(l.id,rangVisible[index-1])}>↥</button><button type="button" aria-label={`Descendre ${l.id}`} disabled={!deplacementPossible||index===filtrees.length-1} className="disabled:opacity-25" onClick={()=>deplacer(l.id,rangVisible[index+1])}>↧</button></div>
                   </td>
                   <td colSpan={11} className="px-2 pb-0.5 pt-1.5">
-                    <div className="grid items-start gap-2" style={{gridTemplateColumns:"minmax(340px,1.2fr) minmax(260px,1fr) 155px"}}>
-                      <PlanningTexteAuto ariaLabel={`Client ${l.id}`} placeholder="Nouveau client" value={l.client} onChange={v=>editer(l.id,{client:v})} className={`${input} font-semibold`} />
-                      <PlanningTexteAuto ariaLabel={`Prestation ${l.id}`} placeholder="À renseigner" value={l.prestation} onChange={v=>editer(l.id,{prestation:v})} className={input}/>
-                      <input aria-label={`Numéro devis ${l.id}`} placeholder="N° devis" value={l.numero} className={input} onChange={e=>editer(l.id,{numero:e.target.value})}/>
+                    <div className="planning-identity-line flex flex-wrap items-baseline justify-start gap-x-2 gap-y-0 text-left">
+                      <PlanningIdentiteTexte ariaLabel={`Client ${l.id}`} placeholder="Nouveau client" value={l.client} onChange={v=>editer(l.id,{client:v})} gras/>
+                      <span aria-hidden="true" className="text-slate-400">—</span>
+                      <PlanningIdentiteTexte ariaLabel={`Prestation ${l.id}`} placeholder="À renseigner" value={l.prestation} onChange={v=>editer(l.id,{prestation:v})}/>
+                      <span aria-hidden="true" className="text-slate-400">·</span>
+                      <PlanningIdentiteTexte ariaLabel={`Numéro devis ${l.id}`} placeholder="N° devis" value={l.numero} onChange={v=>editer(l.id,{numero:v})}/>
                     </div>
                   </td>
                 </tr>
@@ -1829,7 +1869,7 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
                   <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Acompte ${l.id}`} valeur={l.acompte} className={input} onChange={v=>editer(l.id,{acompte:v})}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date acompte ${l.id}`} type="date" value={l.dateAcompte} className={input} onChange={e=>editer(l.id,{dateAcompte:e.target.value})}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><PlanningNombre ariaLabel={`Montant ${l.id}`} valeur={l.montant} className={input} onChange={v=>editer(l.id,{montant:v})}/></td>
-                  <td className="px-1 pb-1.5 pt-0.5"><PlanningTexteAuto ariaLabel={`Commentaire ${l.id}`} value={l.commentaire} onChange={v=>editer(l.id,{commentaire:v})} className={input}/></td>
+                  <td className="px-1 pb-1.5 pt-0.5"><PlanningTexteAuto ariaLabel={`Commentaire ${l.id}`} placeholder="Commentaire…" value={l.commentaire} onChange={v=>editer(l.id,{commentaire:v})} className={input}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Pas avant ${l.id}`} type="date" value={l.pasAvant} className={input} onChange={e=>editer(l.id,{pasAvant:e.target.value})}/></td>
                   <td className="px-1 pb-1.5 pt-0.5"><input aria-label={`Date fixe ${l.id}`} title="Effacer cette date pour déverrouiller le chantier" type="date" value={l.fixe} className={input} onChange={e=>editer(l.id,{fixe:e.target.value})}/></td>
                   <td className="px-2 py-1 text-[11px] font-medium text-teal-900">{periode(l)}</td>
@@ -1839,6 +1879,7 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
             })}
           </table>
           {!filtrees.length&&<p className="p-5 text-sm text-slate-500">Aucun chantier ne correspond aux filtres.</p>}
+          </div>
         </div>
 
       </>:<><div className="flex items-center gap-3"><button className={bouton} onClick={()=>setAnnee(annee-1)}>←</button><span className="font-bold">{annee}</span><button className={bouton} onClick={()=>setAnnee(annee+1)}>→</button>{vue==="mois"&&<select className={input+" max-w-44"} value={mois} onChange={e=>setMois(Number(e.target.value))}>{Array.from({length:12},(_,m)=><option key={m} value={m}>{new Date(annee,m,1).toLocaleDateString("fr-FR",{month:"long"})}</option>)}</select>}</div>
@@ -6955,6 +6996,22 @@ return (
     color: #173e42; background: rgba(255,255,255,.92);
   }
   .atelier-app .planning-chantiers .planning-table textarea { resize: none; }
+  .atelier-app .planning-chantiers .planning-identity-line { justify-content: flex-start; text-align: left; padding: 2px 0; }
+  .atelier-app .planning-chantiers .planning-identity-text {
+    display: inline; flex: 0 1 auto; min-width: 0; max-width: 100%; margin: 0; padding: 0;
+    border: 0; border-radius: 0; background: transparent; box-shadow: none; text-align: left;
+  }
+  .atelier-app .planning-chantiers .planning-identity-text:hover { text-decoration: underline; text-decoration-color: #93aeb5; text-underline-offset: 3px; }
+  .atelier-app .planning-chantiers .planning-table .planning-identity-editor {
+    border: 1px solid #8aaeb5; border-radius: 4px; background: #fff; padding: 1px 4px;
+  }
+  .atelier-app .planning-chantiers .planning-table .planning-values :is(input:not([type="checkbox"]),textarea) {
+    background: transparent; border-color: transparent; border-radius: 4px;
+  }
+  .atelier-app .planning-chantiers .planning-table .planning-values :is(input:not([type="checkbox"]),textarea):is(:hover,:focus) {
+    background: rgba(255,255,255,.92); border-color: #a8c2c5;
+  }
+
   .atelier-app .planning-chantiers .planning-table textarea::placeholder { color: #687b82; font-weight: 400; }
   .atelier-app .planning-chantiers .planning-table tbody .planning-identity { border-top: 1px solid #a8c2c5; }
 
