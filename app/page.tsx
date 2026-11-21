@@ -627,49 +627,36 @@ const getNomPrestation = (prestation: any) => {
   return prestation.prestation || prestation.nom || "";
 };
 
-const getPrixPrestation = (prestation: any, modeClient: string) => {
-  if (!prestation) return 0;
+const ID_INTERVENTION_GLOBALE = "BRI-REMISE-ETAT-LOCAUX-MOBILIER";
+const TARIF_HORAIRE_PAR_DEFAUT = 40;
+const TARIF_HORAIRE_PREFERENTIEL = 25;
+type TarificationDevis = { base: number; coefficient: number; preferentiel: boolean };
 
-  // ================= TARIF NORMAL =================
-  // Compatibilité ancien + nouveau catalogue.
-  let prixNormal = Number(
-    prestation.prix220 ??
-    prestation.prixMo220 ??
-    prestation.prixNormal ??
-    0
-  );
+function tarifHoraireValide(valeur: unknown): number | undefined {
+  const montant = Math.round(Number(valeur) * 100) / 100;
+  return Number.isFinite(montant) && montant > 0 ? montant : undefined;
+}
 
-  // Sécurité :
-  // si aucun prix n'est stocké mais qu'un temps existe,
-  // calcul automatique sur la base 220 € / journée de 7 h.
-  if (
-    (!prixNormal || prixNormal <= 0) &&
-    Number(prestation.heuresUnite || 0) > 0
-  ) {
-    prixNormal =
-      Number(prestation.heuresUnite || 0) * (220 / 7);
-  }
+function normaliserCoefficient(valeur: number, preferentiel: boolean) {
+  const coefficient = Number.isFinite(valeur) ? Math.round(valeur * 10) / 10 : 1;
+  return Math.max(preferentiel ? 1 : 0.8, Number.isFinite(coefficient) ? coefficient : 1);
+}
 
-  prixNormal = Math.round(prixNormal * 100) / 100;
+function tauxHoraire(tarification: TarificationDevis, coefficient = tarification.coefficient) {
+  const base = tarification.preferentiel ? TARIF_HORAIRE_PREFERENTIEL : tarification.base;
+  return Math.round(base * normaliserCoefficient(coefficient, tarification.preferentiel) * 100) / 100;
+}
 
-  // ================= CLIENT NORMAL =================
-  if (modeClient !== "jeremie") {
-    return prixNormal;
-  }
+function prestationHoraire(prestation: (typeof TARIFS_PRESTATIONS)[number]) {
+  return prestation.id === ID_INTERVENTION_GLOBALE ||
+    (prestation.prixFixe === undefined && prestation.heuresUnite > 0);
+}
 
-  // ================= DEPLACEMENT =================
-  // Aucun coefficient Jérémie sur les frais de déplacement.
-  if (
-    prestation.typeTravaux === "deplacement" ||
-    prestation.categorie === "Déplacement / logistique"
-  ) {
-    return prixNormal;
-  }
-
-  // ================= JEREMIE =================
-  // 190 €/jour au lieu de 220 €/jour.
-  return Math.round(prixNormal * (190 / 220) * 100) / 100;
-};
+function prixCatalogue(prestation: (typeof TARIFS_PRESTATIONS)[number], tarification: TarificationDevis) {
+  return prestationHoraire(prestation)
+    ? prestation.heuresUnite * tauxHoraire(tarification)
+    : prestation.prix220;
+}
 
 const parseDateFr = (date: string) => {
   if (!date) return null;
@@ -704,7 +691,9 @@ type LigneTravaux = {
   prixManuel?: boolean;
   heuresUnite?: number;
   coefficientPenibilite?: number;
-heuresUniteManuel?: boolean;
+  coefficientTarif?: number;
+  tarifHoraireApplique?: number;
+  heuresUniteManuel?: boolean;
   detailsPdfPersonnalises?: string[];
   detailsPdfOuvert?: boolean;
 
@@ -717,6 +706,29 @@ heuresUniteManuel?: boolean;
   packNom?: string;
   travauxSupplementaires?: boolean;
 };
+
+function ligneTarifiable(ligne: LigneTravaux) {
+  if (!ligne.tarifId) return !ligne.prestationNom;
+  const prestation = TARIFS_PRESTATIONS.find((p) => p.id === ligne.tarifId);
+  return prestation ? prestationHoraire(prestation) : (ligne.heuresUnite ?? 0) > 0;
+}
+
+function appliquerTarifLigne(ligne: LigneTravaux, tarification: TarificationDevis, coefficient = ligne.coefficientTarif): LigneTravaux {
+  if (!ligneTarifiable(ligne)) return ligne;
+  return {
+    ...ligne,
+    heuresUnite: ligne.heuresUnite ?? TARIFS_PRESTATIONS.find((p) => p.id === ligne.tarifId)?.heuresUnite,
+    coefficientTarif: coefficient,
+    tarifHoraireApplique: tauxHoraire(tarification, coefficient ?? tarification.coefficient),
+  };
+}
+
+function quantitePourCalcul(ligne: LigneTravaux) {
+  if (ligne.tarifHoraireApplique !== undefined && ligne.tarifId) {
+    return ligne.tarifId === ID_INTERVENTION_GLOBALE ? 1 : Math.max(0, ligne.q1);
+  }
+  return ligne.q1 || 1;
+}
 
 // Corrections de statistiques uniquement : aucune écriture dans les factures.
 type CorrectionsEncaissementsMensuels = Record<string, number>;
@@ -842,6 +854,7 @@ type Dossier = {
 
   // ================= DEVIS / FACTURE =================
   lignesTravaux: LigneTravaux[];
+  tarificationDevis?: TarificationDevis;
   numeroDevis: string;
   numeroFacture: string;
   // Document émis conservé à l'identique, distinct du paiement reçu.
@@ -952,7 +965,7 @@ function integrerMinimumPDF(lignes: LigneTravaux[], montants: number[], compleme
 
 function creerBaseFacturation(devis: Dossier): BaseFacturation {
   const lignes: LigneTravaux[] = JSON.parse(JSON.stringify(devis.lignesTravaux || []));
-  const heures = lignes.reduce((s, l) => s + (l.heuresUnite || 0) * (l.q1 || 1), 0);
+  const heures = lignes.reduce((s, l) => s + (l.heuresUnite || 0) * quantitePourCalcul(l), 0);
   const jours = Math.max(1, Math.ceil(heures / 7));
   const kmAR = (devis.kmAller || 0) * 2;
   const tarif = (id: string) => TARIFS_PRESTATIONS.find((p) => p.id === id)?.prix220 || 0;
@@ -974,7 +987,7 @@ function creerBaseFacturation(devis: Dossier): BaseFacturation {
 function calculerSupplementsFacture(base: BaseFacturation, lignes: LigneTravaux[], mode: string, kmAR: number, tarifJourSuivant: number) {
   const idsOrigine = new Set(base.lignes.map((l) => l.id));
   const nouvelles = lignes.filter((l) => !idsOrigine.has(l.id));
-  const heuresSup = nouvelles.reduce((s, l) => s + (l.heuresUnite || 0) * (l.q1 || 1), 0);
+  const heuresSup = nouvelles.reduce((s, l) => s + (l.heuresUnite || 0) * quantitePourCalcul(l), 0);
   const jours = Math.max(base.jours, Math.ceil((base.heures + heuresSup) / 7));
   const joursSup = Math.max(0, jours - base.jours);
   const fraisSup = Math.round(joursSup * Math.max(0, kmAR) * tarifJourSuivant * 100) / 100;
@@ -1043,7 +1056,7 @@ const clientsBase = [
   adresseAgence: "",
   complementAdresse: "",
   notes:
-    "Sous-traitance Jérémie — base 190 €/jour — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
+    "Sous-traitance Jérémie — hors fournitures.\n\nMail : contact.meurissecouverture@gmail.com     Tel secrétariat: 05 64 72 22 98",
   modeClient: "jeremie",
   agence: "",
 },
@@ -1354,49 +1367,60 @@ function detailsTravaux(ligne: LigneTravaux): string[] {
   ]);
 }
 function prixLigne(ligne: LigneTravaux, modeClient: string) {
-  const c = modeClient === "jeremie" ? 190 / 220 : 1;
+  const c = ligne.tarifHoraireApplique !== undefined
+    ? ligne.tarifHoraireApplique / (220 / 7)
+    : modeClient === "jeremie" ? 190 / 220 : 1;
+  const arrondir = ligne.tarifHoraireApplique === undefined
+    ? Math.round : (prix: number) => Math.round(prix * 100) / 100;
 
   if (ligne.type === "peinture") {
-    return Math.round(ligne.q1 * 9 * c + ligne.q2 * 12 * c + ligne.r1 * 18 * c + ligne.r2 * 2.5 * c + ligne.option * 20 * c);
+    return arrondir(ligne.q1 * 9 * c + ligne.q2 * 12 * c + ligne.r1 * 18 * c + ligne.r2 * 2.5 * c + ligne.option * 20 * c);
   }
 
   if (ligne.type === "plafond") {
-    return Math.round(ligne.q1 * 18 * c + ligne.q2 * 18 * c + ligne.r1 * 40 * c + ligne.r2 * 18 * c + ligne.option * 130 * c);
+    return arrondir(ligne.q1 * 18 * c + ligne.q2 * 18 * c + ligne.r1 * 40 * c + ligne.r2 * 18 * c + ligne.option * 130 * c);
   }
 
   if (ligne.type === "parquet") {
-    return Math.round(ligne.q1 * 18 * c + ligne.q2 * 8 * c + ligne.r1 * 20 * c + ligne.r2 * 40 * c + ligne.option * 8 * c);
+    return arrondir(ligne.q1 * 18 * c + ligne.q2 * 8 * c + ligne.r1 * 20 * c + ligne.r2 * 40 * c + ligne.option * 8 * c);
   }
 
   if (ligne.type === "cuisine") {
-    return Math.round(ligne.q1 * 70 * c + ligne.q2 * 70 * c + ligne.r1 * 35 * c + ligne.r2 * 45 * c + ligne.option * 35 * c);
+    return arrondir(ligne.q1 * 70 * c + ligne.q2 * 70 * c + ligne.r1 * 35 * c + ligne.r2 * 45 * c + ligne.option * 35 * c);
   }
 
   if (ligne.type === "wc") {
-    return Math.round(ligne.q1 * 180 * c + ligne.q2 * 80 * c + ligne.r1 * 35 * c + ligne.r2 * 8 * c + ligne.option * 45 * c);
+    return arrondir(ligne.q1 * 180 * c + ligne.q2 * 80 * c + ligne.r1 * 35 * c + ligne.r2 * 8 * c + ligne.option * 45 * c);
   }
 
   if (ligne.type === "vmc") {
-    return Math.round(ligne.q1 * 180 * c + ligne.q2 * 45 * c + ligne.r1 * 12 * c + ligne.r2 * 60 * c + ligne.option * 45 * c);
+    return arrondir(ligne.q1 * 180 * c + ligne.q2 * 45 * c + ligne.r1 * 12 * c + ligne.r2 * 60 * c + ligne.option * 45 * c);
   }
 
   if (ligne.type === "placo") {
-    return Math.round(ligne.q1 * 45 * c + ligne.q2 * 12 * c + ligne.r1 * 18 * c + ligne.r2 * 25 * c + ligne.option * 60 * c);
+    return arrondir(ligne.q1 * 45 * c + ligne.q2 * 12 * c + ligne.r1 * 18 * c + ligne.r2 * 25 * c + ligne.option * 60 * c);
   }
 
   if (ligne.type === "gouttiere") {
-    return Math.round(ligne.q1 * 28 * c + ligne.q2 * 35 * c + ligne.r1 * 20 * c + ligne.r2 * 35 * c + ligne.option * 80 * c);
+    return arrondir(ligne.q1 * 28 * c + ligne.q2 * 35 * c + ligne.r1 * 20 * c + ligne.r2 * 35 * c + ligne.option * 80 * c);
   }
 
   return 0;
 }
-const ID_INTERVENTION_GLOBALE = "BRI-REMISE-ETAT-LOCAUX-MOBILIER";
 
 function prixInterventionGlobale(ligne: LigneTravaux, modeClient: string) {
   const heures = Math.max(0, Number(ligne.heuresUnite) || 0);
   const coefficient = Math.max(1, Number(ligne.coefficientPenibilite) || 1);
   const tarifJour = modeClient === "jeremie" ? 190 : 220;
   return Math.round(heures * (tarifJour / 7) * coefficient * 100) / 100;
+}
+
+function prixUnitaireAutomatique(ligne: LigneTravaux, modeClient: string) {
+  if (ligne.tarifHoraireApplique !== undefined && ligne.tarifId) {
+    return Math.max(0, Number(ligne.heuresUnite) || 0) * ligne.tarifHoraireApplique;
+  }
+  if (ligne.tarifId === ID_INTERVENTION_GLOBALE) return prixInterventionGlobale(ligne, modeClient);
+  return ligne.prixUnitaireAuto ?? ligne.prixUnitaire ?? 0;
 }
 
 function montantLigne(ligne: LigneTravaux, modeClient: string) {
@@ -1411,14 +1435,16 @@ function montantLigne(ligne: LigneTravaux, modeClient: string) {
   if (ligne.tarifId === ID_INTERVENTION_GLOBALE) {
     const prix = ligne.prixManuel
       ? Math.max(0, Number(ligne.prixUnitaire) || 0)
-      : prixInterventionGlobale(ligne, modeClient);
+      : prixUnitaireAutomatique(ligne, modeClient);
     return Math.round((prix + montantFourniture) * 100) / 100;
   }
 
   let montantPrestation = 0;
 
-  if (ligne.prixUnitaire) {
-    montantPrestation = ligne.prixUnitaire * (ligne.q1 || 1);
+  if (ligne.tarifHoraireApplique !== undefined && ligne.tarifId && !ligne.prixManuel) {
+    montantPrestation = prixUnitaireAutomatique(ligne, modeClient) * quantitePourCalcul(ligne);
+  } else if (ligne.prixUnitaire || ligne.prixManuel) {
+    montantPrestation = (ligne.prixUnitaire ?? 0) * quantitePourCalcul(ligne);
   } else {
     montantPrestation = prixLigne(ligne, modeClient);
   }
@@ -1495,7 +1521,7 @@ function construireLignesPlanning(historique: Dossier[], p: PlanningDonnees): Pl
     resultat.push({
       id, manuel:false, dossierId:origine.id,
       client:e.client ?? nomClientHistorique(origine), prestation:e.prestation ?? "",
-      heures:e.heures ?? (courant.lignesTravaux || []).reduce((s,l) => s + planningNombre(l.heuresUnite) * (l.q1 || 1),0),
+      heures:e.heures ?? (courant.lignesTravaux || []).reduce((s,l) => s + planningNombre(l.heuresUnite) * quantitePourCalcul(l),0),
       montant:e.montant ?? origine.total ?? 0, acompte:e.acompte ?? acompte,
       dateAcompte:e.dateAcompte ?? origine.dateAcompte ?? courant.dateAcompte ?? "",
       numero:e.numero ?? origine.numeroDevis,
@@ -1936,6 +1962,7 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   const d = sauvegarde.data;
 
   setHistorique(d.historique || []);
+  setTarifHoraireNormal(tarifHoraireValide(d.tarifHoraireNormal) ?? TARIF_HORAIRE_PAR_DEFAUT);
   planningModifieRef.current = false;
   setPlanningDonnees(normaliserPlanning(d.planningDonnees));
   setDepenses(d.depenses || []);
@@ -1964,6 +1991,7 @@ setNumeroSap(d.numeroSap || "");
     setAdresseAgence(b.adresseAgence || "");
     setNotes(b.notes || "");
     setModeClient(b.modeClient || "normal");
+    setTarificationDevis(b.tarificationDevis);
     setClientFinalNom(b.clientFinalNom || "");
 setClientFinalTelephone(b.clientFinalTelephone || "");
 setClientFinalAdresse(b.clientFinalAdresse || "");
@@ -2024,6 +2052,7 @@ const appliquerSauvegardeComplete = (data: any) => {
   if (!data) return;
 
   setHistorique(data.historique || []);
+  setTarifHoraireNormal(tarifHoraireValide(data.tarifHoraireNormal) ?? TARIF_HORAIRE_PAR_DEFAUT);
   planningModifieRef.current = false;
   setPlanningDonnees(normaliserPlanning(data.planningDonnees));
   setDepenses(data.depenses || []);
@@ -2061,6 +2090,7 @@ const appliquerSauvegardeComplete = (data: any) => {
     setNotes(b.notes || "");
 
     setModeClient(b.modeClient || "normal");
+    setTarificationDevis(b.tarificationDevis);
 
     setClientFinalNom(b.clientFinalNom || "");
     setClientFinalTelephone(b.clientFinalTelephone || "");
@@ -2346,7 +2376,7 @@ const [ribBanque, setRibBanque] = useState("");
   const [adresse, setAdresse] = useState("Revel");
   const [adresseAgence, setAdresseAgence] = useState("");
   const [complementAdresse, setComplementAdresse] = useState("");
-  const [notes, setNotes] = useState("Sous-traitance Jérémie — base 190 €/jour — hors fournitures.");
+  const [notes, setNotes] = useState("Sous-traitance Jérémie — hors fournitures.");
   const [locataire, setLocataire] = useState("");
 const [telephoneLocataire, setTelephoneLocataire] = useState("");
 const [proprietaire, setProprietaire] = useState("");
@@ -2401,6 +2431,21 @@ const [prestationsFavorites, setPrestationsFavorites] = useState<string[]>(
 const [numeroDevis, setNumeroDevis] = useState("");
 const [numeroFacture, setNumeroFacture] = useState("");
 
+  const [tarifHoraireNormal, setTarifHoraireNormal] = useState(TARIF_HORAIRE_PAR_DEFAUT);
+  const [tarificationDevis, setTarificationDevis] = useState<TarificationDevis>();
+  const tarifDuDevis: TarificationDevis = tarificationDevis ?? {
+    base: tarifHoraireNormal, coefficient: 1, preferentiel: false,
+  };
+  const dialogueTarifRef = useRef<HTMLDialogElement>(null);
+  const [reglageTarif, setReglageTarif] = useState<{
+    ligneId: number | null;
+    coefficient: string;
+    preferentiel: boolean;
+  } | null>(null);
+  const reglageTarifOuvert = reglageTarif !== null;
+  useEffect(() => {
+    if (reglageTarifOuvert) dialogueTarifRef.current?.showModal();
+  }, [reglageTarifOuvert]);
   const [lignesTravaux, setLignesTravaux] = useState<LigneTravaux[]>([]);
   useEffect(() => {
     const prestationRenseignee = lignesTravaux.some((ligne) =>
@@ -2412,7 +2457,7 @@ const [numeroFacture, setNumeroFacture] = useState("");
   }, [lignesTravaux]);
 
   // Historique d'annulation limité au devis courant (prestations et conditions).
-  const [historiqueAnnulation, setHistoriqueAnnulation] = useState<Array<{lignes: LigneTravaux[]; generales: string; chantier: string}>>([]);
+  const [historiqueAnnulation, setHistoriqueAnnulation] = useState<Array<{lignes: LigneTravaux[]; tarif?: TarificationDevis; generales: string; chantier: string}>>([]);
   const annulationEnCoursRef = useRef(false);
   const precedentAnnulationRef = useRef<string | null>(null);
   const annulerDerniereModification = () => {
@@ -2421,6 +2466,7 @@ const [numeroFacture, setNumeroFacture] = useState("");
     annulationEnCoursRef.current = true;
     setHistoriqueAnnulation(h => h.slice(0, -1));
     setLignesTravaux(precedent.lignes);
+    setTarificationDevis(precedent.tarif);
     setConditionsGeneralesDevis(precedent.generales);
     setConditionsChantier(precedent.chantier);
   };
@@ -2482,14 +2528,14 @@ const premiereSauvegardeLocaleRef = useRef(true);
 
 useEffect(() => {
   if (!sauvegardePrete) return;
-  const actuel = JSON.stringify({ lignes: lignesTravaux, generales: conditionsGeneralesDevis, chantier: conditionsChantier });
+  const actuel = JSON.stringify({ lignes: lignesTravaux, tarif: tarificationDevis, generales: conditionsGeneralesDevis, chantier: conditionsChantier });
   const precedent = precedentAnnulationRef.current;
   precedentAnnulationRef.current = actuel;
   if (annulationEnCoursRef.current) { annulationEnCoursRef.current = false; return; }
   if (precedent !== null && precedent !== actuel) {
     setHistoriqueAnnulation(h => [...h.slice(-29), JSON.parse(precedent)]);
   }
-}, [lignesTravaux, conditionsGeneralesDevis, conditionsChantier, sauvegardePrete]);
+}, [lignesTravaux, tarificationDevis, conditionsGeneralesDevis, conditionsChantier, sauvegardePrete]);
 
 useEffect(() => {
   setEstAndroid(/Android/i.test(window.navigator.userAgent));
@@ -2534,6 +2580,7 @@ setRibBic(d.ribBic || "");
 setRibBanque(d.ribBanque || "");
 
       setHistorique(d.historique || []);
+      setTarifHoraireNormal(tarifHoraireValide(d.tarifHoraireNormal) ?? TARIF_HORAIRE_PAR_DEFAUT);
   planningModifieRef.current = false;
   setPlanningDonnees(normaliserPlanning(d.planningDonnees));
       setDepenses(d.depenses || []);
@@ -2558,6 +2605,7 @@ setAnneeSelectionnee(new Date().getFullYear());
         setAdresseAgence(b.adresseAgence || "");
         setNotes(b.notes || "");
         setModeClient(b.modeClient || "normal");
+        setTarificationDevis(b.tarificationDevis);
         setClientFinalNom(b.clientFinalNom || "");
 setClientFinalTelephone(b.clientFinalTelephone || "");
 setClientFinalAdresse(b.clientFinalAdresse || "");
@@ -2701,6 +2749,8 @@ useEffect(() => {
   adresseAgence,
   notes,
   modeClient,
+  tarifHoraireNormal,
+  tarificationDevis,
   lignesTravaux,
   montantEncaisse,
 
@@ -2796,6 +2846,8 @@ useEffect(() => {
   adresseAgence,
   notes,
   modeClient,
+  tarifHoraireNormal,
+  tarificationDevis,
   lignesTravaux,
   montantEncaisse,
   dateChantier,
@@ -2826,6 +2878,7 @@ const construireSauvegardeComplete = () => {
     historique,
     depenses,
     correctionsEncaissementsMensuels,
+    tarifHoraireNormal,
     clientsEnregistres,
 
     compteurDevis,
@@ -2857,6 +2910,7 @@ const construireSauvegardeComplete = () => {
       notes,
 
       modeClient,
+      tarificationDevis,
 
       clientFinalNom,
       clientFinalTelephone,
@@ -2962,7 +3016,7 @@ useEffect(() => {
   // ================= TEMPS CHANTIER =================
   let totalHeuresChantier = lignesTravaux.reduce((somme, ligne) => {
     const heures = ligne.heuresUnite || 0;
-    const quantite = ligne.q1 || 1;
+    const quantite = quantitePourCalcul(ligne);
 
     return somme + heures * quantite;
   }, 0);
@@ -3250,6 +3304,47 @@ const supprimerClientEnregistre = (nomClient: string) => {
 
   alert("Client supprimé des clients enregistrés.");
 };
+const changerTarifHoraireNormal = (base: number) => {
+  if (base === tarifHoraireNormal) return;
+  setTarifHoraireNormal(base);
+  if (numeroDevis || numeroFacture || baseFacturation) return;
+  const prochainTarif = { ...tarifDuDevis, base };
+  setTarificationDevis(prochainTarif);
+  setLignesTravaux((lignes) => lignes.map((ligne) => appliquerTarifLigne(ligne, prochainTarif)));
+};
+
+const ouvrirReglageTarif = (ligne?: LigneTravaux) => {
+  setReglageTarif({
+    ligneId: ligne?.id ?? null,
+    coefficient: formatMontant(ligne?.coefficientTarif ?? tarifDuDevis.coefficient),
+    preferentiel: tarifDuDevis.preferentiel,
+  });
+};
+
+const fermerReglageTarif = () => dialogueTarifRef.current?.close();
+
+const validerReglageTarif = (reprendreTarifDevis = false) => {
+  if (!reglageTarif) return;
+  const { ligneId, preferentiel } = reglageTarif;
+  const coefficient = normaliserCoefficient(Number(reglageTarif.coefficient.replace(",", ".")), preferentiel);
+  if (ligneId === null) {
+    const prochainTarif = { ...tarifDuDevis, preferentiel, coefficient: preferentiel ? 1 : coefficient };
+    const modeModifie = preferentiel !== tarifDuDevis.preferentiel;
+    setTarificationDevis(prochainTarif);
+    setLignesTravaux((lignes) => lignes.map((ligne) => {
+      if (baseFacturation?.lignes.some((l) => l.id === ligne.id)) return ligne;
+      return appliquerTarifLigne(modeModifie ? { ...ligne, coefficientTarif: undefined } : ligne, prochainTarif);
+    }));
+  } else {
+    setLignesTravaux((lignes) => lignes.map((ligne) => ligne.id === ligneId
+      ? appliquerTarifLigne({
+          ...ligne, coefficientTarif: reprendreTarifDevis ? undefined : coefficient, prixManuel: false,
+        }, tarifDuDevis)
+      : ligne));
+  }
+  fermerReglageTarif();
+};
+
 const ajouterLigne = () => {
   const nouvelleLigne: LigneTravaux = {
     id: Date.now(),
@@ -3275,7 +3370,8 @@ const ajouterLigne = () => {
     offert: false,
   };
 
-  setLignesTravaux((ancien) => [...ancien, nouvelleLigne]);
+  setTarificationDevis(tarifDuDevis);
+  setLignesTravaux((ancien) => [...ancien, appliquerTarifLigne(nouvelleLigne, tarifDuDevis)]);
   setLigneTravauxOuverteId(nouvelleLigne.id);
 };
 
@@ -3310,6 +3406,10 @@ const modifierLigne = (
   ...l,
   [champ]: valeurNumerique,
 };
+
+if (champ === "heuresUnite" && l.tarifHoraireApplique !== undefined) {
+  return { ...ligneModifiee, heuresUnite: Math.max(0, valeurNumerique), heuresUniteManuel: true };
+}
 
 if (
   l.tarifId === ID_INTERVENTION_GLOBALE &&
@@ -3399,6 +3499,7 @@ const modifierDetailPdf = (id: number, index: number, valeur: string) => {
   setReferenceChantier("");
 
   setModeClient("normal");
+  setTarificationDevis(undefined);
   setClientFinalNom("");
 setClientFinalTelephone("");
 setClientFinalAdresse("");
@@ -3470,6 +3571,7 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   setNotes("Observation RDV : ");
 
   setModeClient("normal");
+  setTarificationDevis(undefined);
 
   setLocataire("");
   setTelephoneLocataire("");
@@ -3627,6 +3729,7 @@ fraisDeplacementManuel:
     clientFinalAdresse,
 
     lignesTravaux: estEvenementSimple ? [] : lignesTravaux,
+    tarificationDevis: estEvenementSimple ? undefined : tarificationDevis,
 
     numeroDevis: estEvenementSimple ? "" : numeroDevisFinal,
     numeroFacture: estEvenementSimple ? "" : numeroFactureFinal,
@@ -3799,6 +3902,16 @@ const rechargerDossier = (d: Dossier) => {
   setAdresseAgence(d.adresseAgence || "");
   setNotes(d.notes);
   setModeClient(d.modeClient);
+  const actualiserBase = !d.numeroDevis && !d.numeroFacture && d.devisOrigineId === undefined &&
+    (!d.tarificationDevis || d.tarificationDevis.base !== tarifHoraireNormal);
+  const tarificationRechargee = actualiserBase
+    ? {
+        coefficient: d.tarificationDevis?.coefficient ?? 1,
+        preferentiel: d.tarificationDevis?.preferentiel ?? false,
+        base: tarifHoraireNormal,
+      }
+    : d.tarificationDevis;
+  setTarificationDevis(tarificationRechargee);
   setClientFinalNom(d.clientFinalNom || "");
 setClientFinalTelephone(d.clientFinalTelephone || "");
 setClientFinalAdresse(d.clientFinalAdresse || "");
@@ -3811,7 +3924,9 @@ setClientFinalAdresse(d.clientFinalAdresse || "");
       .map((l) => ({ ...l, travauxSupplementaires: true })),
   ] : d.lignesTravaux;
   setLignesTravaux(
-    lignesRechargees || [
+    (actualiserBase && tarificationRechargee && lignesRechargees
+      ? lignesRechargees.map((ligne) => appliquerTarifLigne(ligne, tarificationRechargee))
+      : lignesRechargees) || [
       {
         id: Date.now(),
         type: "plafond",
@@ -3933,6 +4048,7 @@ const preparerFactureDepuisDevis = (devis: Dossier) => {
 
 const transformerRdvEnDevis = (d: Dossier) => {
   rechargerDossier(d);
+  setTarificationDevis(undefined);
 
   setStatutDevis("en_cours");
   setStatutChantier("a_planifier");
@@ -4847,10 +4963,7 @@ const ajouterPrestationAuDevis = (
     return;
   }
 
-  const prixClient = getPrixPrestation(
-    prestationTrouvee,
-    modeClient
-  );
+  const prixClient = prixCatalogue(prestationTrouvee, tarifDuDevis);
 
   const detailsBase =
     prestationTrouvee.detailsPdf &&
@@ -4865,7 +4978,7 @@ const ajouterPrestationAuDevis = (
           "Nettoyage de fin d’intervention",
         ];
 
-  const nouvelleLigne: LigneTravaux = {
+  const nouvelleLigne = appliquerTarifLigne({
       id: Date.now() + Math.floor(Math.random() * 1000),
 
       type:
@@ -4898,7 +5011,8 @@ const ajouterPrestationAuDevis = (
       detailsPdfOuvert: false,
       fournitureIncluse: false,
       prixFournitureInclus: 0,
-    };
+    }, tarifDuDevis);
+  setTarificationDevis(tarifDuDevis);
   setLignesTravaux((lignesActuelles) => {
     const indexInsertion = insertionApresId === null
       ? -1
@@ -4947,13 +5061,13 @@ const ajouterPackAuDevis = (idPack: string) => {
 
       if (!prestation) return null;
 
-      const prixClient = getPrixPrestation(prestation, modeClient);
+      const prixClient = prixCatalogue(prestation, tarifDuDevis);
       const detailsBase =
         prestation.detailsPdf?.length > 0
           ? prestation.detailsPdf
           : DETAILS_PDF_PAR_CATEGORIE[prestation.categorie] || [];
 
-      return {
+      return appliquerTarifLigne({
         id: maintenant + index + Math.floor(Math.random() * 1000),
         type: prestation.typeTravaux || "prestation_tableau",
         q1: quantite,
@@ -4976,7 +5090,7 @@ const ajouterPackAuDevis = (idPack: string) => {
         offert: false,
         packInstanceId: instancePack,
         packNom: pack.nom,
-      } as LigneTravaux;
+      }, tarifDuDevis);
     })
     .filter(Boolean) as LigneTravaux[];
 
@@ -4984,6 +5098,7 @@ const ajouterPackAuDevis = (idPack: string) => {
 
   if (!premiereNouvelleLigneId) return;
   setLigneTravauxOuverteId(premiereNouvelleLigneId);
+  setTarificationDevis(tarifDuDevis);
 
   setLignesTravaux((lignesActuelles) => [
     ...lignesActuelles,
@@ -5058,6 +5173,7 @@ const reinitialiserApplicationComplete = () => {
   setReferenceChantier("");
 
   setModeClient("normal");
+  setTarificationDevis(undefined);
   setClientFinalNom("");
   setClientFinalTelephone("");
   setClientFinalAdresse("");
@@ -5090,6 +5206,7 @@ setFraisDeplacementManuel(0);
   setMotifRdv("");
   setTypeRdv("visite");
 
+  setTarifHoraireNormal(TARIF_HORAIRE_PAR_DEFAUT);
   setRibTitulaire("");
   setRibIban("");
   setRibBic("");
@@ -5133,6 +5250,7 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
       const data = JSON.parse(String(reader.result));
 
       setHistorique(data.historique || []);
+      setTarifHoraireNormal(tarifHoraireValide(data.tarifHoraireNormal) ?? TARIF_HORAIRE_PAR_DEFAUT);
   planningModifieRef.current = false;
   setPlanningDonnees(normaliserPlanning(data.planningDonnees));
       setDepenses(data.depenses || []);
@@ -5167,6 +5285,7 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNotes(b.notes || "");
 
         setModeClient(b.modeClient || "normal");
+        setTarificationDevis(b.tarificationDevis);
 
         setClientFinalNom(b.clientFinalNom || "");
         setClientFinalTelephone(b.clientFinalTelephone || "");
@@ -6711,7 +6830,7 @@ const genererFicheChantier = () => {
 
   ajouterTitreSection("Prestations dans l’ordre du devis");
   lignesTravaux.forEach((ligne, index) => {
-    const quantite = ligne.q1 || 1;
+    const quantite = quantitePourCalcul(ligne);
     ajouterTexte(
       `Étape ${index + 1} - ${ligne.prestationNom || "Prestation personnalisée"} - ${quantite} ${ligne.unite || "u"}`,
       { gras: true, taille: 8.5 }
@@ -8088,15 +8207,18 @@ return (
   ref={lignesTravauxRef}
   className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"
 >
-  <div className="mb-4">
-    <h3 className="text-base font-bold text-slate-800">
-      {insertionApresId === null ? "Ajouter une prestation" : "Insérer une prestation"}
-    </h3>
-
-    <p className="mt-1 text-sm text-slate-500">
-      Recherche directement une prestation ou
-      sélectionne une catégorie.
-    </p>
+  <div className="mb-4 flex items-start justify-between gap-2">
+    <div className="min-w-0">
+      <h3 className="text-base font-bold text-slate-800">
+        {insertionApresId === null ? "Ajouter une prestation" : "Insérer une prestation"}
+      </h3>
+      <p className="mt-1 text-sm text-slate-500">Recherche une prestation ou sélectionne une catégorie.</p>
+    </div>
+    <button type="button" aria-haspopup="dialog" onClick={() => ouvrirReglageTarif()}
+      className="shrink-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-xs font-semibold text-blue-800">
+      {tarifDuDevis.preferentiel ? "Préférentiel" : baseFacturation ? "Tarif des ajouts" : "Tarif du devis"}
+      {(tarificationDevis || !lignesTravaux.length) && ` · ${formatMontant(tauxHoraire(tarifDuDevis))} €/h`}
+    </button>
   </div>
 
   {insertionApresId !== null && (
@@ -8287,11 +8409,7 @@ return (
                   prestation.id
                 );
 
-              const prixClient =
-                getPrixPrestation(
-                  prestation,
-                  modeClient
-                );
+              const prixClient = prixCatalogue(prestation, tarifDuDevis);
 
               return (
                 <div
@@ -8390,6 +8508,7 @@ return (
   const ligneVerrouillee = Boolean(baseFacturation?.lignes.some(l => l.id === ligne.id));
   const ligneOuverte = ligneTravauxOuverteId === ligne.id;
   const montantAffiche = calcul.montantsFacture?.[index] ?? montantLigne(ligne, modeClient);
+  const prixAffiche = ligne.offert && !montantAffiche ? "Offert" : `${formatMontant(montantAffiche)} €`;
 
   return (
     <div key={ligne.id} id={`ligne-travaux-${ligne.id}`} className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -8415,9 +8534,20 @@ return (
             <span className="font-medium text-blue-700">{ligneOuverte ? "▴ Replier" : "▾ Détails"}</span>
           </span>
         </button>
-        <span className="shrink-0 text-sm font-bold tabular-nums text-slate-900">
-          {ligne.offert && !montantAffiche ? "Offert" : `${formatMontant(montantAffiche)} €`}
-        </span>
+        {!ligneVerrouillee && ligneTarifiable(ligne) ? (
+          <button type="button" aria-haspopup="dialog"
+            aria-label={`Régler la pénibilité de la ligne ${index + 1}`}
+            title={ligne.prixManuel ? "Prix manuel" : "Réglage de la pénibilité"}
+            onClick={() => ouvrirReglageTarif(ligne)}
+            className="group relative h-8 shrink-0 self-center text-right text-sm font-bold tabular-nums text-slate-900">
+            <span className="block pb-3 leading-5">{prixAffiche}</span>
+            <span className="absolute bottom-0 right-0 max-w-full truncate rounded bg-blue-50 px-1 text-[10px] font-semibold leading-3 text-blue-800 group-hover:bg-blue-100">
+              {ligne.prixManuel ? "Manuel" : ligne.tarifHoraireApplique === undefined ? "Tarif" : `×${formatMontant(ligne.coefficientTarif ?? tarifDuDevis.coefficient)}`}
+            </span>
+          </button>
+        ) : (
+          <span className="shrink-0 text-sm font-bold tabular-nums text-slate-900">{prixAffiche}</span>
+        )}
         <div className="flex shrink-0 flex-wrap items-center gap-1.5">
           <button
             type="button"
@@ -8478,15 +8608,15 @@ return (
           value={ligne.heuresUnite || 0}
           onChange={(v) => modifierLigne(ligne.id, "heuresUnite", v)}
         />
-        <NumberInput
-          label="Coefficient de pénibilité (1 = normal, 1,30 = +30 %)"
-          value={ligne.coefficientPenibilite ?? 1}
-          onChange={(v) => modifierLigne(ligne.id, "coefficientPenibilite", v)}
-        />
+        {ligne.tarifHoraireApplique === undefined && (
+          <NumberInput
+            label="Coefficient historique"
+            value={ligne.coefficientPenibilite ?? 1}
+            onChange={(v) => modifierLigne(ligne.id, "coefficientPenibilite", v)}
+          />
+        )}
         <p className="text-xs text-slate-500 md:col-span-2">
-          Saisis ton temps, puis ajuste le prix total du forfait pour inclure tes fournitures.
-          Ce prix manuel inclut déjà la pénibilité : elle ne sera pas ajoutée une seconde fois.
-                Si les fournitures sont ajoutées à ce prix, ne les saisis pas aussi dans les champs de fournitures.
+          Saisis le temps total et ajoute tes fournitures séparément.
         </p>
       </div>
     ) : (
@@ -8507,11 +8637,9 @@ return (
               ? {
                   ...l,
                   prixManuel: checked,
-                  prixUnitaire: checked
+                  prixUnitaire: checked && l.tarifHoraireApplique === undefined && l.tarifId !== ID_INTERVENTION_GLOBALE
                     ? l.prixUnitaire
-                    : l.tarifId === ID_INTERVENTION_GLOBALE
-                      ? prixInterventionGlobale(l, modeClient)
-                      : l.prixUnitaireAuto || l.prixUnitaire,
+                    : Math.round(prixUnitaireAutomatique(l, modeClient) * 100) / 100,
                 }
               : l
           )
@@ -8626,8 +8754,8 @@ return (
     {!ligne.prixManuel && (
       <p className="text-xs text-slate-500">
         {ligne.tarifId === ID_INTERVENTION_GLOBALE
-          ? `Main-d’œuvre calculée : ${formatMontant(prixInterventionGlobale(ligne, modeClient))} € pour le forfait`
-          : `Prix automatique du tableau : ${formatMontant(ligne.prixUnitaireAuto || ligne.prixUnitaire)} € / ${ligne.unite}`}
+          ? `Main-d’œuvre calculée : ${formatMontant(prixUnitaireAutomatique(ligne, modeClient))} € pour le forfait`
+          : `Prix automatique du tableau : ${formatMontant(prixUnitaireAutomatique(ligne, modeClient))} € / ${ligne.unite}`}
       </p>
     )}
   </div>
@@ -8713,7 +8841,7 @@ return (
 
             {ligne.tarifId !== ID_INTERVENTION_GLOBALE && ligne.prixUnitaire && ligne.unite && (
               <p className="text-sm text-slate-500">
-                Tarif appliqué : {formatMontant(ligne.prixUnitaire)} € / {ligne.unite}
+                Tarif appliqué : {formatMontant(ligne.prixManuel ? ligne.prixUnitaire : prixUnitaireAutomatique(ligne, modeClient))} € / {ligne.unite}
               </p>
             )}
           </div>
@@ -9745,12 +9873,18 @@ return (
       setStatutChantier("a_planifier");
       setFacturePayee(false);
 
+      const tarifCopie: TarificationDevis = {
+        coefficient: item.tarificationDevis?.coefficient ?? 1,
+        preferentiel: item.tarificationDevis?.preferentiel ?? false,
+        base: tarifHoraireNormal,
+      };
+      setTarificationDevis(tarifCopie);
       setLignesTravaux(
-        item.lignesTravaux.map((ligne) => ({
+        item.lignesTravaux.map((ligne) => appliquerTarifLigne({
           ...ligne,
           id: Date.now() + Math.random(),
           travauxSupplementaires: false,
-        }))
+        }, tarifCopie))
       );
 
       window.scrollTo({
@@ -9802,7 +9936,24 @@ return (
   })()}
 </BlocRepliable>
 
-<BlocRepliable titre="Paramètres entreprise / RIB" ouvertParDefaut={false}>
+<BlocRepliable titre="Paramètres entreprise / tarif horaire / RIB" ouvertParDefaut={false}>
+  <form className="rounded-lg border bg-slate-50 p-3" onSubmit={(event) => {
+    event.preventDefault();
+    const base = tarifHoraireValide(new FormData(event.currentTarget).get("tarif"));
+    if (base !== undefined) changerTarifHoraireNormal(base);
+  }}>
+    <label htmlFor="tarif-horaire-normal" className="block text-sm font-semibold">Tarif horaire de base (€/h)</label>
+    <div className="mt-1 flex items-center gap-2">
+      <input key={tarifHoraireNormal} id="tarif-horaire-normal" name="tarif" type="number"
+        min="0.01" step="0.01" required defaultValue={tarifHoraireNormal}
+        className="w-28 rounded-lg border bg-white px-2 py-1.5 text-sm" />
+      <button type="submit" className="btn-outline px-3 py-1.5 text-xs">Enregistrer le tarif</button>
+    </div>
+    <p className="mt-1 text-xs text-slate-600">
+      Plancher standard à −20 % : {formatMontant(tarifHoraireNormal * 0.8)} €/h.
+      Les nouveaux devis et les brouillons utilisent cette base. Le tarif préférentiel est de {TARIF_HORAIRE_PREFERENTIEL} €/h.
+    </p>
+  </form>
   <div className="grid gap-3 md:grid-cols-2">
     <Input label="Titulaire" value={ribTitulaire} onChange={setRibTitulaire} />
     <Input label="Banque" value={ribBanque} onChange={setRibBanque} />
@@ -9810,6 +9961,69 @@ return (
     <Input label="BIC" value={ribBic} onChange={setRibBic} />
   </div>
 </BlocRepliable>
+
+<dialog ref={dialogueTarifRef} onClose={() => setReglageTarif(null)}
+  aria-labelledby="titre-reglage-tarif"
+  className="fixed inset-0 m-auto w-11/12 max-w-sm rounded-xl border bg-white p-4 shadow-xl backdrop:bg-slate-900/40">
+  {reglageTarif && (() => {
+    const global = reglageTarif.ligneId === null;
+    const { preferentiel } = reglageTarif;
+    const coefficient = normaliserCoefficient(Number(reglageTarif.coefficient.replace(",", ".")), preferentiel);
+    const minimum = preferentiel ? 1 : 0.8;
+    const changerCoefficient = (valeur: string) => setReglageTarif({ ...reglageTarif, coefficient: valeur });
+    return (
+      <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); validerReglageTarif(); }}>
+        <h2 id="titre-reglage-tarif" className="text-base font-bold">{global ? "Tarif du devis" : "Pénibilité de la prestation"}</h2>
+        {global && (
+          <div className="flex gap-2">
+            {[false, true].map((mode) => (
+              <button key={String(mode)} type="button" aria-pressed={preferentiel === mode}
+                onClick={() => {
+                  if (preferentiel !== mode) setReglageTarif({ ...reglageTarif, preferentiel: mode, coefficient: "1,00" });
+                }}
+                className={`rounded-lg border px-3 py-1.5 text-sm ${preferentiel === mode ? "border-blue-400 bg-blue-50 text-blue-900" : "bg-white"}`}>
+                {mode ? `Préférentiel · ${TARIF_HORAIRE_PREFERENTIEL} €/h` : `Standard · ${formatMontant(tarifDuDevis.base)} €/h`}
+              </button>
+            ))}
+          </div>
+        )}
+        {(!global || !preferentiel) && (
+          <div>
+            <label htmlFor="coefficient-tarif" className="text-sm font-semibold">Coefficient de pénibilité</label>
+            <div className="mt-1 flex items-center gap-2">
+              <button type="button" aria-label="Diminuer de 10 points" disabled={coefficient <= minimum}
+                onClick={() => changerCoefficient(formatMontant(normaliserCoefficient(coefficient - 0.1, preferentiel)))}
+                className="rounded border px-3 py-1 disabled:opacity-40">−</button>
+              <input id="coefficient-tarif" inputMode="decimal" value={reglageTarif.coefficient}
+                required pattern="[0-9]+([,.][0-9]+)?" onChange={(event) => changerCoefficient(event.target.value)}
+                className="w-20 rounded border px-2 py-1 text-center tabular-nums" />
+              <button type="button" aria-label="Augmenter de 10 points"
+                onClick={() => changerCoefficient(formatMontant(normaliserCoefficient(coefficient + 0.1, preferentiel)))}
+                className="rounded border px-3 py-1">+</button>
+              <span className="text-sm font-semibold">{formatMontant(tauxHoraire({ ...tarifDuDevis, preferentiel }, coefficient))} €/h</span>
+            </div>
+          </div>
+        )}
+        {global && preferentiel && (
+          <p className="text-xs text-slate-600">À l’activation du tarif préférentiel, les coefficients des prestations reviennent à 1,00. Tu peux ensuite les augmenter ligne par ligne.</p>
+        )}
+        {global && lignesTravaux.some((l) => l.prixManuel) && (
+          <p className="text-xs text-slate-600">Les prix manuels restent prioritaires.</p>
+        )}
+        {!global && lignesTravaux.some((l) => l.id === reglageTarif.ligneId && l.prixManuel) && (
+          <p className="text-xs text-slate-600">Appliquer le coefficient réactive le calcul automatique de cette ligne.</p>
+        )}
+        <div className="flex flex-wrap justify-end gap-2">
+          {!global && (
+            <button type="button" onClick={() => validerReglageTarif(true)} className="btn-outline px-2 py-1 text-xs">Suivre le devis</button>
+          )}
+          <button type="button" onClick={fermerReglageTarif} className="btn-outline px-2 py-1 text-xs">Annuler</button>
+          <button type="submit" className="btn-blue px-2 py-1 text-xs">Appliquer</button>
+        </div>
+      </form>
+    );
+  })()}
+</dialog>
 
 {showPopupCalendrier && dateSelectionnee && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">

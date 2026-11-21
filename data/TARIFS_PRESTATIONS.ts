@@ -19,6 +19,8 @@ string;
 heuresUnite:
 number;
 
+prixFixe?: number;
+
 prix220:
 number;
 
@@ -136,6 +138,8 @@ return {
   unite,
 
   heuresUnite,
+
+  prixFixe: options.prixFixe,
 
   prix220,
 
@@ -464,7 +468,7 @@ p(
   ],
   {
     prixFixe: 0,
-    action: "Renseigner le temps et la pénibilité, puis ajuster le prix total pour inclure les fournitures.",
+    action: "Renseigner le temps et la pénibilité. Saisir les fournitures séparément dans le devis.",
     conditions: "Travaux compris et éléments fournis par le client à préciser dans les détails de chaque devis. Fournitures prévues intégrées au prix du forfait, sans double comptage. Toute prestation supplémentaire fera l'objet d'un accord chiffré préalable.",
     rentabilite: "🟠 Temps et fournitures à renseigner",
     typeTravaux: "main_oeuvre",
