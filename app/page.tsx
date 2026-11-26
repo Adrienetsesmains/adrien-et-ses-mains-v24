@@ -1222,7 +1222,6 @@ function formatNumero(prefix: string, numero: number) {
 // les compteurs, tout en conservant automatiquement une valeur plus élevée.
 const PROCHAIN_NUMERO_DEVIS = 53;
 const PROCHAIN_NUMERO_FACTURE = 17;
-const CLE_RATTRAPAGE_DEVIS_053 = "rattrapageDevis053EffectueV26";
 const CLE_RATTRAPAGE_FACTURE_017 = "rattrapageFacture017EffectueV25";
 
 const CONDITIONS_GENERALES_DEVIS_DEFAUT = [
@@ -1232,6 +1231,12 @@ const CONDITIONS_GENERALES_DEVIS_DEFAUT = [
   "Les fournitures non mentionnées au devis ne sont pas incluses.",
   "Le client reconnaît que les quantités et prix sont basés sur les éléments visibles au moment de l’estimation.",
 ].join("\n");
+
+function ordinalDocument(numero: string | undefined, prefixe: "D" | "F"): number {
+  const correspondance = new RegExp(`^${prefixe}-2026-(\\d+)$`).exec(numero?.trim() || "");
+  const ordinal = Number(correspondance?.[1]);
+  return Number.isSafeInteger(ordinal) && ordinal > 0 ? ordinal : 0;
+}
 
 function compteurDevisValide(valeur: unknown) {
   const numero = Number(valeur);
@@ -4837,70 +4842,39 @@ const numerosFacturesDossiers = (dossiers: Dossier[]) => dossiers.flatMap((d) =>
   ...(d.facturesIntermediaires || []).map((f) => f.numero),
 ]);
 
-const prochainNumeroFactureDisponible = () => {
-  const numeros = numerosFacturesDossiers(historique)
-    .concat(numeroFacture)
-    .map((n) => /^F-2026-(\d+)$/.exec(n || ""))
-    .filter((m): m is RegExpExecArray => Boolean(m))
-    .map((m) => Number(m[1]) + 1);
-  return Math.max(compteurFactureValide(compteurFacture), ...numeros);
-};
+const dernierOrdinalDevis = Math.max(...historique.map((d) => ordinalDocument(d.numeroDevis, "D")),
+  ordinalDocument(numeroDevis, "D"));
+const dernierOrdinalFacture = Math.max(...numerosFacturesDossiers(historique).map((n) => ordinalDocument(n, "F")),
+  ordinalDocument(numeroFacture, "F"));
+const minimumCompteurDevis = Math.max(PROCHAIN_NUMERO_DEVIS, dernierOrdinalDevis + 1);
+const minimumCompteurFacture = Math.max(PROCHAIN_NUMERO_FACTURE, dernierOrdinalFacture + 1);
+const prochainNumeroDevisDisponible = () => Math.max(compteurDevisValide(compteurDevis), minimumCompteurDevis);
+const prochainNumeroFactureDisponible = () => Math.max(compteurFactureValide(compteurFacture), minimumCompteurFacture);
 
-const compteurFactureTest = 31;
-const numeroFactureTest = formatNumero("F", compteurFactureTest);
-const afficheRetourBrouillonFactureTest =
-  (numeroFacture || dossierActuel?.numeroFacture) === numeroFactureTest &&
-  numeroDevis === "D-2026-065";
+const numeroDerniereFacture = dernierOrdinalFacture ? formatNumero("F", dernierOrdinalFacture) : "";
+const derniereFacturePeutEtreRetiree = Boolean(numeroDerniereFacture &&
+  (numeroFacture === numeroDerniereFacture || historique.some((d) => d.numeroFacture === numeroDerniereFacture)));
 
-const remettreFactureTestEnBrouillon = async () => {
-  if (!afficheRetourBrouillonFactureTest || generationPDFEnCoursRef.current) return;
-
-  if (facturePayee || dossierActuel?.facturePayee || montantEncaisse > 0 ||
-    (dossierActuel?.montantEncaisse ?? 0) > 0) {
-    alert("Impossible de retirer le numéro d’une facture avec un règlement enregistré.");
-    return;
-  }
-
-  const adresseContientSeulementLeNom = Boolean(adresseFacturationProprietaire.trim()) &&
-    normaliserTexte(adresseFacturationProprietaire) === normaliserTexte(proprietaire);
-  const adresseCorrigee = adresseContientSeulementLeNom ? "" : adresseFacturationProprietaire;
-  const historiqueMisAJour = historique.map((d) =>
-    d.id === idDossierActuel && d.numeroFacture === numeroFactureTest
-      ? { ...d, numeroFacture: "", adresseFacturationProprietaire: adresseCorrigee }
-      : d
-  );
-  if (prochainNumeroFactureDisponible() > compteurFactureTest + 1 ||
-    numerosFacturesDossiers(historiqueMisAJour).includes(numeroFactureTest)) {
-    alert("Le numéro 031 ne peut plus être réutilisé : un autre document l’utilise ou un numéro supérieur a déjà été attribué.");
-    return;
-  }
-
-  if (!window.confirm("Confirme que la F-2026-031 était un test et n’a été ni envoyée ni comptabilisée. Le prochain PDF de facture reprendra le numéro 031.")) return;
-
-  const donnees = construireSauvegardeComplete();
-  const sauvegarde = {
-    ...donnees,
-    historique: historiqueMisAJour,
-    numeroFacture: "",
-    compteurFacture: compteurFactureTest,
-    brouillon: { ...donnees.brouillon, adresseFacturationProprietaire: adresseCorrigee },
-  };
-
+const sauvegarderCompteurs = async (sauvegarde: ReturnType<typeof construireSauvegardeComplete>) => {
   try {
     ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(sauvegarde));
     ecrireStockageLocal(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
   } catch (erreur) {
     console.error(erreur);
-    alert("Le retour en brouillon n’a pas pu être enregistré sur cet appareil.");
+    alert("La numérotation n’a pas pu être enregistrée sur cet appareil.");
     return;
   }
 
   generationPDFEnCoursRef.current = true;
   setGenerationPDFEnCours(true);
-  setHistorique(historiqueMisAJour);
-  setNumeroFacture("");
-  setCompteurFacture(compteurFactureTest);
-  setAdresseFacturationProprietaire(adresseCorrigee);
+  setCompteurDevis(sauvegarde.compteurDevis);
+  setCompteurFacture(sauvegarde.compteurFacture);
+  if (sauvegarde.historique !== historique) {
+    setHistorique(sauvegarde.historique);
+    setNumeroFacture(sauvegarde.numeroFacture);
+    setAdresseFacturationProprietaire(sauvegarde.brouillon.adresseFacturationProprietaire);
+  }
+
   let synchronisee = false;
   try {
     synchronisee = await envoyerDonneesCloud(sauvegarde, false);
@@ -4910,9 +4884,75 @@ const remettreFactureTestEnBrouillon = async () => {
     generationPDFEnCoursRef.current = false;
     setGenerationPDFEnCours(false);
   }
+
   alert(synchronisee
-    ? "La facture est revenue en brouillon. Le prochain numéro est F-2026-031."
-    : "Le prochain numéro est F-2026-031 sur cet appareil. La synchronisation a échoué. Relance la sauvegarde cloud avant de facturer depuis un autre appareil.");
+    ? "Les compteurs ont été enregistrés."
+    : "Les compteurs ont été enregistrés sur cet appareil. La synchronisation a échoué.");
+};
+
+const modifierCompteurs = async (devis: number, facture: number) => {
+  if (generationPDFEnCoursRef.current) return;
+  if (!Number.isSafeInteger(devis) || devis < minimumCompteurDevis ||
+    !Number.isSafeInteger(facture) || facture < minimumCompteurFacture) {
+    alert(`Utilise un numéro supérieur aux documents existants. Minimum : ${formatNumero("D", minimumCompteurDevis)} et ${formatNumero("F", minimumCompteurFacture)}.`);
+    return;
+  }
+
+  await sauvegarderCompteurs({
+    ...construireSauvegardeComplete(),
+    compteurDevis: devis,
+    compteurFacture: facture,
+  });
+};
+
+const remettreFactureTestEnBrouillon = async () => {
+  if (!derniereFacturePeutEtreRetiree || generationPDFEnCoursRef.current) return;
+  if (compteurFacture > dernierOrdinalFacture + 1) {
+    alert("Le compteur a avancé au-delà de cette facture. Vérifie les numéros déjà utilisés avant de libérer ce brouillon.");
+    return;
+  }
+  const candidates = historique.filter((d) => d.numeroFacture === numeroDerniereFacture);
+  const factureCible = candidates[0];
+  const correspondAuDossierOuvert = Boolean(factureCible && factureCible.id === idDossierActuel);
+  const factureOuverte = numeroFacture === numeroDerniereFacture || correspondAuDossierOuvert;
+  if (candidates.length > 1 ||
+    (factureCible && numeroFacture === numeroDerniereFacture && !correspondAuDossierOuvert)) {
+    alert("Plusieurs dossiers utilisent ce numéro. Vérifie l’historique avant de le libérer.");
+    return;
+  }
+
+  if (factureCible?.facturePayee || (factureCible?.montantEncaisse ?? 0) > 0 ||
+    (factureOuverte && (facturePayee || montantEncaisse > 0))) {
+    alert("Impossible de retirer le numéro d’une facture avec un règlement enregistré.");
+    return;
+  }
+
+  const devisCible = factureOuverte ? numeroDevis : factureCible?.numeroDevis;
+  const adresseCible = factureOuverte ? adresseFacturationProprietaire : factureCible?.adresseFacturationProprietaire || "";
+  const nomCible = factureOuverte ? proprietaire : factureCible?.proprietaire || "";
+  const adresseCorrigee = numeroDerniereFacture === "F-2026-031" && devisCible === "D-2026-065" &&
+    normaliserTexte(adresseCible) === normaliserTexte(nomCible) ? "" : adresseCible;
+
+  const historiqueMisAJour = historique.map((d) =>
+    d === factureCible ? { ...d, numeroFacture: "", adresseFacturationProprietaire: adresseCorrigee } : d
+  );
+  if (numerosFacturesDossiers(historiqueMisAJour).includes(numeroDerniereFacture)) {
+    alert("Un autre document utilise ce numéro. Vérifie l’historique avant de le libérer.");
+    return;
+  }
+
+  if (!window.confirm(`Confirme que la ${numeroDerniereFacture} est un brouillon, sans envoi ni comptabilisation. Son numéro sera réutilisable et son dossier sera conservé.`)) return;
+
+  const donnees = construireSauvegardeComplete();
+  await sauvegarderCompteurs({
+    ...donnees,
+    historique: historiqueMisAJour,
+    numeroFacture: factureOuverte ? "" : numeroFacture,
+    compteurFacture: dernierOrdinalFacture,
+    brouillon: factureOuverte
+      ? { ...donnees.brouillon, adresseFacturationProprietaire: adresseCorrigee }
+      : donnees.brouillon,
+  });
 };
 
 const resumeExpress = useMemo(() => {
@@ -5719,22 +5759,10 @@ let numero = estDocumentPartiel ? formatNumero("F", numeroSuivantAcompte)
   : type === "devis" ? numeroDevis : numeroFacture;
 
 if (type === "devis" && !numeroDevis) {
-  // Rattrapage demandé le 18/09/2026 : le prochain nouveau devis doit
-  // obligatoirement prendre le numéro D-2026-053 une seule fois, même si
-  // une ancienne sauvegarde contient momentanément un compteur plus élevé.
-  const rattrapageDevis053DejaEffectue =
-    localStorage.getItem(CLE_RATTRAPAGE_DEVIS_053) === "oui";
-  const numeroDevisAUtiliser = rattrapageDevis053DejaEffectue
-    ? compteurDevis
-    : PROCHAIN_NUMERO_DEVIS;
-
+  const numeroDevisAUtiliser = prochainNumeroDevisDisponible();
   numero = formatNumero("D", numeroDevisAUtiliser);
   setNumeroDevis(numero);
   setCompteurDevis(numeroDevisAUtiliser + 1);
-
-  if (!rattrapageDevis053DejaEffectue) {
-    ecrireStockageLocal(CLE_RATTRAPAGE_DEVIS_053, "oui");
-  }
 
   if (idDossierActuel !== null) {
     setHistorique((ancien) =>
@@ -8315,14 +8343,14 @@ return (
         />
       )}
     </fieldset>
-    {!estAndroid && afficheRetourBrouillonFactureTest && (
+    {!estAndroid && derniereFacturePeutEtreRetiree && numeroFacture === numeroDerniereFacture && (
       <button
         type="button"
         className="btn-outline"
         disabled={generationPDFEnCours}
         onClick={() => void remettreFactureTestEnBrouillon()}
       >
-        Déverrouiller le client facturé et réutiliser le 031
+        Remettre la {numeroDerniereFacture} de test en brouillon
       </button>
     )}
     <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
@@ -10190,7 +10218,39 @@ return (
   })()}
 </BlocRepliable>
 
-<BlocRepliable titre="Paramètres entreprise / tarif horaire / RIB" ouvertParDefaut={false}>
+<BlocRepliable titre="Paramètres entreprise" ouvertParDefaut={false}>
+  <form
+    key={`${prochainNumeroDevisDisponible()}-${prochainNumeroFactureDisponible()}`}
+    className="space-y-3 rounded-lg border bg-slate-50 p-3"
+    onSubmit={(event) => {
+      event.preventDefault();
+      const valeurs = new FormData(event.currentTarget);
+      void modifierCompteurs(Number(valeurs.get("compteurDevis")), Number(valeurs.get("compteurFacture")));
+    }}
+  >
+    <h3 className="text-sm font-semibold">Numérotation des devis et des factures</h3>
+    <div className="grid gap-3 md:grid-cols-2">
+      <label className="space-y-1 text-sm">
+        <span>Prochain devis — D-2026-</span>
+        <input name="compteurDevis" type="number" min={minimumCompteurDevis} step={1} required
+          defaultValue={prochainNumeroDevisDisponible()} className="block w-28 rounded-lg border bg-white p-2" />
+      </label>
+      <label className="space-y-1 text-sm">
+        <span>Prochaine facture — F-2026-</span>
+        <input name="compteurFacture" type="number" min={minimumCompteurFacture} step={1} required
+          defaultValue={prochainNumeroFactureDisponible()} className="block w-28 rounded-lg border bg-white p-2" />
+      </label>
+    </div>
+    <div className="flex flex-wrap gap-2">
+      <button type="submit" className="btn-outline" disabled={generationPDFEnCours}>Enregistrer les compteurs</button>
+      {!estAndroid && derniereFacturePeutEtreRetiree && (
+        <button type="button" className="btn-outline" disabled={generationPDFEnCours}
+          onClick={() => void remettreFactureTestEnBrouillon()}>
+          Libérer {numeroDerniereFacture} si c’est un brouillon
+        </button>
+      )}
+    </div>
+  </form>
   <form className="rounded-lg border bg-slate-50 p-3" onSubmit={(event) => {
     event.preventDefault();
     const base = tarifHoraireValide(new FormData(event.currentTarget).get("tarif"));
