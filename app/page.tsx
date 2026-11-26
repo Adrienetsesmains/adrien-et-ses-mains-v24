@@ -4819,14 +4819,82 @@ const enregistrerReglementSituation = () => {
   }
 };
 
+const numerosFacturesDossiers = (dossiers: Dossier[]) => dossiers.flatMap((d) => [
+  d.numeroFacture,
+  d.factureAcompte?.numero,
+  ...(d.facturesIntermediaires || []).map((f) => f.numero),
+]);
+
 const prochainNumeroFactureDisponible = () => {
-  const numeros = historique.flatMap((d) => [d.numeroFacture, d.factureAcompte?.numero,
-    ...(d.facturesIntermediaires || []).map((f) => f.numero)])
+  const numeros = numerosFacturesDossiers(historique)
     .concat(numeroFacture)
     .map((n) => /^F-2026-(\d+)$/.exec(n || ""))
     .filter((m): m is RegExpExecArray => Boolean(m))
     .map((m) => Number(m[1]) + 1);
   return Math.max(compteurFactureValide(compteurFacture), ...numeros);
+};
+
+const compteurFactureTest = 31;
+const numeroFactureTest = formatNumero("F", compteurFactureTest);
+const afficheRetourBrouillonFactureTest =
+  numeroFacture === numeroFactureTest && numeroDevis === "D-2026-065";
+
+const remettreFactureTestEnBrouillon = async () => {
+  if (!afficheRetourBrouillonFactureTest || generationPDFEnCoursRef.current) return;
+
+  if (facturePayee || dossierActuel?.facturePayee || montantEncaisse > 0 ||
+    (dossierActuel?.montantEncaisse ?? 0) > 0) {
+    alert("Impossible de retirer le numéro d’une facture avec un règlement enregistré.");
+    return;
+  }
+
+  const historiqueMisAJour = historique.map((d) =>
+    d.id === idDossierActuel && d.numeroFacture === numeroFactureTest
+      ? { ...d, numeroFacture: "" }
+      : d
+  );
+  if (prochainNumeroFactureDisponible() > compteurFactureTest + 1 ||
+    numerosFacturesDossiers(historiqueMisAJour).includes(numeroFactureTest)) {
+    alert("Le numéro 031 ne peut plus être réutilisé : un autre document l’utilise ou un numéro supérieur a déjà été attribué.");
+    return;
+  }
+
+  if (!window.confirm("Confirme que la F-2026-031 était un test et n’a été ni envoyée ni comptabilisée. Le prochain PDF de facture reprendra le numéro 031.")) return;
+
+  const donnees = construireSauvegardeComplete();
+  const sauvegarde = {
+    ...donnees,
+    historique: historiqueMisAJour,
+    numeroFacture: "",
+    compteurFacture: compteurFactureTest,
+  };
+
+  try {
+    ecrireStockageLocal(CLE_SAUVEGARDE_V25, JSON.stringify(sauvegarde));
+    ecrireStockageLocal(CLE_DERNIERE_MODIFICATION_LOCALE_V26, new Date().toISOString());
+  } catch (erreur) {
+    console.error(erreur);
+    alert("Le retour en brouillon n’a pas pu être enregistré sur cet appareil.");
+    return;
+  }
+
+  generationPDFEnCoursRef.current = true;
+  setGenerationPDFEnCours(true);
+  setHistorique(historiqueMisAJour);
+  setNumeroFacture("");
+  setCompteurFacture(compteurFactureTest);
+  let synchronisee = false;
+  try {
+    synchronisee = await envoyerDonneesCloud(sauvegarde, false);
+  } catch (erreur) {
+    console.error(erreur);
+  } finally {
+    generationPDFEnCoursRef.current = false;
+    setGenerationPDFEnCours(false);
+  }
+  alert(synchronisee
+    ? "La facture est revenue en brouillon. Le prochain numéro est F-2026-031."
+    : "Le prochain numéro est F-2026-031 sur cet appareil. La synchronisation a échoué. Relance la sauvegarde cloud avant de facturer depuis un autre appareil.");
 };
 
 const resumeExpress = useMemo(() => {
@@ -5556,7 +5624,7 @@ const fabriquerPDF = async (type: TypeDocumentPDF) => {
       facturerProprietaire !== Boolean(dossierActuel.facturerProprietaire) ||
       (facturerProprietaire
         ? proprietaire.trim() !== dossierActuel.proprietaire?.trim() ||
-          adresseFacturationProprietaire.trim() !== dossierActuel.adresseFacturationProprietaire?.trim()
+          adresseFacturationProprietaire.trim() !== (dossierActuel.adresseFacturationProprietaire || "").trim()
         : (agence.trim() || client.trim()) !== (dossierActuel.agence?.trim() || dossierActuel.client?.trim()) ||
           adresseAgence.trim() !== (dossierActuel.adresseAgence || "").trim()))) {
     alert("Le client facturé a changé. Utilise une facture rectificative pour remplacer cette facture numérotée.");
@@ -5565,8 +5633,8 @@ const fabriquerPDF = async (type: TypeDocumentPDF) => {
 
   const agenceFacturee = modeClient === "agence" && !facturerProprietaire;
   const proprietaireFacture = modeClient === "agence" && facturerProprietaire;
-  if (proprietaireFacture && (!proprietaire.trim() || !adresseFacturationProprietaire.trim())) {
-    alert("Indique le nom complet et l’adresse de facturation du propriétaire avant de générer le PDF.");
+  if (proprietaireFacture && !proprietaire.trim()) {
+    alert("Renseigne « Nom complet du propriétaire » dans le dossier avant de générer le PDF.");
     return "";
   }
 
@@ -5921,8 +5989,8 @@ const lignesClient: LigneBloc[] = proprietaireFacture
   ? [
       { label: "Nom", valeur: proprietaire },
       { label: "Adresse", valeur: adresseFacturationProprietaire },
-      { label: "Tél.", valeur: telephoneProprietaire },
       { label: "Suivi par", valeur: suiviAgencePDF },
+      { label: "Adresse agence", valeur: adresseAgence },
     ]
   : [
       { label: "Nom", valeur: agenceFacturee ? nomAgencePDF : client },
@@ -5972,7 +6040,7 @@ const hauteurClientAuto = dessinerCadreInfos(
   yCadres,
   largeurClient,
   lignesClient,
-  27
+  proprietaireFacture ? 34 : 27
 );
 
 const hauteurChantierAuto = estFactureMeurisse
@@ -8143,6 +8211,16 @@ return (
               <>
                 <Input label={dossierActuel?.devisOrigineId !== undefined ? "Devis d’origine de la facture" : "Numéro devis"} value={numeroDevis} onChange={setNumeroDevis} />
                 <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
+                {afficheRetourBrouillonFactureTest && (
+                  <button
+                    type="button"
+                    className="btn-outline"
+                    disabled={generationPDFEnCours}
+                    onClick={() => void remettreFactureTestEnBrouillon()}
+                  >
+                    Remettre la F-2026-031 de test en brouillon
+                  </button>
+                )}
               </>
             ) : (
               <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
@@ -8167,11 +8245,14 @@ return (
         label="Client facturé"
         value={facturerProprietaire ? "proprietaire" : "agence"}
         onChange={(valeur) => setFacturerProprietaire(valeur === "proprietaire")}
-        options={[["agence", "Agence immobilière"], ["proprietaire", "Propriétaire du bien"]]}
+        options={[
+          ["agence", "Agence immobilière"],
+          ["proprietaire", proprietaire.trim() || "Propriétaire du bien"],
+        ]}
       />
       {facturerProprietaire && (
         <TextArea
-          label="Adresse de facturation du propriétaire"
+          label="Adresse de facturation du propriétaire (facultative)"
           value={adresseFacturationProprietaire}
           onChange={setAdresseFacturationProprietaire}
         />
