@@ -849,6 +849,8 @@ type Dossier = {
   telephoneLocataire: string;
   proprietaire: string;
   telephoneProprietaire: string;
+  facturerProprietaire?: boolean;
+  adresseFacturationProprietaire?: string;
   agence: string;
   referenceChantier: string;
 
@@ -2040,6 +2042,8 @@ setTypeRdv(b.typeRdv || "visite");
     setTelephoneLocataire(b.telephoneLocataire || "");
     setProprietaire(b.proprietaire || "");
     setTelephoneProprietaire(b.telephoneProprietaire || "");
+    setFacturerProprietaire(b.facturerProprietaire === true);
+    setAdresseFacturationProprietaire(b.adresseFacturationProprietaire || "");
     setAgence(b.agence || "");
     setReferenceChantier(b.referenceChantier || "");
     setComplementAdresse(b.complementAdresse || "");
@@ -2137,6 +2141,8 @@ const appliquerSauvegardeComplete = (data: any) => {
     setTelephoneLocataire(b.telephoneLocataire || "");
     setProprietaire(b.proprietaire || "");
     setTelephoneProprietaire(b.telephoneProprietaire || "");
+    setFacturerProprietaire(b.facturerProprietaire === true);
+    setAdresseFacturationProprietaire(b.adresseFacturationProprietaire || "");
 
     setAgence(b.agence || "");
     setReferenceChantier(b.referenceChantier || "");
@@ -2381,6 +2387,8 @@ const [ribBanque, setRibBanque] = useState("");
 const [telephoneLocataire, setTelephoneLocataire] = useState("");
 const [proprietaire, setProprietaire] = useState("");
 const [telephoneProprietaire, setTelephoneProprietaire] = useState("");
+const [facturerProprietaire, setFacturerProprietaire] = useState(false);
+const [adresseFacturationProprietaire, setAdresseFacturationProprietaire] = useState("");
 const [agence, setAgence] = useState("");
 const [referenceChantier, setReferenceChantier] = useState("");
 
@@ -2644,6 +2652,8 @@ setTypeRdv(b.typeRdv || "visite");
         setTelephoneLocataire(b.telephoneLocataire || "");
         setProprietaire(b.proprietaire || "");
         setTelephoneProprietaire(b.telephoneProprietaire || "");
+        setFacturerProprietaire(b.facturerProprietaire === true);
+        setAdresseFacturationProprietaire(b.adresseFacturationProprietaire || "");
         setAgence(b.agence || "");
         setReferenceChantier(b.referenceChantier || "");
         setComplementAdresse(b.complementAdresse || "");
@@ -2767,6 +2777,8 @@ numeroSap,
   telephoneLocataire,
   proprietaire,
   telephoneProprietaire,
+  facturerProprietaire,
+  adresseFacturationProprietaire,
   agence,
   referenceChantier,
   complementAdresse,
@@ -2860,6 +2872,8 @@ useEffect(() => {
   telephoneLocataire,
   proprietaire,
   telephoneProprietaire,
+  facturerProprietaire,
+  adresseFacturationProprietaire,
   agence,
   referenceChantier,
   complementAdresse,
@@ -2959,6 +2973,8 @@ acompteManuel,
 
       proprietaire,
       telephoneProprietaire,
+      facturerProprietaire,
+      adresseFacturationProprietaire,
 
       agence,
       referenceChantier,
@@ -3255,12 +3271,17 @@ const joursCalendrier = useMemo(() => {
   const fiche = clientsEnregistres.find((c) => c.nom === nom);
   if (!fiche) return;
 
+  if (fiche.modeClient === "agence" && modeClient === "agence" &&
+    normaliserTexte(fiche.nom) === normaliserTexte(client)) return;
+
   setClient(fiche.nom);
   setTelephone(fiche.telephone || "");
   setEmail(fiche.email || "");
   setNotes(fiche.notes || "");
   setModeClient(fiche.modeClient || "normal");
   setAgence(fiche.agence || "");
+  setFacturerProprietaire(false);
+  setAdresseFacturationProprietaire("");
 
   if (fiche.modeClient === "agence") {
     setAdresse("");
@@ -3495,6 +3516,8 @@ const modifierDetailPdf = (id: number, index: number, valeur: string) => {
   setTelephoneLocataire("");
   setProprietaire("");
   setTelephoneProprietaire("");
+  setFacturerProprietaire(false);
+  setAdresseFacturationProprietaire("");
   setAgence("");
   setReferenceChantier("");
 
@@ -3577,6 +3600,8 @@ const creerRDVDepuisCalendrier = (date: Date) => {
   setTelephoneLocataire("");
   setProprietaire("");
   setTelephoneProprietaire("");
+  setFacturerProprietaire(false);
+  setAdresseFacturationProprietaire("");
   setAgence("");
   setReferenceChantier("");
 
@@ -3753,6 +3778,8 @@ fraisDeplacementManuel:
     telephoneLocataire,
     proprietaire,
     telephoneProprietaire,
+    facturerProprietaire,
+    adresseFacturationProprietaire,
     agence,
     referenceChantier,
   };
@@ -3993,6 +4020,8 @@ if (d.typeEvenement === "rdv") {
   setTelephoneLocataire(d.telephoneLocataire || "");
   setProprietaire(d.proprietaire || "");
   setTelephoneProprietaire(d.telephoneProprietaire || "");
+  setFacturerProprietaire(d.facturerProprietaire === true);
+  setAdresseFacturationProprietaire(d.adresseFacturationProprietaire || "");
   setAgence(d.agence || "");
   setReferenceChantier(d.referenceChantier || "");
   setComplementAdresse(d.complementAdresse || "");
@@ -5169,6 +5198,8 @@ const reinitialiserApplicationComplete = () => {
   setTelephoneLocataire("");
   setProprietaire("");
   setTelephoneProprietaire("");
+  setFacturerProprietaire(false);
+  setAdresseFacturationProprietaire("");
   setAgence("");
   setReferenceChantier("");
 
@@ -5335,6 +5366,8 @@ setFraisDeplacementManuel(
 
         setProprietaire(b.proprietaire || "");
         setTelephoneProprietaire(b.telephoneProprietaire || "");
+        setFacturerProprietaire(b.facturerProprietaire === true);
+        setAdresseFacturationProprietaire(b.adresseFacturationProprietaire || "");
 
         setAgence(b.agence || "");
         setReferenceChantier(b.referenceChantier || "");
@@ -5517,6 +5550,26 @@ const fabriquerPDF = async (type: TypeDocumentPDF) => {
     alert("Une facture finale existe déjà pour ce devis. Ouvre-la pour suivre son règlement.");
     return "";
   }
+  if (type === "facture" && numeroFacture && dossierActuel?.numeroFacture === numeroFacture &&
+    (modeClient === "agence" || dossierActuel.modeClient === "agence") &&
+    (modeClient !== dossierActuel.modeClient ||
+      facturerProprietaire !== Boolean(dossierActuel.facturerProprietaire) ||
+      (facturerProprietaire
+        ? proprietaire.trim() !== dossierActuel.proprietaire?.trim() ||
+          adresseFacturationProprietaire.trim() !== dossierActuel.adresseFacturationProprietaire?.trim()
+        : (agence.trim() || client.trim()) !== (dossierActuel.agence?.trim() || dossierActuel.client?.trim()) ||
+          adresseAgence.trim() !== (dossierActuel.adresseAgence || "").trim()))) {
+    alert("Le client facturé a changé. Utilise une facture rectificative pour remplacer cette facture numérotée.");
+    return "";
+  }
+
+  const agenceFacturee = modeClient === "agence" && !facturerProprietaire;
+  const proprietaireFacture = modeClient === "agence" && facturerProprietaire;
+  if (proprietaireFacture && (!proprietaire.trim() || !adresseFacturationProprietaire.trim())) {
+    alert("Indique le nom complet et l’adresse de facturation du propriétaire avant de générer le PDF.");
+    return "";
+  }
+
   const montantDocumentAcompte = Math.round(calcul.acompte * 100) / 100;
   if (estAcompte && (!Number.isFinite(montantDocumentAcompte) ||
     montantDocumentAcompte <= 0 || montantDocumentAcompte > calcul.total)) {
@@ -5527,6 +5580,21 @@ const fabriquerPDF = async (type: TypeDocumentPDF) => {
   const numeroSuivantAcompte = estDocumentPartiel ? prochainNumeroFactureDisponible() : 0;
   const doc = new jsPDF({ compress: true });
 
+  const coordonneesAgencePDF = modeClient === "agence" ? {
+    modeClient,
+    client,
+    telephone,
+    email,
+    adresse,
+    complementAdresse,
+    adresseAgence,
+    proprietaire,
+    telephoneProprietaire,
+    agence,
+    referenceChantier,
+    facturerProprietaire,
+    adresseFacturationProprietaire,
+  } : {};
   const titre = type === "devis" ? "DEVIS" : "FACTURE";
   const estFactureMeurisse = modeClient === "jeremie" && type === "facture";
 
@@ -5566,7 +5634,7 @@ if (type === "devis") {
     setHistorique((ancien) =>
       ancien.map((d) =>
         d.id === idDossierActuel
-          ? { ...d, statutDevis: "envoye" }
+          ? { ...d, ...coordonneesAgencePDF, statutDevis: "envoye" }
           : d
       )
     );
@@ -5590,7 +5658,7 @@ if (type === "facture" && !numeroFacture) {
   if (idDossierActuel !== null) {
     setHistorique((ancien) =>
       ancien.map((d) =>
-        d.id === idDossierActuel ? { ...d, numeroFacture: numero } : d
+        d.id === idDossierActuel ? { ...d, ...coordonneesAgencePDF, numeroFacture: numero } : d
       )
     );
   }
@@ -5843,16 +5911,27 @@ const dessinerCadreInfos = (
   return hauteurBloc;
 };
 
-const lignesClient: LigneBloc[] = [
-  { label: "Nom", valeur: client || "", icone: "N" },
-  { label: "Tél.", valeur: telephone || "", icone: "T" },
-  { label: "Email", valeur: email || "", icone: "@" },
-  {
-    label: modeClient === "agence" ? "Agence" : "Adresse",
-    valeur: modeClient === "agence" ? adresseAgence || "" : adresse || "",
-    icone: "A",
-  },
-];
+const nomAgencePDF = agence.trim() || client.trim();
+const contactInclutAgence = normaliserTexte(client).includes(normaliserTexte(nomAgencePDF));
+const suiviAgencePDF = contactInclutAgence
+  ? client.trim()
+  : [client.trim(), nomAgencePDF].filter(Boolean).join(" – ");
+
+const lignesClient: LigneBloc[] = proprietaireFacture
+  ? [
+      { label: "Nom", valeur: proprietaire },
+      { label: "Adresse", valeur: adresseFacturationProprietaire },
+      { label: "Tél.", valeur: telephoneProprietaire },
+      { label: "Suivi par", valeur: suiviAgencePDF },
+    ]
+  : [
+      { label: "Nom", valeur: agenceFacturee ? nomAgencePDF : client },
+      ...(agenceFacturee && client.trim() !== nomAgencePDF
+        ? [{ label: "Contact", valeur: client }] : []),
+      { label: "Tél.", valeur: telephone },
+      { label: "Email", valeur: email },
+      { label: "Adresse", valeur: agenceFacturee ? adresseAgence : adresse },
+    ];
 
 let lignesChantier: LigneBloc[] = [];
 
@@ -5867,8 +5946,10 @@ if (modeClient === "jeremie") {
     { label: "Réf.", valeur: referenceChantier || "", icone: "R" },
     { label: "Locataire", valeur: locataire || "", icone: "L" },
     { label: "Tél. loc.", valeur: telephoneLocataire || "", icone: "T" },
-    { label: "Proprio.", valeur: proprietaire || "", icone: "P" },
-    { label: "Tél. prop.", valeur: telephoneProprietaire || "", icone: "T" },
+    ...(!proprietaireFacture ? [
+      { label: "Proprio.", valeur: proprietaire, icone: "P" },
+      { label: "Tél. prop.", valeur: telephoneProprietaire, icone: "T" },
+    ] : []),
     {
       label: "Adresse",
       valeur: [adresse?.trim(), complementAdresse?.trim()].filter(Boolean).join("\n"),
@@ -5886,7 +5967,7 @@ if (modeClient === "jeremie") {
 }
 
 const hauteurClientAuto = dessinerCadreInfos(
-  "Client",
+  modeClient === "agence" ? "Client facturé" : "Client",
   xClient,
   yCadres,
   largeurClient,
@@ -6184,8 +6265,8 @@ if (type === "devis" && commentaireFournituresPDF) {
   y += hauteurCommentaireFournitures + 8;
 }
 
-// ================= CONDITIONS + SIGNATURE PREMIUM COMPACT =================
-if (!estDocumentPartiel) {
+// ================= CONDITIONS ET SIGNATURE DU DEVIS =================
+if (type === "devis") {
 doc.setFont("helvetica", "normal");
 doc.setFontSize(8.2);
 
@@ -6268,7 +6349,6 @@ if (conditionsPropresChantier.length > 0) {
   });
 }
 
-if (type === "devis" || type === "facture") {
   doc.setDrawColor(80);
   doc.line(
     140,
@@ -6287,7 +6367,6 @@ doc.rect(148, yConditions + 24.5, 40, 13.5);
 
 doc.setFontSize(8);
 doc.text("Signature client", 168, yConditions + 43.5, { align: "center" });
-}
 
 // On repart après la hauteur réellement utilisée + une marge courte.
 y = yConditions + hauteurConditions + 5;
@@ -6450,19 +6529,20 @@ const totalPages = doc.getNumberOfPages();
   doc.setFontSize(7);
 doc.setTextColor(90, 90, 90);
 
-doc.text(
-  "En cas de retard de paiement, des pénalités calculées au taux légal en vigueur seront appliquées,",
-  105,
-  256,
-  { align: "center" }
-);
-
-doc.text(
-  "ainsi qu’une indemnité forfaitaire de 40 € pour frais de recouvrement (article L441-10 du Code de commerce).",
-  105,
-  259,
-  { align: "center" }
-);
+if (modeClient === "jeremie" || agenceFacturee) {
+  doc.text(
+    "En cas de retard de paiement, des pénalités calculées au taux légal en vigueur seront appliquées,",
+    105,
+    256,
+    { align: "center" }
+  );
+  doc.text(
+    "ainsi qu’une indemnité forfaitaire de 40 € pour frais de recouvrement (article L441-10 du Code de commerce).",
+    105,
+    259,
+    { align: "center" }
+  );
+}
 
 doc.setTextColor(0, 0, 0);
   doc.text("TVA NON APPLICABLE - ARTICLE 293 B DU CGI", 105, 267.5, {
@@ -6484,7 +6564,8 @@ doc.setTextColor(0, 0, 0);
     align: "center",
   });
 
-  const nomFichier = `${numero}-${client || "client"}.pdf`;
+  const nomFacturePDF = proprietaireFacture ? proprietaire : agenceFacturee ? nomAgencePDF : client;
+  const nomFichier = `${numero}-${nomFacturePDF.trim() || "client"}.pdf`;
 
 // Figer le PDF émis : un nouveau clic rend exactement le même document.
 const pdfBase64 = doc.output("datauristring").split(",")[1];
@@ -7896,6 +7977,10 @@ return (
       setAdresseAgence("");
       setNotes("");
       setAgence("");
+      setProprietaire("");
+      setTelephoneProprietaire("");
+      setFacturerProprietaire(false);
+      setAdresseFacturationProprietaire("");
       return;
     }
 
@@ -8067,12 +8152,31 @@ return (
             )}
 
    
-            <Select label="Type client" value={modeClient} onChange={setModeClient} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
+            <Select label="Type client" value={modeClient} onChange={(valeur) => {
+              setModeClient(valeur);
+              setFacturerProprietaire(false);
+              setAdresseFacturationProprietaire("");
+            }} options={[["jeremie", "Jérémie"], ["normal", "Particulier"], ["agence", "Agence immobilière"]]} />
 {(modeClient === "agence" || modeClient === "jeremie") && (
   <div className="space-y-4 rounded-2xl border bg-slate-50 p-4">
    {modeClient === "agence" && (
   <>
-    <Input label="Nom de l’agence" value={agence} onChange={setAgence} />
+    <Input label="Nom de l’agence (raison sociale)" value={agence} onChange={setAgence} />
+    <fieldset className="space-y-3 rounded-xl border bg-white p-3" disabled={Boolean(numeroFacture)}>
+      <Select
+        label="Client facturé"
+        value={facturerProprietaire ? "proprietaire" : "agence"}
+        onChange={(valeur) => setFacturerProprietaire(valeur === "proprietaire")}
+        options={[["agence", "Agence immobilière"], ["proprietaire", "Propriétaire du bien"]]}
+      />
+      {facturerProprietaire && (
+        <TextArea
+          label="Adresse de facturation du propriétaire"
+          value={adresseFacturationProprietaire}
+          onChange={setAdresseFacturationProprietaire}
+        />
+      )}
+    </fieldset>
     <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
     <Input label="Adresse chantier / appartement" value={adresse} onChange={setAdresse} />
     <Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
@@ -8082,12 +8186,14 @@ return (
           value={telephoneLocataire}
           onChange={(v) => setTelephoneLocataire(formatTelephone(v))}
         />
-        <Input label="Propriétaire" value={proprietaire} onChange={setProprietaire} />
-        <Input
-          label="Téléphone propriétaire"
-          value={telephoneProprietaire}
-          onChange={(v) => setTelephoneProprietaire(formatTelephone(v))}
-        />
+        <fieldset className="space-y-4" disabled={Boolean(numeroFacture && facturerProprietaire)}>
+          <Input label="Nom complet du propriétaire" value={proprietaire} onChange={setProprietaire} />
+          <Input
+            label="Téléphone propriétaire"
+            value={telephoneProprietaire}
+            onChange={(v) => setTelephoneProprietaire(formatTelephone(v))}
+          />
+        </fieldset>
       </>
     )}
 
