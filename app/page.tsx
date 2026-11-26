@@ -1201,6 +1201,10 @@ function normaliserTexte(valeur: string) {
     .trim();
 }
 
+function tamponFactureValide(valeur: unknown): string {
+  return typeof valeur === "string" && /^data:image\/(png|jpeg);base64,/.test(valeur) ? valeur : "";
+}
+
 function normaliserTelephone(valeur: string) {
   return valeur.replace(/\D/g, "");
 }
@@ -1974,6 +1978,7 @@ function PlanningChantiers({historique,donnees,onChange,ouvrir}: {
   setCompteurFacture(compteurFactureValide(d.compteurFacture));
   setNumeroDevis(d.numeroDevis || "");
 setNumeroFacture(d.numeroFacture || "");
+  setTamponFacture(tamponFactureValide(d.tamponFacture));
 
 setFactureSap(d.factureSap || false);
 setNumeroSap(d.numeroSap || "");
@@ -2076,6 +2081,7 @@ const appliquerSauvegardeComplete = (data: any) => {
   setRibIban(data.ribIban || "");
   setRibBic(data.ribBic || "");
   setRibBanque(data.ribBanque || "");
+  setTamponFacture(tamponFactureValide(data.tamponFacture));
 
   setFactureSap(data.factureSap || false);
   setNumeroSap(data.numeroSap || "");
@@ -2375,6 +2381,8 @@ const [ribTitulaire, setRibTitulaire] = useState("");
 const [ribIban, setRibIban] = useState("");
 const [ribBic, setRibBic] = useState("");
 const [ribBanque, setRibBanque] = useState("");
+const [tamponFacture, setTamponFacture] = useState("");
+const [importTamponEnCours, setImportTamponEnCours] = useState(false);
 
   const [client, setClient] = useState("Jérémie Meurisse");
   const [telephone, setTelephone] = useState("06 50 95 10 89");
@@ -2586,6 +2594,7 @@ useEffect(() => {
 setRibIban(d.ribIban || "");
 setRibBic(d.ribBic || "");
 setRibBanque(d.ribBanque || "");
+setTamponFacture(tamponFactureValide(d.tamponFacture));
 
       setHistorique(d.historique || []);
       setTarifHoraireNormal(tarifHoraireValide(d.tarifHoraireNormal) ?? TARIF_HORAIRE_PAR_DEFAUT);
@@ -2806,6 +2815,7 @@ ribTitulaire,
 ribIban,
 ribBic,
 ribBanque,
+tamponFacture,
 ]);
 // 🔒 BACKUP AUTOMATIQUE (historique sécurisé avec versions)
 
@@ -2884,6 +2894,7 @@ useEffect(() => {
 ribIban,
 ribBic,
 ribBanque,
+tamponFacture,
 ]);
 
 const construireSauvegardeComplete = () => {
@@ -2908,6 +2919,7 @@ const construireSauvegardeComplete = () => {
     ribIban,
     ribBic,
     ribBanque,
+    tamponFacture,
 
     factureSap,
     numeroSap,
@@ -5316,6 +5328,7 @@ setFraisDeplacementManuel(0);
   setRibIban("");
   setRibBic("");
   setRibBanque("");
+  setTamponFacture("");
 
   setListeBackups([]);
   setSauvegardesOuvertes(false);
@@ -5375,6 +5388,7 @@ const importer = (event: React.ChangeEvent<HTMLInputElement>) => {
       setRibIban(data.ribIban || "");
       setRibBic(data.ribBic || "");
       setRibBanque(data.ribBanque || "");
+      setTamponFacture(tamponFactureValide(data.tamponFacture));
 
       if (data.brouillon) {
         const b = data.brouillon;
@@ -5504,6 +5518,35 @@ setFraisDeplacementManuel(
   // ou de fournitures : le forfait constitue alors une prestation distincte.
   if (repartition.nonReparti > 0) resultat.push(["Forfait d’intervention", repartition.nonReparti]);
   return resultat;
+};
+
+const importerTamponFacture = async (fichier: File) => {
+  if (!["image/png", "image/jpeg"].includes(fichier.type) || fichier.size > 5 * 1024 * 1024) {
+    alert("Choisis une image PNG ou JPEG de 5 Mo maximum.");
+    return;
+  }
+
+  setImportTamponEnCours(true);
+  const url = URL.createObjectURL(fichier);
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const ratio = Math.min(1, 480 / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * ratio));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * ratio));
+    const contexte = canvas.getContext("2d");
+    if (!contexte) throw new Error("Impossible de préparer l’image.");
+    contexte.drawImage(image, 0, 0, canvas.width, canvas.height);
+    setTamponFacture(canvas.toDataURL(fichier.type, 0.9));
+  } catch (erreur) {
+    console.error(erreur);
+    alert("Impossible d’importer ce tampon. Vérifie que l’image s’ouvre correctement.");
+  } finally {
+    URL.revokeObjectURL(url);
+    setImportTamponEnCours(false);
+  }
 };
 
 const chargerBanniereV26 = async () => {
@@ -6254,6 +6297,21 @@ doc.text(
 );
 doc.text(formatEuroPDF(resteAPayerPDF), 188, y + 25.5, { align: "right" });
 
+if (type !== "devis" && tamponFacture) {
+  const { width, height } = doc.getImageProperties(tamponFacture);
+  const largeurDisponible = xBlocTotal - 15;
+  const echelle = Math.min((largeurDisponible - 8) / width, hauteurBlocTotal / height);
+  const largeurTampon = width * echelle;
+  const hauteurTampon = height * echelle;
+  doc.addImage(
+    tamponFacture,
+    15 + (largeurDisponible - largeurTampon) / 2,
+    y + (hauteurBlocTotal - hauteurTampon) / 2,
+    largeurTampon,
+    hauteurTampon
+  );
+}
+
 y += hauteurBlocTotal + 5;
 if (type === "facture" && factureAcompteCourante && !estSoldeAvecSituations) {
   const referenceAcompte = doc.splitTextToSize(
@@ -6339,12 +6397,14 @@ if (type === "devis" && commentaireFournituresPDF) {
   y += hauteurCommentaireFournitures + 8;
 }
 
-// ================= CONDITIONS ET SIGNATURE DU DEVIS =================
-if (type === "devis") {
+// ================= CONDITIONS ET SIGNATURE =================
+if (type === "devis" || type === "facture") {
 doc.setFont("helvetica", "normal");
 doc.setFontSize(8.2);
 
-const conditions = preparerListePDF(conditionsGeneralesDevis);
+const conditions = preparerListePDF(conditionsGeneralesDevis).map((ligne) =>
+  type === "facture" ? ligne.replace(/^Le présent devis est établi/, "Le devis d’origine est établi") : ligne
+);
 const conditionsPropresChantier = preparerListePDF(conditionsChantier);
 
 const hauteurListeConditions = (liste: string[]) =>
@@ -6356,7 +6416,7 @@ const hauteurListeConditions = (liste: string[]) =>
 // Cadre fortement compacté par défaut, toujours extensible automatiquement.
 const hauteurConditions = Math.max(
   47,
-  15 +
+  19 +
     hauteurListeConditions(conditions) +
     (conditionsPropresChantier.length > 0
       ? 7 + hauteurListeConditions(conditionsPropresChantier)
@@ -6434,13 +6494,14 @@ if (conditionsPropresChantier.length > 0) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
- doc.text("Bon pour accord", 167, yConditions + 15.5, { align: "center" });
-doc.text("Date :        /        / 2026", 150, yConditions + 21);
+  doc.text(type === "devis" ? "Bon pour accord" : "Signature client", 167, yConditions + 15.5, { align: "center" });
+  doc.text("Date :        /        / 2026", 150, yConditions + 21);
+  doc.rect(148, yConditions + 24.5, 40, 13.5);
 
-doc.rect(148, yConditions + 24.5, 40, 13.5);
-
-doc.setFontSize(8);
-doc.text("Signature client", 168, yConditions + 43.5, { align: "center" });
+  if (type === "devis") {
+    doc.setFontSize(8);
+    doc.text("Signature client", 168, yConditions + 43.5, { align: "center" });
+  }
 
 // On repart après la hauteur réellement utilisée + une marge courte.
 y = yConditions + hauteurConditions + 5;
@@ -10152,6 +10213,28 @@ return (
     <Input label="Banque" value={ribBanque} onChange={setRibBanque} />
     <Input label="IBAN" value={ribIban} onChange={setRibIban} />
     <Input label="BIC" value={ribBic} onChange={setRibBic} />
+  </div>
+  <div className="space-y-2 rounded-lg border bg-slate-50 p-3">
+    <label htmlFor="tampon-facture" className="block text-sm font-semibold">Tampon des factures</label>
+    {tamponFacture && <img src={tamponFacture} alt="Aperçu du tampon des factures" className="max-h-28 max-w-full" />}
+    <p className="text-xs text-slate-600">Choisis une image PNG ou JPEG. Elle sera ajoutée aux factures générées.</p>
+    <input
+      id="tampon-facture"
+      type="file"
+      accept="image/png,image/jpeg"
+      disabled={importTamponEnCours}
+      className="block max-w-full text-sm"
+      onChange={(event) => {
+        const fichier = event.currentTarget.files?.[0];
+        event.currentTarget.value = "";
+        if (fichier) void importerTamponFacture(fichier);
+      }}
+    />
+    {tamponFacture && (
+      <button type="button" className="btn-outline" disabled={importTamponEnCours} onClick={() => setTamponFacture("")}>
+        Retirer le tampon
+      </button>
+    )}
   </div>
 </BlocRepliable>
 
