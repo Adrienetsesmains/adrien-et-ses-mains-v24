@@ -4837,7 +4837,8 @@ const prochainNumeroFactureDisponible = () => {
 const compteurFactureTest = 31;
 const numeroFactureTest = formatNumero("F", compteurFactureTest);
 const afficheRetourBrouillonFactureTest =
-  numeroFacture === numeroFactureTest && numeroDevis === "D-2026-065";
+  (numeroFacture || dossierActuel?.numeroFacture) === numeroFactureTest &&
+  numeroDevis === "D-2026-065";
 
 const remettreFactureTestEnBrouillon = async () => {
   if (!afficheRetourBrouillonFactureTest || generationPDFEnCoursRef.current) return;
@@ -4848,9 +4849,12 @@ const remettreFactureTestEnBrouillon = async () => {
     return;
   }
 
+  const adresseContientSeulementLeNom = Boolean(adresseFacturationProprietaire.trim()) &&
+    normaliserTexte(adresseFacturationProprietaire) === normaliserTexte(proprietaire);
+  const adresseCorrigee = adresseContientSeulementLeNom ? "" : adresseFacturationProprietaire;
   const historiqueMisAJour = historique.map((d) =>
     d.id === idDossierActuel && d.numeroFacture === numeroFactureTest
-      ? { ...d, numeroFacture: "" }
+      ? { ...d, numeroFacture: "", adresseFacturationProprietaire: adresseCorrigee }
       : d
   );
   if (prochainNumeroFactureDisponible() > compteurFactureTest + 1 ||
@@ -4867,6 +4871,7 @@ const remettreFactureTestEnBrouillon = async () => {
     historique: historiqueMisAJour,
     numeroFacture: "",
     compteurFacture: compteurFactureTest,
+    brouillon: { ...donnees.brouillon, adresseFacturationProprietaire: adresseCorrigee },
   };
 
   try {
@@ -4883,6 +4888,7 @@ const remettreFactureTestEnBrouillon = async () => {
   setHistorique(historiqueMisAJour);
   setNumeroFacture("");
   setCompteurFacture(compteurFactureTest);
+  setAdresseFacturationProprietaire(adresseCorrigee);
   let synchronisee = false;
   try {
     synchronisee = await envoyerDonneesCloud(sauvegarde, false);
@@ -8211,16 +8217,6 @@ return (
               <>
                 <Input label={dossierActuel?.devisOrigineId !== undefined ? "Devis d’origine de la facture" : "Numéro devis"} value={numeroDevis} onChange={setNumeroDevis} />
                 <Input label="Numéro facture" value={numeroFacture} onChange={setNumeroFacture} />
-                {afficheRetourBrouillonFactureTest && (
-                  <button
-                    type="button"
-                    className="btn-outline"
-                    disabled={generationPDFEnCours}
-                    onClick={() => void remettreFactureTestEnBrouillon()}
-                  >
-                    Remettre la F-2026-031 de test en brouillon
-                  </button>
-                )}
               </>
             ) : (
               <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
@@ -8258,6 +8254,16 @@ return (
         />
       )}
     </fieldset>
+    {!estAndroid && afficheRetourBrouillonFactureTest && (
+      <button
+        type="button"
+        className="btn-outline"
+        disabled={generationPDFEnCours}
+        onClick={() => void remettreFactureTestEnBrouillon()}
+      >
+        Déverrouiller le client facturé et réutiliser le 031
+      </button>
+    )}
     <Input label="Référence chantier agence" value={referenceChantier} onChange={setReferenceChantier} />
     <Input label="Adresse chantier / appartement" value={adresse} onChange={setAdresse} />
     <Input label="Complément d’adresse / étage / appartement / bâtiment" value={complementAdresse} onChange={setComplementAdresse} />
